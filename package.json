@@ -1,9 +1,14 @@
 {
   "name": "inventario-patrimonio",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node dist/main.js",
+    "start:dev": "ts-node-dev --respawn --transpile-only src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint . --ext .ts",
+    "test": "jest",
+    "test:e2e": "jest -c test/jest-e2e.json"
   },
   "repository": {
     "type": "git",
@@ -27,6 +32,7 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "@nestjs/testing": "^11.1.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.5.0",
     "@types/supertest": "^6.0.3",

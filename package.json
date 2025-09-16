@@ -1,0 +1,22 @@
+{
+  "name": "inventario-patrimonio",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DiogoCrespi/Desenv._sistemas_corporativos_patrimonio.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DiogoCrespi/Desenv._sistemas_corporativos_patrimonio/issues"
+  },
+  "homepage": "https://github.com/DiogoCrespi/Desenv._sistemas_corporativos_patrimonio#readme",
+  "description": "",
+  "private": "true",
+  "type": "module"
+}

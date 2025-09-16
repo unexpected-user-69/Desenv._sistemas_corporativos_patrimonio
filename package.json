@@ -8,7 +8,10 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-    "test:e2e": "jest -c test/jest-e2e.json"
+    "test:e2e": "jest -c test/jest-e2e.json",
+    "typeorm": "ts-node -r dotenv/config ./node_modules/typeorm/cli.js -d src/database/data-source.ts",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:revert": "npm run typeorm -- migration:revert"
   },
   "repository": {
     "type": "git",

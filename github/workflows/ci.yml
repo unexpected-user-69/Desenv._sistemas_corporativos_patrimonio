@@ -1,19 +1,15 @@
-name: CI
-
-on:
+ name: CI
+ on:
   pull_request:
     branches: [ main ]
   push:
     branches: [ main ]
-
-permissions:
+ permissions:
   contents: read
-
-concurrency:
+ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-jobs:
+ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -38,7 +34,6 @@ jobs:
       - name: No Node project — lint skipped (pass)
         if: steps.detect.outputs.has_node != 'true'
         run: echo "No package.json at repo root. Lint skipped."
-
   build:
     runs-on: ubuntu-latest
     needs: lint
@@ -64,7 +59,6 @@ jobs:
       - name: No Node project — build skipped (pass)
         if: steps.detect.outputs.has_node != 'true'
         run: echo "No package.json at repo root. Build skipped."
-
   test:
     runs-on: ubuntu-latest
     needs: build
@@ -78,15 +72,12 @@ jobs:
           else
             echo "has_node=false" >> $GITHUB_OUTPUT
           fi
-      - uses: actions/setup-node@v4
-        if: steps.detect.outputs.has_node == 'true'
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-        if: steps.detect.outputs.has_node == 'true'
-      - run: npm -ws run test --if-present -- --ci
-        if: steps.detect.outputs.has_node == 'true'
-      - name: No Node project — test skipped (pass)
-        if: steps.detect.outputs.has_node != 'true'
-        run: echo "No package.json at repo root. Test skipped."
+- uses: actions/setup-node@v4
+ if: steps.detect.outputs.has_node == 'true'
+ with:
+ node-version: 20
+ cache: npm- run: npm ci
+ if: steps.detect.outputs.has_node == 'true'- run: npm -ws run test --if-present -- --ci
+ if: steps.detect.outputs.has_node == 'true'- name: No Node project — test skipped (pass)
+ if: steps.detect.outputs.has_node != 'true'
+ run: echo "No package.json at repo root. Test skipped."

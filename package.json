@@ -9,9 +9,9 @@
     "lint": "eslint . --ext .ts",
     "test": "jest",
     "test:e2e": "jest -c test/jest-e2e.json",
-    "typeorm": "ts-node -r dotenv/config ./node_modules/typeorm/cli.js -d src/database/data-source.ts",
-    "migration:run": "npm run typeorm -- migration:run",
-    "migration:revert": "npm run typeorm -- migration:revert"
+    "typeorm": "node ./node_modules/typeorm/cli.js -d data-source.cjs",
+    "migration:run": "npm run build && node ./node_modules/typeorm/cli.js -d data-source.cjs migration:run",
+    "migration:revert": "npm run build && node ./node_modules/typeorm/cli.js -d data-source.cjs migration:revert"
   },
   "repository": {
     "type": "git",
@@ -26,13 +26,13 @@
   "homepage": "https://github.com/DiogoCrespi/Desenv._sistemas_corporativos_patrimonio#readme",
   "description": "",
   "private": "true",
-  "type": "module",
   "dependencies": {
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-express": "^11.1.6",
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/typeorm": "^11.0.0",
+    "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "pg": "^8.16.3",

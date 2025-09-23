@@ -26,17 +26,16 @@ export class UsersService {
 
   async create(dto: CreateUserDto): Promise<User> {
     const { name, email, password, role, isActive } = dto;
-    const payload: Pick<
-      User,
-      'name' | 'email' | 'passwordHash' | 'role' | 'isActive'
-    > = {
+    const entity: User = this.userRepository.create({
       name,
       email,
       passwordHash: password,
       role,
       isActive: isActive ?? true,
-    };
-    const entity: User = this.userRepository.create(payload);
+    } satisfies Pick<
+      User,
+      'name' | 'email' | 'passwordHash' | 'role' | 'isActive'
+    >);
     return this.userRepository.save(entity);
   }
 
@@ -47,7 +46,7 @@ export class UsersService {
       email: dto.email ?? user.email,
       role: dto.role ?? user.role,
       isActive: dto.isActive ?? user.isActive,
-    };
+    } satisfies Partial<User>;
     if (dto.password) {
       updatePayload.passwordHash = dto.password;
     }

@@ -26,7 +26,10 @@ export class UsersService {
 
   async create(dto: CreateUserDto): Promise<User> {
     const { name, email, password, role, isActive } = dto;
-    const payload: Partial<User> = {
+    const payload: Pick<
+      User,
+      'name' | 'email' | 'passwordHash' | 'role' | 'isActive'
+    > = {
       name,
       email,
       passwordHash: password,

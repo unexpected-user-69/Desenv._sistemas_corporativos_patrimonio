@@ -19,41 +19,29 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(`User with ID "${id}" not found`);
     }
     return user;
   }
 
   async create(dto: CreateUserDto): Promise<User> {
-    const { name, email, password, role, isActive } = dto;
-    const entity = new User();
-    entity.name = name;
-    entity.email = email;
-    entity.passwordHash = password;
-    entity.role = role;
-    entity.isActive = isActive ?? true;
+    const entity = this.userRepository.create({
+      passwordHash: dto.password,
+      isActive: dto.isActive ?? true,
+    });
     return this.userRepository.save(entity);
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
+    const user = await this.userRepository.preload({
+      id,
+      ...dto,
+      ...(dto.password && { passwordHash: dto.password }),
+    });
 
-    if (dto.name !== undefined) {
-      user.name = dto.name;
+    if (!user) {
+      throw new NotFoundException(`User with ID "${id}" not found`);
     }
-    if (dto.email !== undefined) {
-      user.email = dto.email;
-    }
-    if (dto.role !== undefined) {
-      user.role = dto.role;
-    }
-    if (dto.isActive !== undefined) {
-      user.isActive = dto.isActive;
-    }
-    if (dto.password) {
-      user.passwordHash = dto.password;
-    }
-
     return this.userRepository.save(user);
   }
 

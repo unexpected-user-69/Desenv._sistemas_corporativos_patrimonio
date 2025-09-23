@@ -25,28 +25,29 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto): Promise<User> {
-    const entity = this.userRepository.create({
+    const entity: User = this.userRepository.create({
       name: dto.name,
       email: dto.email,
       passwordHash: dto.password,
       role: dto.role,
-      isActive: true,
+      isActive: dto.isActive ?? true,
     });
     return this.userRepository.save(entity);
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
-    Object.assign(user, {
+    const updatePayload: Partial<User> = {
       name: dto.name ?? user.name,
       email: dto.email ?? user.email,
       role: dto.role ?? user.role,
       isActive: dto.isActive ?? user.isActive,
-    });
+    };
     if (dto.password) {
-      user.passwordHash = dto.password;
+      updatePayload.passwordHash = dto.password;
     }
-    return this.userRepository.save(user);
+    const merged = this.userRepository.merge(user, updatePayload);
+    return this.userRepository.save(merged);
   }
 
   async remove(id: string): Promise<void> {

@@ -36,7 +36,7 @@ export class UsersService {
       role,
       isActive: isActive ?? true,
     };
-    const entity = this.userRepository.create(payload);
+    const entity: User = this.userRepository.create(payload);
     return this.userRepository.save(entity);
   }
 
@@ -51,7 +51,7 @@ export class UsersService {
     if (dto.password) {
       updatePayload.passwordHash = dto.password;
     }
-    const merged = this.userRepository.merge(user, updatePayload);
+    const merged: User = this.userRepository.merge(user, updatePayload);
     return this.userRepository.save(merged);
   }
 

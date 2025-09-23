@@ -25,12 +25,13 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto): Promise<User> {
+    const { name, email, password, role, isActive } = dto;
     const entity: User = this.userRepository.create({
-      name: dto.name,
-      email: dto.email,
-      passwordHash: dto.password,
-      role: dto.role,
-      isActive: dto.isActive ?? true,
+      name,
+      email,
+      passwordHash: password,
+      role,
+      isActive: isActive ?? true,
     });
     return this.userRepository.save(entity);
   }

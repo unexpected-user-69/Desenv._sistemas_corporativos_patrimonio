@@ -26,13 +26,14 @@ export class UsersService {
 
   async create(dto: CreateUserDto): Promise<User> {
     const { name, email, password, role, isActive } = dto;
-    const entity: User = this.userRepository.create({
+    const payload: Partial<User> = {
       name,
       email,
       passwordHash: password,
       role,
       isActive: isActive ?? true,
-    });
+    };
+    const entity = this.userRepository.create(payload);
     return this.userRepository.save(entity);
   }
 

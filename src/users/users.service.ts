@@ -25,7 +25,9 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto): Promise<User> {
+    // Correção: Adiciona ...dto para copiar todas as propriedades.
     const entity = this.userRepository.create({
+      ...dto,
       passwordHash: dto.password,
       isActive: dto.isActive ?? true,
     });
@@ -50,3 +52,4 @@ export class UsersService {
     await this.userRepository.remove(user);
   }
 }
+

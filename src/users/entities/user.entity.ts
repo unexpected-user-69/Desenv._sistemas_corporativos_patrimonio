@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum UserRole {
   STUDENT = 'STUDENT',
@@ -21,7 +28,12 @@ export class User {
   @Column({ name: 'password_hash', type: 'varchar', length: 255 })
   passwordHash!: string;
 
-  @Column({ name: 'role', type: 'varchar', length: 32, default: UserRole.STUDENT })
+  @Column({
+    name: 'role',
+    type: 'varchar',
+    length: 32,
+    default: UserRole.STUDENT,
+  })
   role!: UserRole;
 
   @Column({ name: 'is_active', type: 'boolean', default: true })

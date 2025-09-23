@@ -1,7 +1,5 @@
-
-Sua consulta solicita uma análise detalhada, arquivo por arquivo (ou PDF por PDF), das implementações e estruturas documentadas, organizadas em tópicos.
-
-Abaixo está o detalhamento das implementações encontradas nas fontes, separadas pelos números de referência dos documentos.
+nosso projeto é Sistema de controle de patrimonio e inventario 
+Implementações encontradas nas fontes, separadas pelos números de referência dos documentos.
 
 ---
 
@@ -226,3 +224,54 @@ Este documento consolida o *estado atual* da governança e do bootstrap do servi
 #### Bootstrap do Serviço Nest
 *   **Aplicação Operacional**: Base executável configurada.
 *   **Configurações Mínimas**: Execução local com porta padrão, Healthcheck funcional para monitoramento e configuração mínima de variáveis de ambiente.
+
+---
+
+### PDF 073: Entregáveis e Códigos de Implementação (Checklist de Auditoria)
+
+#### I. Entregáveis Primários (Resultados Esperados)
+*   **Issue** `Auditoria de Governança`.
+*   **Labels** `governance`, `quality`, `security` (na Issue de Auditoria).
+*   **Milestone** (Associada ao sprint atual).
+*   **Plano de Ação** (Realista, limitado a 5 itens prioritários).
+*   **Evidências** (Prints/links que comprovem a implementação).
+
+#### II. Checklist Técnico Essencial (Configurações Obrigatórias)
+*   **Branch Protection na Main**:
+    *   `PR obrigatório`.
+    *   `required checks` (up-to-date).
+    *   `linear history`.
+    *   `sem bypass/force-push`.
+    *   `auto-delete branch`.
+*   **CI Mínima Required**:
+    *   `Lint` (marcado como Required).
+    *   `build` (marcado como Required).
+    *   `test` (marcado como Required).
+*   **Revisão/Integração**:
+    *   `CODEOWNERS` (arquivo configurado).
+    *   `Require review from Code Owners` (ativado).
+    *   `Required conversation resolution` (habilitada).
+    *   `Merge Queue` (ativada).
+
+#### III. Controles de Segurança
+*   `Signed Commits` (GPG/SSH requeridos).
+*   `Secret Scanning + Push protection` (ativos).
+*   `Environments` (`staging`/`prod` configurados).
+*   `required deployments` (configurados para CD).
+
+#### IV. Templates e Documentação
+*   **Templates Obrigatórios**:
+    *   `PR template` (com checklist de riscos).
+    *   `Issue templates` (para bugs e features).
+*   **Arquivos de Documentação/Segurança**:
+    *   `README` (com instruções claras).
+    *   `CONTRIBUTING` (com padrões Git).
+    *   `SECURITY.md` (para repositórios públicos).
+    *   `LICENSE` (apropriada).
+    *   `.env.example` (para configurações).
+
+#### V. Entregáveis do Monitor/Professor (Relatório Consolidado)
+*   **Planilha/board** de consolidação.
+*   **Relatório Consolidado por Turma** (Documento/painel de status).
+*   **Critérios de Status**: `Verde`, `Amarelo`, `Vermelho` (para classificação das equipes).
+*   **Achados por Categoria** (Ex: Branch protection: status e gaps, CI Required: implementação e bloqueios, etc.).

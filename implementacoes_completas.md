@@ -1,3 +1,4 @@
+# SEMPRE busque terminar as implementacoes de `implementação_geral.md`.
 # Implementações Completas
 
 - Bootstrap NestJS na raiz (lint/build/test OK)

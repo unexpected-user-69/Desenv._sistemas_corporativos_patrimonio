@@ -18,6 +18,8 @@ Novidades (entregues):
 - `.env.example` versionado (sem segredos)
 
 Próximas entregas sugeridas (alto valor):
-- DTOs adicionais, documentação de erros e testes e2e/integração ampliados
+- Documentar Users no Swagger (feito)
+- Testes unitários do UsersService (feito)
+- Ampliar testes e2e e documentação de erros
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

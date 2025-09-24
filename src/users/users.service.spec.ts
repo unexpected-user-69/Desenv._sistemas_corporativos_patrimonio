@@ -1,12 +1,12 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+// import { Repository } from 'typeorm';
 import { UsersService } from './users.service';
 import { User, UserRole } from './entities/user.entity';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let repo: Repository<User>;
+  // Nota: repositório é mockado mas não usado diretamente nos testes
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -15,11 +15,18 @@ describe('UsersService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: {
-            find: jest.fn().mockResolvedValue([]),
-            findOne: jest.fn().mockResolvedValue(null),
-            create: jest.fn((payload) => payload),
-            save: jest.fn(async (entity) => ({ id: 'uuid', ...entity })),
-            merge: jest.fn((user, update) => ({ ...user, ...update })),
+            find: jest.fn().mockResolvedValue([] as User[]),
+            findOne: jest.fn().mockResolvedValue(null as unknown as User),
+            create: jest.fn((payload: Partial<User>) => payload as User),
+            save: jest
+              .fn()
+              .mockImplementation((entity: User) =>
+                Promise.resolve({ id: 'uuid', ...entity } as User),
+              ),
+            merge: jest.fn(
+              (user: User, update: Partial<User>) =>
+                ({ ...user, ...update }) as User,
+            ),
             remove: jest.fn().mockResolvedValue(undefined),
           },
         },
@@ -27,7 +34,7 @@ describe('UsersService', () => {
     }).compile();
 
     service = moduleRef.get(UsersService);
-    repo = moduleRef.get(getRepositoryToken(User));
+    // repo = moduleRef.get(getRepositoryToken(User));
   });
 
   it('findAll retorna lista', async () => {

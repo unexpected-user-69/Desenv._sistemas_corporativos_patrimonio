@@ -19,6 +19,10 @@ Novidades (entregues):
 - `.env.example` versionado (sem segredos)
  - Tratamento de erros padronizado via filtro global (`HttpExceptionFilter`)
 
+Entregáveis de Auditoria (docs/processo):
+- PR template com checklist de riscos
+- Documento `GOVERNANCE_AUDIT.md` com checklist e plano de ação
+
 Próximas entregas sugeridas (alto valor):
 - Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
 

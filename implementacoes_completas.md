@@ -11,6 +11,10 @@
 - CRUD Users scaffold: `UsersModule`, `UsersService`, `UsersController`, DTOs (validações)
 - Integração TypeORM no `AppModule` (tipado)
 
+Novidades (em andamento):
+- ValidationPipe global e documentação Swagger (`/api/docs`)
+- Endpoint `GET /health` para healthcheck
+
 Próximas entregas sugeridas (alto valor):
 - Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
 - `.env.example` versionado (sem segredos)

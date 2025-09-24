@@ -11,6 +11,7 @@
 - CRUD Users scaffold: `UsersModule`, `UsersService`, `UsersController`, DTOs (validações)
 - Integração TypeORM no `AppModule` (tipado)
 
+
 Próximas entregas sugeridas (alto valor):
 - Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
 - `.env.example` versionado (sem segredos)

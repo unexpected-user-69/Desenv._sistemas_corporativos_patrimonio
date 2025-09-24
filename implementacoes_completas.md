@@ -6,7 +6,13 @@
 - TypeORM `src/database/data-source.ts` (export default)
 - Entidade `User` com índice único em `email`
 - Migração inicial `users` aplicada
-- CI (lint/build/test) habilitado em `.github/workflows/ci.yml`
+- CI (lint/build/test) habilitado e verde em `.github/workflows/ci.yml`
 - Renomeação do projeto e banco: `patrimonio_inventario`
+- CRUD Users scaffold: `UsersModule`, `UsersService`, `UsersController`, DTOs (validações)
+- Integração TypeORM no `AppModule` (tipado)
+
+Próximas entregas sugeridas (alto valor):
+- Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
+- `.env.example` versionado (sem segredos)
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

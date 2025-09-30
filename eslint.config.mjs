@@ -31,16 +31,19 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'warn'
     },
   },
-  {
-    files: ['**/*.spec.ts', '**/test/**/*.ts'],
-    rules: {
-      // Desabilitar regras de segurança de tipo para arquivos de teste
-      // Isso é comum em testes onde mocks podem ter tipos 'any' ou incompletos
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unused-vars': 'off', // Pode ser útil para mocks
+    {
+      files: ['**/*.spec.ts', '**/test/**/*.ts'],
+      rules: {
+        // Desabilitar regras de segurança de tipo para arquivos de teste
+        // Isso é comum em testes onde mocks podem ter tipos 'any' ou incompletos
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-return': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
+        '@typescript-eslint/no-unused-vars': 'off', // Pode ser útil para mocks
+        '@typescript-eslint/unbound-method': 'off', // Permitir referências a métodos não vinculados em testes
+        '@typescript-eslint/require-await': 'off', // Permitir métodos async sem await em mocks
+      },
     },
-  },
 );

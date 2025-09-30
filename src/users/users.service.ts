@@ -34,12 +34,14 @@ export class UsersService {
    * Serializa User para UserResponseDto usando class-transformer
    */
   private serializeUser(user: User): UserResponseDto {
-    return plainToClass(UserResponseDto, user, { excludeExtraneousValues: true });
+    return plainToClass(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.find();
-    return users.map(user => this.serializeUser(user));
+    return users.map((user) => this.serializeUser(user));
   }
 
   async findAllPaginated(
@@ -91,7 +93,7 @@ export class UsersService {
     const hasPreviousPage = page > 1;
 
     return {
-      data: users.map(user => this.serializeUser(user)),
+      data: users.map((user) => this.serializeUser(user)),
       meta: {
         page,
         limit,
@@ -157,7 +159,7 @@ export class UsersService {
     const hasPreviousPage = page > 1;
 
     return {
-      data: users.map(user => this.serializeUser(user)),
+      data: users.map((user) => this.serializeUser(user)),
       total,
       page,
       limit,

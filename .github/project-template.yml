@@ -1,0 +1,38 @@
+# Template para Project Kanban (Project V2)
+# Baseado em PDF 063/064 - Guia de Gestão de Projetos no GitHub
+
+name: "Patrimônio e Inventário - Kanban"
+description: "Quadro Kanban para acompanhamento do desenvolvimento"
+
+# Colunas do Kanban
+columns:
+  - name: "Todo"
+    description: "Tarefas a serem iniciadas"
+    
+  - name: "In Progress" 
+    description: "Tarefas em desenvolvimento"
+    
+  - name: "Review"
+    description: "Tarefas em revisão"
+    
+  - name: "Done"
+    description: "Tarefas concluídas"
+
+# Campos customizados
+fields:
+  - name: "Priority"
+    type: "single_select"
+    options:
+      - name: "P1 - Crítico"
+        color: "b60205"
+      - name: "P2 - Importante" 
+        color: "ff9500"
+      - name: "P3 - Melhoria"
+        color: "0e8a16"
+        
+  - name: "Sprint"
+    type: "single_select"
+    options:
+      - name: "Sprint 1 - M1 Users MVP"
+      - name: "Sprint 2 - M2 Observabilidade"
+      - name: "Sprint 3 - M3 Endurecimento"

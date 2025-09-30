@@ -77,6 +77,70 @@ Containerização e Configuração (PDF 084):
 - .env.example com configurações para Docker
 - Documentação DOCKER_SETUP.md com guia completo
 
+Funcionalidades Avançadas (PDF 078/079/081/082/083):
+- Testes E2E completos para endpoints `/v1/users` (CRUD completo)
+- Paginação na listagem de usuários com metadados (page, limit, total, totalPages)
+- Filtros avançados: role, isActive, busca por nome (case-insensitive)
+- Ordenação por campos: name, email, createdAt, updatedAt (ASC/DESC)
+- DTOs de paginação e filtros com validação completa
+- Swagger documentation para todos os parâmetros de query
+
+Observabilidade e Monitoramento (M2):
+- Sistema de logging estruturado com Winston
+- Logs em arquivos (error.log, combined.log) e console
+- Interceptor de logging para todas as requisições HTTP
+- Métricas de performance em tempo real
+- Endpoint `/v1/metrics` para monitoramento
+- Contadores de requisições por método e status
+- Tempo médio de resposta e latência p95
+- Interceptor de métricas global
+
+Performance Testing (M3):
+- Testes de carga com autocannon (load-test.js)
+- Testes de stress com múltiplos cenários (stress-test.js)
+- Scripts npm: `test:load` e `test:stress`
+- Análise automática de performance e taxa de erro
+- Relatórios detalhados de throughput e latência
+- Validação de readiness para produção
+
+Funcionalidades Avançadas de API (Baseado no Projeto de Referência):
+- Listagem paginada e com filtros avançados implementada
+- Busca textual genérica (q) com ILIKE para nome e email (case-insensitive)
+- Filtros específicos por role e isActive
+- DTOs especializados: PaginationQueryDto, PaginatedUsersResponseDto, QueryUsersDto
+- Validação completa com class-validator e class-transformer
+- Swagger documentation para todos os parâmetros de query
+- Testes unitários detalhados para métodos create e findAll
+- Fábrica de mocks para repositórios TypeORM (repository.mock.ts)
+- Testes separados por funcionalidade (users.service.create.spec.ts, users.service.find.spec.ts)
+- Cobertura completa de cenários de negócio e tratamento de erros
+- Normalização de email e validação de unicidade
+- Hash seguro de senhas com bcryptjs
+- Serialização segura (exclusão de passwordHash)
+- Tratamento de race conditions e constraint violations
+
+Scripts de Automação (Prioridade 3):
+- Script setup-governanca.sh para configurar governança do repositório GitHub
+- Configuração automática de labels organizacionais, de prioridade e governança
+- Criação de milestones estratégicos (M1, M2, M3)
+- Configuração de Project Board Kanban
+- Branch Protection Rules com CI required checks
+- Script setup-environment.sh para configurar novos ambientes de desenvolvimento
+- Verificação automática de dependências do sistema (Node.js, Docker, Git)
+- Instalação e configuração automática de dependências do projeto
+- Configuração do arquivo .env e inicialização do banco de dados
+- Execução automática de migrações, testes e lint
+- Configuração de Git hooks de pre-commit
+- Script run-migrations.ts para execução de migrações com logs estruturados
+- Tratamento de erros específicos e relatórios detalhados
+- Script setup-cicd.sh para configuração de CI/CD e automação
+- Configuração de workflows de CI com jobs: lint, build, test, security
+- Configuração do Dependabot para atualizações automáticas
+- Configuração do CodeQL para análise de segurança
+- Automação de releases com GitHub Actions
+- Scripts npm integrados: setup:governance, setup:environment, setup:cicd
+- Documentação completa dos scripts em scripts/README.md
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

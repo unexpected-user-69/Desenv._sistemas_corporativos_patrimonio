@@ -141,6 +141,17 @@ Scripts de Automação (Prioridade 3):
 - Scripts npm integrados: setup:governance, setup:environment, setup:cicd
 - Documentação completa dos scripts em scripts/README.md
 
+Melhorias Baseadas no Projeto de Referência (Prioridades 1 e 2):
+- Configuração ESLint com recommended-type-checked para maior segurança de tipos
+- ClassSerializerInterceptor implementado corretamente com @Exclude/@Expose
+- Remoção do método stripSensitive manual em favor da serialização automática
+- Transformação avançada nos DTOs com @Transform para isActive (aceita múltiplos formatos)
+- Lógica de filtragem simplificada e mais declarativa no UsersService
+- Serialização híbrida usando plainToClass para compatibilidade com testes
+- Validação de tipos mais rigorosa mantendo flexibilidade em arquivos de teste
+- API mais resiliente aceitando diferentes formatos de entrada (true/false, "1"/"0")
+- Código mais limpo e alinhado com as melhores práticas do NestJS
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

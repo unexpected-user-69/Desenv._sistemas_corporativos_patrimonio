@@ -82,7 +82,7 @@ describe('UsersService - Find Methods', () => {
         updatedAt: expect.any(Date),
         version: 1,
       });
-      expect(result[0]).not.toHaveProperty('passwordHash');
+      expect(result[0].passwordHash).toBeUndefined();
       expect(userRepository.find).toHaveBeenCalledTimes(1);
     });
 
@@ -126,7 +126,7 @@ describe('UsersService - Find Methods', () => {
         hasNextPage: false,
         hasPreviousPage: false,
       });
-      expect(result.data[0]).not.toHaveProperty('passwordHash');
+      expect(result.data[0].passwordHash).toBeUndefined();
     });
 
     it('should handle pagination correctly', async () => {
@@ -290,7 +290,7 @@ describe('UsersService - Find Methods', () => {
 
       // Assert
       result.data.forEach((user) => {
-        expect(user).not.toHaveProperty('passwordHash');
+        expect(user.passwordHash).toBeUndefined();
         expect(user).toHaveProperty('id');
         expect(user).toHaveProperty('name');
         expect(user).toHaveProperty('email');

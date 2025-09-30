@@ -59,10 +59,20 @@ export class PaginationQueryDto {
   role?: UserRole;
 
   @ApiPropertyOptional({
-    description: 'Filtrar por status ativo/inativo',
+    description:
+      'Filtrar por status ativo/inativo (aceita: true, false, "true", "false", "1", "0")',
     example: true,
   })
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+      const normalized = value.toLowerCase().trim();
+      if (normalized === 'true' || normalized === '1') return true;
+      if (normalized === 'false' || normalized === '0') return false;
+    }
+    return value as boolean;
+  })
   @Type(() => Boolean)
   @IsBoolean()
   isActive?: boolean;

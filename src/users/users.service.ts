@@ -39,7 +39,9 @@ export class UsersService {
     const user = await this.userRepository.preload({
       id,
       ...dto,
-      ...(dto.password && { passwordHash: await bcrypt.hash(dto.password, 10) }),
+      ...(dto.password && {
+        passwordHash: await bcrypt.hash(dto.password, 10),
+      }),
     });
 
     if (!user) {

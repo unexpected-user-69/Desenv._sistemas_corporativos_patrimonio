@@ -70,3 +70,4 @@ Após a persistência do domínio ter sido estabelecida com sucesso, os próximo
 4.  **Funcionalidades Avançadas:**
     *   Adição de funcionalidades como **Paginação e Filtros** (ex: por nome/e-mail).
     *   Implementação de políticas de acesso (**Autenticação/RBAC**).
+    

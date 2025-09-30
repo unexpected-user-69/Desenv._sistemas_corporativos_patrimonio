@@ -23,42 +23,21 @@ Entregáveis de Auditoria (docs/processo):
 - PR template com checklist de riscos
 - Documento `GOVERNANCE_AUDIT.md` com checklist e plano de ação
 
-Próximas entregas sugeridas (alto valor):
-- Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
-
 Segurança e Qualidade de Dados:
 - Hash seguro de senha com `bcryptjs` no `UsersService` (create/update)
 - Campo `passwordHash` excluído de respostas (ClassSerializer via `@Exclude`)
 - Email com `citext` + índice único (unicidade case-insensitive)
 
-Próximas entregas sugeridas (alto valor):
-- Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
-
 Testes adicionais:
 - Testes unitários do `UsersController` com service mock
 
-Próximas entregas sugeridas (alto valor):
-- Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
+Campos de Auditoria e Ciclo de Vida:
+- Campo `avatarUrl` (opcional) na entidade User e DTOs
+- Campo `deletedAt` para soft delete (DeleteDateColumn)
+- Campo `version` para optimistic lock (VersionColumn)
+- Migração `AddUserAuditFields` para adicionar novos campos
+- Soft delete implementado no `UsersService.remove()`
 
-Próximas entregas sugeridas (alto valor):
-- Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
-- `.env.example` versionado (sem segredos)
-
-
-#Novidades (entregues):
-- ValidationPipe global e documentação Swagger (`/api/docs`)
-- Endpoint `GET /health` para healthcheck
-- Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
-- `.env.example` versionado (sem segredos)
- - Tratamento de erros padronizado via filtro global (`HttpExceptionFilter`)
-
-#Próximas entregas sugeridas (alto valor):
-- Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
-
-
-#Próximas entregas sugeridas (alto valor):
-- Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
-- `.env.example` versionado (sem segredos)
-
+Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

@@ -5,6 +5,7 @@ import {
   MinLength,
   IsOptional,
   IsBoolean,
+  IsUrl,
 } from 'class-validator';
 import { UserRole } from '../entities/user.entity';
 
@@ -24,4 +25,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsUrl()
+  avatarUrl?: string;
 }

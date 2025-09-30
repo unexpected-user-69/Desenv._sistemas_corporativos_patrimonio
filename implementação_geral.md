@@ -494,3 +494,222 @@ Documentar e configurar as variáveis de ambiente.
 Caso haja scripts de migração existentes, eles podem precisar de uma correção nos imports.
 
 1.  **Correção de Import (Problema 3):** Se o `data-source.ts` foi alterado para usar apenas o export nomeado (`export const AppDataSource`), os scripts de migração devem ser atualizados para usar o **import nomeado**: `import { AppDataSource } from './data-source';`.
+
+
+
+
+pdf 085 -----
+O roteiro didático foca na implementação, documentação e teste de um endpoint de listagem paginada de usuários (`findAll()`) com filtros e metadados. As implementações solicitadas e detalhadas nas fontes são as seguintes:
+
+### Fase 2: Estruturação dos DTOs (Data Transfer Objects)
+
+#### DTO de Entrada (PaginationQueryDto)
+Implementação do DTO para lidar com os parâmetros de consulta, incluindo transformações de tipo, *defaults* e validação na borda (controlador):
+
+*   **Paginação (`page`, `limit`):**
+    *   Implementação de `@Transform` para garantir que os valores sejam numéricos (com *default* `1` para `page` e `20` para `limit`).
+    *   Validações `@IsInt`, `@Min(1)` (para `page` e `limit`) e `@Max(100)` (para `limit`).
+*   **Filtro Textual (`q`):**
+    *   Implementação como opcional (`@IsOptional`).
+    *   Transformação para remover espaços (`trim`).
+    *   Validação `@IsString`.
+*   **Filtro por Role (`role`):**
+    *   Implementação como opcional.
+    *   Validação `@IsIn` para restringir os valores aceitos (ex: `['admin', 'teacher', 'student']`).
+*   **Filtro por Status (`is_active`):**
+    *   Implementação como opcional.
+    *   Validação `@IsBooleanString` para aceitar `'true'` ou `'false'`.
+
+#### DTO de Resposta (PaginatedUsersResponseDto)
+Implementação de uma estrutura de resposta padronizada:
+
+*   Define as propriedades `data: T[]`, `total: number`.
+*   Define a propriedade `meta` contendo `page`, `limit`, `has_next`, e `has_prev`.
+
+### Fase 3: Implementação do Service (users.service.ts)
+
+A implementação do método `findAllPaged` evolui utilizando o TypeORM, culminando no uso do *QueryBuilder* para lidar com filtros combinados.
+
+#### Implementações Sequenciais do Service:
+
+1.  **Básico:** Implementação inicial temporária de `async findAll(): Promise<User[]>` retornando todos os resultados via `this.repo.find()`.
+2.  **Paginação:** Implementação de `findAllPaged`:
+    *   Cálculo de `const skip = (page - 1) * limit`.
+    *   Uso de `this.repo.findAndCount({ skip, take: limit, order: { created_at: 'DESC' } })`.
+    *   Cálculo e retorno dos metadados de paginação (`has_next`, `has_prev`).
+3.  **Filtro Textual (`q`) (usando repositório):** Implementação da cláusula `where` para buscar por nome OU email usando `ILike`.
+    *   Exemplo de `where`: `q ? [{ name: ILike(%${q}%) }, { email: ILike(%${q}%) }] : {}`.
+4.  **Composição de Filtros (Transição para QueryBuilder):** Implementação da estratégia de usar o `QueryBuilder` para combinar filtros com lógica OR (para `q`) e AND (para `role`/`is_active`).
+    *   Iniciação do QueryBuilder: `const qb = this.repo.createQueryBuilder('u')`.
+5.  **Filtros Combinados no QueryBuilder:**
+    *   **Busca Textual (OR):** Implementação de `qb.andWhere('(u.name ILIKE :q OR u.email ILIKE :q)', { q: `%${q}%` })` se `q` estiver presente.
+    *   **Filtro por Role (AND):** Implementação de `qb.andWhere('u.role = :role', { role })` se `role` estiver presente.
+    *   **Filtro Ativo/Inativo (AND):** Implementação de `qb.andWhere('u.is_active = :active', { active: is_active === 'true' })` se `is_active` estiver definido.
+    *   **Ordenação e Paginação:** Configuração de `qb.orderBy('u.created_at', 'DESC').skip((page - 1) * limit).take(limit)`.
+    *   Execução da busca: `const [data, total] = await qb.getManyAndCount()`.
+
+#### Implementações de Refatoração e Otimização:
+
+*   **Extração de Filtros:** Extrair a construção de filtros para uma função privada.
+*   **Garantia de Índices:** Garantir índices nas colunas `email`, `created_at` e colunas filtradas.
+*   **Campos Públicos:** Implementar o retorno de apenas campos públicos (evitar campos sensíveis como `password_hash`).
+
+### Fase 4: Implementação do Controller (users.controller.ts)
+
+1.  **Estrutura Básica:** Implementação do método `@Get() findAll()`.
+2.  **Query Params e Validação:** Implementação da injeção e validação dos parâmetros de consulta usando `@Query() query: PaginationQueryDto`.
+3.  **Chamada do Service:** Chamada para `this.usersService.findAllPaged(query)`.
+4.  **Transformação de Dados:** Uso de `ClassSerializerInterceptor` ou mapeamento DTO de saída para tratar campos sensíveis.
+5.  **Padronização da Resposta:** Garantir que a resposta final padronizada seja `{ data, total, meta }`.
+
+### Fase 5: Documentação Swagger
+
+Implementação de decoradores Swagger para documentação profissional do endpoint:
+
+*   **Operação:** Implementação de `@ApiTags('users')` e `@ApiOperation({ summary: 'List users (paginated)' })`.
+*   **Parâmetros de Consulta:** Implementação de `@ApiQuery` para documentar `page`, `limit`, `q`, `role` (incluindo `enum: ['admin','teacher','student']`), e `is_active` (incluindo `enum: ['true','false']`).
+*   **Resposta:** Implementação de `@ApiOkResponse({ type: PaginatedUsersResponseDto })`.
+
+### Fase 6: Validação e Testes
+
+Embora esta fase se concentre em cenários, as implementações solicitadas envolvem:
+
+*   **Implementação de Testes Unitários:** Para a montagem do QueryBuilder (usando mocks).
+*   **Implementação de Testes de Integração:** Leves com banco de dados em memória ou contêiner.
+*   **Validação do DTO:** Garantir que a validação do DTO implementada na Fase 2 dispare erros 400 para casos como `page < 1`, `limit > 100`, ou `role` inválido.
+
+### Fase 7: Evolução e Melhorias
+
+Futuras implementações para escalabilidade e melhoria da UX de API:
+
+*   **Cache:** Implementação de *cache* de resultados (ex.: Redis) para consultas populares.
+*   **Filtros Avançados:** Implementação de filtros por intervalo de datas.
+*   **Ordenação Dinâmica:** Implementação de ordenação dinâmica (via `sort` e `order`).
+*   **Busca Fuzzy:** Implementação de busca fuzzy ou trigramas.
+*   **Agregações:** Implementação de agregações/estatísticas (ex.: por *role*).
+*   **Controle de Acesso:** Implementação de *Rate limiting* e chaves de paginação (cursor).
+
+
+
+-----------------------------------
+pdf 86----- Implementações para Testes Unitários (Teoria + Aplicação em NestJS)
+
+**1. Instalação e Configuração do Jest:**
+
+*   **Instalação Básica (JavaScript):** Executar `npm i -D jest`.
+*   **Configuração de Scripts:** Adicionar ao `package.json` os scripts `"test": "jest"`, `"test:watch": "jest --watch"`, e `"test:cov": "jest --coverage"`.
+*   **Instalação (TypeScript/NestJS):** Executar `npm i -D jest ts-jest @types/jest`.
+
+**2. Estrutura de Código e Teste:**
+
+*   **Criação de Arquivos:** Criar arquivos de teste com o sufixo `.spec.ts` ou `.test.ts`, preferencialmente co-localizados ou em um diretório `test/`.
+*   **Exemplo Mínimo:** Implementar uma função pura (ex.: `sum` em `src/lib/sum.ts`) e seu teste correspondente (ex.: `test/sum.spec.ts`) usando `describe`, `it`, e `expect`.
+
+**3. Implementação de Dobrês de Teste (Test Doubles):**
+
+A injeção de dependências no NestJS é o ponto chave para implementar dobres.
+
+*   **Implementar Dummy (useValue):** Fornecer objetos com métodos vazios ou que não fazem nada, para satisfazer as interfaces (ex.: `{ log(){ /* vazio */ } }`).
+*   **Implementar Stub (useValue):** Utilizar `jest.fn().mockResolvedValue(...)` para pré-configurar retornos e controlar o fluxo de execução.
+*   **Implementar Spy (useValue):** Usar `jest.fn()` para monitorar chamadas e argumentos, verificando com `toHaveBeenCalledWith`.
+*   **Implementar Mock (useValue):** Usar `jest.fn()` com expectativas rígidas, incluindo negativas (e.g., `expect(repo.save).not.toHaveBeenCalled()`).
+*   **Implementar Fake (useClass):** Fornecer implementações simplificadas e em memória via `useClass: RepoFake`, para simular lógica de negócio sem dependências reais (ex.: `UsersRepoFake` em memória).
+
+**4. Setup de Módulos de Teste no NestJS:**
+
+*   **Criação do Módulo de Teste:** Utilizar `Test.createTestingModule` para construir um módulo isolado para o teste.
+*   **Substituição de Providers:** Dentro do `providers` do `TestingModule`, substituir implementações reais por mocks/stubs usando `useValue` ou `useClass`. Por exemplo: `{ provide:'UsersRepo', useValue:{ findByEmail: jest.fn(), save: jest.fn() } }`.
+
+**5. Boas Práticas de Implementação de Testes (Padrão AAA):**
+
+*   **Arrange (Preparação):** Implementar a configuração de dados de entrada e dobles de teste antes da execução.
+*   **Act (Ação):** Implementar a execução da única ação que será testada (ex.: `const result = await service.createUser(dto)`).
+*   **Assert (Verificação):** Implementar a validação do valor de retorno e a verificação das interações com os dobles (ex.: `expect(result).toEqual(...)`, `expect(mockHasher.hash).toHaveBeenCalledWith(...)`).
+*   **Reset de Mocks:** Implementar `jest.clearAllMocks()` dentro do `beforeEach` para garantir o isolamento entre os testes.
+*   **Controle de Tempo:** Implementar `jest.useFakeTimers().setSystemTime(...)` para controlar funcionalidades que dependem de datas ou intervalos.
+
+**6. Sugestões Finais para a Qualidade:**
+
+*   **Isolar Dependências:** Implementar stubs e spies para simular comportamentos, focando exclusivamente no comportamento da unidade sob teste.
+*   **Monitorar Cobertura:** Implementar e rodar o script `npm run test:cov` regularmente para identificar áreas do código não testadas.
+
+---
+pdf 87a-----
+
+A seguir estão todas as implementações solicitadas ou descritas no material, focadas na arquitetura do microsserviço Users, DTOs, *Service* e a estrutura de Testes Unitários:
+
+### 1. Implementações da Estrutura da Entidade e Enum
+
+*   **Implementar o *Enum* `UserRole`** com os valores `STUDENT`, `TEACHER`, e `ADMIN`.
+*   **Implementar a *Entity* `User`** usando *decorators* do TypeORM, incluindo:
+    *   `@Entity({ name: 'users' })`.
+    *   `@Index(['email'], { unique: true })` para garantir a integridade dos dados.
+    *   Definir propriedades como `id`, `name`, `email`, `passwordHash`, `role`, `isActive`, `avatarUrl` (opcional), `createdAt`, e `updatedAt`.
+    *   Configurar `@Column` para `role` usando `enum: UserRole` com *default* para `UserRole.STUDENT`.
+    *   Configurar `@Column` para `isActive` com tipo `boolean` e *default* `true`.
+
+### 2. Implementações dos DTOs (Data Transfer Objects)
+
+*   **Implementar `CreateUserDto`** definindo a estrutura de entrada (campos obrigatórios: `name`, `email`, `password`, e `role` opcional).
+*   **Implementar `PaginationQueryDto` (QueryUsersDto)** para filtros e paginação:
+    *   Configurar `page` e `limit` com `@Type(() => Number)`, `@IsInt()`, `@Min(1)`, `@Max(100)`.
+    *   Configurar o campo de busca textual `q` com `@Transform` para realizar o *trim* do valor.
+    *   Configurar o filtro `role` com `@IsEnum(UserRole)`.
+    *   Configurar o filtro `is_active` com um `@Transform` customizado para converter valores de *string* (e.g., 'true', '1', 'yes') para booleano.
+    *   Aplicar `@IsBoolean()` e `@IsOptional()` para `is_active`.
+*   **Implementar a Estrutura de Resposta Paginada** que deve retornar o formato `{ data, total, page, limit }`.
+
+### 3. Implementações no UsersService (Lógica de Negócio)
+
+*   **Implementar a Injeção de Dependência** do repositório TypeORM no construtor do `UsersService` usando `@InjectRepository(User)`.
+*   **Implementar Utilitários Privados:**
+    *   `private stripSensitive(u: User)`: Para remover campos sensíveis (como `passwordHash`) das respostas.
+    *   `private async hash(plain: string)`: Para gerar o *salt* (`bcrypt.genSalt(10)`) e aplicar o hash na senha.
+    *   `private normalizeEmail(email: string)`: Para normalizar o email (*trim* e *lower case*).
+    *   `private normalizeName(name: string)`: Para normalizar o nome (*trim* e compactar espaços).
+*   **Implementar o Método `create(dto: CreateUserDto)`:**
+    *   Aplicar normalização de `email` e `name`.
+    *   Realizar checagem preliminar de existência de email usando `this.repo.findOne({ where: { email } })`.
+    *   Aplicar o *hash* da senha, concatenando o `HASH_PEPPER` do `process.env` se presente.
+    *   Criar a entidade com `this.repo.create()` e persistir com `this.repo.save()`.
+    *   Implementar `try/catch` para capturar `QueryFailedError` com código `'23505'` (violação de índice único) e lançar `ConflictException`.
+*   **Implementar o Método `findAll(query: PaginationQueryDto)`:**
+    *   Destruturar o `query` DTO aplicando *defaults* (`page = 1`, `limit = 20`).
+    *   Construir dinamicamente a cláusula `where` para o `repo.findAndCount`:
+        *   Usar `ILike` para busca textual `q` em `name` OU `email`.
+        *   Aplicar filtros `role` e `is_active` (opcionais).
+        *   Estruturar o `whereClause` para aplicar OR na busca textual e AND nos demais filtros.
+    *   Executar `this.repo.findAndCount` aplicando `order: { createdAt: 'DESC' }`, `skip`, e `take`.
+    *   Mapear os dados de saída, aplicando `this.stripSensitive(u)` a cada usuário.
+
+### 4. Implementações de Mocks e Estrutura de Testes Unitários
+
+*   **Implementar a Fábrica de Mocks do Repositório (`repositoryMockFactory`)**: Uma função que retorna um objeto simulando o `Repository<any>` da TypeORM, com `jest.Mock` para os métodos essenciais (`create`, `save`, `findOne`, `findAndCount`, etc.).
+*   **Implementar a Tipagem `MockType<T>`** para garantir segurança de tipo ao mockar o repositório.
+*   **Implementar o Mock Global do `bcrypt`**: Usar `jest.mock('bcrypt', ...)` para controlar o retorno de `genSalt` e `hash`.
+*   **Implementar o Setup do Módulo de Teste (em `users.service.create.spec.ts`):**
+    *   Usar `Test.createTestingModule` para configurar o ambiente de injeção.
+    *   Substituir o repositório real com o *factory* mockado: `{ provide: getRepositoryToken(User), useFactory: repositoryMockFactory }`.
+    *   Implementar `beforeEach` e `afterEach` para gerenciar variáveis de ambiente e limpar mocks (`jest.clearAllMocks()`).
+*   **Implementar Testes Unitários para `create`** cobrindo os seguintes cenários:
+    *   Caminho feliz (sucesso, normalização de dados, uso de `passwordHash` no salvamento, e exclusão do *hash* no retorno).
+    *   Verificação do uso correto de `HASH_PEPPER` do ambiente.
+    *   Respeito à `role` explícita.
+    *   Tratamento de conflito de email na pré-checagem (`findOne` retorna existente).
+    *   Tratamento de conflito de email na condição de corrida (captura de `QueryFailedError` 23505).
+*   **Implementar a Estrutura de Pastas de Testes:** Organizar os testes paralelamente ao código fonte, separando `mocks` reutilizáveis e testes específicos (e.g., `users.service.create.spec.ts`).
+*   **Implementar a Configuração do Jest (`jest.config.ts`):**
+    *   Definir `preset: 'ts-jest'`, `testMatch`, e `moduleNameMapper` para *imports* com `@/`.
+    *   Configurar a Cobertura (`collectCoverageFrom`, `coveragePathIgnorePatterns` excluindo DTOs e *Entities*, e `coverageThreshold` exigindo, por exemplo, 80% de linhas).
+    *   Garantir qualidade dos mocks com `clearMocks: true`, `resetMocks: true`, `restoreMocks: true`.
+
+### 5. Implementações de Evolução Técnica (Próximos Passos)
+
+*   **Implementar um Service Dedicado para Hash de Senhas** com injeção de dependência.
+*   **Implementar Testes Adicionais** para `findOne`, `update`, `remove`, cobrindo cenários de erro de repositório e *timeouts*.
+*   **Implementar `UserResponseDto` e Mappers Puros** para garantir transformações controladas na saída e prevenir vazamento de `passwordHash`.
+*   **Implementar Filtros Avançados** como busca *full-text*, ordenação dinâmica, e filtragem por intervalo de datas.
+*   **Implementar Paginação Baseada em Cursor** para grandes listas.
+
+---
+

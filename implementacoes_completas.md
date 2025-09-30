@@ -152,6 +152,21 @@ Melhorias Baseadas no Projeto de Referência (Prioridades 1 e 2):
 - API mais resiliente aceitando diferentes formatos de entrada (true/false, "1"/"0")
 - Código mais limpo e alinhado com as melhores práticas do NestJS
 
+Implementações Avançadas de Testes Unitários (PDF 086):
+- Dobres de teste implementados: Dummy, Stub, Spy, Mock e Fake Repository
+- Padrão AAA (Arrange, Act, Assert) aplicado consistentemente em todos os testes
+- Utilitários de teste em test/utils/test-doubles.ts para reutilização
+- FakeUserRepository para testes de integração sem dependências externas
+- Testes avançados para UsersService com cobertura completa de cenários
+- Testes avançados para UsersController com validação de respostas
+- Configuração de setup global para testes em test/setup.ts
+- Scripts npm especializados: test:unit, test:integration, test:advanced, test:all
+- Cobertura de testes expandida para 55 testes passando
+- Testes de edge cases, cenários de erro e otimização de performance
+- Mocking avançado com expectativas rígidas e monitoramento de chamadas
+- Controle de tempo com fake timers para testes dependentes de data
+- Isolamento de dependências com stubs e spies para testes unitários puros
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

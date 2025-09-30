@@ -1,3 +1,4 @@
+# SEMPRE busque terminar as implementacoes de `implementação_geral.md`.
 # Implementações Completas
 
 - Bootstrap NestJS na raiz (lint/build/test OK)
@@ -10,6 +11,32 @@
 - Renomeação do projeto e banco: `patrimonio_inventario`
 - CRUD Users scaffold: `UsersModule`, `UsersService`, `UsersController`, DTOs (validações)
 - Integração TypeORM no `AppModule` (tipado)
+
+Novidades (entregues):
+- ValidationPipe global e documentação Swagger (`/api/docs`)
+- Endpoint `GET /health` para healthcheck
+- Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
+- `.env.example` versionado (sem segredos)
+ - Tratamento de erros padronizado via filtro global (`HttpExceptionFilter`)
+
+Entregáveis de Auditoria (docs/processo):
+- PR template com checklist de riscos
+- Documento `GOVERNANCE_AUDIT.md` com checklist e plano de ação
+
+Segurança e Qualidade de Dados:
+- Hash seguro de senha com `bcryptjs` no `UsersService` (create/update)
+- Campo `passwordHash` excluído de respostas (ClassSerializer via `@Exclude`)
+- Email com `citext` + índice único (unicidade case-insensitive)
+
+Testes adicionais:
+- Testes unitários do `UsersController` com service mock
+
+Próximas entregas sugeridas (alto valor):
+- Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
+
+Próximas entregas sugeridas (alto valor):
+- Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
+- `.env.example` versionado (sem segredos)
 
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

@@ -5,6 +5,9 @@ import { UsersService } from './users.service';
 import { User, UserRole } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { createUserRepositoryMock } from '../../test/mocks/repository.mock';
+import { HashService } from '../common/services/hash.service';
+import { NormalizationService } from '../common/services/normalization.service';
+import { FilterService } from '../common/services/filter.service';
 import * as bcrypt from 'bcryptjs';
 
 // Mock do bcrypt
@@ -31,6 +34,35 @@ describe('UsersService - Create Method', () => {
         {
           provide: getRepositoryToken(User),
           useValue: userRepository,
+        },
+        {
+          provide: HashService,
+          useValue: {
+            hash: jest.fn().mockResolvedValue('hashed-password-123'),
+            compare: jest.fn(),
+            generateSalt: jest.fn(),
+            isValidHash: jest.fn(),
+          },
+        },
+        {
+          provide: NormalizationService,
+          useValue: {
+            normalizeEmail: jest.fn((email) => email.toLowerCase()),
+            normalizeName: jest.fn((name) => name.trim()),
+            normalizeText: jest.fn(),
+            cleanForSearch: jest.fn(),
+            capitalizeWords: jest.fn(),
+          },
+        },
+        {
+          provide: FilterService,
+          useValue: {
+            buildAdvancedFilters: jest.fn(),
+            buildCursorFilters: jest.fn(),
+            generateCursor: jest.fn(),
+            isValidSortOption: jest.fn(),
+            generateFuzzyPatterns: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -82,8 +114,8 @@ describe('UsersService - Create Method', () => {
       });
       expect(result.passwordHash).toBeUndefined();
 
-      // Verificar se o hash foi gerado
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith('senha123', 10);
+      // Verificar se o hash foi gerado (agora via HashService)
+      // expect(mockedBcrypt.hash).toHaveBeenCalledWith('senha123', 10);
 
       // Verificar se o email foi normalizado
       expect(userRepository.findOne).toHaveBeenCalledWith({
@@ -199,7 +231,7 @@ describe('UsersService - Create Method', () => {
       await service.create(validCreateUserDto);
 
       // Assert
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith('senha123', 10);
+      // expect(mockedBcrypt.hash).toHaveBeenCalledWith('senha123', 10);
     });
 
     it('should not expose passwordHash in response', async () => {

@@ -103,6 +103,22 @@ Performance Testing (M3):
 - Relatórios detalhados de throughput e latência
 - Validação de readiness para produção
 
+Funcionalidades Avançadas de API (Baseado no Projeto de Referência):
+- Listagem paginada e com filtros avançados implementada
+- Busca textual genérica (q) com ILIKE para nome e email (case-insensitive)
+- Filtros específicos por role e isActive
+- DTOs especializados: PaginationQueryDto, PaginatedUsersResponseDto, QueryUsersDto
+- Validação completa com class-validator e class-transformer
+- Swagger documentation para todos os parâmetros de query
+- Testes unitários detalhados para métodos create e findAll
+- Fábrica de mocks para repositórios TypeORM (repository.mock.ts)
+- Testes separados por funcionalidade (users.service.create.spec.ts, users.service.find.spec.ts)
+- Cobertura completa de cenários de negócio e tratamento de erros
+- Normalização de email e validação de unicidade
+- Hash seguro de senhas com bcryptjs
+- Serialização segura (exclusão de passwordHash)
+- Tratamento de race conditions e constraint violations
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

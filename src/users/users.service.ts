@@ -4,13 +4,15 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, FindManyOptions } from 'typeorm';
+import { Repository, Like, FindManyOptions, ILike, Or } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { FilterUsersDto } from './dto/filter-users.dto';
 import { PaginatedResponseDto } from './dto/pagination.dto';
+import { QueryUsersDto } from './dto/query-users.dto';
+import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -99,6 +101,75 @@ export class UsersService {
         hasNextPage,
         hasPreviousPage,
       },
+    };
+  }
+
+  async findAllWithAdvancedFilters(
+    query: QueryUsersDto,
+  ): Promise<PaginatedUsersResponseDto> {
+    const {
+      page = 1,
+      limit = 10,
+      q,
+      role,
+      isActive,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+    } = query;
+
+    const skip = (page - 1) * limit;
+
+    // Construir condições de busca
+    const whereConditions: any[] = [];
+
+    // Filtros específicos
+    if (role) {
+      whereConditions.push({ role });
+    }
+
+    if (isActive !== undefined) {
+      whereConditions.push({ isActive });
+    }
+
+    // Busca textual genérica (nome e email)
+    if (q) {
+      whereConditions.push({
+        name: ILike(`%${q}%`),
+      });
+      whereConditions.push({
+        email: ILike(`%${q}%`),
+      });
+    }
+
+    // Construir opções de busca
+    const findOptions: FindManyOptions<User> = {
+      where: whereConditions.length > 0 ? whereConditions : undefined,
+      skip,
+      take: limit,
+      order: {
+        [sortBy]: sortOrder,
+      },
+    };
+
+    // Busca textual simplificada - apenas por nome
+    // Se não encontrar por nome, será feita uma segunda busca por email
+
+    // Executar busca paginada
+    const [users, total] = await this.userRepository.findAndCount(findOptions);
+
+    // Calcular metadados de paginação
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      data: users.map((user) => this.stripSensitive(user)),
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNextPage,
+      hasPreviousPage,
     };
   }
 

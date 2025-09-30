@@ -19,6 +19,15 @@ describe('UsersController', () => {
         hasPreviousPage: false,
       },
     }),
+    findAllWithAdvancedFilters: jest.fn().mockResolvedValue({
+      data: [] as User[],
+      total: 0,
+      page: 1,
+      limit: 10,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    }),
     findOne: jest.fn().mockResolvedValue({ id: 'u1' } as User),
     create: jest.fn().mockResolvedValue({ id: 'u2' } as User),
     update: jest.fn().mockResolvedValue({ id: 'u3' } as User),
@@ -38,14 +47,12 @@ describe('UsersController', () => {
     const res = await controller.findAll({});
     expect(res).toEqual({
       data: [],
-      meta: {
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
-      },
+      total: 0,
+      page: 1,
+      limit: 10,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
     });
   });
 

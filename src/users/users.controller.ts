@@ -23,8 +23,8 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { FilterUsersDto } from './dto/filter-users.dto';
-import { PaginatedResponseDto } from './dto/pagination.dto';
+import { QueryUsersDto } from './dto/query-users.dto';
+import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -33,8 +33,8 @@ export class UsersController {
 
   @Get()
   @ApiOkResponse({
-    description: 'Lista todos os usuários (com paginação e filtros)',
-    type: PaginatedResponseDto<UserResponseDto>,
+    description: 'Lista todos os usuários (com paginação e filtros avançados)',
+    type: PaginatedUsersResponseDto,
   })
   @ApiQuery({
     name: 'page',
@@ -49,6 +49,12 @@ export class UsersController {
     description: 'Itens por página',
   })
   @ApiQuery({
+    name: 'q',
+    required: false,
+    type: String,
+    description: 'Busca textual genérica (nome e email)',
+  })
+  @ApiQuery({
     name: 'role',
     required: false,
     enum: ['STUDENT', 'TEACHER', 'ADMIN'],
@@ -59,12 +65,6 @@ export class UsersController {
     required: false,
     type: Boolean,
     description: 'Filtrar por status ativo',
-  })
-  @ApiQuery({
-    name: 'search',
-    required: false,
-    type: String,
-    description: 'Buscar por nome',
   })
   @ApiQuery({
     name: 'sortBy',
@@ -78,10 +78,8 @@ export class UsersController {
     enum: ['ASC', 'DESC'],
     description: 'Direção da ordenação',
   })
-  findAll(
-    @Query() filters: FilterUsersDto,
-  ): Promise<PaginatedResponseDto<UserResponseDto>> {
-    return this.usersService.findAllPaginated(filters);
+  findAll(@Query() query: QueryUsersDto): Promise<PaginatedUsersResponseDto> {
+    return this.usersService.findAllWithAdvancedFilters(query);
   }
 
   @Get(':id')

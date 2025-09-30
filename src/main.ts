@@ -10,8 +10,6 @@ async function bootstrap() {
 
   app.useGlobalFilters(new HttpExceptionFilter());
 
-
-
   const config = new DocumentBuilder()
     .setTitle('Patrimonio & Inventario API')
     .setVersion('1.0.0')

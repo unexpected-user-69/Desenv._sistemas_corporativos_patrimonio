@@ -116,7 +116,10 @@ describe('FilterService', () => {
       expect(result.where).toHaveLength(4); // 2 from role+name, 2 from isActive+email
       // Verifica que temos combinações de filtros
       expect(result.where).toContainEqual(
-        expect.objectContaining({ role: UserRole.TEACHER, name: expect.any(Object) }),
+        expect.objectContaining({
+          role: UserRole.TEACHER,
+          name: expect.any(Object),
+        }),
       );
       expect(result.where).toContainEqual(
         expect.objectContaining({ isActive: true, name: expect.any(Object) }),

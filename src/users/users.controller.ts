@@ -7,7 +7,6 @@ import {
   Body,
   Put,
   Delete,
-  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -54,7 +53,7 @@ export class UsersController {
   @ApiBody({ type: CreateUserDto })
   @ApiCreatedResponse({
     description: 'Cria um novo usuário',
-    type: UserResponseDto
+    type: UserResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Dados de entrada inválidos' })
   @ApiConflictResponse({ description: 'Email já existe' })

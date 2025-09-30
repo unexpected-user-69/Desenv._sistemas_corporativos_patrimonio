@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AppService } from './app.service';
 
@@ -17,7 +17,7 @@ export class AppController {
   @Get('health')
   @ApiOperation({ summary: 'Verifica a saúde da aplicação' })
   @ApiOkResponse({
-    description: 'Aplicação saudável'
+    description: 'Aplicação saudável',
   })
   health(): string {
     return 'OK';

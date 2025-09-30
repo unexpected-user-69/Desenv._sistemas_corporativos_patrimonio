@@ -23,6 +23,9 @@ Entregáveis de Auditoria (docs/processo):
 - PR template com checklist de riscos
 - Documento `GOVERNANCE_AUDIT.md` com checklist e plano de ação
 
+Próximas entregas sugeridas (alto valor):
+- Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
+
 Segurança e Qualidade de Dados:
 - Hash seguro de senha com `bcryptjs` no `UsersService` (create/update)
 - Campo `passwordHash` excluído de respostas (ClassSerializer via `@Exclude`)

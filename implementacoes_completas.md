@@ -77,6 +77,32 @@ Containerização e Configuração (PDF 084):
 - .env.example com configurações para Docker
 - Documentação DOCKER_SETUP.md com guia completo
 
+Funcionalidades Avançadas (PDF 078/079/081/082/083):
+- Testes E2E completos para endpoints `/v1/users` (CRUD completo)
+- Paginação na listagem de usuários com metadados (page, limit, total, totalPages)
+- Filtros avançados: role, isActive, busca por nome (case-insensitive)
+- Ordenação por campos: name, email, createdAt, updatedAt (ASC/DESC)
+- DTOs de paginação e filtros com validação completa
+- Swagger documentation para todos os parâmetros de query
+
+Observabilidade e Monitoramento (M2):
+- Sistema de logging estruturado com Winston
+- Logs em arquivos (error.log, combined.log) e console
+- Interceptor de logging para todas as requisições HTTP
+- Métricas de performance em tempo real
+- Endpoint `/v1/metrics` para monitoramento
+- Contadores de requisições por método e status
+- Tempo médio de resposta e latência p95
+- Interceptor de métricas global
+
+Performance Testing (M3):
+- Testes de carga com autocannon (load-test.js)
+- Testes de stress com múltiplos cenários (stress-test.js)
+- Scripts npm: `test:load` e `test:stress`
+- Análise automática de performance e taxa de erro
+- Relatórios detalhados de throughput e latência
+- Validação de readiness para produção
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

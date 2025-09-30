@@ -8,6 +8,17 @@ describe('UsersController', () => {
 
   const serviceMock: Partial<UsersService> = {
     findAll: jest.fn().mockResolvedValue([] as User[]),
+    findAllPaginated: jest.fn().mockResolvedValue({
+      data: [] as User[],
+      meta: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    }),
     findOne: jest.fn().mockResolvedValue({ id: 'u1' } as User),
     create: jest.fn().mockResolvedValue({ id: 'u2' } as User),
     update: jest.fn().mockResolvedValue({ id: 'u3' } as User),
@@ -24,8 +35,18 @@ describe('UsersController', () => {
   });
 
   it('findAll', async () => {
-    const res = await controller.findAll();
-    expect(res).toEqual([]);
+    const res = await controller.findAll({});
+    expect(res).toEqual({
+      data: [],
+      meta: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    });
   });
 
   it('create', async () => {

@@ -4,11 +4,13 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like, FindManyOptions } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { FilterUsersDto } from './dto/filter-users.dto';
+import { PaginatedResponseDto } from './dto/pagination.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -37,6 +39,67 @@ export class UsersService {
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.find();
     return users.map((user) => this.stripSensitive(user));
+  }
+
+  async findAllPaginated(
+    filters: FilterUsersDto,
+  ): Promise<PaginatedResponseDto<UserResponseDto>> {
+    const {
+      page = 1,
+      limit = 10,
+      role,
+      isActive,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+    } = filters;
+
+    const skip = (page - 1) * limit;
+
+    // Construir condições de busca
+    const where: Record<string, unknown> = {};
+
+    if (role) {
+      where.role = role;
+    }
+
+    if (isActive !== undefined) {
+      where.isActive = isActive;
+    }
+
+    if (search) {
+      where.name = Like(`%${search}%`);
+    }
+
+    // Construir opções de busca
+    const findOptions: FindManyOptions<User> = {
+      where,
+      skip,
+      take: limit,
+      order: {
+        [sortBy]: sortOrder,
+      },
+    };
+
+    // Executar busca paginada
+    const [users, total] = await this.userRepository.findAndCount(findOptions);
+
+    // Calcular metadados de paginação
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      data: users.map((user) => this.stripSensitive(user)),
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+      },
+    };
   }
 
   async findOne(id: string): Promise<UserResponseDto> {

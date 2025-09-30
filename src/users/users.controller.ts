@@ -7,6 +7,7 @@ import {
   Body,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -17,10 +18,13 @@ import {
   ApiTags,
   ApiConflictResponse,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { FilterUsersDto } from './dto/filter-users.dto';
+import { PaginatedResponseDto } from './dto/pagination.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -29,11 +33,55 @@ export class UsersController {
 
   @Get()
   @ApiOkResponse({
-    description: 'Lista todos os usuários',
-    type: [UserResponseDto],
+    description: 'Lista todos os usuários (com paginação e filtros)',
+    type: PaginatedResponseDto<UserResponseDto>,
   })
-  findAll(): Promise<UserResponseDto[]> {
-    return this.usersService.findAll();
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número da página',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Itens por página',
+  })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: ['STUDENT', 'TEACHER', 'ADMIN'],
+    description: 'Filtrar por role',
+  })
+  @ApiQuery({
+    name: 'isActive',
+    required: false,
+    type: Boolean,
+    description: 'Filtrar por status ativo',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Buscar por nome',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['name', 'email', 'createdAt', 'updatedAt'],
+    description: 'Campo para ordenação',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['ASC', 'DESC'],
+    description: 'Direção da ordenação',
+  })
+  findAll(
+    @Query() filters: FilterUsersDto,
+  ): Promise<PaginatedResponseDto<UserResponseDto>> {
+    return this.usersService.findAllPaginated(filters);
   }
 
   @Get(':id')

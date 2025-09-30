@@ -1,0 +1,40 @@
+# CI Required Checks Configuration
+# Baseado em PDF 073 - Checklist de Auditoria
+
+# Configuração dos checks obrigatórios no CI
+required_checks:
+  # Jobs obrigatórios que devem passar
+  jobs:
+    - name: "lint"
+      required: true
+      description: "Verificação de estilo e padrões de código"
+      
+    - name: "build"
+      required: true
+      description: "Compilação e verificação de integridade"
+      
+    - name: "test"
+      required: true
+      description: "Execução de testes automatizados"
+
+# Configurações de contexto
+contexts:
+  - "lint"
+  - "build"
+  - "test"
+
+# Configurações de branch protection
+branch_protection:
+  # Requer que todos os checks passem
+  required_status_checks:
+    strict: true
+    contexts:
+      - "lint"
+      - "build"
+      - "test"
+  
+  # Não permite bypass
+  enforce_admins: true
+  
+  # Requer PR atualizado
+  require_up_to_date_branches: true

@@ -403,3 +403,94 @@ Este tutorial aborda uma correção crucial de configuração para o NestJS ao u
         4.  Configuração do Swagger (`DocumentBuilder`, `SwaggerModule.createDocument`, `SwaggerModule.setup('docs', app, document);`).
 3.  **Advertência:** Não utilizar `DocumentBuilder().addServer('/v1', 'API v1')` quando o prefixo global já estiver definido, para evitar URLs duplicadas (ex: `/v1/v1/...`).
 4.  **Validação:** Após a correção, a URL gerada no Swagger deve conter `/v1`, como em `http://localhost:3001/v1/users?...`.
+
+
+---
+
+### PDF 084: Implementações de Containerização e Configuração
+
+O foco deste tutorial é migrar a aplicação NestJS para um ambiente totalmente containerizado (aplicação e PostgreSQL), utilizando o Docker Compose.
+
+#### `Dockerfile` (Aplicação NestJS)
+
+Este arquivo define a construção e o ambiente de execução da aplicação, utilizando uma abordagem multi-stage (`base` para build, `prod` para runtime).
+
+1.  **Estágio `base` (Build):**
+    *   Usar imagem leve (ex: `node:18-alpine`).
+    *   Definir diretório de trabalho: `/usr/src/app`.
+    *   Instalar dependências de sistema operacional necessárias (ex: `bash`).
+    *   Copiar `package*.json` e instalar dependências completas (`npm ci`).
+    *   Copiar o código-fonte e compilar a aplicação (`npm run build`).
+2.  **Estágio `prod` (Produção/Runtime):**
+    *   Usar uma nova imagem leve (ex: `node:18-alpine`).
+    *   Instalar `bash` para executar o `start.sh`.
+    *   Copiar `package*.json` e instalar dependências de produção (`npm ci --omit=dev`).
+    *   Copiar os artefatos compilados (`dist`) e o script de inicialização (`start.sh`) do estágio `base`.
+    *   Garantir que o script de inicialização seja executável (`RUN chmod +x ./start.sh`).
+    *   Definir a variável de ambiente `NODE_ENV=production`.
+    *   Definir o comando de inicialização final: **`CMD ["./start.sh"]`**.
+
+#### `start.sh` (Script de Inicialização do Container)
+
+Este script automatiza as etapas que devem ocorrer antes da aplicação iniciar.
+
+1.  **Configuração de Segurança:** Implementar `set -euo pipefail`.
+2.  **Espera do Banco de Dados:** Incluir lógica (mencionada, mas não totalmente detalhada no excerto) para aguardar que o serviço `db` esteja pronto.
+3.  **Execução de Migrações:** Executar o comando do TypeORM (ou ORM equivalente) para aplicar migrações: **`npm run migration:run`**. O script deve ser tolerante a erros se não houver migrações pendentes.
+4.  **Início da Aplicação:** Iniciar a aplicação em modo produção: **`npm run start:prod`**.
+
+#### `docker-compose.yml` (Orquestração)
+
+Este arquivo define os serviços, redes e volumes necessários para rodar a aplicação e o banco de dados em conjunto.
+
+1.  **Serviço `db` (PostgreSQL):**
+    *   Configurar a imagem (`postgres:15-alpine`).
+    *   Definir variáveis de ambiente para credenciais (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`) lendo valores do `.env` ou usando *defaults*.
+    *   Mapear portas (`5432:5432`).
+    *   Configurar um volume persistente (`db_data`).
+    *   Implementar um **`healthcheck`** usando `pg_isready` para garantir que o banco esteja pronto antes que a aplicação tente se conectar.
+    *   Conectar à rede dedicada (`aurora_network`).
+2.  **Serviço `app` (Aplicação NestJS):**
+    *   Especificar a construção do container (`build: .`).
+    *   Configurar a dependência no serviço `db` com condição de saúde: **`depends_on: { db: { condition: service_healthy } }`**.
+    *   Carregar variáveis de ambiente do arquivo `.env` (`env_file: .env`).
+    *   Definir variáveis de ambiente para a conexão com o banco de dados, crucialmente usando o nome do serviço `db` como host: **`DB_HOST: db`** e `DB_PORT: 5432`.
+    *   Mapear portas (`3001:3001`).
+    *   Conectar à rede dedicada (`aurora_network`).
+3.  **Rede e Volumes:**
+    *   Definir a rede `aurora_network` com `driver: bridge`.
+    *   Definir o volume `db_data`.
+
+#### `data-source.ts` (Configuração TypeORM)
+
+Este arquivo exige ajustes para garantir a conectividade dentro do Docker e para compatibilidade com o TypeORM CLI.
+
+1.  **Variáveis de Ambiente:** Implementar a leitura de todas as configurações de conexão (host, porta, usuário, senha, nome do banco) a partir de `process.env`, com *fallbacks* para valores padrão (ex: `host: process.env.DB_HOST || 'localhost'`).
+2.  **Correção de Export (Problema 2):** Garantir que o arquivo contenha **apenas um export** da instância `DataSource`.
+    *   **Implementação:** Manter apenas o *export nomeado*: `export const AppDataSource = new DataSource({ /* ... */ });`.
+
+#### `package.json` (Scripts)
+
+Necessita de uma correção essencial no script de inicialização de produção.
+
+1.  **Correção do Script de Start (Problema 1):** Ajustar o script `start:prod` para refletir o nome do arquivo JavaScript compilado real (que inclui a extensão `.js`).
+    *   **Implementação:** `"start:prod": "node dist/main.js"`.
+
+#### `.dockerignore`
+
+Criar este arquivo para otimizar o processo de build do Docker, excluindo arquivos desnecessários.
+
+1.  **Conteúdo Essencial:** Listar diretórios e arquivos que não devem ser copiados para o contexto de build (ex: `node_modules`, `.git`, `.gitignore`, `.env`, `coverage`, `Dockerfile`, etc.).
+
+#### `.env.example` e `.env`
+
+Documentar e configurar as variáveis de ambiente.
+
+1.  **Configuração de Rede:** Definir `DB_HOST=db` (nome do serviço no Docker Compose) e `DB_PORT=5432` para uso interno da rede Docker.
+2.  **Configurações de ORM:** Incluir variáveis como `TYPEORM_LOGGING` e `TYPEORM_SYNC`.
+
+#### Arquivos de Migração (TypeORM)
+
+Caso haja scripts de migração existentes, eles podem precisar de uma correção nos imports.
+
+1.  **Correção de Import (Problema 3):** Se o `data-source.ts` foi alterado para usar apenas o export nomeado (`export const AppDataSource`), os scripts de migração devem ser atualizados para usar o **import nomeado**: `import { AppDataSource } from './data-source';`.

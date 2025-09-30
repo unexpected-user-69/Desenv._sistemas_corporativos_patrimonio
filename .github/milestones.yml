@@ -1,0 +1,20 @@
+# Milestones estratégicos para o projeto
+# Baseado em PDF 063/064 - Guia de Gestão de Projetos no GitHub
+
+# M1 - Users MVP (Sprint 1)
+- title: "M1 Users MVP"
+  description: "CRUD básico de usuários, validações e Swagger inicial"
+  state: "open"
+  due_on: "2024-12-15T23:59:59Z"
+
+# M2 - Observabilidade (Sprint 2)  
+- title: "M2 Observabilidade"
+  description: "Implementação de logs, métricas e monitoramento"
+  state: "open"
+  due_on: "2025-01-15T23:59:59Z"
+
+# M3 - Endurecimento (Sprint 3)
+- title: "M3 Endurecimento"
+  description: "Segurança avançada, testes abrangentes e performance"
+  state: "open"
+  due_on: "2025-02-15T23:59:59Z"

@@ -1,3 +1,4 @@
+
 # SEMPRE busque terminar as implementacoes de `implementação_geral.md`.
 # Implementações Completas
 
@@ -38,6 +39,15 @@ Campos de Auditoria e Ciclo de Vida:
 - Migração `AddUserAuditFields` para adicionar novos campos
 - Soft delete implementado no `UsersService.remove()`
 
+Gestão Visual e Organizacional (PDF 063/064):
+- Labels organizacionais: `feat`, `bug`, `docs`, `test`, `chore`, `infra`
+- Labels de prioridade: `P1`, `P2`, `P3`
+- Labels de governança: `governance`, `quality`, `security`
+- Milestones estratégicos: M1 Users MVP, M2 Observabilidade, M3 Endurecimento
+- Template Project Kanban com colunas Todo/In Progress/Review/Done
+- Definition of Done (DoD) com critérios de qualidade
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.
+

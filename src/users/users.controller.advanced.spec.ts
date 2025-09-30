@@ -186,7 +186,7 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
         });
         // Remover passwordHash para simular serialização
         const { passwordHash, ...userWithoutPassword } = createdUser;
-        usersService.create.mockResolvedValue(userWithoutPassword as any);
+        usersService.create.mockResolvedValue(userWithoutPassword);
 
         // ACT - Execução da ação
         const result = await controller.create(createUserDto);
@@ -390,7 +390,7 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
       });
       // Remover passwordHash para simular serialização
       const { passwordHash, ...userWithoutPassword } = userWithSensitiveData;
-      usersService.findOne.mockResolvedValue(userWithoutPassword as any);
+      usersService.findOne.mockResolvedValue(userWithoutPassword);
 
       // Act
       const result = await controller.findOne('test-id');

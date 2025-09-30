@@ -167,6 +167,34 @@ Implementações Avançadas de Testes Unitários (PDF 086):
 - Controle de tempo com fake timers para testes dependentes de data
 - Isolamento de dependências com stubs e spies para testes unitários puros
 
+Serviços Avançados e Funcionalidades Extras (PDF 87a):
+- Service Dedicado para Hash de Senhas (HashService) com injeção de dependência
+- Suporte a HASH_PEPPER e HASH_SALT_ROUNDS configuráveis via ambiente
+- Métodos utilitários: hash(), compare(), generateSalt(), isValidHash()
+- Service de Normalização (NormalizationService) para dados de entrada
+- Normalização de email (trim, lowercase) e nome (trim, compactar espaços)
+- Métodos utilitários: normalizeEmail(), normalizeName(), normalizeText()
+- Limpeza de texto para busca: cleanForSearch(), capitalizeWords()
+- Service de Filtros Avançados (FilterService) para busca full-text
+- Filtros combinados com busca textual, role, isActive e intervalo de datas
+- Paginação baseada em cursor para grandes listas
+- Busca fuzzy (aproximada) com padrões de caracteres faltando/extra
+- Validação de opções de ordenação e geração de cursors
+- CommonModule para organizar serviços reutilizáveis
+- Integração completa dos novos serviços no UsersService
+- Métodos utilitários privados: normalizeEmail(), normalizeName()
+- Novos endpoints avançados no UsersController:
+  - GET /v1/users/advanced/search - Busca avançada com filtros full-text
+  - GET /v1/users/cursor/search - Paginação baseada em cursor
+  - GET /v1/users/fuzzy/search - Busca fuzzy (aproximada)
+  - GET /v1/users/date-range - Busca por intervalo de datas
+  - GET /v1/users/stats/roles - Estatísticas por role
+  - GET /v1/users/recent/active - Usuários ativos recentes
+- Testes unitários completos para todos os novos serviços
+- Cobertura de cenários: hash com pepper, normalização, filtros, cursors
+- Validação de edge cases e tratamento de erros
+- Documentação Swagger completa para todos os novos endpoints
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

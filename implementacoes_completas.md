@@ -47,6 +47,13 @@ Gestão Visual e Organizacional (PDF 063/064):
 - Template Project Kanban com colunas Todo/In Progress/Review/Done
 - Definition of Done (DoD) com critérios de qualidade
 
+Proteção de Branch e CI Required (PDF 073):
+- Branch Protection Rules: PR obrigatório, required checks, linear history
+- CI Required Checks: Lint, Build, Test marcados como obrigatórios
+- Security Settings: Signed commits, secret scanning, dependabot
+- Environments: staging/prod configurados com proteções
+- Guia de Branch Protection e troubleshooting
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

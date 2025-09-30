@@ -67,6 +67,16 @@ Microsserviço Users Completo (PDF 078/079/081/082/083):
 - Tipagem explícita em controllers e services
 - `select: false` na coluna passwordHash da entidade
 
+Containerização e Configuração (PDF 084):
+- Dockerfile multi-stage (base para build, prod para runtime)
+- Script start.sh com segurança, espera do banco e migrações
+- docker-compose.yml com serviços db e app, rede dedicada
+- .dockerignore para otimizar build
+- data-source.ts com export nomeado AppDataSource
+- package.json com script start:prod corrigido (.js)
+- .env.example com configurações para Docker
+- Documentação DOCKER_SETUP.md com guia completo
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

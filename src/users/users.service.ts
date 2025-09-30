@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, FindManyOptions, ILike } from 'typeorm';
+import { Repository, Like, FindManyOptions, ILike, Between } from 'typeorm';
 import { plainToClass } from 'class-transformer';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,20 +14,28 @@ import { FilterUsersDto } from './dto/filter-users.dto';
 import { PaginatedResponseDto } from './dto/pagination.dto';
 import { QueryUsersDto } from './dto/query-users.dto';
 import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
-import * as bcrypt from 'bcryptjs';
+import { HashService } from '../common/services/hash.service';
+import { NormalizationService } from '../common/services/normalization.service';
+import {
+  FilterService,
+  AdvancedFilterOptions,
+} from '../common/services/filter.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly hashService: HashService,
+    private readonly normalizationService: NormalizationService,
+    private readonly filterService: FilterService,
   ) {}
 
   /**
-   * Gera hash seguro da senha usando bcrypt
+   * Gera hash seguro da senha usando HashService
    */
   private async hash(plain: string): Promise<string> {
-    return bcrypt.hash(plain, 10);
+    return this.hashService.hash(plain);
   }
 
   /**
@@ -37,6 +45,20 @@ export class UsersService {
     return plainToClass(UserResponseDto, user, {
       excludeExtraneousValues: true,
     });
+  }
+
+  /**
+   * Normaliza email usando NormalizationService
+   */
+  private normalizeEmail(email: string): string {
+    return this.normalizationService.normalizeEmail(email);
+  }
+
+  /**
+   * Normaliza nome usando NormalizationService
+   */
+  private normalizeName(name: string): string {
+    return this.normalizationService.normalizeName(name);
   }
 
   async findAll(): Promise<UserResponseDto[]> {
@@ -178,8 +200,9 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto): Promise<UserResponseDto> {
-    // Normalização de email
-    const normalizedEmail = dto.email.toLowerCase();
+    // Normalização de email e nome usando serviços
+    const normalizedEmail = this.normalizeEmail(dto.email);
+    const normalizedName = this.normalizeName(dto.name);
 
     // Checagem preliminar de email único
     const existingUser = await this.userRepository.findOne({
@@ -193,6 +216,7 @@ export class UsersService {
       const hashedPassword = await this.hash(dto.password);
       const entity = this.userRepository.create({
         ...dto,
+        name: normalizedName,
         email: normalizedEmail,
         passwordHash: hashedPassword,
         isActive: dto.isActive ?? true,
@@ -229,5 +253,144 @@ export class UsersService {
   async remove(id: string): Promise<void> {
     await this.findOne(id); // Verifica se existe
     await this.userRepository.softDelete(id);
+  }
+
+  /**
+   * Busca avançada com filtros full-text e ordenação dinâmica
+   */
+  async findWithAdvancedFilters(
+    options: AdvancedFilterOptions,
+  ): Promise<PaginatedUsersResponseDto> {
+    const findOptions = this.filterService.buildAdvancedFilters(options);
+    const [users, total] = await this.userRepository.findAndCount(findOptions);
+
+    const { page = 1, limit = 20 } = options;
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      data: users.map((user) => this.serializeUser(user)),
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNextPage,
+      hasPreviousPage,
+    };
+  }
+
+  /**
+   * Busca com paginação baseada em cursor
+   */
+  async findWithCursorPagination(
+    options: AdvancedFilterOptions,
+    cursor?: string,
+  ): Promise<{
+    data: UserResponseDto[];
+    nextCursor?: string;
+    hasMore: boolean;
+  }> {
+    const findOptions = this.filterService.buildCursorFilters(options, cursor);
+    const [users] = await this.userRepository.findAndCount(findOptions);
+
+    let nextCursor: string | undefined;
+    let hasMore = false;
+
+    if (users.length > 0 && users.length === (options.limit || 20)) {
+      const lastUser = users[users.length - 1];
+      nextCursor = this.filterService.generateCursor(lastUser);
+      hasMore = true;
+    }
+
+    return {
+      data: users.map((user) => this.serializeUser(user)),
+      nextCursor,
+      hasMore,
+    };
+  }
+
+  /**
+   * Busca fuzzy (aproximada) por nome ou email
+   */
+  async findFuzzy(searchText: string, limit = 10): Promise<UserResponseDto[]> {
+    const patterns = this.filterService.generateFuzzyPatterns(searchText);
+
+    if (patterns.length === 0) {
+      return [];
+    }
+
+    const whereConditions = patterns.flatMap((pattern) => [
+      { name: ILike(pattern) },
+      { email: ILike(pattern) },
+    ]);
+
+    const users = await this.userRepository.find({
+      where: whereConditions,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    return users.map((user) => this.serializeUser(user));
+  }
+
+  /**
+   * Busca por intervalo de datas
+   */
+  async findByDateRange(
+    dateFrom: Date,
+    dateTo: Date,
+    options: Partial<AdvancedFilterOptions> = {},
+  ): Promise<UserResponseDto[]> {
+    const findOptions: FindManyOptions<User> = {
+      where: {
+        createdAt: Between(dateFrom, dateTo),
+        ...(options.role && { role: options.role }),
+        ...(options.isActive !== undefined && { isActive: options.isActive }),
+      },
+      order: { createdAt: 'DESC' },
+      take: options.limit || 100,
+    };
+
+    const users = await this.userRepository.find(findOptions);
+    return users.map((user) => this.serializeUser(user));
+  }
+
+  /**
+   * Estatísticas de usuários por role
+   */
+  async getUserStatsByRole(): Promise<Record<string, number>> {
+    const users = await this.userRepository.find({
+      select: ['role'],
+    });
+
+    const stats: Record<string, number> = {};
+    users.forEach((user) => {
+      stats[user.role] = (stats[user.role] || 0) + 1;
+    });
+
+    return stats;
+  }
+
+  /**
+   * Busca usuários ativos recentes
+   */
+  async findRecentActiveUsers(
+    days = 30,
+    limit = 10,
+  ): Promise<UserResponseDto[]> {
+    const dateFrom = new Date();
+    dateFrom.setDate(dateFrom.getDate() - days);
+
+    const users = await this.userRepository.find({
+      where: {
+        isActive: true,
+        updatedAt: Between(dateFrom, new Date()),
+      },
+      order: { updatedAt: 'DESC' },
+      take: limit,
+    });
+
+    return users.map((user) => this.serializeUser(user));
   }
 }

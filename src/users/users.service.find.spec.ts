@@ -4,6 +4,9 @@ import { UsersService } from './users.service';
 import { User, UserRole } from './entities/user.entity';
 import { QueryUsersDto } from './dto/query-users.dto';
 import { createUserRepositoryMock } from '../../test/mocks/repository.mock';
+import { HashService } from '../common/services/hash.service';
+import { NormalizationService } from '../common/services/normalization.service';
+import { FilterService } from '../common/services/filter.service';
 
 describe('UsersService - Find Methods', () => {
   let service: UsersService;
@@ -55,6 +58,35 @@ describe('UsersService - Find Methods', () => {
         {
           provide: getRepositoryToken(User),
           useValue: userRepository,
+        },
+        {
+          provide: HashService,
+          useValue: {
+            hash: jest.fn().mockResolvedValue('hashed-password-123'),
+            compare: jest.fn(),
+            generateSalt: jest.fn(),
+            isValidHash: jest.fn(),
+          },
+        },
+        {
+          provide: NormalizationService,
+          useValue: {
+            normalizeEmail: jest.fn((email) => email.toLowerCase()),
+            normalizeName: jest.fn((name) => name.trim()),
+            normalizeText: jest.fn(),
+            cleanForSearch: jest.fn(),
+            capitalizeWords: jest.fn(),
+          },
+        },
+        {
+          provide: FilterService,
+          useValue: {
+            buildAdvancedFilters: jest.fn(),
+            buildCursorFilters: jest.fn(),
+            generateCursor: jest.fn(),
+            isValidSortOption: jest.fn(),
+            generateFuzzyPatterns: jest.fn(),
+          },
         },
       ],
     }).compile();

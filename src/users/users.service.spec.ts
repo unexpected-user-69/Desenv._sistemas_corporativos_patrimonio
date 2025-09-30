@@ -3,6 +3,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 // import { Repository } from 'typeorm';
 import { UsersService } from './users.service';
 import { User, UserRole } from './entities/user.entity';
+import { HashService } from '../common/services/hash.service';
+import { NormalizationService } from '../common/services/normalization.service';
+import { FilterService } from '../common/services/filter.service';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -28,6 +31,35 @@ describe('UsersService', () => {
                 ({ ...user, ...update }) as User,
             ),
             remove: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: HashService,
+          useValue: {
+            hash: jest.fn().mockResolvedValue('hashed-password-123'),
+            compare: jest.fn(),
+            generateSalt: jest.fn(),
+            isValidHash: jest.fn(),
+          },
+        },
+        {
+          provide: NormalizationService,
+          useValue: {
+            normalizeEmail: jest.fn((email) => email.toLowerCase()),
+            normalizeName: jest.fn((name) => name.trim()),
+            normalizeText: jest.fn(),
+            cleanForSearch: jest.fn(),
+            capitalizeWords: jest.fn(),
+          },
+        },
+        {
+          provide: FilterService,
+          useValue: {
+            buildAdvancedFilters: jest.fn(),
+            buildCursorFilters: jest.fn(),
+            generateCursor: jest.fn(),
+            isValidSortOption: jest.fn(),
+            generateFuzzyPatterns: jest.fn(),
           },
         },
       ],

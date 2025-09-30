@@ -33,7 +33,6 @@ Testes adicionais:
 
 Próximas entregas sugeridas (alto valor):
 - Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
-=======
 
 Próximas entregas sugeridas (alto valor):
 - Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`

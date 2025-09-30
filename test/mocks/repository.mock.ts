@@ -134,8 +134,8 @@ export function createUserRepositoryMock() {
   const mock = createRepositoryMock();
 
   // Configurações específicas para usuários
-  mock.findOne.mockImplementation((options: any) => {
-    if (options?.where?.email === 'existing@example.com') {
+  mock.findOne.mockImplementation((_options: any) => {
+    if (_options?.where?.email === 'existing@example.com') {
       return Promise.resolve({
         id: 'user-1',
         name: 'Existing User',

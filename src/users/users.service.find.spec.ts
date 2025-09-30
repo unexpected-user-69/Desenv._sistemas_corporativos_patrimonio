@@ -237,7 +237,7 @@ describe('UsersService - Find Methods', () => {
       userRepository.findAndCount.mockResolvedValue([mockUsers, 3]);
 
       // Act
-      const result = await service.findAllWithAdvancedFilters(query);
+      await service.findAllWithAdvancedFilters(query);
 
       // Assert
       expect(userRepository.findAndCount).toHaveBeenCalledWith(

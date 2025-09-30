@@ -44,7 +44,9 @@ export class PaginationQueryDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value) as string)
+  @Transform(
+    ({ value }) => (typeof value === 'string' ? value.trim() : value) as string,
+  )
   q?: string;
 
   @ApiPropertyOptional({

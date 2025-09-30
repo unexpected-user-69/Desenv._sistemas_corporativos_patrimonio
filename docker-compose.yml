@@ -1,22 +1,59 @@
+# Docker Compose para orquestração completa
+# Baseado em PDF 084 - Containerização e Configuração
+
 version: '3.9'
+
 services:
-  aurora_db:
-    image: postgres:16
+  # Serviço de banco de dados PostgreSQL
+  db:
+    image: postgres:15-alpine
     container_name: patrimonio_inventario_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
       POSTGRES_DB: ${DB_NAME:-patrimonio_inventario}
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME:-patrimonio_inventario}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-patrimonio_inventario}"]
       interval: 5s
       timeout: 5s
       retries: 12
+    networks:
+      - patrimonio_network
+
+  # Serviço da aplicação NestJS
+  app:
+    build: .
+    container_name: patrimonio_inventario_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      NODE_ENV: production
+      PORT: 3001
+    ports:
+      - "${APP_PORT:-3001}:3001"
+    networks:
+      - patrimonio_network
+
+# Rede dedicada para comunicação entre serviços
+networks:
+  patrimonio_network:
+    driver: bridge
+
+# Volume persistente para dados do PostgreSQL
 volumes:
-  pgdata:
+  db_data:
 

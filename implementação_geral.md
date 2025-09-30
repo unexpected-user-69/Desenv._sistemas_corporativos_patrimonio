@@ -275,3 +275,131 @@ Este documento consolida o *estado atual* da governança e do bootstrap do servi
 *   **Relatório Consolidado por Turma** (Documento/painel de status).
 *   **Critérios de Status**: `Verde`, `Amarelo`, `Vermelho` (para classificação das equipes).
 *   **Achados por Categoria** (Ex: Branch protection: status e gaps, CI Required: implementação e bloqueios, etc.).
+
+O seu pedido é para que eu detalhe as implementações essenciais contidas em cada arquivo de origem (PDF), seguindo o formato solicitado.
+
+---
+
+### PDF 078: Excerpts from "078-Microsservico-Users-Implementacao-Completa (2).pdf"
+
+Este guia foca na implementação completa do microsserviço Users, seguindo o padrão Verificar → Implementar → Validar → Documentar → Entregar.
+
+**Componentes e Implementações Chave:**
+
+1.  **Configuração Inicial e Dependências:**
+    *   Utilizar **NestJS, TypeORM e PostgreSQL** como base.
+    *   Instalar dependências essenciais: `@nestjs/typeorm`, `typeorm`, `pg`, `class-validator`, `class-transformer`, `@nestjs/swagger`, `swagger-ui-express`, e `helmet`.
+2.  **Scripts de Desenvolvimento:**
+    *   Implementar scripts no `package.json` para **migrações** (`migration:generate`, `migration:run`, `migration:revert`) e testes (`test`, `test:e2e`).
+3.  **Módulo Principal (`App.module.ts`):**
+    *   Configurar o `TypeOrmModule` usando o `AppDataSource.options`.
+    *   Ativar o **`ValidationPipe` globalmente** (`APP_PIPE`) com as opções: `whitelist: true`, `forbidNonWhitelisted: true`, e `transform: true`.
+4.  **Inicialização (`main.ts`):**
+    *   Utilizar `helmet()` para segurança básica.
+    *   Configurar o **Swagger** (`DocumentBuilder`, `SwaggerModule`) para documentação automática da API com prefixo `/docs`.
+    *   Definir o **prefixo global** como `v1` (`app.setGlobalPrefix('v1')`).
+5.  **Configuração do Banco de Dados (`data-source.ts`):**
+    *   Configurar a conexão PostgreSQL, suportando URL completa ou variáveis de ambiente separadas (host, port, user, pass, db name).
+    *   Incluir suporte a **SSL** opcional para ambientes como Supabase/Render.
+    *   Garantir que `synchronize: false` e `migrationsRun: false` estejam definidos.
+6.  **Modelagem do Domínio (`User Entity`):**
+    *   Definir a entidade `User` com campos como `id`, `name`, `email`, `passwordHash` (com `length: 255`), `role` (usando `UserRole` enum), `isActive`, `avatarUrl`, e timestamps (`createdAt`, `updatedAt`).
+    *   Garantir um **índice único no campo `email`**.
+7.  **DTOs de Contrato:**
+    *   Implementar **`CreateUserDto`** com validações de entrada (mínimo de 2 caracteres para nome, formato de e-mail, mínimo de 6 caracteres para senha, e `IsEnum` opcional para `role`).
+    *   Implementar **`UserResponseDto`** usando `@Exclude()` na classe e `@Expose()` nos campos que devem ser retornados (excluindo `passwordHash` por padrão) para garantir segurança e um contrato de API estável.
+8.  **Gerenciamento de Segurança (Serviço):**
+    *   Implementar o método **`private async hash(plain: string)`** usando **bcrypt** para gerar um hash seguro com salt, dificultando ataques de força bruta.
+    *   Implementar o método **`private stripSensitive(u: User)`** para remover explicitamente o `passwordHash` da entidade antes de retornar ao cliente, prevenindo vazamento de dados sensíveis.
+9.  **Serialização Global:**
+    *   Ativar o **`ClassSerializerInterceptor`** globalmente em `main.ts` para que os decoradores `@Exclude()` e `@Expose()` funcionem nos DTOs de resposta.
+10. **Implementação do `Create` (Serviço):**
+    *   No método `create`, incluir a normalização de e-mail (para minúsculas).
+    *   Realizar uma **checagem preliminar de e-mail único** (`findOne`) e tratar o erro.
+    *   Aplicar o `hash()` na senha, opcionalmente com um **"pepper"**.
+    *   Tratar o **erro de conflito do banco de dados (código '23505')** para condições de corrida.
+    *   Retornar o resultado sanitizado usando `this.stripSensitive(saved)` ou `plainToInstance(UserResponseDto, user, ...)` no controller.
+11. **Users Controller:**
+    *   Implementar o endpoint **`POST /users`**.
+    *   Utilizar o `plainToInstance(UserResponseDto, user, { excludeExtraneousValues: true })` para garantir que apenas os campos expostos sejam retornados na resposta.
+    *   Documentar o endpoint completamente usando decoradores **Swagger** (`@ApiTags`, `@ApiBody`, `@ApiCreatedResponse`, `ApiConflictResponse`).
+
+---
+
+### PDF 079: Excerpts from "079-Microsservico-Users.pdf"
+
+Este documento reforça a metodologia e os requisitos de implementação do microsserviço Users.
+
+**Pontos de Implementação Confirmados/Reforçados:**
+
+1.  **Metodologia:** Seguir os passos: Verificar, Implementar, Validar, Documentar, Entregar.
+2.  **Configuração de Módulo:** Confirma a estrutura do `App.module.ts` com `TypeOrmModule` e `ValidationPipe` global.
+3.  **Segurança e Hashing:** Reitera a importância de evitar a exposição de dados sensíveis (como `passwordHash`) e a necessidade de usar algoritmos de hash robustos como **bcrypt** com "salt".
+4.  **Integração do ClassSerializer:** Confirma a necessidade de ativar o `ClassSerializerInterceptor` globalmente no `main.ts` para que os DTOs de resposta funcionem corretamente.
+5.  **Validação:** O processo de validação em ambiente controlado deve incluir: conexão com PostgreSQL em Docker, aplicação de migrações, teste do `POST /v1/users` via **cURL** (confirmando 201 e ausência do hash na resposta), e verificação direta no banco de dados.
+6.  **Próximos Passos (Implementações Futuras):**
+    *   Implementar listagem paginada, busca por ID, atualização idempotente (PUT/PATCH), e remoção (soft delete).
+    *   Criar **Testes Automatizados** (Unitários e E2E).
+    *   Orquestrar o serviço e o PostgreSQL usando **Docker Compose**.
+
+---
+
+### PDF 081: Excerpts from "081-TypeScript-para-Backend-com-NestJS.pdf"
+
+Este material foca na utilização robusta do TypeScript, suas ferramentas e como combiná-lo com as práticas de NestJS e TypeORM.
+
+**Implementações de Tipagem e Validação:**
+
+1.  **Configuração TypeScript:**
+    *   Garantir a configuração correta do `tsconfig.json`, habilitando `experimentalDecorators: true` e `emitDecoratorMetadata: true` para o funcionamento dos decoradores do NestJS.
+2.  **DTOs (Classes vs. Interfaces):**
+    *   DTOs de entrada devem ser **Classes** (não interfaces) para gerar metadados de runtime que o `ValidationPipe` e o `class-validator` possam utilizar.
+    *   Utilizar decoradores como `@IsEmail`, `@IsNotEmpty`, e `@MinLength` nos DTOs.
+    *   Usar `PartialType` do `@nestjs/swagger` para criar DTOs de atualização.
+3.  **Entities (TypeORM):**
+    *   Definir entidades TypeORM com tipagem forte e decoradores.
+    *   Usar o atributo `select: false` na coluna `passwordHash` (embora isso possa ser sobrescrito pelo TypeORM, é uma camada de proteção).
+4.  **Services Tipados:**
+    *   Injetar o repositório (`Repository<UserEntity>`) usando `@InjectRepository`.
+    *   Declarar explicitamente os tipos de retorno nas funções assíncronas (ex: `Promise<User | null>`), seguindo a boa prática de usar retorno explícito em serviços.
+5.  **Controllers Tipados:**
+    *   Definir tipos explícitos para parâmetros e retornos nos métodos do controller (ex: `@Param('id') id: string`, `@Body() dto: CreateUserDto`).
+6.  **Validação Runtime:**
+    *   Ativar o **`ValidationPipe` global** no `main.ts` com as opções `whitelist: true`, `forbidNonWhitelisted: true`, e `transform: true`.
+7.  **Swagger e Tipos:**
+    *   A combinação de DTOs tipados com decoradores do Swagger (`@ApiProperty()`) gera documentação automática e consistente.
+8.  **Boas Práticas de Resposta:**
+    *   Usar **Utility Types** como `Pick<T, K>` ou `Omit<T, K>` para definir tipos de resposta pública que não contenham dados sensíveis.
+
+---
+
+### PDF 082: Excerpts from "082-TypeScript-para-Backend-com-NestJS.pdf"
+
+Este arquivo reitera e detalha os aspectos de tipagem e arquitetura de um projeto NestJS com foco em robustez e validação.
+
+**Implementações de Tipagem e Validação (Reiteradas):**
+
+1.  **Decisões de Tipagem:** Reforça a preferência por **União de Literais** (`'ACTIVE' | 'BLOCKED'`) para estados simples em APIs, em vez de `enum`.
+2.  **Configuração Essencial:** Confirma a necessidade de configurar `experimentalDecorators` e `emitDecoratorMetadata` no `tsconfig.json`.
+3.  **DTOs:** Reafirma que DTOs devem ser classes com decoradores de validação (`@IsNotEmpty`, `@MinLength`) para que o `ValidationPipe` funcione em runtime.
+4.  **Entidade:** Mostra um exemplo de `UserEntity` com a propriedade `passwordHash` configurada com `select: false`.
+5.  **Validação Global:** Confirma a ativação do `ValidationPipe` global com as três regras (`whitelist`, `forbidNonWhitelisted`, `transform`) no `main.ts`.
+
+---
+
+### PDF 083: Excerpts from "083-Tutorial-Configuracao-e-Correcao-do-Swagger-no-NestJS-prefixo-global-v1.pdf"
+
+Este tutorial aborda uma correção crucial de configuração para o NestJS ao usar o versionamento de API com prefixo global.
+
+**Implementação e Correção do Swagger:**
+
+1.  **Causa-Raiz do Problema:** O problema de o Swagger não exibir o prefixo global (`/v1`) nas URLs das rotas ocorre quando **`SwaggerModule.setup` é configurado antes de `app.setGlobalPrefix('v1')`**.
+2.  **Solução Implementada (Ordem Correta no `main.ts`):**
+    *   A implementação de correção exige que o **prefixo global seja definido antes** da configuração do Swagger.
+    *   **Ordem Correta de Configuração:**
+        1.  `const app = await NestFactory.create(AppModule);`
+        2.  `app.use(helmet());` (Configurações de segurança)
+        3.  **`app.setGlobalPrefix('v1');`** (Definir o prefixo global)
+        4.  Configuração do Swagger (`DocumentBuilder`, `SwaggerModule.createDocument`, `SwaggerModule.setup('docs', app, document);`).
+3.  **Advertência:** Não utilizar `DocumentBuilder().addServer('/v1', 'API v1')` quando o prefixo global já estiver definido, para evitar URLs duplicadas (ex: `/v1/v1/...`).
+4.  **Validação:** Após a correção, a URL gerada no Swagger deve conter `/v1`, como em `http://localhost:3001/v1/users?...`.

@@ -54,6 +54,19 @@ Proteção de Branch e CI Required (PDF 073):
 - Environments: staging/prod configurados com proteções
 - Guia de Branch Protection e troubleshooting
 
+Microsserviço Users Completo (PDF 078/079/081/082/083):
+- Helmet para segurança básica
+- Prefixo global `v1` configurado corretamente
+- UserResponseDto com @Exclude/@Expose para serialização segura
+- ClassSerializerInterceptor global ativado
+- Métodos privados `hash()` e `stripSensitive()` no UsersService
+- Normalização de email (toLowerCase) e checagem de unicidade
+- Tratamento de erro de conflito (código '23505')
+- Swagger em `/docs` com URLs corretas `/v1/users`
+- ValidationPipe com `forbidNonWhitelisted: true`
+- Tipagem explícita em controllers e services
+- `select: false` na coluna passwordHash da entidade
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

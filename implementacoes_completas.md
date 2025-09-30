@@ -119,6 +119,28 @@ Funcionalidades Avançadas de API (Baseado no Projeto de Referência):
 - Serialização segura (exclusão de passwordHash)
 - Tratamento de race conditions e constraint violations
 
+Scripts de Automação (Prioridade 3):
+- Script setup-governanca.sh para configurar governança do repositório GitHub
+- Configuração automática de labels organizacionais, de prioridade e governança
+- Criação de milestones estratégicos (M1, M2, M3)
+- Configuração de Project Board Kanban
+- Branch Protection Rules com CI required checks
+- Script setup-environment.sh para configurar novos ambientes de desenvolvimento
+- Verificação automática de dependências do sistema (Node.js, Docker, Git)
+- Instalação e configuração automática de dependências do projeto
+- Configuração do arquivo .env e inicialização do banco de dados
+- Execução automática de migrações, testes e lint
+- Configuração de Git hooks de pre-commit
+- Script run-migrations.ts para execução de migrações com logs estruturados
+- Tratamento de erros específicos e relatórios detalhados
+- Script setup-cicd.sh para configuração de CI/CD e automação
+- Configuração de workflows de CI com jobs: lint, build, test, security
+- Configuração do Dependabot para atualizações automáticas
+- Configuração do CodeQL para análise de segurança
+- Automação de releases com GitHub Actions
+- Scripts npm integrados: setup:governance, setup:environment, setup:cicd
+- Documentação completa dos scripts em scripts/README.md
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, FindManyOptions, ILike } from 'typeorm';
+import { plainToClass } from 'class-transformer';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -30,17 +31,15 @@ export class UsersService {
   }
 
   /**
-   * Remove dados sensíveis da entidade User
+   * Serializa User para UserResponseDto usando class-transformer
    */
-  private stripSensitive(user: User): UserResponseDto {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { passwordHash, ...userWithoutPassword } = user;
-    return userWithoutPassword as UserResponseDto;
+  private serializeUser(user: User): UserResponseDto {
+    return plainToClass(UserResponseDto, user, { excludeExtraneousValues: true });
   }
 
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.find();
-    return users.map((user) => this.stripSensitive(user));
+    return users.map(user => this.serializeUser(user));
   }
 
   async findAllPaginated(
@@ -92,7 +91,7 @@ export class UsersService {
     const hasPreviousPage = page > 1;
 
     return {
-      data: users.map((user) => this.stripSensitive(user)),
+      data: users.map(user => this.serializeUser(user)),
       meta: {
         page,
         limit,
@@ -119,7 +118,7 @@ export class UsersService {
 
     const skip = (page - 1) * limit;
 
-    // Construir condições de busca
+    // Construir condições de busca de forma declarativa
     const whereConditions: any[] = [];
 
     // Filtros específicos
@@ -131,14 +130,12 @@ export class UsersService {
       whereConditions.push({ isActive });
     }
 
-    // Busca textual genérica (nome e email)
+    // Busca textual genérica (nome e email) - mais eficiente
     if (q) {
-      whereConditions.push({
-        name: ILike(`%${q}%`),
-      });
-      whereConditions.push({
-        email: ILike(`%${q}%`),
-      });
+      whereConditions.push([
+        { name: ILike(`%${q}%`) },
+        { email: ILike(`%${q}%`) },
+      ]);
     }
 
     // Construir opções de busca
@@ -151,9 +148,6 @@ export class UsersService {
       },
     };
 
-    // Busca textual simplificada - apenas por nome
-    // Se não encontrar por nome, será feita uma segunda busca por email
-
     // Executar busca paginada
     const [users, total] = await this.userRepository.findAndCount(findOptions);
 
@@ -163,7 +157,7 @@ export class UsersService {
     const hasPreviousPage = page > 1;
 
     return {
-      data: users.map((user) => this.stripSensitive(user)),
+      data: users.map(user => this.serializeUser(user)),
       total,
       page,
       limit,
@@ -178,7 +172,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }
-    return this.stripSensitive(user);
+    return this.serializeUser(user);
   }
 
   async create(dto: CreateUserDto): Promise<UserResponseDto> {
@@ -202,7 +196,7 @@ export class UsersService {
         isActive: dto.isActive ?? true,
       });
       const saved = await this.userRepository.save(entity);
-      return this.stripSensitive(saved);
+      return this.serializeUser(saved);
     } catch (error: any) {
       // Tratamento de erro de conflito do banco (código '23505')
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -227,7 +221,7 @@ export class UsersService {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }
     const saved = await this.userRepository.save(user);
-    return this.stripSensitive(saved);
+    return saved as UserResponseDto;
   }
 
   async remove(id: string): Promise<void> {

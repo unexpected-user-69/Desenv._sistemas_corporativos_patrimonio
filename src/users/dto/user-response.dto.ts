@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose, Exclude } from 'class-transformer';
 import { UserRole } from '../entities/user.entity';
 
 export class UserResponseDto {
@@ -29,5 +29,6 @@ export class UserResponseDto {
   @Expose()
   version!: number;
 
-  // passwordHash é excluído por padrão (não tem @Expose)
+  @Exclude()
+  passwordHash!: string;
 }

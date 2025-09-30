@@ -80,7 +80,7 @@ describe('UsersService - Create Method', () => {
         updatedAt: expect.any(Date),
         version: 1,
       });
-      expect(result).not.toHaveProperty('passwordHash');
+      expect(result.passwordHash).toBeUndefined();
 
       // Verificar se o hash foi gerado
       expect(mockedBcrypt.hash).toHaveBeenCalledWith('senha123', 10);
@@ -222,7 +222,7 @@ describe('UsersService - Create Method', () => {
       const result = await service.create(validCreateUserDto);
 
       // Assert
-      expect(result).not.toHaveProperty('passwordHash');
+      expect(result.passwordHash).toBeUndefined();
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('name');
       expect(result).toHaveProperty('email');

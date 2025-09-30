@@ -1,0 +1,71 @@
+# Security Settings Configuration
+# Baseado em PDF 073 - Checklist de Auditoria
+
+# Configurações de segurança do repositório
+security:
+  # Signed Commits
+  signed_commits:
+    enabled: true
+    required: true
+    verification_required: true
+    gpg_verification: true
+    ssh_verification: true
+  
+  # Secret Scanning
+  secret_scanning:
+    enabled: true
+    push_protection: true
+    alert_retention: "30 days"
+    custom_patterns:
+      - name: "Database URL"
+        pattern: "postgres://[a-zA-Z0-9]+:[a-zA-Z0-9]+@[a-zA-Z0-9.-]+:[0-9]+/[a-zA-Z0-9]+"
+      - name: "JWT Secret"
+        pattern: "jwt_secret[\\s]*=[\\s]*['\"][a-zA-Z0-9+/=]{32,}['\"]"
+      - name: "API Key"
+        pattern: "api_key[\\s]*=[\\s]*['\"][a-zA-Z0-9]{32,}['\"]"
+  
+  # Dependabot
+  dependabot:
+    enabled: true
+    security_updates: true
+    version_updates: true
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+  
+  # Code Scanning
+  code_scanning:
+    enabled: true
+    tools:
+      - name: "CodeQL"
+        language: ["javascript", "typescript"]
+        schedule: "weekly"
+      - name: "ESLint Security"
+        language: ["javascript", "typescript"]
+        schedule: "on_push"
+  
+  # Vulnerability Alerts
+  vulnerability_alerts:
+    enabled: true
+    auto_merge: false
+    require_review: true
+  
+  # Branch Protection
+  branch_protection:
+    main:
+      required_status_checks:
+        strict: true
+        contexts:
+          - "security-scan"
+          - "dependency-check"
+      enforce_admins: true
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        require_code_owner_reviews: true
+        dismiss_stale_reviews: true
+      restrictions:
+        users: []
+        teams: []
+      allow_force_pushes: false
+      allow_deletions: false

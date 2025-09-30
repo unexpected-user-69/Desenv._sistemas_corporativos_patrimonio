@@ -26,5 +26,20 @@ Entregáveis de Auditoria (docs/processo):
 Próximas entregas sugeridas (alto valor):
 - Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
 
+Segurança e Qualidade de Dados:
+- Hash seguro de senha com `bcryptjs` no `UsersService` (create/update)
+- Campo `passwordHash` excluído de respostas (ClassSerializer via `@Exclude`)
+- Email com `citext` + índice único (unicidade case-insensitive)
+
+Testes adicionais:
+- Testes unitários do `UsersController` com service mock
+
+Próximas entregas sugeridas (alto valor):
+- Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
+
+Próximas entregas sugeridas (alto valor):
+- Templates de governança: issues/PR, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
+- `.env.example` versionado (sem segredos)
+
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

@@ -8,6 +8,10 @@
 - [ ] Sem segredos versionados
 - [ ] Documentação atualizada (se aplicável)
 - [ ] Closes #<id> (se aplicável)
+
 - [ ] Riscos avaliados (rollback, impacto, segurança)
 - [ ] Evidências anexadas (prints/links) conforme auditoria
+ - [ ] Riscos avaliados (rollback, impacto, segurança)
+ - [ ] Evidências anexadas (prints/links) conforme auditoria
+
 

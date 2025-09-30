@@ -9,7 +9,6 @@ import {
   Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -17,9 +16,6 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -36,18 +32,14 @@ export class UsersController {
 
   @Get(':id')
   @ApiOkResponse({ description: 'Retorna um usuário pelo id' })
-
   @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
-
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.usersService.findOne(id);
   }
 
   @Post()
   @ApiCreatedResponse({ description: 'Cria um novo usuário' })
-
   @ApiBadRequestResponse({ description: 'Payload inválido' })
-
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }

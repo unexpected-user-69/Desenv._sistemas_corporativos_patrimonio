@@ -9,10 +9,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  app.useGlobalFilters(new HttpExceptionFilter());
-
-
-
   const config = new DocumentBuilder()
     .setTitle('Patrimonio & Inventario API')
     .setVersion('1.0.0')

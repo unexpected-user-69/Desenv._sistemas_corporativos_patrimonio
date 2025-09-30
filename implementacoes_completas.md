@@ -31,6 +31,9 @@ Segurança e Qualidade de Dados:
 - Campo `passwordHash` excluído de respostas (ClassSerializer via `@Exclude`)
 - Email com `citext` + índice único (unicidade case-insensitive)
 
+Próximas entregas sugeridas (alto valor):
+- Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
+
 Testes adicionais:
 - Testes unitários do `UsersController` com service mock
 

@@ -1,0 +1,37 @@
+# Branch Protection Rules para Main
+# Baseado em PDF 073 - Checklist de Auditoria
+
+# Configurações de proteção da branch main
+main:
+  # Proteções básicas
+  required_status_checks:
+    strict: true  # Requer que a branch esteja atualizada
+    contexts:
+      - "lint"
+      - "build" 
+      - "test"
+  
+  # Revisão obrigatória
+  required_pull_request_reviews:
+    required_approving_review_count: 1
+    dismiss_stale_reviews: true
+    require_code_owner_reviews: true
+    require_last_push_approval: true
+  
+  # Restrições de push
+  restrictions:
+    users: []  # Nenhum usuário pode fazer push direto
+    teams: []  # Nenhum time pode fazer push direto
+    apps: []   # Nenhum app pode fazer push direto
+  
+  # Configurações adicionais
+  enforce_admins: true  # Aplica regras até para admins
+  required_linear_history: true  # Histórico linear obrigatório
+  allow_force_pushes: false  # Proíbe force push
+  allow_deletions: false  # Proíbe deleção da branch
+  
+  # Auto-delete branches após merge
+  delete_branch_on_merge: true
+  
+  # Merge queue (quando disponível)
+  required_conversation_resolution: true

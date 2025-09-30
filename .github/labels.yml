@@ -1,0 +1,66 @@
+# Labels organizacionais para governança do projeto
+# Baseado em PDF 063/064 - Guia de Gestão de Projetos no GitHub
+
+# Labels de Tipo (Essenciais)
+- name: feat
+  color: 0e8a16
+  description: "Novas funcionalidades"
+
+- name: bug
+  color: d73a4a
+  description: "Correções de problemas"
+
+- name: docs
+  color: 0075ca
+  description: "Atualizações de documentação"
+
+- name: test
+  color: f9d71c
+  description: "Adição/melhoria de testes"
+
+- name: chore
+  color: 7057ff
+  description: "Tarefas de manutenção"
+
+- name: infra
+  color: 8b5cf6
+  description: "Mudanças em infraestrutura/CI/CD"
+
+# Labels de Prioridade
+- name: P1
+  color: b60205
+  description: "Prioridade Alta - Crítico"
+
+- name: P2
+  color: ff9500
+  description: "Prioridade Média - Importante"
+
+- name: P3
+  color: 0e8a16
+  description: "Prioridade Baixa - Melhoria"
+
+# Labels de Governança
+- name: governance
+  color: 5319e7
+  description: "Relacionado à governança do projeto"
+
+- name: quality
+  color: 1d76db
+  description: "Melhorias de qualidade de código"
+
+- name: security
+  color: ee0701
+  description: "Questões de segurança"
+
+# Labels de Status
+- name: ready-for-review
+  color: 0e8a16
+  description: "Pronto para revisão"
+
+- name: needs-review
+  color: fbca04
+  description: "Precisa de revisão"
+
+- name: blocked
+  color: d73a4a
+  description: "Bloqueado - não pode prosseguir"

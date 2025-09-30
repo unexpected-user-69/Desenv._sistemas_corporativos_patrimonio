@@ -1,0 +1,63 @@
+# Environments Configuration
+# Baseado em PDF 073 - Checklist de Auditoria
+
+# Configuração de ambientes para deployment
+environments:
+  # Ambiente de staging
+  staging:
+    protection_rules:
+      - type: "required_reviewers"
+        reviewers: 1
+        dismiss_stale_reviews: true
+      - type: "wait_timer"
+        wait_timer: 0  # Sem delay para staging
+    
+    deployment_branch_policy:
+      protected_branches: false
+      custom_branch_policies: true
+      custom_branch_policy_branches:
+        - "feat/*"
+        - "staging"
+    
+    # Secrets específicos do ambiente
+    secrets:
+      - "STAGING_DB_URL"
+      - "STAGING_API_KEY"
+    
+  # Ambiente de produção
+  production:
+    protection_rules:
+      - type: "required_reviewers"
+        reviewers: 2  # Dupla aprovação para prod
+        dismiss_stale_reviews: true
+      - type: "wait_timer"
+        wait_timer: 5  # 5 minutos de delay para prod
+    
+    deployment_branch_policy:
+      protected_branches: true
+      custom_branch_policies: false
+      protected_branch_policy_branches:
+        - "main"
+    
+    # Secrets específicos do ambiente
+    secrets:
+      - "PROD_DB_URL"
+      - "PROD_API_KEY"
+      - "PROD_JWT_SECRET"
+
+# Configurações de deployment
+deployment_settings:
+  # Required deployments para CD
+  required_deployments:
+    staging:
+      required: true
+      environment: "staging"
+    production:
+      required: true
+      environment: "production"
+  
+  # Configurações de rollback
+  rollback_settings:
+    enabled: true
+    auto_rollback: false
+    rollback_on_failure: true

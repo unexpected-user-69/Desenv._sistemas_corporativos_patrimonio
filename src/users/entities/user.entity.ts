@@ -1,11 +1,14 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  VersionColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 export enum UserRole {
   STUDENT = 'STUDENT',

@@ -24,5 +24,3 @@ export const AppDataSource = new DataSource({
   logging: process.env.NODE_ENV === 'development',
 });
 
-// Export default para compatibilidade com código existente
-export default AppDataSource;

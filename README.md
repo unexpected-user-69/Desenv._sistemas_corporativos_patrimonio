@@ -150,6 +150,9 @@ src/
 ## 🔧 Configuração
 
 ### **Variáveis de Ambiente**
+
+Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+
 ```env
 # Banco de dados
 DB_HOST=localhost
@@ -161,7 +164,17 @@ DB_NAME=patrimonio_inventario
 # Aplicação
 NODE_ENV=development
 PORT=3001
+APP_PORT=3001
+
+# Segurança
+HASH_PEPPER=your-pepper-here
+HASH_SALT_ROUNDS=12
 ```
+
+**⚠️ Importante**: 
+- Substitua `your-pepper-here` por uma string aleatória para produção
+- Para Docker, use `DB_HOST=db` em vez de `localhost`
+- O arquivo `.env` não deve ser versionado (já está no `.gitignore`)
 
 ### **Docker**
 - **Aplicação**: http://localhost:3001

@@ -34,7 +34,7 @@ describe('HashService', () => {
       // Arrange
       const plainPassword = 'password123';
       const hashedPassword = 'hashed_password_123';
-      mockedBcrypt.hash.mockResolvedValue(hashedPassword);
+      (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
 
       // Act
       const result = await service.hash(plainPassword);
@@ -50,7 +50,7 @@ describe('HashService', () => {
       process.env.HASH_PEPPER = 'my-pepper';
       const plainPassword = 'password123';
       const hashedPassword = 'hashed_password_with_pepper';
-      mockedBcrypt.hash.mockResolvedValue(hashedPassword);
+      (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
 
       // Act
       const result = await service.hash(plainPassword);
@@ -69,7 +69,7 @@ describe('HashService', () => {
       process.env.HASH_SALT_ROUNDS = '12';
       const plainPassword = 'password123';
       const hashedPassword = 'hashed_password_123';
-      mockedBcrypt.hash.mockResolvedValue(hashedPassword);
+      (mockedBcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
 
       // Create new service instance to pick up env change
       const newService = new HashService();
@@ -91,7 +91,7 @@ describe('HashService', () => {
       // Arrange
       const plainPassword = 'password123';
       const hashedPassword = 'hashed_password_123';
-      mockedBcrypt.compare.mockResolvedValue(true);
+      (mockedBcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
       const result = await service.compare(plainPassword, hashedPassword);
@@ -107,7 +107,7 @@ describe('HashService', () => {
       process.env.HASH_PEPPER = 'my-pepper';
       const plainPassword = 'password123';
       const hashedPassword = 'hashed_password_123';
-      mockedBcrypt.compare.mockResolvedValue(true);
+      (mockedBcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
       const result = await service.compare(plainPassword, hashedPassword);
@@ -124,7 +124,7 @@ describe('HashService', () => {
       // Arrange
       const plainPassword = 'wrong_password';
       const hashedPassword = 'hashed_password_123';
-      mockedBcrypt.compare.mockResolvedValue(false);
+      (mockedBcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       // Act
       const result = await service.compare(plainPassword, hashedPassword);
@@ -138,7 +138,7 @@ describe('HashService', () => {
     it.skip('should generate salt with default rounds', async () => {
       // Arrange
       const generatedSalt = 'generated_salt_123';
-      mockedBcrypt.genSalt.mockResolvedValue(generatedSalt);
+      (mockedBcrypt.genSalt as jest.Mock).mockResolvedValue(generatedSalt);
 
       // Act
       const result = await service.generateSalt();

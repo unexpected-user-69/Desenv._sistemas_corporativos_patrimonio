@@ -2,7 +2,7 @@
 # Baseado em PDF 084 - Containerização e Configuração
 
 # Estágio base (Build)
-FROM node:18-alpine AS base
+FROM node:22-alpine AS base
 
 # Definir diretório de trabalho
 WORKDIR /usr/src/app
@@ -23,7 +23,7 @@ COPY . .
 RUN npm run build
 
 # Estágio prod (Produção/Runtime)
-FROM node:18-alpine AS prod
+FROM node:22-alpine AS prod
 
 # Instalar bash para executar start.sh
 RUN apk add --no-cache bash

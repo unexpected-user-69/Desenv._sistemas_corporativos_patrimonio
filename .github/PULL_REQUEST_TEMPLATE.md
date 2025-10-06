@@ -9,4 +9,10 @@
 - [ ] Documentação atualizada (se aplicável)
 - [ ] Closes #<id> (se aplicável)
  - [ ] Riscos avaliados (rollback, impacto, segurança)
+
+ - [ ] Evidências anexadas (prints/links) conforme auditoria
+
+ - [ ] Riscos avaliados (rollback, impacto, segurança)
+ - [ ] Evidências anexadas (prints/links) conforme auditoria
+
  - [ ] Evidências anexadas (prints/links) conforme auditoria

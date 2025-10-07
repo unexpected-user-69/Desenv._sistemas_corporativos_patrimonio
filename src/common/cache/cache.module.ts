@@ -13,6 +13,7 @@ import * as redisStore from 'cache-manager-redis-store';
 
         if (redisUrl) {
           // Configuração para Redis
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return {
             store: redisStore,
             url: redisUrl,
@@ -22,6 +23,7 @@ import * as redisStore from 'cache-manager-redis-store';
           } as any;
         } else {
           // Fallback para cache em memória
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return {
             ttl: configService.get<number>('CACHE_TTL', 300),
             max: configService.get<number>('CACHE_MAX_ITEMS', 1000),

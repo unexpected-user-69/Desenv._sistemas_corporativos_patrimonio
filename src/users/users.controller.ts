@@ -34,50 +34,57 @@ export class UsersController {
 
   @Get()
   @ApiOkResponse({
-    description: 'Lista todos os usuários (com paginação e filtros avançados)',
+    description: 'Lista todos os usuários com paginação e filtros avançados',
     type: PaginatedUsersResponseDto,
   })
   @ApiQuery({
     name: 'page',
     required: false,
     type: Number,
-    description: 'Número da página',
+    description: 'Número da página (padrão: 1)',
+    example: 1,
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     type: Number,
-    description: 'Itens por página',
+    description: 'Itens por página (padrão: 10, máximo: 100)',
+    example: 10,
   })
   @ApiQuery({
     name: 'q',
     required: false,
     type: String,
     description: 'Busca textual genérica (nome e email)',
+    example: 'joão silva',
   })
   @ApiQuery({
     name: 'role',
     required: false,
     enum: ['STUDENT', 'TEACHER', 'ADMIN'],
-    description: 'Filtrar por role',
+    description: 'Filtrar por role específico',
+    example: 'STUDENT',
   })
   @ApiQuery({
     name: 'isActive',
     required: false,
     type: Boolean,
-    description: 'Filtrar por status ativo',
+    description: 'Filtrar por status ativo (true/false)',
+    example: true,
   })
   @ApiQuery({
     name: 'sortBy',
     required: false,
     enum: ['name', 'email', 'createdAt', 'updatedAt'],
     description: 'Campo para ordenação',
+    example: 'createdAt',
   })
   @ApiQuery({
     name: 'sortOrder',
     required: false,
     enum: ['ASC', 'DESC'],
     description: 'Direção da ordenação',
+    example: 'DESC',
   })
   findAll(@Query() query: QueryUsersDto): Promise<PaginatedUsersResponseDto> {
     return this.usersService.findAllWithAdvancedFilters(query);
@@ -88,24 +95,186 @@ export class UsersController {
     description: 'Retorna um usuário pelo ID',
     type: UserResponseDto,
   })
-  @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
-  @ApiBadRequestResponse({ description: 'ID inválido' })
+  @ApiNotFoundResponse({ 
+    description: 'Usuário não encontrado',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'User with ID "uuid-here" not found' },
+        error: { type: 'string', example: 'Not Found' }
+      }
+    }
+  })
+  @ApiBadRequestResponse({ 
+    description: 'ID inválido (não é um UUID válido)',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 400 },
+        message: { type: 'string', example: 'Validation failed (uuid is expected)' },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
+  })
   findOne(
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<UserResponseDto> {
     return this.usersService.findOne(id);
   }
 
-  @Post()
-  @ApiBody({ type: CreateUserDto })
-  @ApiCreatedResponse({
-    description: 'Cria um novo usuário',
+  @Get('email/:email')
+  @ApiOkResponse({
+    description: 'Retorna um usuário pelo email',
     type: UserResponseDto,
   })
-  @ApiBadRequestResponse({ description: 'Dados de entrada inválidos' })
-  @ApiConflictResponse({ description: 'Email já existe' })
+  @ApiNotFoundResponse({ 
+    description: 'Usuário não encontrado',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'User with email "email@example.com" not found' },
+        error: { type: 'string', example: 'Not Found' }
+      }
+    }
+  })
+  @ApiBadRequestResponse({ 
+    description: 'Email inválido',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 400 },
+        message: { type: 'string', example: 'Invalid email format' },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
+  })
+  findByEmail(
+    @Param('email') email: string,
+  ): Promise<UserResponseDto> {
+    return this.usersService.findByEmail(email);
+  }
+
+  @Post()
+  @ApiBody({ 
+    type: CreateUserDto,
+    description: 'Dados do usuário a ser criado',
+    examples: {
+      student: {
+        summary: 'Criar estudante',
+        value: {
+          name: 'João Silva',
+          email: 'joao.silva@email.com',
+          password: 'senha123',
+          role: 'STUDENT',
+          isActive: true
+        }
+      },
+      teacher: {
+        summary: 'Criar professor',
+        value: {
+          name: 'Maria Santos',
+          email: 'maria.santos@email.com',
+          password: 'senha456',
+          role: 'TEACHER',
+          isActive: true
+        }
+      }
+    }
+  })
+  @ApiCreatedResponse({
+    description: 'Usuário criado com sucesso',
+    type: UserResponseDto,
+  })
+  @ApiBadRequestResponse({ 
+    description: 'Dados de entrada inválidos',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 400 },
+        message: { 
+          type: 'array', 
+          items: { type: 'string' },
+          example: ['name should not be empty', 'email must be a valid email']
+        },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
+  })
+  @ApiConflictResponse({ 
+    description: 'Email já existe no sistema',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 409 },
+        message: { type: 'string', example: 'Email already exists' },
+        error: { type: 'string', example: 'Conflict' }
+      }
+    }
+  })
   create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     return this.usersService.create(dto);
+  }
+
+  @Post('bulk')
+  @ApiBody({ 
+    type: [CreateUserDto],
+    description: 'Lista de usuários a serem criados',
+    examples: {
+      multiple: {
+        summary: 'Criar múltiplos usuários',
+        value: [
+          {
+            name: 'João Silva',
+            email: 'joao.silva@email.com',
+            password: 'senha123',
+            role: 'STUDENT',
+            isActive: true
+          },
+          {
+            name: 'Maria Santos',
+            email: 'maria.santos@email.com',
+            password: 'senha456',
+            role: 'TEACHER',
+            isActive: true
+          }
+        ]
+      }
+    }
+  })
+  @ApiCreatedResponse({
+    description: 'Usuários criados com sucesso',
+    type: [UserResponseDto],
+  })
+  @ApiBadRequestResponse({ 
+    description: 'Dados de entrada inválidos',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 400 },
+        message: { 
+          type: 'array', 
+          items: { type: 'string' },
+          example: ['name should not be empty', 'email must be a valid email']
+        },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
+  })
+  @ApiConflictResponse({ 
+    description: 'Um ou mais emails já existem no sistema',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 409 },
+        message: { type: 'string', example: 'One or more emails already exist' },
+        error: { type: 'string', example: 'Conflict' }
+      }
+    }
+  })
+  createBulk(@Body() dtos: CreateUserDto[]): Promise<UserResponseDto[]> {
+    return this.usersService.createBulk(dtos);
   }
 
   @Put(':id')

@@ -4,7 +4,9 @@ import { Repository } from 'typeorm';
  * Fábrica de mocks para repositórios TypeORM
  * Fornece um mock completo e padronizado para testes
  */
-export function createRepositoryMock<T>(): jest.Mocked<Repository<T>> {
+export function createRepositoryMock<T extends object>(): jest.Mocked<
+  Repository<T>
+> {
   return {
     // Métodos básicos de busca
     find: jest.fn().mockResolvedValue([]),
@@ -100,8 +102,6 @@ export function createRepositoryMock<T>(): jest.Mocked<Repository<T>> {
       hasVirtualPrimaryColumns: false,
       hasUUIDPrimaryColumns: false,
       hasGeneratedPrimaryColumns: false,
-      hasMultiplePrimaryKeys: false,
-      hasMultiplePrimaryKeys: false,
     } as any,
 
     // Métodos de conexão
@@ -112,7 +112,7 @@ export function createRepositoryMock<T>(): jest.Mocked<Repository<T>> {
     merge: jest
       .fn()
       .mockImplementation((target: T, ...sources: Partial<T>[]) =>
-        Object.assign(target, ...sources),
+        Object.assign(target as object, ...sources),
       ),
 
     // Métodos de cache

@@ -16,7 +16,9 @@ export const createDummyLogger = () => ({
   debug: jest.fn(() => {}),
 });
 
-export const createDummyRepository = <T>(): Partial<Repository<T>> => ({
+export const createDummyRepository = <T extends object>(): Partial<
+  Repository<T>
+> => ({
   find: jest.fn(),
   findOne: jest.fn(),
   save: jest.fn(),
@@ -51,7 +53,9 @@ export const createStubBcryptService = () => ({
 // 3. SPY - Objetos que monitoram chamadas e argumentos
 // ============================================================================
 
-export const createSpyRepository = <T>(): Partial<Repository<T>> => {
+export const createSpyRepository = <T extends object>(): Partial<
+  Repository<T>
+> => {
   const spy = {
     find: jest.fn(),
     findOne: jest.fn(),

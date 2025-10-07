@@ -29,9 +29,6 @@ Segurança e Qualidade de Dados:
 - Campo `passwordHash` excluído de respostas (ClassSerializer via `@Exclude`)
 - Email com `citext` + índice único (unicidade case-insensitive)
 
-Próximas entregas sugeridas (alto valor):
-- Ampliar testes e2e e documentação de erros (antes busque terminar as implementacoes de `implementação_geral.md`. )
-
 Testes adicionais:
 - Testes unitários do `UsersController` com service mock
 
@@ -197,6 +194,18 @@ Serviços Avançados e Funcionalidades Extras (PDF 87a):
 - Cobertura de cenários: hash com pepper, normalização, filtros, cursors
 - Validação de edge cases e tratamento de erros
 - Documentação Swagger completa para todos os novos endpoints
+
+Trabalho Integrado - Pesquisa e Prática (PDF 086):
+- Swagger com prefixo global /v1 configurado corretamente no main.ts
+- Containerização completa com Dockerfile multi-stage e docker-compose.yml
+- Endpoint de listagem paginada GET /v1/users com filtros avançados
+- Testes unitários com cobertura adequada e Test Doubles implementados
+- Documentação completa em /docs/trabalho-integrado/
+- Pesquisa crítica sobre os 4 tópicos principais
+- Evidências documentadas com prints e validações
+- Cobertura de testes: 59.87% geral, 84.68% UsersService
+- 122 testes passando com padrão AAA e Test Doubles
+- Implementação completa de todos os requisitos do trabalho integrado
 
 Próximas entregas sugeridas (cite elas):
 

@@ -23,7 +23,7 @@ describe('UsersService - Create Method', () => {
     jest.clearAllMocks();
 
     // Mock do bcrypt
-    mockedBcrypt.hash.mockResolvedValue('hashed-password-123');
+    (mockedBcrypt.hash as jest.Mock).mockResolvedValue('hashed-password-123');
 
     // Criar mock do repositório
     userRepository = createUserRepositoryMock();
@@ -83,8 +83,12 @@ describe('UsersService - Create Method', () => {
       // Arrange
       userRepository.findOne.mockResolvedValue(null); // Email não existe
       userRepository.create.mockReturnValue({
+        id: 'user-123',
         ...validCreateUserDto,
         passwordHash: 'hashed-password-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: 1,
       } as User);
       userRepository.save.mockResolvedValue({
         id: 'user-123',

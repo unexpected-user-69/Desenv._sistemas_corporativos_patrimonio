@@ -713,3 +713,28 @@ A seguir estão todas as implementações solicitadas ou descritas no material, 
 
 ---
 
+Trabalho Integrado (NestJS) Entrega: 06/10, às 13h (abrir PR com todas as evidências até esse horário) Documentação (Swagger).
+Ajustar o main.ts para aplicar um prefixo global /v1 antes da inicialização do Swagger.
+Anotar o endpoint de listagem com @ApiQuery para os filtros e @ApiOkResponse para o sucesso.
+Containerização (Docker)
+Criar um Dockerfile multi-stage para a aplicação NestJS.
+Criar um docker-compose.yml contendo:
+Serviço db (Postgres).
+Serviço app (NestJS) com depends_on e condition: service_healthy para o banco.
+Rede dedicada para os serviços.
+Criar um script dockerstart.sh que aguarda a conexão com o banco, executa as migrações e então inicia a aplicação.
+Endpoint de Listagem Paginada
+Implementar um endpoint GET /<entidade> para uma entidade central do projeto.
+Adicionar suporte aos query parameters: page, limit, q (busca textual) e filtros específicos do domínio.
+Estruturar a resposta no formato { data, total, meta }.
+Ocultar campos sensíveis na resposta.
+Testes Unitários (Jest)
+Criar uma suíte de testes para o Service responsável pela listagem.
+Cobrir os seguintes cenários:
+Listagem sem filtros.
+Com paginação.
+Com busca textual.
+Com pelo menos 2 filtros específicos do domínio.
+Com entradas inválidas (page<1, limit>100).
+Utilizar stubs ou spies para simular o repositório, evitando o acesso real ao banco.
+Atingir uma cobertura de código de no mínimo 70% para o Service testado.

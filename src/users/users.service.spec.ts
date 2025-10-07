@@ -24,7 +24,7 @@ describe('UsersService', () => {
             save: jest
               .fn()
               .mockImplementation((entity: User) =>
-                Promise.resolve({ id: 'uuid', ...entity } as User),
+                Promise.resolve({ ...entity, id: 'uuid' } as User),
               ),
             merge: jest.fn(
               (user: User, update: Partial<User>) =>

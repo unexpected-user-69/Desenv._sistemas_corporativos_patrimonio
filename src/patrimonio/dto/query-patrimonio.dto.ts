@@ -1,7 +1,17 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsBoolean, IsNumber, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { PatrimonioStatus, PatrimonioCategoria } from '../entities/patrimonio.entity';
+import {
+  PatrimonioStatus,
+  PatrimonioCategoria,
+} from '../entities/patrimonio.entity';
 
 export class QueryPatrimonioDto {
   @ApiPropertyOptional({
@@ -34,7 +44,8 @@ export class QueryPatrimonioDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   q?: string;
 
   @ApiPropertyOptional({
@@ -61,7 +72,8 @@ export class QueryPatrimonioDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   marca?: string;
 
   @ApiPropertyOptional({
@@ -70,7 +82,8 @@ export class QueryPatrimonioDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   localizacao?: string;
 
   @ApiPropertyOptional({
@@ -121,7 +134,15 @@ export class QueryPatrimonioDto {
 
   @ApiPropertyOptional({
     description: 'Campo para ordenação',
-    enum: ['nome', 'codigo', 'categoria', 'status', 'valorAquisicao', 'dataAquisicao', 'createdAt'],
+    enum: [
+      'nome',
+      'codigo',
+      'categoria',
+      'status',
+      'valorAquisicao',
+      'dataAquisicao',
+      'createdAt',
+    ],
     example: 'nome',
   })
   @IsOptional()

@@ -13,7 +13,10 @@ import {
   IsUrl,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { PatrimonioStatus, PatrimonioCategoria } from '../entities/patrimonio.entity';
+import {
+  PatrimonioStatus,
+  PatrimonioCategoria,
+} from '../entities/patrimonio.entity';
 
 export class CreatePatrimonioDto {
   @ApiProperty({
@@ -26,7 +29,10 @@ export class CreatePatrimonioDto {
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(50)
-  @Transform(({ value }) => value?.trim().toUpperCase())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toUpperCase() : value,
+  )
   codigo!: string;
 
   @ApiProperty({
@@ -37,7 +43,8 @@ export class CreatePatrimonioDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   nome!: string;
 
   @ApiPropertyOptional({
@@ -46,7 +53,8 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   descricao?: string;
 
   @ApiProperty({
@@ -75,7 +83,8 @@ export class CreatePatrimonioDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   marca?: string;
 
   @ApiPropertyOptional({
@@ -86,7 +95,8 @@ export class CreatePatrimonioDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   modelo?: string;
 
   @ApiPropertyOptional({
@@ -97,12 +107,13 @@ export class CreatePatrimonioDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   numeroSerie?: string;
 
   @ApiPropertyOptional({
     description: 'Valor de aquisição do patrimônio',
-    example: 2500.00,
+    example: 2500.0,
     minimum: 0,
   })
   @IsOptional()
@@ -136,7 +147,8 @@ export class CreatePatrimonioDto {
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   localizacao?: string;
 
   @ApiPropertyOptional({
@@ -154,7 +166,8 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => value?.trim())
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   observacoes?: string;
 
   @ApiPropertyOptional({

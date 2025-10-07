@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, Index } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 export class CreatePatrimoniosTable1758646964162 implements MigrationInterface {
   name = 'CreatePatrimoniosTable1758646964162';
@@ -133,10 +133,18 @@ export class CreatePatrimoniosTable1758646964162 implements MigrationInterface {
     );
 
     // Criar índices usando SQL direto
-    await queryRunner.query(`CREATE UNIQUE INDEX "uq_patrimonios_codigo" ON "patrimonios" ("codigo")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_categoria" ON "patrimonios" ("categoria")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_status" ON "patrimonios" ("status")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_responsavel" ON "patrimonios" ("responsavel_id")`);
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "uq_patrimonios_codigo" ON "patrimonios" ("codigo")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_categoria" ON "patrimonios" ("categoria")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_status" ON "patrimonios" ("status")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_responsavel" ON "patrimonios" ("responsavel_id")`,
+    );
 
     // Criar constraint de check para categoria
     await queryRunner.query(`
@@ -162,12 +170,20 @@ export class CreatePatrimoniosTable1758646964162 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Remover constraints
-    await queryRunner.query(`ALTER TABLE patrimonios DROP CONSTRAINT IF EXISTS chk_patrimonios_valor_aquisicao`);
-    await queryRunner.query(`ALTER TABLE patrimonios DROP CONSTRAINT IF EXISTS chk_patrimonios_status`);
-    await queryRunner.query(`ALTER TABLE patrimonios DROP CONSTRAINT IF EXISTS chk_patrimonios_categoria`);
+    await queryRunner.query(
+      `ALTER TABLE patrimonios DROP CONSTRAINT IF EXISTS chk_patrimonios_valor_aquisicao`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE patrimonios DROP CONSTRAINT IF EXISTS chk_patrimonios_status`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE patrimonios DROP CONSTRAINT IF EXISTS chk_patrimonios_categoria`,
+    );
 
     // Remover índices
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_responsavel"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_patrimonios_responsavel"`,
+    );
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_status"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_categoria"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "uq_patrimonios_codigo"`);

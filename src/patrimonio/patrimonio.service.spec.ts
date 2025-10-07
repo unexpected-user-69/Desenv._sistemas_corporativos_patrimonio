@@ -3,7 +3,11 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { PatrimonioService } from './patrimonio.service';
-import { Patrimonio, PatrimonioStatus, PatrimonioCategoria } from './entities/patrimonio.entity';
+import {
+  Patrimonio,
+  PatrimonioStatus,
+  PatrimonioCategoria,
+} from './entities/patrimonio.entity';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
 import { UpdatePatrimonioDto } from './dto/update-patrimonio.dto';
 import { createRepositoryMock } from '../../test/mocks/repository.mock';
@@ -22,7 +26,7 @@ describe('PatrimonioService', () => {
     marca: 'Dell',
     modelo: 'Inspiron 15 3000',
     numeroSerie: 'ABC123456789',
-    valorAquisicao: 2500.00,
+    valorAquisicao: 2500.0,
     dataAquisicao: new Date('2024-01-15'),
     dataGarantia: new Date('2025-01-15'),
     localizacao: 'Sala 101',
@@ -62,7 +66,9 @@ describe('PatrimonioService', () => {
       const result = await service.findOne('patrimonio-1');
 
       // Assert
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 'patrimonio-1' } });
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { id: 'patrimonio-1' },
+      });
       expect(result).toMatchObject({
         id: mockPatrimonio.id,
         codigo: mockPatrimonio.codigo,
@@ -78,7 +84,9 @@ describe('PatrimonioService', () => {
 
       // Act & Assert
       await expect(service.findOne('non-existent')).rejects.toThrow(
-        new NotFoundException('Patrimônio com ID "non-existent" não encontrado'),
+        new NotFoundException(
+          'Patrimônio com ID "non-existent" não encontrado',
+        ),
       );
     });
   });
@@ -92,7 +100,9 @@ describe('PatrimonioService', () => {
       const result = await service.findByCodigo('PAT-2024-001');
 
       // Assert
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { codigo: 'PAT-2024-001' } });
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { codigo: 'PAT-2024-001' },
+      });
       expect(result).toMatchObject({
         id: mockPatrimonio.id,
         codigo: mockPatrimonio.codigo,
@@ -106,7 +116,9 @@ describe('PatrimonioService', () => {
 
       // Act & Assert
       await expect(service.findByCodigo('NON-EXISTENT')).rejects.toThrow(
-        new NotFoundException('Patrimônio com código "NON-EXISTENT" não encontrado'),
+        new NotFoundException(
+          'Patrimônio com código "NON-EXISTENT" não encontrado',
+        ),
       );
     });
   });
@@ -120,7 +132,7 @@ describe('PatrimonioService', () => {
       status: PatrimonioStatus.ATIVO,
       marca: 'Dell',
       modelo: 'P2419H',
-      valorAquisicao: 800.00,
+      valorAquisicao: 800.0,
       dataAquisicao: '2024-02-01',
       localizacao: 'Sala 102',
     };
@@ -135,7 +147,9 @@ describe('PatrimonioService', () => {
       const result = await service.create(createDto);
 
       // Assert
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { codigo: createDto.codigo } });
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { codigo: createDto.codigo },
+      });
       expect(repository.create).toHaveBeenCalledWith({
         ...createDto,
         dataAquisicao: new Date(createDto.dataAquisicao!),
@@ -177,7 +191,7 @@ describe('PatrimonioService', () => {
   describe('update', () => {
     const updateDto: UpdatePatrimonioDto = {
       nome: 'Notebook Dell Inspiron 15 - Atualizado',
-      valorAquisicao: 2800.00,
+      valorAquisicao: 2800.0,
     };
 
     it('should update a patrimonio', async () => {
@@ -210,7 +224,9 @@ describe('PatrimonioService', () => {
 
       // Act & Assert
       await expect(service.update('non-existent', updateDto)).rejects.toThrow(
-        new NotFoundException('Patrimônio com ID "non-existent" não encontrado'),
+        new NotFoundException(
+          'Patrimônio com ID "non-existent" não encontrado',
+        ),
       );
     });
   });
@@ -225,7 +241,9 @@ describe('PatrimonioService', () => {
       await service.remove('patrimonio-1');
 
       // Assert
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 'patrimonio-1' } });
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { id: 'patrimonio-1' },
+      });
       expect(repository.softDelete).toHaveBeenCalledWith('patrimonio-1');
     });
 
@@ -235,7 +253,9 @@ describe('PatrimonioService', () => {
 
       // Act & Assert
       await expect(service.remove('non-existent')).rejects.toThrow(
-        new NotFoundException('Patrimônio com ID "non-existent" não encontrado'),
+        new NotFoundException(
+          'Patrimônio com ID "non-existent" não encontrado',
+        ),
       );
     });
   });
@@ -247,14 +267,14 @@ describe('PatrimonioService', () => {
         nome: 'Monitor Dell 24"',
         categoria: PatrimonioCategoria.EQUIPAMENTO,
         marca: 'Dell',
-        valorAquisicao: 800.00,
+        valorAquisicao: 800.0,
       },
       {
         codigo: 'PAT-2024-004',
         nome: 'Teclado Logitech',
         categoria: PatrimonioCategoria.EQUIPAMENTO,
         marca: 'Logitech',
-        valorAquisicao: 150.00,
+        valorAquisicao: 150.0,
       },
     ];
 
@@ -267,7 +287,7 @@ describe('PatrimonioService', () => {
         codigo: dto.codigo,
         nome: dto.nome,
       }));
-      
+
       repository.create
         .mockReturnValueOnce(createdPatrimonios[0] as any)
         .mockReturnValueOnce(createdPatrimonios[1] as any);
@@ -303,7 +323,9 @@ describe('PatrimonioService', () => {
 
       // Act & Assert
       await expect(service.createBulk(tooManyPatrimonios)).rejects.toThrow(
-        new ConflictException('Máximo 100 patrimônios podem ser criados por vez'),
+        new ConflictException(
+          'Máximo 100 patrimônios podem ser criados por vez',
+        ),
       );
     });
 

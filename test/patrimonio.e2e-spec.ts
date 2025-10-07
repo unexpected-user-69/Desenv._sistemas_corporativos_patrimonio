@@ -3,7 +3,11 @@ import { INestApplication } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { Patrimonio, PatrimonioStatus, PatrimonioCategoria } from '../src/patrimonio/entities/patrimonio.entity';
+import {
+  Patrimonio,
+  PatrimonioStatus,
+  PatrimonioCategoria,
+} from '../src/patrimonio/entities/patrimonio.entity';
 import { User, UserRole } from '../src/users/entities/user.entity';
 
 describe('PatrimonioController (e2e)', () => {
@@ -35,7 +39,7 @@ describe('PatrimonioController (e2e)', () => {
         marca: 'Dell',
         modelo: 'Inspiron 15 3000',
         numeroSerie: 'ABC123456789',
-        valorAquisicao: 2500.00,
+        valorAquisicao: 2500.0,
         dataAquisicao: '2024-01-15',
         dataGarantia: '2025-01-15',
         localizacao: 'Sala 101 - Setor Administrativo',
@@ -123,7 +127,9 @@ describe('PatrimonioController (e2e)', () => {
         .expect((res) => {
           expect(res.body.data).toBeDefined();
           if (res.body.data.length > 0) {
-            expect(res.body.data[0].categoria).toBe(PatrimonioCategoria.EQUIPAMENTO);
+            expect(res.body.data[0].categoria).toBe(
+              PatrimonioCategoria.EQUIPAMENTO,
+            );
           }
         });
     });
@@ -278,7 +284,7 @@ describe('PatrimonioController (e2e)', () => {
     it('should update a patrimonio', () => {
       const updateDto = {
         nome: 'Notebook Dell Inspiron 15 - Atualizado',
-        valorAquisicao: 2800.00,
+        valorAquisicao: 2800.0,
         observacoes: 'Atualizado via teste E2E',
       };
 
@@ -314,7 +320,7 @@ describe('PatrimonioController (e2e)', () => {
           nome: 'Monitor Dell 24"',
           categoria: PatrimonioCategoria.EQUIPAMENTO,
           marca: 'Dell',
-          valorAquisicao: 800.00,
+          valorAquisicao: 800.0,
           localizacao: 'Sala 101',
         },
         {
@@ -322,7 +328,7 @@ describe('PatrimonioController (e2e)', () => {
           nome: 'Teclado Logitech',
           categoria: PatrimonioCategoria.EQUIPAMENTO,
           marca: 'Logitech',
-          valorAquisicao: 150.00,
+          valorAquisicao: 150.0,
           localizacao: 'Sala 101',
         },
       ];
@@ -376,7 +382,9 @@ describe('PatrimonioController (e2e)', () => {
         .send(duplicateDtos)
         .expect(409)
         .expect((res) => {
-          expect(res.body.message).toContain('Códigos duplicados na requisição');
+          expect(res.body.message).toContain(
+            'Códigos duplicados na requisição',
+          );
         });
     });
 

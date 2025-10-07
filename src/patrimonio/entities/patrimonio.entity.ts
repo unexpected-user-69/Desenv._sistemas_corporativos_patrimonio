@@ -68,10 +68,21 @@ export class Patrimonio {
   @Column({ name: 'modelo', type: 'varchar', length: 100, nullable: true })
   modelo?: string;
 
-  @Column({ name: 'numero_serie', type: 'varchar', length: 100, nullable: true })
+  @Column({
+    name: 'numero_serie',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
   numeroSerie?: string;
 
-  @Column({ name: 'valor_aquisicao', type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({
+    name: 'valor_aquisicao',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   valorAquisicao?: number;
 
   @Column({ name: 'data_aquisicao', type: 'date', nullable: true })

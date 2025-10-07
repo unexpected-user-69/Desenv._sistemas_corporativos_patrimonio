@@ -1,6 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { PatrimonioStatus, PatrimonioCategoria } from '../entities/patrimonio.entity';
+import {
+  PatrimonioStatus,
+  PatrimonioCategoria,
+} from '../entities/patrimonio.entity';
 
 export class PatrimonioResponseDto {
   @ApiProperty({
@@ -70,7 +73,7 @@ export class PatrimonioResponseDto {
 
   @ApiPropertyOptional({
     description: 'Valor de aquisição do patrimônio',
-    example: 2500.00,
+    example: 2500.0,
   })
   @Expose()
   @Type(() => Number)

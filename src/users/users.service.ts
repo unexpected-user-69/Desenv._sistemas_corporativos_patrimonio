@@ -201,7 +201,9 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<UserResponseDto> {
     const normalizedEmail = this.normalizeEmail(email);
-    const user = await this.userRepository.findOne({ where: { email: normalizedEmail } });
+    const user = await this.userRepository.findOne({
+      where: { email: normalizedEmail },
+    });
     if (!user) {
       throw new NotFoundException(`User with email "${email}" not found`);
     }
@@ -252,14 +254,14 @@ export class UsersService {
     }
 
     // Normalizar todos os emails e nomes
-    const normalizedDtos = dtos.map(dto => ({
+    const normalizedDtos = dtos.map((dto) => ({
       ...dto,
       email: this.normalizeEmail(dto.email),
       name: this.normalizeName(dto.name),
     }));
 
     // Verificar emails duplicados na entrada
-    const emails = normalizedDtos.map(dto => dto.email);
+    const emails = normalizedDtos.map((dto) => dto.email);
     const uniqueEmails = new Set(emails);
     if (emails.length !== uniqueEmails.size) {
       throw new ConflictException('Duplicate emails in the request');
@@ -267,12 +269,14 @@ export class UsersService {
 
     // Verificar se algum email já existe no banco
     const existingUsers = await this.userRepository.find({
-      where: emails.map(email => ({ email })),
+      where: emails.map((email) => ({ email })),
     });
 
     if (existingUsers.length > 0) {
-      const existingEmails = existingUsers.map(user => user.email);
-      throw new ConflictException(`Emails already exist: ${existingEmails.join(', ')}`);
+      const existingEmails = existingUsers.map((user) => user.email);
+      throw new ConflictException(
+        `Emails already exist: ${existingEmails.join(', ')}`,
+      );
     }
 
     try {
@@ -285,16 +289,17 @@ export class UsersService {
             passwordHash: hashedPassword,
             isActive: dto.isActive ?? true,
           });
-        })
+        }),
       );
 
       // Salvar todos os usuários
       const savedUsers = await this.userRepository.save(entities);
-      
+
       // Serializar e retornar
-      return savedUsers.map(user => this.serializeUser(user));
+      return savedUsers.map((user) => this.serializeUser(user));
     } catch (error: any) {
       // Tratamento de erro de conflito do banco
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error?.code === '23505') {
         throw new ConflictException('One or more emails already exist');
       }

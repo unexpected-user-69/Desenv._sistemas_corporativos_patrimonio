@@ -230,6 +230,26 @@ Funcionalidades Avançadas de Produção:
 - Configuração de ambiente para diferentes estágios (dev/staging/prod)
 - Documentação completa de todas as funcionalidades implementadas
 
+CRUD Completo de Patrimônio (Branch feat/patrimonio-crud-complete):
+- Entidade Patrimonio com campos completos (código, nome, categoria, status, marca, modelo, etc.)
+- DTOs para criação, atualização e resposta com validações completas
+- Service com métodos CRUD completos e funcionalidades avançadas:
+  - Listagem com paginação e filtros avançados (busca textual, categoria, status, valor, data)
+  - Busca por código, categoria, responsável
+  - Criação em lote (bulk) com validação de duplicatas
+  - Estatísticas por categoria e status
+  - Soft delete implementado
+- Controller com endpoints RESTful completos (12 endpoints)
+- Migração para criação da tabela patrimonios com índices otimizados
+- 23 testes unitários cobrindo todos os cenários de negócio
+- Testes E2E para todos os endpoints com casos de sucesso e erro
+- Documentação Swagger completa com exemplos e schemas de erro
+- Integração completa com AppModule e sistema existente
+- Constraints de banco para integridade de dados
+- Suporte a categorias: EQUIPAMENTO, MOBILIARIO, VEICULO, IMOVEL, SOFTWARE, OUTROS
+- Suporte a status: ATIVO, INATIVO, MANUTENCAO, DESCARTADO
+- Campos de auditoria completos (createdAt, updatedAt, deletedAt, version)
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

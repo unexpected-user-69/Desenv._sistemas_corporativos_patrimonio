@@ -8,7 +8,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { HashService } from '../common/services/hash.service';
 import { NormalizationService } from '../common/services/normalization.service';
 import { FilterService } from '../common/services/filter.service';
+import { CacheService } from '../common/services/cache.service';
 import { createRepositoryMock } from '../../test/mocks/repository.mock';
+import { createCacheServiceMock } from '../../test/mocks/cache.service.mock';
 
 describe('UsersService - New Methods', () => {
   let service: UsersService;
@@ -66,6 +68,10 @@ describe('UsersService - New Methods', () => {
             validateSortOptions: jest.fn(),
             generateCursor: jest.fn(),
           },
+        },
+        {
+          provide: CacheService,
+          useValue: createCacheServiceMock(),
         },
       ],
     }).compile();

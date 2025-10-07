@@ -6,6 +6,8 @@ import { User, UserRole } from './entities/user.entity';
 import { HashService } from '../common/services/hash.service';
 import { NormalizationService } from '../common/services/normalization.service';
 import { FilterService } from '../common/services/filter.service';
+import { CacheService } from '../common/services/cache.service';
+import { createCacheServiceMock } from '../../test/mocks/cache.service.mock';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -61,6 +63,10 @@ describe('UsersService', () => {
             isValidSortOption: jest.fn(),
             generateFuzzyPatterns: jest.fn(),
           },
+        },
+        {
+          provide: CacheService,
+          useValue: createCacheServiceMock(),
         },
       ],
     }).compile();

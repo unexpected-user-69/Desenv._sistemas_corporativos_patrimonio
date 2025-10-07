@@ -26,6 +26,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { QueryUsersDto } from './dto/query-users.dto';
 import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
+import { AdvancedQueryUsersDto } from './dto/advanced-query-users.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -310,70 +311,6 @@ export class UsersController {
     return this.usersService.remove(id);
   }
 
-  @Get('advanced/search')
-  @ApiOkResponse({
-    description: 'Busca avançada com filtros full-text e ordenação dinâmica',
-    type: PaginatedUsersResponseDto,
-  })
-  @ApiQuery({
-    name: 'searchText',
-    required: false,
-    description: 'Texto para busca full-text',
-  })
-  @ApiQuery({ name: 'role', required: false, description: 'Filtrar por role' })
-  @ApiQuery({
-    name: 'isActive',
-    required: false,
-    description: 'Filtrar por status ativo',
-  })
-  @ApiQuery({
-    name: 'dateFrom',
-    required: false,
-    description: 'Data inicial (ISO string)',
-  })
-  @ApiQuery({
-    name: 'dateTo',
-    required: false,
-    description: 'Data final (ISO string)',
-  })
-  @ApiQuery({
-    name: 'sortBy',
-    required: false,
-    description: 'Campo para ordenação',
-  })
-  @ApiQuery({
-    name: 'sortOrder',
-    required: false,
-    description: 'Direção da ordenação (ASC/DESC)',
-  })
-  @ApiQuery({ name: 'page', required: false, description: 'Número da página' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Itens por página' })
-  async findWithAdvancedFilters(
-    @Query('searchText') searchText?: string,
-    @Query('role') role?: string,
-    @Query('isActive') isActive?: boolean,
-    @Query('dateFrom') dateFrom?: string,
-    @Query('dateTo') dateTo?: string,
-    @Query('sortBy') sortBy?: string,
-    @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ): Promise<PaginatedUsersResponseDto> {
-    const options = {
-      searchText,
-      role: role as UserRole | undefined,
-      isActive,
-      dateFrom: dateFrom ? new Date(dateFrom) : undefined,
-      dateTo: dateTo ? new Date(dateTo) : undefined,
-      sortBy,
-      sortOrder,
-      page,
-      limit,
-    };
-
-    return this.usersService.findWithAdvancedFilters(options);
-  }
-
   @Get('cursor/search')
   @ApiOkResponse({
     description: 'Busca com paginação baseada em cursor',
@@ -516,5 +453,108 @@ export class UsersController {
     @Query('limit') limit?: number,
   ): Promise<UserResponseDto[]> {
     return this.usersService.findRecentActiveUsers(days, limit);
+  }
+
+  @Get('advanced')
+  @ApiOkResponse({
+    description: 'Lista usuários com filtros avançados e cache',
+    type: PaginatedUsersResponseDto,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Número da página',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Número de itens por página',
+    example: 20,
+  })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    description: 'Busca textual (nome, email)',
+    example: 'joão silva',
+  })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    description: 'Filtro por role',
+    enum: UserRole,
+  })
+  @ApiQuery({
+    name: 'isActive',
+    required: false,
+    description: 'Filtro por status ativo',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'createdAfter',
+    required: false,
+    description: 'Data de criação inicial (ISO 8601)',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  @ApiQuery({
+    name: 'createdBefore',
+    required: false,
+    description: 'Data de criação final (ISO 8601)',
+    example: '2024-12-31T23:59:59.999Z',
+  })
+  @ApiQuery({
+    name: 'updatedAfter',
+    required: false,
+    description: 'Data de atualização inicial (ISO 8601)',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  @ApiQuery({
+    name: 'updatedBefore',
+    required: false,
+    description: 'Data de atualização final (ISO 8601)',
+    example: '2024-12-31T23:59:59.999Z',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: 'Campo para ordenação',
+    enum: ['name', 'email', 'role', 'isActive', 'createdAt', 'updatedAt'],
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    description: 'Direção da ordenação',
+    enum: ['ASC', 'DESC'],
+  })
+  async findWithAdvancedFilters(
+    @Query() query: AdvancedQueryUsersDto,
+  ): Promise<PaginatedUsersResponseDto> {
+    return this.usersService.findWithAdvancedFilters(query);
+  }
+
+  @Get('stats')
+  @ApiOkResponse({
+    description: 'Estatísticas de usuários com cache',
+    schema: {
+      type: 'object',
+      properties: {
+        total: { type: 'number', description: 'Total de usuários' },
+        active: { type: 'number', description: 'Usuários ativos' },
+        inactive: { type: 'number', description: 'Usuários inativos' },
+        byRole: {
+          type: 'object',
+          description: 'Contagem por role',
+          additionalProperties: { type: 'number' },
+        },
+      },
+    },
+  })
+  async getUserStats(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+    byRole: Record<string, number>;
+  }> {
+    return this.usersService.getUserStats();
   }
 }

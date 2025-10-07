@@ -256,6 +256,25 @@ CRUD Completo de Patrimônio (Branch feat/patrimonio-crud-complete):
 - Lint e build passando sem erros
 - PR #35 criado e CI checks passando
 
+Cache Redis e Filtros Avançados (Branch feat/redis-cache-advanced-filters):
+- Integração completa do Redis com @nestjs/cache-manager e cache-manager-redis-store
+- CacheService dedicado para operações de cache com logging estruturado
+- Cache inteligente para consultas populares com TTL configurável
+- Filtros avançados por intervalo de datas (createdAfter, createdBefore, updatedAfter, updatedBefore)
+- Ordenação dinâmica por qualquer campo (sortBy, sortOrder) com validação
+- Endpoint GET /v1/users/advanced com cache Redis e filtros avançados
+- Endpoint GET /v1/users/stats com estatísticas em cache
+- Invalidação automática de cache em operações de escrita
+- Configuração de cache via variáveis de ambiente (REDIS_HOST, REDIS_PORT, CACHE_TTL)
+- AppCacheModule configurado com ConfigService para configuração dinâmica
+- Testes unitários completos para CacheService com cenários de erro
+- Testes para funcionalidades de cache em UsersService
+- Mock de CacheService para testes unitários
+- Correção de todos os testes existentes para incluir CacheService
+- 171 testes passando com cobertura completa
+- Build e lint passando sem erros
+- Documentação Swagger atualizada para novos endpoints
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

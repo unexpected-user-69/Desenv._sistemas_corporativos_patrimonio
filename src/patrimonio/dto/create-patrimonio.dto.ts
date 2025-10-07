@@ -29,10 +29,10 @@ export class CreatePatrimonioDto {
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(50)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim().toUpperCase() : value,
-  )
+  @Transform(({ value }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return typeof value === 'string' ? value.trim().toUpperCase() : value;
+  })
   codigo!: string;
 
   @ApiProperty({

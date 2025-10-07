@@ -296,7 +296,6 @@ export class PatrimonioService {
         }),
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const savedPatrimonios =
         await this.patrimonioRepository.save(patrimonios);
       return savedPatrimonios.map((patrimonio) =>
@@ -316,6 +315,7 @@ export class PatrimonioService {
    */
   async findByCategoria(categoria: string): Promise<PatrimonioResponseDto[]> {
     const patrimonios = await this.patrimonioRepository.find({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       where: { categoria: categoria as any },
       order: { nome: 'ASC' },
     });
@@ -342,7 +342,7 @@ export class PatrimonioService {
   /**
    * Estatísticas por categoria
    */
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
   async getStatsByCategoria(): Promise<Record<string, number>> {
     const result = await this.patrimonioRepository
       .createQueryBuilder('patrimonio')
@@ -351,10 +351,12 @@ export class PatrimonioService {
       .groupBy('patrimonio.categoria')
       .getRawMany();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return result.reduce(
       (stats, row) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
         stats[row.categoria] = parseInt(row.count);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return stats;
       },
       {} as Record<string, number>,
@@ -364,7 +366,7 @@ export class PatrimonioService {
   /**
    * Estatísticas por status
    */
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
   async getStatsByStatus(): Promise<Record<string, number>> {
     const result = await this.patrimonioRepository
       .createQueryBuilder('patrimonio')
@@ -373,10 +375,12 @@ export class PatrimonioService {
       .groupBy('patrimonio.status')
       .getRawMany();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return result.reduce(
       (stats, row) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
         stats[row.status] = parseInt(row.count);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return stats;
       },
       {} as Record<string, number>,

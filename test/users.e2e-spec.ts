@@ -180,6 +180,111 @@ describe('Users (e2e)', () => {
     });
   });
 
+  describe('GET /v1/users/email/:email', () => {
+    it('should return user by email', async () => {
+      const response = await request(httpServer)
+        .get('/v1/users/email/joao.silva@example.com')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('id');
+      expect(response.body).toHaveProperty('name', 'João Silva');
+      expect(response.body).toHaveProperty('email', 'joao.silva@example.com');
+      expect(response.body).not.toHaveProperty('passwordHash');
+    });
+
+    it('should return 404 for non-existent email', async () => {
+      await request(httpServer)
+        .get('/v1/users/email/notfound@example.com')
+        .expect(404);
+    });
+
+    it('should handle case-insensitive email search', async () => {
+      const response = await request(httpServer)
+        .get('/v1/users/email/JOAO.SILVA@EXAMPLE.COM')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('email', 'joao.silva@example.com');
+    });
+  });
+
+  describe('POST /v1/users/bulk', () => {
+    it('should create multiple users', async () => {
+      const bulkUsers = [
+        {
+          name: 'Maria Santos',
+          email: 'maria.santos@example.com',
+          password: 'senha456',
+          role: UserRole.TEACHER,
+          isActive: true,
+        },
+        {
+          name: 'Pedro Costa',
+          email: 'pedro.costa@example.com',
+          password: 'senha789',
+          role: UserRole.ADMIN,
+          isActive: true,
+        },
+      ];
+
+      const response = await request(httpServer)
+        .post('/v1/users/bulk')
+        .send(bulkUsers)
+        .expect(201);
+
+      expect(response.body).toHaveLength(2);
+      expect(response.body[0]).toHaveProperty('id');
+      expect(response.body[0]).toHaveProperty('name', 'Maria Santos');
+      expect(response.body[0]).toHaveProperty('email', 'maria.santos@example.com');
+      expect(response.body[0]).not.toHaveProperty('passwordHash');
+      expect(response.body[1]).toHaveProperty('id');
+      expect(response.body[1]).toHaveProperty('name', 'Pedro Costa');
+      expect(response.body[1]).toHaveProperty('email', 'pedro.costa@example.com');
+    });
+
+    it('should return 409 for empty array', async () => {
+      await request(httpServer)
+        .post('/v1/users/bulk')
+        .send([])
+        .expect(409);
+    });
+
+    it('should return 409 for duplicate emails in request', async () => {
+      const duplicateUsers = [
+        {
+          name: 'User 1',
+          email: 'duplicate@example.com',
+          password: 'senha123',
+          role: UserRole.STUDENT,
+        },
+        {
+          name: 'User 2',
+          email: 'duplicate@example.com',
+          password: 'senha456',
+          role: UserRole.TEACHER,
+        },
+      ];
+
+      await request(httpServer)
+        .post('/v1/users/bulk')
+        .send(duplicateUsers)
+        .expect(409);
+    });
+
+    it('should return 409 for too many users', async () => {
+      const tooManyUsers = Array(101).fill({
+        name: 'Test User',
+        email: 'test@example.com',
+        password: 'senha123',
+        role: UserRole.STUDENT,
+      });
+
+      await request(httpServer)
+        .post('/v1/users/bulk')
+        .send(tooManyUsers)
+        .expect(409);
+    });
+  });
+
   describe('Health Check', () => {
     it('should return health status', async () => {
       const response = await request(httpServer).get('/v1/health').expect(200);

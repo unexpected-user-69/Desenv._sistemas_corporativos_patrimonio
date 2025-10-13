@@ -207,6 +207,29 @@ Trabalho Integrado - Pesquisa e Prática (PDF 086):
 - 122 testes passando com padrão AAA e Test Doubles
 - Implementação completa de todos os requisitos do trabalho integrado
 
+Melhorias nos Métodos POST e GET (Branch feat/implement-post-get-methods):
+- Documentação Swagger aprimorada com exemplos detalhados e schemas de erro
+- Endpoint GET /v1/users/email/:email para busca por email com normalização
+- Endpoint POST /v1/users/bulk para criação em lote (até 100 usuários)
+- Validações robustas para emails duplicados na entrada e no banco
+- Tratamento de erros específicos para cada cenário de falha
+- Limite de segurança para criação em lote (máximo 100 usuários)
+- Normalização automática de emails e nomes em operações em lote
+- Testes unitários completos para novos métodos (findByEmail, createBulk)
+- Testes E2E para novos endpoints com cenários de sucesso e erro
+- Cobertura de testes expandida para 129 testes passando
+
+Funcionalidades Avançadas de Produção:
+- Rate limiting com @nestjs/throttler (100 requisições por minuto)
+- Configuração CORS para produção com origins configuráveis via ambiente
+- Compressão gzip para otimização de performance e redução de bandwidth
+- Proteção contra spam e ataques DDoS com throttling inteligente
+- Headers de segurança configurados com helmet
+- Validação de entrada rigorosa com pipes customizados
+- Interceptors globais para logging e métricas de performance
+- Configuração de ambiente para diferentes estágios (dev/staging/prod)
+- Documentação completa de todas as funcionalidades implementadas
+
 Próximas entregas sugeridas (cite elas):
 
 Ver também: `implementacoes.md` e `implementação_geral.md`.

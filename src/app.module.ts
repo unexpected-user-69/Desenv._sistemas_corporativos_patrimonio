@@ -12,6 +12,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { User } from './users/entities/user.entity';
 import { Patrimonio } from './patrimonio/entities/patrimonio.entity';
+import { AppCacheModule } from './common/cache/cache.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { Patrimonio } from './patrimonio/entities/patrimonio.entity';
     UsersModule,
     PatrimonioModule,
     LoggerModule,
+    AppCacheModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [

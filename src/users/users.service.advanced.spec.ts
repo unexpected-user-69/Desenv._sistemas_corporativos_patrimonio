@@ -18,6 +18,8 @@ import {
 } from '../../test/utils/test-doubles';
 import { HashService } from '../common/services/hash.service';
 import { NormalizationService } from '../common/services/normalization.service';
+import { CacheService } from '../common/services/cache.service';
+import { createCacheServiceMock } from '../../test/mocks/cache.service.mock';
 import { FilterService } from '../common/services/filter.service';
 
 // Mock bcrypt
@@ -68,6 +70,10 @@ describe('UsersService - Advanced Unit Tests (PDF 086)', () => {
             isValidSortOption: jest.fn(),
             generateFuzzyPatterns: jest.fn(),
           },
+        },
+        {
+          provide: CacheService,
+          useValue: createCacheServiceMock(),
         },
       ],
     }).compile();

@@ -8,7 +8,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { HashService } from '../common/services/hash.service';
 import { NormalizationService } from '../common/services/normalization.service';
 import { FilterService } from '../common/services/filter.service';
+import { CacheService } from '../common/services/cache.service';
 import { createRepositoryMock } from '../../test/mocks/repository.mock';
+import { createCacheServiceMock } from '../../test/mocks/cache.service.mock';
 
 describe('UsersService - New Methods', () => {
   let service: UsersService;
@@ -16,6 +18,7 @@ describe('UsersService - New Methods', () => {
   let hashService: jest.Mocked<HashService>;
   let normalizationService: jest.Mocked<NormalizationService>;
   let filterService: jest.Mocked<FilterService>;
+  let cacheService: jest.Mocked<CacheService>;
 
   const mockUser: User = {
     id: 'user-1',
@@ -67,6 +70,10 @@ describe('UsersService - New Methods', () => {
             generateCursor: jest.fn(),
           },
         },
+        {
+          provide: CacheService,
+          useValue: createCacheServiceMock(),
+        },
       ],
     }).compile();
 
@@ -75,6 +82,7 @@ describe('UsersService - New Methods', () => {
     hashService = module.get(HashService);
     normalizationService = module.get(NormalizationService);
     filterService = module.get(FilterService);
+    cacheService = module.get(CacheService);
   });
 
   describe('findByEmail', () => {

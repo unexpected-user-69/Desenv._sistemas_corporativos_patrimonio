@@ -8,6 +8,8 @@ import { createUserRepositoryMock } from '../../test/mocks/repository.mock';
 import { HashService } from '../common/services/hash.service';
 import { NormalizationService } from '../common/services/normalization.service';
 import { FilterService } from '../common/services/filter.service';
+import { CacheService } from '../common/services/cache.service';
+import { createCacheServiceMock } from '../../test/mocks/cache.service.mock';
 import * as bcrypt from 'bcryptjs';
 
 // Mock do bcrypt
@@ -63,6 +65,10 @@ describe('UsersService - Create Method', () => {
             isValidSortOption: jest.fn(),
             generateFuzzyPatterns: jest.fn(),
           },
+        },
+        {
+          provide: CacheService,
+          useValue: createCacheServiceMock(),
         },
       ],
     }).compile();

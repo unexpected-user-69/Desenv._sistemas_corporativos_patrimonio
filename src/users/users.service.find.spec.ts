@@ -7,6 +7,8 @@ import { createUserRepositoryMock } from '../../test/mocks/repository.mock';
 import { HashService } from '../common/services/hash.service';
 import { NormalizationService } from '../common/services/normalization.service';
 import { FilterService } from '../common/services/filter.service';
+import { CacheService } from '../common/services/cache.service';
+import { createCacheServiceMock } from '../../test/mocks/cache.service.mock';
 
 describe('UsersService - Find Methods', () => {
   let service: UsersService;
@@ -87,6 +89,10 @@ describe('UsersService - Find Methods', () => {
             isValidSortOption: jest.fn(),
             generateFuzzyPatterns: jest.fn(),
           },
+        },
+        {
+          provide: CacheService,
+          useValue: createCacheServiceMock(),
         },
       ],
     }).compile();

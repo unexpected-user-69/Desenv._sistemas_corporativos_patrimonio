@@ -1,0 +1,160 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  PatrimonioStatus,
+  PatrimonioCategoria,
+} from '../entities/patrimonio.entity';
+
+export class QueryPatrimonioDto {
+  @ApiPropertyOptional({
+    description: 'Número da página',
+    example: 1,
+    minimum: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({
+    description: 'Número de itens por página',
+    example: 10,
+    minimum: 1,
+    maximum: 100,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  limit?: number = 10;
+
+  @ApiPropertyOptional({
+    description: 'Busca textual (nome, código, descrição)',
+    example: 'notebook dell',
+  })
+  @IsOptional()
+  @IsString()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  q?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por categoria',
+    enum: PatrimonioCategoria,
+    example: PatrimonioCategoria.EQUIPAMENTO,
+  })
+  @IsOptional()
+  @IsEnum(PatrimonioCategoria)
+  categoria?: PatrimonioCategoria;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por status',
+    enum: PatrimonioStatus,
+    example: PatrimonioStatus.ATIVO,
+  })
+  @IsOptional()
+  @IsEnum(PatrimonioStatus)
+  status?: PatrimonioStatus;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por marca',
+    example: 'Dell',
+  })
+  @IsOptional()
+  @IsString()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  marca?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por localização',
+    example: 'Sala 101',
+  })
+  @IsOptional()
+  @IsString()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  localizacao?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por responsável',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @IsOptional()
+  @IsString()
+  responsavelId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Valor mínimo de aquisição',
+    example: 1000,
+    minimum: 0,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  valorMin?: number;
+
+  @ApiPropertyOptional({
+    description: 'Valor máximo de aquisição',
+    example: 5000,
+    minimum: 0,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  valorMax?: number;
+
+  @ApiPropertyOptional({
+    description: 'Data de aquisição inicial (YYYY-MM-DD)',
+    example: '2024-01-01',
+  })
+  @IsOptional()
+  @IsString()
+  dataInicio?: string;
+
+  @ApiPropertyOptional({
+    description: 'Data de aquisição final (YYYY-MM-DD)',
+    example: '2024-12-31',
+  })
+  @IsOptional()
+  @IsString()
+  dataFim?: string;
+
+  @ApiPropertyOptional({
+    description: 'Campo para ordenação',
+    enum: [
+      'nome',
+      'codigo',
+      'categoria',
+      'status',
+      'valorAquisicao',
+      'dataAquisicao',
+      'createdAt',
+    ],
+    example: 'nome',
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: string = 'nome';
+
+  @ApiPropertyOptional({
+    description: 'Direção da ordenação',
+    enum: ['ASC', 'DESC'],
+    example: 'ASC',
+  })
+  @IsOptional()
+  @IsString()
+  sortOrder?: 'ASC' | 'DESC' = 'ASC';
+}

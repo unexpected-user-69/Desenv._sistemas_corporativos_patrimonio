@@ -130,6 +130,39 @@ frontend/
 - **Analytics**: Integração com Google Analytics
 - **Testing**: Testes unitários e E2E
 
+### 📊 Sistema de Observabilidade e Monitoramento (M2)
+- **Dashboard de Métricas**: Visualização em tempo real de performance
+- **Métricas de Sistema**: CPU, memória, disco e rede
+- **Logs Estruturados**: Visualização e filtros de logs
+- **Alertas**: Sistema de notificações e regras de alerta
+- **WebSocket**: Atualizações em tempo real
+- **Exportação**: Dados em JSON, CSV e Excel
+- **Métricas Históricas**: Análise de tendências
+
+### ⚡ Testes de Performance (M3)
+- **Testes de Carga**: Configuração e execução de testes
+- **Testes de Stress**: Identificação de pontos de quebra
+- **Monitoramento em Tempo Real**: Acompanhamento durante execução
+- **Relatórios Detalhados**: Análise de throughput e latência
+- **Suites de Teste**: Execução de múltiplos testes
+- **Exportação de Resultados**: Dados para análise externa
+
+### 🔧 Serviços Avançados
+- **HashService**: Configuração de algoritmos de hash
+- **NormalizationService**: Normalização de dados de entrada
+- **FilterService**: Filtros avançados e busca full-text
+- **Cache Management**: Configuração e monitoramento de cache
+- **Validação de Dados**: Validação em tempo real
+- **Operações em Lote**: Criação, atualização e exclusão em massa
+
+### 🔍 Endpoints Avançados
+- **Busca Avançada**: Filtros combinados e ordenação dinâmica
+- **Paginação por Cursor**: Navegação eficiente em grandes datasets
+- **Busca Fuzzy**: Busca aproximada com tolerância a erros
+- **Busca por Intervalo de Datas**: Filtros temporais precisos
+- **Estatísticas por Role**: Análise de distribuição de usuários
+- **Usuários Ativos Recentes**: Identificação de atividade
+
 ## Integração com Backend
 
 ### Endpoints Consumidos
@@ -137,6 +170,10 @@ frontend/
 - **Patrimonios API**: `/v1/patrimonios/*` - Todas as operações de patrimônios
 - **Auth API**: `/v1/auth/*` - Autenticação e autorização
 - **Health Check**: `/health` - Status da aplicação
+- **Monitoring API**: `/v1/metrics/*` - Métricas e monitoramento
+- **Performance API**: `/v1/performance/*` - Testes de performance
+- **Advanced API**: `/v1/users/advanced/*` - Funcionalidades avançadas
+- **Cache API**: `/v1/cache/*` - Gerenciamento de cache
 
 ### Configuração de Ambiente
 ```env
@@ -148,16 +185,20 @@ VITE_APP_VERSION=1.0.0
 ## Status das Implementações
 
 ### ✅ Implementado
-- [ ] Estrutura base do projeto
-- [ ] Configuração de build e desenvolvimento
-- [ ] Sistema de roteamento
-- [ ] Configuração de estilos (Tailwind)
-- [ ] Componentes base da UI
-- [ ] Sistema de autenticação
-- [ ] Gestão de usuários
-- [ ] Gestão de patrimônios
-- [ ] Dashboard principal
-- [ ] Sistema de relatórios
+- [x] Estrutura base do projeto
+- [x] Configuração de build e desenvolvimento
+- [x] Sistema de roteamento
+- [x] Configuração de estilos (Tailwind)
+- [x] Componentes base da UI
+- [x] Sistema de autenticação
+- [x] Gestão de usuários
+- [x] Gestão de patrimônios
+- [x] Dashboard principal
+- [x] Sistema de relatórios
+- [x] **Sistema de Observabilidade e Monitoramento (M2)**
+- [x] **Testes de Performance (M3)**
+- [x] **Serviços Avançados (HashService, NormalizationService, FilterService)**
+- [x] **Endpoints Avançados (/advanced/search, /cursor/search, /fuzzy/search)**
 
 ### 🚧 Em Desenvolvimento
 - [ ] Testes automatizados

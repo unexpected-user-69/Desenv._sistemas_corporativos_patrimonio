@@ -2,9 +2,7 @@ import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import {
   AdvancedFilters,
-  FilterOption,
   FilterGroup,
-  FilterState,
   FilterPreset,
   FilterValidation,
   FilterPerformance,

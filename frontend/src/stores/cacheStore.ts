@@ -190,7 +190,7 @@ export const useCacheStore = create<CacheState>()(
         }
       },
 
-      searchKeys: async (query: string, pattern = '*') => {
+      searchKeys: async (_query: string, pattern = '*') => {
         set({ isLoading: true, error: null });
         try {
           const results = await cacheService.searchKeys({

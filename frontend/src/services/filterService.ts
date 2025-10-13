@@ -1,9 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import {
   AdvancedFilters,
-  FilterOption,
   FilterGroup,
-  FilterState,
   FilterPreset,
   FilterValidation,
   FilterPerformance,
@@ -16,7 +14,7 @@ class FilterService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    this.baseURL = 'http://localhost:3000';
     this.api = axios.create({
       baseURL: this.baseURL,
       timeout: 10000,
@@ -198,7 +196,9 @@ class FilterService {
     // Limitar o tamanho do cache
     if (this.filterCache.size > 100) {
       const firstKey = this.filterCache.keys().next().value;
-      this.filterCache.delete(firstKey);
+      if (firstKey) {
+        this.filterCache.delete(firstKey);
+      }
     }
   }
 

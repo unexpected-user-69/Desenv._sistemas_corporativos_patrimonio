@@ -1,7 +1,6 @@
 // Tipos para sistema de monitoramento e observabilidade (M2)
 
 export interface MetricsData {
-  timestamp: string;
   requests: {
     total: number;
     byMethod: Record<string, number>;
@@ -13,99 +12,81 @@ export interface MetricsData {
     throughput: number;
   };
   system: {
-    memoryUsage: number;
-    cpuUsage: number;
-    diskUsage: number;
+    cpu: number;
+    memory: number;
+    disk: number;
+    network: number;
   };
+  timestamp: string;
+}
+
+export interface SystemHealth {
+  status: 'healthy' | 'warning' | 'critical';
+  lastCheck: string;
+  services: Array<{
+    name: string;
+    status: 'healthy' | 'warning' | 'critical';
+    responseTime?: number;
+    error?: string;
+  }>;
+  uptime: number;
+  version: string;
 }
 
 export interface LogEntry {
   id: string;
-  timestamp: string;
   level: 'error' | 'warn' | 'info' | 'debug';
   message: string;
-  context?: Record<string, any>;
+  timestamp: string;
   userId?: string;
-  requestId?: string;
+  context?: Record<string, any>;
+  service?: string;
+  traceId?: string;
+}
+
+export interface Alert {
+  id: string;
+  title: string;
+  description: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  status: 'active' | 'resolved' | 'acknowledged';
+  timestamp: string;
+  source: string;
+  tags?: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface AlertRule {
   id: string;
   name: string;
+  description: string;
   condition: string;
   threshold: number;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'critical' | 'high' | 'medium' | 'low';
   enabled: boolean;
   lastTriggered?: string;
 }
 
-export interface DashboardConfig {
-  id: string;
-  name: string;
-  widgets: WidgetConfig[];
-  refreshInterval: number;
-  autoRefresh: boolean;
-}
-
-export interface WidgetConfig {
-  id: string;
-  type: 'chart' | 'metric' | 'table' | 'alert';
-  title: string;
-  position: { x: number; y: number; w: number; h: number };
-  config: Record<string, any>;
-}
-
-export interface PerformanceMetrics {
-  responseTime: {
-    min: number;
-    max: number;
-    avg: number;
-    p50: number;
-    p95: number;
-    p99: number;
-  };
-  throughput: {
-    requestsPerSecond: number;
-    requestsPerMinute: number;
-  };
-  errorRate: {
-    percentage: number;
-    count: number;
-  };
-  uptime: {
-    percentage: number;
-    downtime: number;
-  };
-}
-
-export interface SystemHealth {
-  status: 'healthy' | 'warning' | 'critical';
-  services: ServiceHealth[];
-  lastCheck: string;
-}
-
-export interface ServiceHealth {
-  name: string;
-  status: 'up' | 'down' | 'degraded';
-  responseTime?: number;
-  lastCheck: string;
-  error?: string;
+export interface ChartData {
+  labels: string[];
+  datasets: Array<{
+    label: string;
+    data: number[];
+    backgroundColor?: string;
+    borderColor?: string;
+    fill?: boolean;
+  }>;
 }
 
 export interface MonitoringConfig {
-  metricsCollection: {
-    enabled: boolean;
-    interval: number;
-    retention: number;
+  refreshInterval: number;
+  autoRefresh: boolean;
+  alertThresholds: {
+    responseTime: number;
+    errorRate: number;
+    cpuUsage: number;
+    memoryUsage: number;
   };
-  logging: {
-    level: string;
-    maxSize: number;
-    maxFiles: number;
-  };
-  alerts: {
-    enabled: boolean;
-    email: string[];
-    webhook?: string;
-  };
+  logLevels: string[];
+  retentionDays: number;
 }

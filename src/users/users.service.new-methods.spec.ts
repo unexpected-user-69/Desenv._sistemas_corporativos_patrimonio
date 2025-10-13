@@ -18,6 +18,7 @@ describe('UsersService - New Methods', () => {
   let hashService: jest.Mocked<HashService>;
   let normalizationService: jest.Mocked<NormalizationService>;
   let filterService: jest.Mocked<FilterService>;
+  let cacheService: jest.Mocked<CacheService>;
 
   const mockUser: User = {
     id: 'user-1',
@@ -81,6 +82,7 @@ describe('UsersService - New Methods', () => {
     hashService = module.get(HashService);
     normalizationService = module.get(NormalizationService);
     filterService = module.get(FilterService);
+    cacheService = module.get(CacheService);
   });
 
   describe('findByEmail', () => {

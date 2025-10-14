@@ -35,12 +35,10 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
       setLoading(true);
       setError(null);
 
-      const [suitesData, qualityData, coverageData, envData, templatesData] = await Promise.all([
+      const [suitesData, qualityData, coverageData] = await Promise.all([
         testingService.getTestSuites(),
         testingService.getQualityMetrics(),
         testingService.getCoverageReport(),
-        testingService.getTestEnvironments(),
-        testingService.getTestTemplates()
       ]);
 
       setTestSuites(suitesData);

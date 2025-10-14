@@ -182,6 +182,7 @@ export const SecurityHeadersPanel: React.FC = () => {
                     onChange={(e) => setEditHeaders({
                       ...editHeaders,
                       helmet: {
+                        ...headers.helmet,
                         ...editHeaders.helmet,
                         [key]: e.target.checked
                       }

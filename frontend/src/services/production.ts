@@ -151,10 +151,10 @@ const mockAlerts: ProductionAlert[] = [
 ];
 
 class ProductionService {
-  private _baseUrl: string;
+  // private _baseUrl: string;
 
   constructor() {
-    this._baseUrl = 'http://localhost:3000';
+    // this._baseUrl = 'http://localhost:3000';
   }
 
   async getProductionDashboard(): Promise<ProductionDashboard> {

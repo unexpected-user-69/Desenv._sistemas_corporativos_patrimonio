@@ -187,7 +187,12 @@ export const EnvironmentConfigPanel: React.FC = () => {
                   value={editConfig.logging?.level || config.logging.level}
                   onChange={(e) => setEditConfig({ 
                     ...editConfig, 
-                    logging: { ...editConfig.logging, level: e.target.value } 
+                    logging: { 
+                      level: e.target.value,
+                      format: editConfig.logging?.format || config.logging.format,
+                      enableConsole: editConfig.logging?.enableConsole ?? config.logging.enableConsole,
+                      enableFile: editConfig.logging?.enableFile ?? config.logging.enableFile
+                    } 
                   })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -210,7 +215,12 @@ export const EnvironmentConfigPanel: React.FC = () => {
                   value={editConfig.logging?.format || config.logging.format}
                   onChange={(e) => setEditConfig({ 
                     ...editConfig, 
-                    logging: { ...editConfig.logging, format: e.target.value } 
+                    logging: { 
+                      level: editConfig.logging?.level || config.logging.level,
+                      format: e.target.value,
+                      enableConsole: editConfig.logging?.enableConsole ?? config.logging.enableConsole,
+                      enableFile: editConfig.logging?.enableFile ?? config.logging.enableFile
+                    } 
                   })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -235,7 +245,12 @@ export const EnvironmentConfigPanel: React.FC = () => {
                   checked={editConfig.logging?.enableConsole ?? config.logging.enableConsole}
                   onChange={(e) => setEditConfig({ 
                     ...editConfig, 
-                    logging: { ...editConfig.logging, enableConsole: e.target.checked } 
+                    logging: { 
+                      level: editConfig.logging?.level || config.logging.level,
+                      format: editConfig.logging?.format || config.logging.format,
+                      enableConsole: e.target.checked,
+                      enableFile: editConfig.logging?.enableFile ?? config.logging.enableFile
+                    } 
                   })}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
@@ -254,7 +269,12 @@ export const EnvironmentConfigPanel: React.FC = () => {
                   checked={editConfig.logging?.enableFile ?? config.logging.enableFile}
                   onChange={(e) => setEditConfig({ 
                     ...editConfig, 
-                    logging: { ...editConfig.logging, enableFile: e.target.checked } 
+                    logging: { 
+                      level: editConfig.logging?.level || config.logging.level,
+                      format: editConfig.logging?.format || config.logging.format,
+                      enableConsole: editConfig.logging?.enableConsole ?? config.logging.enableConsole,
+                      enableFile: e.target.checked
+                    } 
                   })}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />

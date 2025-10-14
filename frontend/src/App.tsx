@@ -6,11 +6,15 @@ import {
   Home,
   Activity,
   Zap,
-  Settings
+  Settings,
+  Shield,
+  TestTube
 } from 'lucide-react';
 import { MonitoringDashboard } from './components/monitoring/MonitoringDashboard';
+import { ProductionPage } from './pages/production/ProductionPage';
+import { TestingPage } from './pages/testing/TestingPage';
 
-type TabType = 'home' | 'cache' | 'filters' | 'analytics' | 'monitoring' | 'performance' | 'advanced';
+type TabType = 'home' | 'cache' | 'filters' | 'analytics' | 'monitoring' | 'performance' | 'advanced' | 'production' | 'testing';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -22,7 +26,9 @@ export const App: React.FC = () => {
     { id: 'analytics', name: 'Analytics', icon: BarChart3 },
     { id: 'monitoring', name: 'Monitoramento', icon: Activity },
     { id: 'performance', name: 'Performance', icon: Zap },
-    { id: 'advanced', name: 'Avançado', icon: Settings }
+    { id: 'advanced', name: 'Avançado', icon: Settings },
+    { id: 'production', name: 'Produção', icon: Shield },
+    { id: 'testing', name: 'Testes', icon: TestTube }
   ];
 
   const renderContent = () => {
@@ -79,6 +85,20 @@ export const App: React.FC = () => {
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Avançado</h3>
                     <p className="text-gray-600">
                       Funcionalidades avançadas e configurações do sistema
+                    </p>
+                  </div>
+                  <div className="card text-center">
+                    <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Produção</h3>
+                    <p className="text-gray-600">
+                      Configurações de produção, segurança e monitoramento
+                    </p>
+                  </div>
+                  <div className="card text-center">
+                    <TestTube className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Testes</h3>
+                    <p className="text-gray-600">
+                      Utilitários de teste, mocks e qualidade de código
                     </p>
                   </div>
                 </div>
@@ -166,6 +186,22 @@ export const App: React.FC = () => {
                   Serviços avançados e endpoints especiais em desenvolvimento
                 </p>
               </div>
+            </div>
+          </div>
+        );
+      case 'production':
+        return (
+          <div className="min-h-screen bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <ProductionPage />
+            </div>
+          </div>
+        );
+      case 'testing':
+        return (
+          <div className="min-h-screen bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <TestingPage />
             </div>
           </div>
         );

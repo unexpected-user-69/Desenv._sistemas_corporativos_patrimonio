@@ -2,7 +2,7 @@
 
 import { MetricsData, LogEntry, AlertRule, DashboardConfig, SystemHealth } from '../types/monitoring';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = 'http://localhost:3000';
 
 export class MonitoringService {
   private baseUrl: string;

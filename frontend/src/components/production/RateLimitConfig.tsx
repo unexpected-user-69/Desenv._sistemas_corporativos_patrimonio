@@ -1,16 +1,16 @@
 // Configuração de Rate Limiting
 
 import React, { useState } from 'react';
-import { RateLimitConfig } from '../../types/production';
+import type { RateLimitConfig as RateLimitConfigType } from '../../types/production';
 import { productionService } from '../../services/production';
 
 interface Props {
-  config: RateLimitConfig;
+  config: RateLimitConfigType;
   onUpdate: () => void;
 }
 
 export const RateLimitConfig: React.FC<Props> = ({ config, onUpdate }) => {
-  const [formData, setFormData] = useState<RateLimitConfig>(config);
+  const [formData, setFormData] = useState<RateLimitConfigType>(config);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 

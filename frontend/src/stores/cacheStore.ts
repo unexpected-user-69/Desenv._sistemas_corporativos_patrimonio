@@ -327,8 +327,8 @@ export const useCacheStore = create<CacheState>()(
       setCacheAlerts: (alerts: CacheAlert[]) => set({ alerts }),
       setCachePatterns: (patterns: CachePattern[]) => set({ patterns }),
       setCacheMetrics: (metrics: CacheMetrics) => set({ metrics }),
-      setCacheFlushOptions: (options: CacheFlushOptions) => set({}),
-      setCacheSearchOptions: (options: CacheSearchOptions) => set({}),
+      setCacheFlushOptions: (_options: CacheFlushOptions) => set({}),
+      setCacheSearchOptions: (_options: CacheSearchOptions) => set({}),
       setCacheSearchResult: (result: CacheSearchResult) => set({ searchResult: result }),
     })),
     {

@@ -1,18 +1,15 @@
 // Serviço para funcionalidades de produção (Rate Limiting, CORS, Compression, Segurança)
 
-import { 
+import type { 
   RateLimitConfig, 
-  RateLimitStatus, 
   CorsConfig, 
   CompressionConfig, 
   CompressionStats,
   SecurityHeaders,
-  EnvironmentConfig,
   RequestLog,
   MetricsData,
   ProductionDashboard,
-  ProductionAlert,
-  ProductionConfig
+  ProductionAlert
 } from '../types/production';
 
 // Mock data para demonstração
@@ -157,7 +154,7 @@ class ProductionService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    this.baseUrl = 'http://localhost:3000';
   }
 
   async getProductionDashboard(): Promise<ProductionDashboard> {
@@ -331,7 +328,7 @@ class ProductionService {
     }
   }
 
-  async updateRateLimitConfig(config: RateLimitConfig): Promise<void> {
+  async updateRateLimitConfig(_config: RateLimitConfig): Promise<void> {
     try {
       // Em produção, fazer requisição real para o backend
       // await fetch(`${this.baseUrl}/v1/production/rate-limit`, {
@@ -350,7 +347,7 @@ class ProductionService {
     }
   }
 
-  async updateCorsConfig(config: CorsConfig): Promise<void> {
+  async updateCorsConfig(_config: CorsConfig): Promise<void> {
     try {
       // Em produção, fazer requisição real para o backend
       // await fetch(`${this.baseUrl}/v1/production/cors`, {
@@ -369,7 +366,7 @@ class ProductionService {
     }
   }
 
-  async updateCompressionConfig(config: CompressionConfig): Promise<void> {
+  async updateCompressionConfig(_config: CompressionConfig): Promise<void> {
     try {
       // Em produção, fazer requisição real para o backend
       // await fetch(`${this.baseUrl}/v1/production/compression`, {
@@ -388,7 +385,7 @@ class ProductionService {
     }
   }
 
-  async updateSecurityConfig(config: SecurityHeaders): Promise<void> {
+  async updateSecurityConfig(_config: SecurityHeaders): Promise<void> {
     try {
       // Em produção, fazer requisição real para o backend
       // await fetch(`${this.baseUrl}/v1/production/security`, {
@@ -407,7 +404,7 @@ class ProductionService {
     }
   }
 
-  async resolveAlert(alertId: string): Promise<void> {
+  async resolveAlert(_alertId: string): Promise<void> {
     try {
       // Em produção, fazer requisição real para o backend
       // await fetch(`${this.baseUrl}/v1/production/alerts/${alertId}/resolve`, {

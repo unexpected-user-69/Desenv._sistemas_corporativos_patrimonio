@@ -16,17 +16,6 @@ export const ProductionMetrics: React.FC<Props> = ({ metrics }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const getStatusColor = (value: number, thresholds: { good: number; warning: number }) => {
-    if (value <= thresholds.good) return 'text-green-600';
-    if (value <= thresholds.warning) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getStatusBg = (value: number, thresholds: { good: number; warning: number }) => {
-    if (value <= thresholds.good) return 'bg-green-100';
-    if (value <= thresholds.warning) return 'bg-yellow-100';
-    return 'bg-red-100';
-  };
 
   return (
     <div className="space-y-6">

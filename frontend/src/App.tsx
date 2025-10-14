@@ -11,6 +11,7 @@ import {
   TestTube
 } from 'lucide-react';
 import { MonitoringDashboard } from './components/monitoring/MonitoringDashboard';
+import { CacheDashboard } from './components/cache/CacheDashboard';
 import { ProductionPage } from './pages/production/ProductionPage';
 import { TestingPage } from './pages/testing/TestingPage';
 

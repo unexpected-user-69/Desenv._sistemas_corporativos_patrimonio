@@ -1,6 +1,6 @@
 // Serviço para funcionalidades avançadas de produção e segurança
 
-import { 
+import type { 
   RateLimitConfig, 
   RateLimitStats, 
   CORSConfig, 
@@ -10,7 +10,6 @@ import {
   SecurityHeaders, 
   SecurityStats, 
   EnvironmentConfig, 
-  ValidationPipeConfig, 
   ValidationStats, 
   InterceptorStats, 
   ProductionDashboard 
@@ -119,7 +118,7 @@ class SecurityService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    this.baseUrl = 'http://localhost:3000';
   }
 
   // Rate Limiting

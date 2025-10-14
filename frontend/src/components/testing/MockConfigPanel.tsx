@@ -8,7 +8,6 @@ export const MockConfigPanel: React.FC = () => {
   const [mockConfigs, setMockConfigs] = useState<MockConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMock, setSelectedMock] = useState<MockConfig | null>(null);
   const [activeTab, setActiveTab] = useState<'list' | 'create' | 'edit'>('list');
   const [editingMock, setEditingMock] = useState<MockConfig | null>(null);
 
@@ -303,7 +302,7 @@ export const MockConfigPanel: React.FC = () => {
                 rows={6}
                 defaultValue={editingMock ? JSON.stringify(editingMock.response, null, 2) : '{\n  "message": "Mock response"\n}'}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                placeholder="{\n  \"message\": \"Mock response\"\n}"
+                placeholder='{"message": "Mock response"}'
               />
             </div>
 

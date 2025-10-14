@@ -1,9 +1,8 @@
 // Dashboard principal de utilitários de teste e qualidade de código
 
 import React, { useState, useEffect } from 'react';
-import { 
+import type { 
   TestSuite, 
-  TestExecution, 
   QualityMetrics, 
   CoverageSummary,
   TestEnvironment,
@@ -29,8 +28,6 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
   const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics | null>(null);
   const [coverage, setCoverage] = useState<CoverageSummary | null>(null);
-  const [environments, setEnvironments] = useState<TestEnvironment[]>([]);
-  const [templates, setTemplates] = useState<TestTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());

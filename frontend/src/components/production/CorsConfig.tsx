@@ -1,16 +1,16 @@
 // Configuração de CORS
 
 import React, { useState } from 'react';
-import { CorsConfig } from '../../types/production';
+import type { CorsConfig as CorsConfigType } from '../../types/production';
 import { productionService } from '../../services/production';
 
 interface Props {
-  config: CorsConfig;
+  config: CorsConfigType;
   onUpdate: () => void;
 }
 
 export const CorsConfig: React.FC<Props> = ({ config, onUpdate }) => {
-  const [formData, setFormData] = useState<CorsConfig>(config);
+  const [formData, setFormData] = useState<CorsConfigType>(config);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [newOrigin, setNewOrigin] = useState('');

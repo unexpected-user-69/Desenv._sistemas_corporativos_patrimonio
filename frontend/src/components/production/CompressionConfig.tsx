@@ -1,16 +1,16 @@
 // Configuração de Compressão
 
 import React, { useState, useEffect } from 'react';
-import { CompressionConfig, CompressionStats } from '../../types/production';
+import type { CompressionConfig as CompressionConfigType, CompressionStats } from '../../types/production';
 import { productionService } from '../../services/production';
 
 interface Props {
-  config: CompressionConfig;
+  config: CompressionConfigType;
   onUpdate: () => void;
 }
 
 export const CompressionConfig: React.FC<Props> = ({ config, onUpdate }) => {
-  const [formData, setFormData] = useState<CompressionConfig>(config);
+  const [formData, setFormData] = useState<CompressionConfigType>(config);
   const [stats, setStats] = useState<CompressionStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingStats, setLoadingStats] = useState(false);

@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { PatrimonioModule } from './patrimonio/patrimonio.module';
 import { LoggerModule } from './common/logger/logger.module';
+import { CommonModule } from './common/common.module';
 import { MetricsController } from './common/controllers/metrics.controller';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -36,8 +37,9 @@ import { Patrimonio } from './patrimonio/entities/patrimonio.entity';
     UsersModule,
     PatrimonioModule,
     LoggerModule,
+    CommonModule,
   ],
-  controllers: [AppController, MetricsController, CacheController],
+  controllers: [AppController, MetricsController],
   providers: [
     AppService,
     MetricsInterceptor,

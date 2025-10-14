@@ -10,10 +10,10 @@
 
 ### ✅ **Backend (NestJS)**
 - **Status**: ✅ RODANDO
-- **Porta**: 3001
-- **URL**: http://localhost:3001
-- **Swagger Docs**: http://localhost:3001/docs
-- **Health Check**: ✅ http://localhost:3001/v1/health retorna "OK"
+- **Porta**: 3101
+- **URL**: http://localhost:3101
+- **Swagger Docs**: http://localhost:3101/docs
+- **Health Check**: ✅ http://localhost:3101/v1/health retorna "OK"
 - **Problema**: Endpoints de cache não implementados
 
 ## 🚨 **Problemas Identificados**
@@ -22,12 +22,12 @@
 Todos os endpoints de cache foram implementados e estão funcionando:
 
 ```
-✅ GET http://localhost:3001/v1/v1/cache/stats
-✅ GET http://localhost:3001/v1/cache/health  
-✅ GET http://localhost:3001/v1/v1/cache/keys
-✅ GET http://localhost:3001/v1/v1/cache/operations
-✅ GET http://localhost:3001/v1/v1/cache/alerts
-✅ GET http://localhost:3001/v1/v1/cache/config
+✅ GET http://localhost:3101/v1/cache/stats
+✅ GET http://localhost:3101/v1/cache/health  
+✅ GET http://localhost:3101/v1/cache/keys
+✅ GET http://localhost:3101/v1/cache/operations
+✅ GET http://localhost:3101/v1/cache/alerts
+✅ GET http://localhost:3101/v1/cache/config
 ```
 
 **Nota**: Há uma duplicação do prefixo `/v1/v1/` que será corrigida em breve.
@@ -36,9 +36,9 @@ Todos os endpoints de cache foram implementados e estão funcionando:
 Endpoints de monitoramento também foram implementados:
 
 ```
-✅ GET http://localhost:3001/v1/metrics
-✅ GET http://localhost:3001/v1/metrics/health
-✅ GET http://localhost:3001/v1/metrics/logs
+✅ GET http://localhost:3101/v1/metrics
+✅ GET http://localhost:3101/v1/metrics/health
+✅ GET http://localhost:3101/v1/metrics/logs
 ```
 
 ### 3. **Problema de Prefixo Duplicado** ⚠️
@@ -166,7 +166,7 @@ export class MockCacheService {
 ### **1. Verificar Backend**
 ```bash
 # Verificar se está rodando
-curl http://localhost:3001/v1/health
+curl http://localhost:3101/v1/health
 
 # Se não estiver, iniciar
 npm run start:dev
@@ -183,7 +183,7 @@ touch src/common/controllers/cache.controller.ts
 ### **3. Testar Integração**
 ```bash
 # Testar endpoint
-curl http://localhost:3001/v1/cache/health
+curl http://localhost:3101/v1/cache/health
 
 # Verificar frontend
 # Abrir http://localhost:5173
@@ -193,7 +193,7 @@ curl http://localhost:3001/v1/cache/health
 ## 📋 **Checklist de Integração**
 
 ### **Backend**
-- [x] ✅ Backend rodando na porta 3001
+- [x] ✅ Backend rodando na porta 3101
 - [x] ✅ Endpoint `/v1/health` funcionando
 - [x] ✅ Endpoints de cache implementados
 - [x] ✅ Endpoints de métricas implementados
@@ -202,7 +202,7 @@ curl http://localhost:3001/v1/cache/health
 
 ### **Frontend**
 - [x] ✅ Frontend rodando na porta 5173
-- [ ] ❌ Serviços configurados para porta 3001
+- [x] ✅ Serviços configurados para porta 3101
 - [ ] ❌ Tratamento de erros de conexão
 - [ ] ❌ Loading states implementados
 - [ ] ❌ Fallback para quando backend não está disponível
@@ -232,8 +232,8 @@ npm run preview           # Preview build
 ### **Testes**
 ```bash
 # Testar backend
-curl http://localhost:3001/v1/health
-curl http://localhost:3001/v1/cache/health
+curl http://localhost:3101/v1/health
+curl http://localhost:3101/v1/cache/health
 
 # Testar frontend
 # Abrir http://localhost:5173 no navegador
@@ -249,7 +249,7 @@ curl http://localhost:3001/v1/cache/health
 ---
 
 **📅 Última Atualização**: 14/10/2025 23:02  
-**🔄 Status**: ✅ Backend rodando na porta 3001 - Frontend rodando na porta 5173  
+**🔄 Status**: ✅ Backend rodando na porta 3101 - Frontend rodando na porta 5173  
 **✅ Implementado**: Endpoints de cache e métricas funcionando  
 **⚠️ Problema**: Prefixo duplicado `/v1/v1/` nos endpoints de cache  
 **👨‍💻 Próxima Ação**: Corrigir prefixo duplicado e configurar CORS para frontend

@@ -191,14 +191,16 @@ npm run migration:run
 ## 🎉 SUCESSO! 
 
 ### ✅ Status Final:
-- **Backend**: ✅ Rodando em http://localhost:3000
+- **Backend**: ✅ Rodando em http://localhost:3101
 - **Frontend**: ✅ Rodando em http://localhost:5173  
 - **Conexão**: ✅ Testada e funcionando
-- **Health Check**: ✅ http://localhost:3000/v1/health retorna "OK"
-- **Swagger**: ✅ Disponível em http://localhost:3000/docs
+- **Health Check**: ✅ http://localhost:3101/v1/health retorna "OK"
+- **Swagger**: ✅ Disponível em http://localhost:3101/docs
 
 ### 🚀 Próximos Passos:
 1. Abrir http://localhost:5173 no navegador
 2. Verificar se os erros de conexão sumiram
 3. Testar as funcionalidades do sistema
 4. Configurar banco de dados se necessário
+
+

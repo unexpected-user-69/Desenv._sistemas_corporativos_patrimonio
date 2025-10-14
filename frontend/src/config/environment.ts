@@ -18,7 +18,7 @@ const getEnvNumber = (key: string, defaultValue: number): number => {
 
 export const config = {
   api: {
-    baseUrl: getEnvVar('VITE_API_BASE_URL', 'http://localhost:3001'),
+    baseUrl: getEnvVar('VITE_API_BASE_URL', 'http://localhost:3101'),
     timeout: 30000,
   },
   app: {

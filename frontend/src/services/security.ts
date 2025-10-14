@@ -39,7 +39,7 @@ const generateMockCORSStats = (): CORSStats => ({
   preflightRequests: Math.floor(Math.random() * 500) + 100,
   blockedRequests: Math.floor(Math.random() * 50) + 5,
   allowedOrigins: [
-    'http://localhost:3001',
+    'http://localhost:3101',
     'https://app.example.com',
     'https://admin.example.com',
   ],
@@ -48,7 +48,7 @@ const generateMockCORSStats = (): CORSStats => ({
     'https://suspicious-domain.org',
   ],
   topOrigins: [
-    { origin: 'http://localhost:3001', requests: 800 },
+    { origin: 'http://localhost:3101', requests: 800 },
     { origin: 'https://app.example.com', requests: 600 },
     { origin: 'https://admin.example.com', requests: 400 },
     { origin: 'https://mobile.example.com', requests: 200 },
@@ -181,7 +181,7 @@ class SecurityService {
   // private _baseUrl: string;
 
   constructor() {
-    // this._baseUrl = 'http://localhost:3001';
+    // this._baseUrl = 'http://localhost:3101';
   }
 
   // Rate Limiting
@@ -258,7 +258,7 @@ class SecurityService {
 
       // Mock data para demonstração
       const config: CORSConfig = {
-        origin: ['http://localhost:3001', 'https://app.example.com'],
+        origin: ['http://localhost:3101', 'https://app.example.com'],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
         exposedHeaders: ['X-Total-Count', 'X-Page-Count'],

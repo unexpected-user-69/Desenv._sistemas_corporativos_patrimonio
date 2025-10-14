@@ -290,7 +290,7 @@ export const CorsConfig: React.FC<Props> = ({ config, onUpdate }) => {
               <button
                 onClick={() =>
                   setFormData({
-                    origin: ['http://localhost:3001', 'http://localhost:5173'],
+                    origin: ['http://localhost:3101', 'http://localhost:5173'],
                     methods: [
                       'GET',
                       'POST',

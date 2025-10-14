@@ -12,7 +12,7 @@ import type {
   CoverageSummary,
 } from '../types/testing';
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'http://localhost:3101';
 
 export class TestingService {
   private baseUrl: string;

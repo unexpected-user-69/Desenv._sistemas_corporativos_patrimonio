@@ -298,7 +298,7 @@ class CacheService {
   async getPatterns(): Promise<CachePattern[]> {
       try {
         const response = await this.api.get('/v1/cache/patterns');
-        return response.data as string[];
+        return response.data as CachePattern[];
       } catch (error) {
         console.error('Erro ao buscar padrões do cache:', error);
       // Retorna padrões mockados
@@ -341,7 +341,7 @@ class CacheService {
   async searchKeys(options: CacheSearchOptions): Promise<CacheSearchResult> {
     try {
       const response = await this.api.post('/v1/cache/search', options);
-      return response.data as CacheKey[];
+      return response.data as CacheSearchResult;
     } catch (error) {
       console.error('Erro ao buscar chaves:', error);
       throw error;

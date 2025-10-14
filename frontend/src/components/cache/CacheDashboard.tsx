@@ -18,6 +18,9 @@ export const CacheDashboard: React.FC = () => {
     fetchConfig,
   } = useCacheStore();
 
+  // Debug temporário
+  console.log('CacheDashboard - keys:', keys, 'type:', typeof keys, 'isArray:', Array.isArray(keys));
+
   useEffect(() => {
     void fetchStats();
     void fetchHealth();
@@ -175,7 +178,7 @@ export const CacheDashboard: React.FC = () => {
           </h2>
         </div>
         <div className="divide-y divide-gray-200">
-          {keys.slice(0, 10).map((key) => (
+          {Array.isArray(keys) ? keys.slice(0, 10).map((key) => (
             <div key={key.key} className="px-6 py-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -189,12 +192,16 @@ export const CacheDashboard: React.FC = () => {
                 </div>
               </div>
             </div>
-          ))}
+          )) : (
+            <div className="px-6 py-4 text-center text-gray-500">
+              Carregando chaves do cache...
+            </div>
+          )}
         </div>
       </div>
 
       {/* Alertas */}
-      {alerts.length > 0 && (
+      {Array.isArray(alerts) && alerts.length > 0 && (
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Alertas</h2>

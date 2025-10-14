@@ -2,7 +2,7 @@ import { Controller, Get, Query, Post, Body, Delete, Param } from '@nestjs/commo
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Cache')
-@Controller('v1/cache')
+@Controller('cache')
 export class CacheController {
   
   @Get('stats')

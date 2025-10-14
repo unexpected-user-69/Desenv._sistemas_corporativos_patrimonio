@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/http-exception.filter';
+import { LoggingInterceptor, TimeoutInterceptor } from './common/interceptors';
 import helmet from 'helmet';
 import compression from 'compression';
 
@@ -41,8 +42,10 @@ async function bootstrap() {
     }),
   );
 
-  // ClassSerializerInterceptor global para @Exclude/@Expose
+  // Interceptors globais
   app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new TimeoutInterceptor(10000), // 10 segundos de timeout
     new ClassSerializerInterceptor(app.get('Reflector')),
   );
 

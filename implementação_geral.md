@@ -713,91 +713,91 @@ A seguir estão todas as implementações solicitadas ou descritas no material, 
 
 ---
 
-## 091--- Excerpts from "091-Microsservico-Users-Testes-Unitarios-no-NestJS-TypeScript (1).pdf"
-
-### Implementações Centrais (Listagem Paginada e Filtros)
-
-*   **Implementar Paginação Canônica e Ordenação:** Verificar que os parâmetros `page` e `limit` são processados corretamente, resultando em cálculos precisos de `skip`/`take` e garantindo uma ordenação previsível, como por `createdAt DESC`.
-    *   A lógica de paginação deve calcular `skip: 0` e `take: 10` quando `page=1` e `limit=10`.
-*   **Implementar Busca Textual Robusta:** Validar o uso de `ILike` (case-insensitive) para pesquisar termos nos campos `name` ou `email`, assegurando que a composição lógica `OR` seja aplicada corretamente.
-    *   A busca deve ser um array com OR, como `[{ name: ILike('%ana%') }, { email: ILike('%ana%') }]`.
-*   **Implementar Filtros Estruturados Combinados:** Confirmar a aplicação de filtros estruturados, como `role` (enum) e `isActive` (booleano), e que estes são combinados com a busca textual utilizando a lógica `AND` dentro de cada branch da condição `OR`.
-    *   Quando `q` não é informado, deve-se aplicar o filtro de `role` sozinho (como um objeto simples, não um array `where`).
-*   **Implementar Sanitização Defensiva de Parâmetros:** Garantir que entradas fora dos limites aceitáveis (`page < 1`, `limit < 1` ou `limit > 100`) são corrigidas automaticamente pela aplicação.
-    *   `page < 1` deve ser corrigido para 1.
-    *   `limit > 100` deve ser limitado para 100.
-    *   `limit < 1` deve ser corrigido para 1.
-*   **Garantir a Segurança e Integridade dos Dados (Stripping):** Realizar verificações formais para assegurar que campos sensíveis, como o `passwordHash`, nunca sejam incluídos no objeto de retorno.
-    *   Confirmar que `passwordHash` nunca é incluído no `select`.
-*   **Assegurar Conformidade do Contrato da API:** Garantir que os métodos `findAll` e `findPaginatedAndFiltered` respeitem o contrato de retorno em todas as combinações de parâmetros.
-*   **Implementação do Controller (Thin Controller):** O controller deve atuar como ponte e delegar a lógica ao service:
-    *   O `POST /users` deve delegar a chamada ao `service.create`.
-    *   O `GET /users` deve delegar a chamada ao `service.findAll` com paginação e filtros.
-
-### Implementações de Qualidade e Processo
-
-*   **Consolidar Limiares de Cobertura e CI/CD:** Integrar scripts de teste e limiares de cobertura de código no processo de CI/CD, garantindo que nenhum PR seja mesclado sem atender a um padrão mínimo de qualidade e cobertura.
-*   **Configuração de Cobertura:** Definir os thresholds de cobertura (ex: `global: { branches: 70, functions: 80, lines: 80, statements: 80 }`).
-
-### Implementações Futuras (Evolução Técnica)
-
-*   **Cobertura Adicional:** Implementar testes para as funcionalidades `findOne`, `update`, e `remove`.
-*   **Criação de Service de Hash:** Criar um serviço dedicado para hash de senhas com injeção de dependência.
-*   **Implementação de Filtros Avançados:** Adicionar normalização de email (`LOWER` no banco), filtros por intervalo de datas, busca full-text e ordenação dinâmica por múltiplos campos.
-*   **Implementação de Paginação Cursor:** Implementar paginação por cursor para listas muito grandes.
-*   **Implementação de DTOs de Resposta:** Implementar `UserResponseDto` e mappers puros (testáveis) garantindo que `passwordHash` nunca vaze.
-
-## 092--- Excerpts from "092-Dos-Fundamentos-ao-Musculo-dos-Testes-Listagem-Paginada-e-Filtros.pdf"
-
-*(Observação: Este documento repete muitas das solicitações de implementação e validações de comportamento cruciais descritas no 091.)*
-
-### Implementações Centrais
-
-*   **Implementar Paginação e Ordenação:** Verificar que `page` e `limit` resultam em cálculos precisos de `skip`/`take` e garantem ordenação por `createdAt DESC`.
-*   **Implementar Busca Textual:** Validar o uso de `ILike` para pesquisar em `name` ou `email` com lógica `OR`.
-*   **Implementar Filtros Estruturados Combinados:** Aplicar filtros estruturados (`role`, `isActive`) combinados com a busca textual usando a lógica `AND` dentro de cada branch da condição `OR`.
-*   **Implementar Sanitização de Parâmetros:** Garantir que entradas fora dos limites aceitáveis (`page < 1`, `limit < 1`, `limit > 100`) sejam corrigidas automaticamente.
-    *   `page < 1` deve ser corrigido para 1.
-    *   `limit > 100` deve ser limitado para 100.
-    *   `limit < 1` deve ser corrigido para 1.
-*   **Implementar Segurança de Dados:** Assegurar que campos sensíveis, como o `passwordHash`, nunca sejam incluídos no objeto de retorno.
-*   **Garantir o Contrato da API:** Assegurar que os métodos `findAll` e `findPaginatedAndFiltered` respeitem o contrato de retorno.
-*   **Garantir a Construção da Query SQL:** Confirmar que a query montada pelo ORM reflete fielmente os parâmetros de entrada (incluindo ordenação, `skip`/`take`, e a composição lógica de `WHERE` com `OR`/`AND` e `ILike`).
-*   **Integrar Limiares de Cobertura e CI/CD:** Integrar scripts de teste e limiares de cobertura de código no processo de CI/CD, prevenindo a introdução de débitos técnicos.
-
-### Implementação do Controller (Delegando Lógica)
-
-*   **Controller: Delegar criação:** O controller deve delegar a criação (`POST /users`) ao `service.create`.
-*   **Controller: Delegar listagem:** O controller deve delegar a listagem (`GET /users`) ao `service.findAll`.
-
-### Implementações Futuras (Evolução Técnica)
-
-*   **Cobertura Adicional:** Implementar testes para `findOne`, `update`, `remove`. Cobrir cenários de erro de repositório, timeouts e validação de dados de entrada.
-*   **Implementar DTOs de Resposta:** Implementar `UserResponseDto` e mappers puros (testáveis) garantindo que `passwordHash` nunca vaze.
-*   **Criar Service de Hash:** Criar serviço dedicado para hash de senhas com injeção de dependência.
-*   **Implementar Filtros Avançados:** Implementar normalização de email (`LOWER` no banco), filtros por intervalo de datas, busca full-text e ordenação dinâmica.
-*   **Implementar Paginação Cursor:** Implementar paginação por cursor para listas muito grandes.
-
-## 093--- Excerpts from "093-Como-usar-o-GitHub-Copilot-Chat-para-Desenvolvimento-Colaborativo.pdf"
-
-*(Observação: Este documento lista tarefas de desenvolvimento que podem ser solicitadas ao Copilot, representando as "solicitações de implementação" dadas à IA.)*
-
-### Solicitações de Implementação ao Copilot
-
-*   **Estruturação Inicial do Projeto:** Solicitar criação de pastas e arquivos para organizar o projeto.
-    *   Exemplo de comando: "Crie no root uma pasta chamada docs e dentro dela uma chamada prompts".
-*   **Geração de Prompts:** Pedir para gerar prompts de análise ou instruções detalhadas.
-*   **Execução Guiada de Tarefas:** Solicitar execução de tarefas a partir de prompts previamente registrados.
-*   **Implementação Iterativa de Funcionalidades:**
-    *   Pedir para implementar endpoints, métodos ou features específicas.
-    *   Implementar endpoints REST completos.
-    *   Criar métodos com validações adequadas.
-    *   Exemplo de comando: "Implemente o endpoint GET /users/:id".
-*   **Criação de Testes:** Solicitar criação de testes unitários ou de integração, incluindo arquivos de teste completos, casos de uso variados, mocks e asserções.
-    *   Exemplo de comando: "Crie agora os testes para o endpoint PATCH".
-*   **Correção de Problemas:** Pedir para corrigir erros de sintaxe, estrutura ou lógica.
-*   **Ajuste Fino:** Pedir para alinhar retornos conforme esperado nos testes.
-    *   Exemplo de comando: "O teste espera { success: true }, ajuste o método para retornar isso".
-*   **Documentação:** Solicitar um resumo ou documentação do processo completo.
-*   **Processo Iterativo:** Implementar pequenas funcionalidades em ciclos de Implementar, Testar, Corrigir e Documentar.
+Trabalho Integrado (NestJS) Entrega: 06/10, às 13h (abrir PR com todas as evidências até esse horário) Documentação (Swagger).
+Ajustar o main.ts para aplicar um prefixo global /v1 antes da inicialização do Swagger.
+Anotar o endpoint de listagem com @ApiQuery para os filtros e @ApiOkResponse para o sucesso.
+Containerização (Docker)
+Criar um Dockerfile multi-stage para a aplicação NestJS.
+Criar um docker-compose.yml contendo:
+Serviço db (Postgres).
+Serviço app (NestJS) com depends_on e condition: service_healthy para o banco.
+Rede dedicada para os serviços.
+Criar um script dockerstart.sh que aguarda a conexão com o banco, executa as migrações e então inicia a aplicação.
+Endpoint de Listagem Paginada
+Implementar um endpoint GET /<entidade> para uma entidade central do projeto.
+Adicionar suporte aos query parameters: page, limit, q (busca textual) e filtros específicos do domínio.
+Estruturar a resposta no formato { data, total, meta }.
+Ocultar campos sensíveis na resposta.
+Testes Unitários (Jest)
+Criar uma suíte de testes para o Service responsável pela listagem.
+Cobrir os seguintes cenários:
+Listagem sem filtros.
+Com paginação.
+Com busca textual.
+Com pelo menos 2 filtros específicos do domínio.
+Com entradas inválidas (page<1, limit>100).
+Utilizar stubs ou spies para simular o repositório, evitando o acesso real ao banco.
+Atingir uma cobertura de código de no mínimo 70% para o Service testado.
 ---
+101--- Identificar oque deve ser implementado
+
+O objetivo principal do plano de padronização é **fundamentar o que falta padronizar/criar** (como *validators*, *interceptors*, *guards*, convenções de `enums/` e `dto` vs `dtos`), explicando o que são, para que servem, quando e como usá-los no projeto do serviço *users* no NestJS, aplicando as mudanças em *Pull Requests* (PRs) pequenos e incrementais.
+
+As principais frentes de implementação e padronização identificadas são:
+
+### 1. Padronização de Estrutura e Convenções
+
+A padronização de nomenclatura de pastas e a organização de tipos comuns são cruciais para a previsibilidade e ergonomia de navegação.
+
+*   **Convenção de DTOs:** Padronizar a nomenclatura de pasta para `dto/` (singular) em todo o repositório. Isso implica renomear `src/users/dtos/` para **`src/users/dto/`** e corrigir os imports.
+*   **Enums:** Criar uma pasta dedicada para tipos enumerados em `src/users/enums/` e **mover `src/users/domain/user-role.enum.ts`** para esse novo local, ajustando os imports. Se surgirem *enums* globais, eles devem ir para `src/common/enums/`.
+
+### 2. Implementação de Validadores Customizados
+
+Devem ser criados para impor regras de domínio e higiene de dados que não são nativas do `class-validator`/`class-transformer`. A pasta `src/common/validators/` deve ser criada.
+
+*   **`IsTrimmed` (Validator):** Garante a consistência de entrada ao verificar que o valor não contém espaços excedentes à esquerda ou à direita. Deve ser aplicado em campos como `name` nos DTOs.
+*   **`ToLowerCase` (Transform):** Normaliza valores para minúsculas. É essencial para campos como `email` ou `username`. Mesmo com o uso de CITEXT no banco de dados, a normalização é útil para consistência em logs e testes.
+*   **`IsStrongPassword` (Opcional):** Um validador de exemplo para impor regras de força de senha, como ter 8+ caracteres, maiúsculas, minúsculas e números, caso o *roadmap* inclua autenticação.
+
+### 3. Implementação de Interceptors (Cross-cutting Concerns)
+
+Interceptors são usados para aplicar lógica comum e comportamentos transversais (como logging e timeout) de forma centralizada, promovendo a separação de responsabilidades e evitando duplicação de código. A pasta `src/common/interceptors/` deve ser criada.
+
+*   **`LoggingInterceptor`:** Para logging estruturado, registrando informações como método, rota, status code e latência da requisição.
+    *   **Recomendação de Implementação:** Utilizar o `Logger` nativo do NestJS inicialmente, substituindo o `tap()` por **`finalize()`** para garantir que o log seja emitido tanto em casos de sucesso quanto de erro. Deve-se implementar lógica para determinar o nível de log (error/warn/info) baseado no status HTTP (ex: >= 500 como error).
+    *   **Meta de Produção:** Avaliar a migração para bibliotecas robustas como **`nestjs-pino` ou `nest-winston`** para logs estruturados em JSON, alto desempenho e rastreabilidade (Correlation ID) em ambientes de produção.
+*   **`TimeoutInterceptor`:** Para impor um tempo máximo de resposta (ex: 10 segundos) e evitar requisições penduradas, liberando recursos.
+*   **`TransformResponseInterceptor` (Opcional):** Usado para padronizar o formato de saída da resposta (envelopamento) em um padrão como `{ data }` ou `{ data, meta }`. Sua ativação deve ser alinhada com os clientes.
+
+**Registro de Interceptors:** `LoggingInterceptor` e `TimeoutInterceptor` devem ser registrados **globalmente** em `main.ts`.
+
+### 4. Implementação de Guards e Autorização
+
+Guards controlam o fluxo da requisição com base em autenticação e autorização, protegendo rotas sensíveis. A pasta `src/common/guards/` deve ser criada.
+
+*   **Decorator de Roles (`roles.decorator.ts`):** Para definir os papéis necessários para acessar um endpoint.
+*   **Guard de Roles (`roles.guard.ts`):** Usa o `Reflector` para ler a metadata de *roles* definida pelo decorator e verificar se o papel do usuário autenticado no *request* (quando existir) está incluído nas roles requeridas.
+*   **Guard de JWT (`jwt-auth.guard.ts`):** Deve ser implementado como um *placeholder* (estendendo `AuthGuard('jwt')`), mas **não deve ser aplicado globalmente** até que a estratégia JWT (Passport) seja configurada e implementada no projeto.
+
+### 5. Padronização de Tipagem de Banco de Dados (CITEXT)
+
+É fundamental garantir que as comparações e restrições de unicidade para o campo `email` sejam *case-insensitive* (não diferenciam maiúsculas de minúsculas).
+
+*   **CITEXT (Escolha Recomendada):** A extensão CITEXT do PostgreSQL é a solução ideal por simplificar consultas (`WHERE email = $1`), garantir unicidade nativa de forma *case-insensitive* e otimizar a performance de indexação.
+    *   **Implementação (Passo a Passo):**
+        1.  Ativar a extensão **`citext`** no banco de dados.
+        2.  Migrar a coluna `email` do tipo `TEXT`/`varchar` para o tipo **`CITEXT`**.
+        3.  Garantir a restrição `UNIQUE` na coluna `email`, recriando o índice único se necessário.
+        4.  Ajustar a entidade TypeORM (`user.entity.ts`) alterando o tipo da coluna para **`type: 'citext'`** e removendo a especificação de *length*.
+*   **Alternativa (Índice Funcional):** Caso a extensão CITEXT não seja permitida, pode-se usar um índice funcional no PostgreSQL com `LOWER()` (`CREATE UNIQUE INDEX uq_users_email_lower ON users (LOWER(email));`). Essa abordagem, porém, exige que o desenvolvedor aplique `LOWER(...)` manualmente em todas as consultas e validações da aplicação.
+
+### Roteiro de Implementação Sugerido (PRs)
+
+O plano sugere que a implementação seja dividida em cinco pequenos PRs para garantir a adoção facilitada e a verificação:
+
+1.  **PR#1 (Estrutura Básica):** Renomear `src/users/dtos/` para `src/users/dto/`, criar pastas em `src/common/`, e mover `user-role.enum`, ajustando todos os imports.
+2.  **PR#2 (Validadores em DTOs):** Desenvolver e aplicar `IsTrimmed` para campos de texto e a combinação `ToLowerCase` + `IsEmail` para o campo `email` nos DTOs.
+3.  **PR#3 (Interceptors de Logging):** Introduzir o `LoggingInterceptor` (com níveis de severidade) e registrar globalmente no `main.ts`.
+4.  **PR#4 (Guards e Decorators de Roles):** Implementar `roles.decorator.ts`, `roles.guard.ts` e o `jwt-auth.guard.ts` como *placeholder*.
+5.  **PR#5 (CITEXT ou Alternativa):** Aplicar a estratégia de *case-insensitive* para o campo `email` no banco de dados, com uma migração dedicada (CITEXT é a opção primária).

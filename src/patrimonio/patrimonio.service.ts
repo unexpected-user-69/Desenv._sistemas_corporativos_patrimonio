@@ -65,7 +65,7 @@ export class PatrimonioService {
     // Busca textual
     if (q) {
       const searchText = this.normalizeSearchText(q);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       where.$or = [
         { nome: ILike(`%${searchText}%`) },
         { codigo: ILike(`%${searchText}%`) },
@@ -77,29 +77,23 @@ export class PatrimonioService {
 
     // Filtros específicos
     if (categoria) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       where.categoria = categoria;
     }
     if (status) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       where.status = status;
     }
     if (marca) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       where.marca = ILike(`%${marca}%`);
     }
     if (localizacao) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       where.localizacao = ILike(`%${localizacao}%`);
     }
     if (responsavelId) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       where.responsavelId = responsavelId;
     }
 
     // Filtros de valor
     if (valorMin !== undefined || valorMax !== undefined) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       where.valorAquisicao = Between(
         valorMin ?? 0,
         valorMax ?? Number.MAX_SAFE_INTEGER,
@@ -108,7 +102,6 @@ export class PatrimonioService {
 
     // Filtros de data
     if (dataInicio || dataFim) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       where.dataAquisicao = Between(
         dataInicio ? new Date(dataInicio) : new Date('1900-01-01'),
         dataFim ? new Date(dataFim) : new Date(),
@@ -116,7 +109,6 @@ export class PatrimonioService {
     }
 
     const findOptions: FindManyOptions<Patrimonio> = {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       where,
       skip,
       take: limit,
@@ -194,7 +186,6 @@ export class PatrimonioService {
       const saved = await this.patrimonioRepository.save(patrimonio);
       return this.serializePatrimonio(saved);
     } catch (error: any) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error?.code === '23505') {
         throw new ConflictException('Código de patrimônio já existe');
       }
@@ -226,7 +217,6 @@ export class PatrimonioService {
       const saved = await this.patrimonioRepository.save(patrimonio);
       return this.serializePatrimonio(saved);
     } catch (error: any) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error?.code === '23505') {
         throw new ConflictException('Código de patrimônio já existe');
       }
@@ -302,7 +292,6 @@ export class PatrimonioService {
         this.serializePatrimonio(patrimonio),
       );
     } catch (error: any) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error?.code === '23505') {
         throw new ConflictException('Um ou mais códigos já existem');
       }
@@ -315,7 +304,6 @@ export class PatrimonioService {
    */
   async findByCategoria(categoria: string): Promise<PatrimonioResponseDto[]> {
     const patrimonios = await this.patrimonioRepository.find({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       where: { categoria: categoria as any },
       order: { nome: 'ASC' },
     });
@@ -351,12 +339,10 @@ export class PatrimonioService {
       .groupBy('patrimonio.categoria')
       .getRawMany();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return result.reduce(
       (stats, row) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
         stats[row.categoria] = parseInt(row.count);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
         return stats;
       },
       {} as Record<string, number>,
@@ -375,12 +361,10 @@ export class PatrimonioService {
       .groupBy('patrimonio.status')
       .getRawMany();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return result.reduce(
       (stats, row) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
         stats[row.status] = parseInt(row.count);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
         return stats;
       },
       {} as Record<string, number>,

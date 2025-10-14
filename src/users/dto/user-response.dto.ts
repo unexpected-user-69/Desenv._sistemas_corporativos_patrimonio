@@ -1,5 +1,5 @@
 import { Expose, Exclude } from 'class-transformer';
-import { UserRole } from '../entities/user.entity';
+import { UserRole } from '../enums/user-role.enum';
 
 export class UserResponseDto {
   @Expose()

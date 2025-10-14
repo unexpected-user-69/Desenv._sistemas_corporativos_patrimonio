@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { FindManyOptions, FindOptionsWhere, ILike, Between } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { UserRole } from '../../users/entities/user.entity';
+import { UserRole } from '../../users/enums/user-role.enum';
 
 export interface AdvancedFilterOptions {
   searchText?: string;

@@ -73,7 +73,6 @@ export class CacheService {
       .sort()
       .reduce(
         (result, key) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           result[key] = params[key];
           return result;
         },

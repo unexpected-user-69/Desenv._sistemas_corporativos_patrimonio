@@ -527,16 +527,13 @@ export const AdvancedFeatures: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-medium text-gray-900">
-                      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
                       {item.name || item.email}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
                       {item.email || item.role}
                     </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
                     {item.createdAt &&
                       new Date(item.createdAt as string).toLocaleDateString()}
                   </div>

@@ -30,7 +30,6 @@ export class CreatePatrimonioDto {
   @MinLength(3)
   @MaxLength(50)
   @Transform(({ value }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return typeof value === 'string' ? value.trim().toUpperCase() : value;
   })
   codigo!: string;
@@ -43,7 +42,6 @@ export class CreatePatrimonioDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   nome!: string;
 
@@ -53,7 +51,6 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   descricao?: string;
 
@@ -83,7 +80,6 @@ export class CreatePatrimonioDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   marca?: string;
 
@@ -95,7 +91,6 @@ export class CreatePatrimonioDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   modelo?: string;
 
@@ -107,7 +102,6 @@ export class CreatePatrimonioDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   numeroSerie?: string;
 
@@ -147,7 +141,6 @@ export class CreatePatrimonioDto {
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   localizacao?: string;
 
@@ -166,7 +159,6 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   observacoes?: string;
 

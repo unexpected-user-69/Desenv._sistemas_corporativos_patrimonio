@@ -47,7 +47,7 @@ export interface FilterConfig {
 export interface AdvancedSearchParams {
   query: string;
   fields: string[];
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
   sort: {
     field: string;
     order: 'asc' | 'desc';
@@ -110,7 +110,7 @@ export interface SearchResult<T = any> {
     query: string;
     executionTime: number;
     suggestions?: string[];
-    facets?: Record<string, any>;
+    facets?: Record<string, unknown>;
   };
 }
 
@@ -162,7 +162,7 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: any;
+  value?: unknown;
 }
 
 export interface ValidationWarning {

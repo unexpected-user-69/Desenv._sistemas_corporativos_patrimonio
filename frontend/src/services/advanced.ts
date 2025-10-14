@@ -1,45 +1,52 @@
 // Serviço para funcionalidades avançadas
 
-import { SearchResult } from '../types/advanced';
+import {
+  SearchResult,
+  AdvancedSearchParams,
+  FuzzySearchParams,
+  DateRangeParams,
+} from '../types/advanced';
 
 class AdvancedService {
-  advancedSearch(): Promise<SearchResult> {
+  async advancedSearch(params: AdvancedSearchParams): Promise<SearchResult> {
     // Mock implementation
     return Promise.resolve({
       data: [],
       pagination: {
-        page: 1,
-        limit: 10,
+        page: params.pagination.page || 1,
+        limit: params.pagination.limit || 10,
         total: 0,
         totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
       },
-      performance: {
-        queryTime: 0,
-        totalTime: 0,
-        cacheHit: false,
+      meta: {
+        query: params.query,
+        executionTime: 0,
       },
     });
   }
 
-  fuzzySearch(): Promise<SearchResult> {
+  async fuzzySearch(params: FuzzySearchParams): Promise<SearchResult> {
     // Mock implementation
     return Promise.resolve({
       data: [],
       pagination: {
         page: 1,
-        limit: 10,
+        limit: params.maxResults,
         total: 0,
         totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
       },
-      performance: {
-        queryTime: 0,
-        totalTime: 0,
-        cacheHit: false,
+      meta: {
+        query: params.query,
+        executionTime: 0,
       },
     });
   }
 
-  dateRangeSearch(): Promise<SearchResult> {
+  async dateRangeSearch(params: DateRangeParams): Promise<SearchResult> {
     // Mock implementation
     return Promise.resolve({
       data: [],
@@ -48,11 +55,12 @@ class AdvancedService {
         limit: 10,
         total: 0,
         totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
       },
-      performance: {
-        queryTime: 0,
-        totalTime: 0,
-        cacheHit: false,
+      meta: {
+        query: `${params.field}: ${params.start} - ${params.end}`,
+        executionTime: 0,
       },
     });
   }

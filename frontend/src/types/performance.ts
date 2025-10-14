@@ -8,7 +8,7 @@ export interface LoadTestConfig {
     url: string;
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     headers?: Record<string, string>;
-    body?: any;
+    body?: unknown;
   };
   load: {
     connections: number;

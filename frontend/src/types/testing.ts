@@ -23,7 +23,7 @@ export interface MockConfig {
   name: string;
   endpoint: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  response: any;
+  response: unknown;
   statusCode: number;
   delay?: number;
   enabled: boolean;
@@ -34,7 +34,7 @@ export interface MockCondition {
   id: string;
   field: string;
   operator: 'equals' | 'contains' | 'regex' | 'exists';
-  value: any;
+  value: unknown;
   description: string;
 }
 
@@ -64,8 +64,8 @@ export interface TestAssertion {
   id: string;
   description: string;
   status: 'passed' | 'failed' | 'pending';
-  expected: any;
-  actual: any;
+  expected: unknown;
+  actual: unknown;
   error?: string;
 }
 
@@ -155,7 +155,7 @@ export interface TestLog {
   timestamp: string;
   level: 'info' | 'warn' | 'error' | 'debug';
   message: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   testId?: string;
 }
 
@@ -210,7 +210,7 @@ export interface TestEnvironment {
       height: number;
     };
   };
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   mocks: MockConfig[];
   status: 'active' | 'inactive' | 'error';
 }

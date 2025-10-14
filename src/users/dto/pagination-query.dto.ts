@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { UserRole } from '../entities/user.entity';
+import { UserRole } from '../enums/user-role.enum';
 
 export class PaginationQueryDto {
   @ApiPropertyOptional({

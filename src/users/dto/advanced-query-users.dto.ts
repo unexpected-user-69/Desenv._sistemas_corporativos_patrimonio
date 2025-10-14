@@ -10,7 +10,7 @@ import {
   IsIn,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { UserRole } from '../entities/user.entity';
+import { UserRole } from '../enums/user-role.enum';
 
 export class AdvancedQueryUsersDto {
   @ApiPropertyOptional({

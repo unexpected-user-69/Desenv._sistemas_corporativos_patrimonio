@@ -9,12 +9,7 @@ import {
   VersionColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-
-export enum UserRole {
-  STUDENT = 'STUDENT',
-  TEACHER = 'TEACHER',
-  ADMIN = 'ADMIN',
-}
+import { UserRole } from '../enums/user-role.enum';
 
 @Entity({ name: 'users' })
 @Index('uq_users_email', ['email'], { unique: true })
@@ -25,7 +20,7 @@ export class User {
   @Column({ name: 'name', type: 'varchar', length: 255 })
   name!: string;
 
-  @Column({ name: 'email', type: 'varchar', length: 255 })
+  @Column({ name: 'email', type: 'citext' })
   email!: string;
 
   @Exclude()

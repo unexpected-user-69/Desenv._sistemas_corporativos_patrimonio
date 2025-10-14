@@ -12,7 +12,7 @@ import {
   CachePattern,
   CacheFlushOptions,
   CacheSearchOptions,
-  CacheSearchResult
+  CacheSearchResult,
 } from '../types/cache';
 
 class CacheService {
@@ -35,7 +35,7 @@ class CacheService {
       (error) => {
         console.error('Cache Service Error:', error);
         throw error;
-      }
+      },
     );
   }
 
@@ -43,7 +43,7 @@ class CacheService {
   async getStats(): Promise<CacheStats> {
     try {
       const response = await this.api.get('/v1/cache/stats');
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao buscar estatísticas do cache:', error);
       // Retorna dados mockados em caso de erro
@@ -53,18 +53,21 @@ class CacheService {
         keys: 500,
         memoryUsage: 1024 * 1024 * 50, // 50MB
         uptime: 86400, // 24 hours
-        evictions: 25
+        evictions: 25,
       };
     }
   }
 
   // Listar chaves do cache
-  async getKeys(pattern: string = '*', limit: number = 100): Promise<CacheKey[]> {
+  async getKeys(
+    pattern: string = '*',
+    limit: number = 100,
+  ): Promise<CacheKey[]> {
     try {
       const response = await this.api.get('/v1/cache/keys', {
-        params: { pattern, limit }
+        params: { pattern, limit },
       });
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao buscar chaves do cache:', error);
       // Retorna dados mockados
@@ -73,20 +76,22 @@ class CacheService {
           key: 'user:123',
           ttl: 3600,
           type: 'string',
-          valuePreview: '{"id":123,"name":"João Silva","email":"joao@example.com"}'
+          valuePreview:
+            '{"id":123,"name":"João Silva","email":"joao@example.com"}',
         },
         {
           key: 'session:abc123',
           ttl: 1800,
           type: 'hash',
-          valuePreview: '{"userId":123,"role":"admin","lastActivity":"2024-12-19T10:30:00Z"}'
+          valuePreview:
+            '{"userId":123,"role":"admin","lastActivity":"2024-12-19T10:30:00Z"}',
         },
         {
           key: 'cache:users:list',
           ttl: 600,
           type: 'list',
-          valuePreview: '[{"id":1,"name":"User 1"},{"id":2,"name":"User 2"}]'
-        }
+          valuePreview: '[{"id":1,"name":"User 1"},{"id":2,"name":"User 2"}]',
+        },
       ];
     }
   }
@@ -94,8 +99,10 @@ class CacheService {
   // Obter valor de uma chave específica
   async getKey(key: string): Promise<any> {
     try {
-      const response = await this.api.get(`/v1/cache/keys/${encodeURIComponent(key)}`);
-      return response.data;
+      const response = await this.api.get(
+        `/v1/cache/keys/${encodeURIComponent(key)}`,
+      );
+      return response.data as unknown;
     } catch (error) {
       console.error(`Erro ao buscar chave ${key}:`, error);
       throw error;
@@ -103,12 +110,12 @@ class CacheService {
   }
 
   // Definir valor de uma chave
-  async setKey(key: string, value: any, ttl?: number): Promise<void> {
+  async setKey(key: string, value: unknown, ttl?: number): Promise<void> {
     try {
       await this.api.post('/v1/cache/keys', {
         key,
         value,
-        ttl
+        ttl,
       });
     } catch (error) {
       console.error(`Erro ao definir chave ${key}:`, error);
@@ -130,14 +137,14 @@ class CacheService {
   async getConfig(): Promise<CacheConfig> {
     try {
       const response = await this.api.get('/v1/cache/config');
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao buscar configuração do cache:', error);
       // Retorna configuração padrão
       return {
         maxmemory: '100mb',
         maxmemoryPolicy: 'allkeys-lru',
-        defaultTTL: 3600
+        defaultTTL: 3600,
       };
     }
   }
@@ -145,7 +152,7 @@ class CacheService {
   async updateConfig(config: Partial<CacheConfig>): Promise<CacheConfig> {
     try {
       const response = await this.api.patch('/v1/cache/config', config);
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao atualizar configuração do cache:', error);
       throw error;
@@ -156,9 +163,9 @@ class CacheService {
   async getOperations(limit: number = 50): Promise<CacheOperation[]> {
     try {
       const response = await this.api.get('/v1/cache/operations', {
-        params: { limit }
+        params: { limit },
       });
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao buscar operações do cache:', error);
       // Retorna dados mockados
@@ -169,7 +176,7 @@ class CacheService {
           key: 'user:123',
           timestamp: new Date().toISOString(),
           duration: 2,
-          success: true
+          success: true,
         },
         {
           id: '2',
@@ -177,7 +184,7 @@ class CacheService {
           key: 'session:abc123',
           timestamp: new Date(Date.now() - 60000).toISOString(),
           duration: 5,
-          success: true
+          success: true,
         },
         {
           id: '3',
@@ -185,8 +192,8 @@ class CacheService {
           key: 'temp:data',
           timestamp: new Date(Date.now() - 120000).toISOString(),
           duration: 1,
-          success: true
-        }
+          success: true,
+        },
       ];
     }
   }
@@ -195,7 +202,7 @@ class CacheService {
   async getMetrics(): Promise<CacheMetrics> {
     try {
       const response = await this.api.get('/v1/cache/metrics');
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao buscar métricas do cache:', error);
       // Retorna métricas mockadas
@@ -205,17 +212,17 @@ class CacheService {
           max: 50,
           avg: 5,
           p95: 15,
-          p99: 25
+          p99: 25,
         },
         throughput: {
           operationsPerSecond: 100,
-          totalOperations: 10000
+          totalOperations: 10000,
         },
         hitRate: {
           percentage: 89.3,
           hits: 1250,
-          misses: 150
-        }
+          misses: 150,
+        },
       };
     }
   }
@@ -224,7 +231,7 @@ class CacheService {
   async getAlerts(): Promise<CacheAlert[]> {
     try {
       const response = await this.api.get('/v1/cache/alerts');
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao buscar alertas do cache:', error);
       // Retorna alertas mockados
@@ -234,22 +241,22 @@ class CacheService {
           message: 'Alto uso de memória detectado (85%)',
           level: 'warn',
           timestamp: new Date(Date.now() - 300000).toISOString(),
-          resolved: false
+          resolved: false,
         },
         {
           id: '2',
           message: 'Taxa de hit baixa (65%)',
           level: 'warn',
           timestamp: new Date(Date.now() - 600000).toISOString(),
-          resolved: false
+          resolved: false,
         },
         {
           id: '3',
           message: 'Cache reiniciado com sucesso',
           level: 'info',
           timestamp: new Date(Date.now() - 900000).toISOString(),
-          resolved: true
-        }
+          resolved: true,
+        },
       ];
     }
   }
@@ -267,7 +274,7 @@ class CacheService {
   async getHealth(): Promise<CacheHealth> {
     try {
       const response = await this.api.get('/v1/cache/health');
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao buscar saúde do cache:', error);
       // Retorna dados mockados
@@ -277,12 +284,12 @@ class CacheService {
         memoryUsage: {
           used: 50 * 1024 * 1024, // 50MB
           total: 100 * 1024 * 1024, // 100MB
-          percentage: 50
+          percentage: 50,
         },
         connections: {
           active: 5,
-          max: 100
-        }
+          max: 100,
+        },
       };
     }
   }
@@ -291,7 +298,7 @@ class CacheService {
   async getPatterns(): Promise<CachePattern[]> {
     try {
       const response = await this.api.get('/v1/cache/patterns');
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao buscar padrões do cache:', error);
       // Retorna padrões mockados
@@ -300,26 +307,28 @@ class CacheService {
           pattern: 'user:*',
           count: 150,
           memoryUsage: 1024 * 1024 * 10, // 10MB
-          avgTTL: 3600
+          avgTTL: 3600,
         },
         {
           pattern: 'session:*',
           count: 50,
           memoryUsage: 1024 * 1024 * 5, // 5MB
-          avgTTL: 1800
+          avgTTL: 1800,
         },
         {
           pattern: 'cache:*',
           count: 25,
           memoryUsage: 1024 * 1024 * 2, // 2MB
-          avgTTL: 600
-        }
+          avgTTL: 600,
+        },
       ];
     }
   }
 
   // Limpar cache
-  async flushCache(options: CacheFlushOptions = { async: true }): Promise<void> {
+  async flushCache(
+    options: CacheFlushOptions = { async: true },
+  ): Promise<void> {
     try {
       await this.api.post('/v1/cache/flush', options);
     } catch (error) {
@@ -332,7 +341,7 @@ class CacheService {
   async searchKeys(options: CacheSearchOptions): Promise<CacheSearchResult> {
     try {
       const response = await this.api.post('/v1/cache/search', options);
-      return response.data;
+      return response.data as unknown;
     } catch (error) {
       console.error('Erro ao buscar chaves:', error);
       throw error;
@@ -346,7 +355,7 @@ class CacheService {
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data as string) as CacheMetrics;
         onMessage(data);
       } catch (error) {
         console.error('Erro ao processar mensagem WebSocket:', error);

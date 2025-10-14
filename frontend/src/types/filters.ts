@@ -11,19 +11,19 @@ export interface AdvancedFilters {
   createdBefore?: string;
   updatedAfter?: string;
   updatedBefore?: string;
-  
+
   // Filtros de busca textual
   search?: string;
   searchFields?: string[];
-  
+
   // Filtros específicos
   role?: string;
   isActive?: boolean;
-  
+
   // Ordenação
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
-  
+
   // Paginação
   page?: number;
   limit?: number;
@@ -40,7 +40,14 @@ export interface FilterGroup {
   name: string;
   label: string;
   options: FilterOption[];
-  type: 'select' | 'multiselect' | 'date' | 'daterange' | 'text' | 'number' | 'boolean';
+  type:
+    | 'select'
+    | 'multiselect'
+    | 'date'
+    | 'daterange'
+    | 'text'
+    | 'number'
+    | 'boolean';
   multiple?: boolean;
 }
 

@@ -11,7 +11,9 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
   if (!coverage) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Nenhum relatório de cobertura disponível</div>
+        <div className="text-gray-500">
+          Nenhum relatório de cobertura disponível
+        </div>
       </div>
     );
   }
@@ -45,7 +47,9 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">Cobertura de Código</h2>
+        <h2 className="text-xl font-semibold text-gray-900">
+          Cobertura de Código
+        </h2>
         <p className="text-sm text-gray-600">
           Análise de cobertura de testes e qualidade do código
         </p>
@@ -53,10 +57,16 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
 
       {/* Overall Coverage */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Cobertura Geral</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Cobertura Geral
+        </h3>
         <div className="text-center">
-          <div className={`inline-flex items-center justify-center w-32 h-32 rounded-full ${getCoverageBgColor(coverage.overall)} mb-4`}>
-            <span className={`text-4xl font-bold ${getCoverageColor(coverage.overall)}`}>
+          <div
+            className={`inline-flex items-center justify-center w-32 h-32 rounded-full ${getCoverageBgColor(coverage.overall)} mb-4`}
+          >
+            <span
+              className={`text-4xl font-bold ${getCoverageColor(coverage.overall)}`}
+            >
               {coverage.overall}%
             </span>
           </div>
@@ -71,12 +81,16 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
 
       {/* Coverage by Type */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Cobertura por Tipo</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Cobertura por Tipo
+        </h3>
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">Linhas</span>
-              <span className={`text-sm font-bold ${getCoverageColor(coverage.thresholds.lines)}`}>
+              <span
+                className={`text-sm font-bold ${getCoverageColor(coverage.thresholds.lines)}`}
+              >
                 {coverage.thresholds.lines}%
               </span>
             </div>
@@ -91,7 +105,9 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">Funções</span>
-              <span className={`text-sm font-bold ${getCoverageColor(coverage.thresholds.functions)}`}>
+              <span
+                className={`text-sm font-bold ${getCoverageColor(coverage.thresholds.functions)}`}
+              >
                 {coverage.thresholds.functions}%
               </span>
             </div>
@@ -105,8 +121,12 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Branches</span>
-              <span className={`text-sm font-bold ${getCoverageColor(coverage.thresholds.branches)}`}>
+              <span className="text-sm font-medium text-gray-700">
+                Branches
+              </span>
+              <span
+                className={`text-sm font-bold ${getCoverageColor(coverage.thresholds.branches)}`}
+              >
                 {coverage.thresholds.branches}%
               </span>
             </div>
@@ -120,8 +140,12 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Statements</span>
-              <span className={`text-sm font-bold ${getCoverageColor(coverage.thresholds.statements)}`}>
+              <span className="text-sm font-medium text-gray-700">
+                Statements
+              </span>
+              <span
+                className={`text-sm font-bold ${getCoverageColor(coverage.thresholds.statements)}`}
+              >
                 {coverage.thresholds.statements}%
               </span>
             </div>
@@ -138,7 +162,9 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
       {/* File Coverage Details */}
       {coverage.files.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Cobertura por Arquivo</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Cobertura por Arquivo
+          </h3>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -174,10 +200,14 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
                         <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
                           <div
                             className={`h-2 rounded-full ${getCoverageBarColor(file.coverage.lines.percentage)}`}
-                            style={{ width: `${file.coverage.lines.percentage}%` }}
+                            style={{
+                              width: `${file.coverage.lines.percentage}%`,
+                            }}
                           ></div>
                         </div>
-                        <span className={`text-sm font-medium ${getCoverageColor(file.coverage.lines.percentage)}`}>
+                        <span
+                          className={`text-sm font-medium ${getCoverageColor(file.coverage.lines.percentage)}`}
+                        >
                           {file.coverage.lines.percentage}%
                         </span>
                       </div>
@@ -187,10 +217,14 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
                         <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
                           <div
                             className={`h-2 rounded-full ${getCoverageBarColor(file.coverage.functions.percentage)}`}
-                            style={{ width: `${file.coverage.functions.percentage}%` }}
+                            style={{
+                              width: `${file.coverage.functions.percentage}%`,
+                            }}
                           ></div>
                         </div>
-                        <span className={`text-sm font-medium ${getCoverageColor(file.coverage.functions.percentage)}`}>
+                        <span
+                          className={`text-sm font-medium ${getCoverageColor(file.coverage.functions.percentage)}`}
+                        >
                           {file.coverage.functions.percentage}%
                         </span>
                       </div>
@@ -200,10 +234,14 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
                         <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
                           <div
                             className={`h-2 rounded-full ${getCoverageBarColor(file.coverage.branches.percentage)}`}
-                            style={{ width: `${file.coverage.branches.percentage}%` }}
+                            style={{
+                              width: `${file.coverage.branches.percentage}%`,
+                            }}
                           ></div>
                         </div>
-                        <span className={`text-sm font-medium ${getCoverageColor(file.coverage.branches.percentage)}`}>
+                        <span
+                          className={`text-sm font-medium ${getCoverageColor(file.coverage.branches.percentage)}`}
+                        >
                           {file.coverage.branches.percentage}%
                         </span>
                       </div>
@@ -213,16 +251,22 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
                         <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
                           <div
                             className={`h-2 rounded-full ${getCoverageBarColor(file.coverage.statements.percentage)}`}
-                            style={{ width: `${file.coverage.statements.percentage}%` }}
+                            style={{
+                              width: `${file.coverage.statements.percentage}%`,
+                            }}
                           ></div>
                         </div>
-                        <span className={`text-sm font-medium ${getCoverageColor(file.coverage.statements.percentage)}`}>
+                        <span
+                          className={`text-sm font-medium ${getCoverageColor(file.coverage.statements.percentage)}`}
+                        >
                           {file.coverage.statements.percentage}%
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCoverageBgColor(file.coverage.lines.percentage)} ${getCoverageColor(file.coverage.lines.percentage)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCoverageBgColor(file.coverage.lines.percentage)} ${getCoverageColor(file.coverage.lines.percentage)}`}
+                      >
                         {getCoverageLabel(file.coverage.lines.percentage)}
                       </span>
                     </td>
@@ -236,13 +280,16 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
 
       {/* Coverage Recommendations */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4">Recomendações de Cobertura</h3>
+        <h3 className="text-lg font-semibold text-blue-900 mb-4">
+          Recomendações de Cobertura
+        </h3>
         <div className="space-y-2">
           {coverage.overall < 80 && (
             <div className="flex items-start space-x-2">
               <span className="text-blue-600">📈</span>
               <span className="text-sm text-blue-800">
-                Cobertura geral abaixo de 80%. Adicione mais testes para melhorar a cobertura.
+                Cobertura geral abaixo de 80%. Adicione mais testes para
+                melhorar a cobertura.
               </span>
             </div>
           )}
@@ -250,15 +297,19 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
             <div className="flex items-start space-x-2">
               <span className="text-blue-600">🌿</span>
               <span className="text-sm text-blue-800">
-                Cobertura de branches baixa. Teste diferentes caminhos condicionais.
+                Cobertura de branches baixa. Teste diferentes caminhos
+                condicionais.
               </span>
             </div>
           )}
-          {coverage.files.some(file => file.coverage.lines.percentage < 50) && (
+          {coverage.files.some(
+            (file) => file.coverage.lines.percentage < 50,
+          ) && (
             <div className="flex items-start space-x-2">
               <span className="text-blue-600">📄</span>
               <span className="text-sm text-blue-800">
-                Alguns arquivos têm cobertura muito baixa. Foque em testar arquivos críticos.
+                Alguns arquivos têm cobertura muito baixa. Foque em testar
+                arquivos críticos.
               </span>
             </div>
           )}
@@ -266,7 +317,8 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
             <div className="flex items-start space-x-2">
               <span className="text-blue-600">🎉</span>
               <span className="text-sm text-blue-800">
-                Excelente cobertura! Mantenha os testes atualizados conforme o código evolui.
+                Excelente cobertura! Mantenha os testes atualizados conforme o
+                código evolui.
               </span>
             </div>
           )}
@@ -278,20 +330,50 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ coverage }) => {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Ações</h3>
         <div className="flex flex-wrap gap-3">
           <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            <svg
+              className="h-4 w-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
             </svg>
             Baixar Relatório
           </button>
           <button className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            <svg
+              className="h-4 w-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
             </svg>
             Copiar Relatório
           </button>
           <button className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+            <svg
+              className="h-4 w-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
+              />
             </svg>
             Configurar Thresholds
           </button>

@@ -18,19 +18,19 @@ export const CompressionPanel: React.FC = () => {
       setError(null);
       const [configData, statsData] = await Promise.all([
         securityService.getCompressionConfig(),
-        securityService.getCompressionStats()
+        securityService.getCompressionStats(),
       ]);
       setConfig(configData);
       setStats(statsData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
+    } catch {
+      setError('Erro ao carregar dados');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, []);
 
   const handleEdit = () => {
@@ -41,12 +41,13 @@ export const CompressionPanel: React.FC = () => {
   const handleSave = async () => {
     try {
       if (config) {
-        const updatedConfig = await securityService.updateCompressionConfig(editConfig);
+        const updatedConfig =
+          await securityService.updateCompressionConfig(editConfig);
         setConfig(updatedConfig);
         setIsEditing(false);
         setEditConfig({});
       }
-    } catch (err) {
+    } catch {
       setError('Erro ao salvar configuração');
     }
   };
@@ -77,7 +78,7 @@ export const CompressionPanel: React.FC = () => {
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
         <p className="text-sm text-red-700">{error}</p>
         <button
-          onClick={loadData}
+          onClick={() => void loadData()}
           className="mt-2 text-sm text-red-600 hover:text-red-500 underline"
         >
           Tentar novamente
@@ -93,27 +94,47 @@ export const CompressionPanel: React.FC = () => {
         <div className="flex space-x-2">
           {!isEditing ? (
             <button
-              onClick={handleEdit}
+              onClick={() => void handleEdit()}
               className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              <svg
+                className="h-4 w-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
               </svg>
               Editar
             </button>
           ) : (
             <>
               <button
-                onClick={handleSave}
+                onClick={() => void handleSave()}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="h-4 w-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 Salvar
               </button>
               <button
-                onClick={handleCancel}
+                onClick={() => void handleCancel()}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancelar
@@ -121,11 +142,21 @@ export const CompressionPanel: React.FC = () => {
             </>
           )}
           <button
-            onClick={loadData}
+            onClick={() => void loadData()}
             className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <svg
+              className="h-4 w-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
             Atualizar
           </button>
@@ -134,7 +165,9 @@ export const CompressionPanel: React.FC = () => {
 
       {/* Configuração */}
       <div className="bg-white border rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Configuração</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Configuração
+        </h3>
         {config && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -145,11 +178,15 @@ export const CompressionPanel: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={editConfig.enabled ?? config.enabled}
-                  onChange={(e) => setEditConfig({ ...editConfig, enabled: e.target.checked })}
+                  onChange={(e) =>
+                    setEditConfig({ ...editConfig, enabled: e.target.checked })
+                  }
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
               ) : (
-                <p className="text-sm text-gray-900">{config.enabled ? 'Sim' : 'Não'}</p>
+                <p className="text-sm text-gray-900">
+                  {config.enabled ? 'Sim' : 'Não'}
+                </p>
               )}
             </div>
 
@@ -164,12 +201,19 @@ export const CompressionPanel: React.FC = () => {
                     min="1"
                     max="9"
                     value={editConfig.level ?? config.level}
-                    onChange={(e) => setEditConfig({ ...editConfig, level: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setEditConfig({
+                        ...editConfig,
+                        level: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
                     <span>1 (Rápido)</span>
-                    <span className="font-medium">{editConfig.level ?? config.level}</span>
+                    <span className="font-medium">
+                      {editConfig.level ?? config.level}
+                    </span>
                     <span>9 (Máximo)</span>
                   </div>
                 </div>
@@ -177,7 +221,11 @@ export const CompressionPanel: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-900">{config.level}</p>
                   <p className="text-xs text-gray-500">
-                    {config.level <= 3 ? 'Rápido' : config.level <= 6 ? 'Equilibrado' : 'Máxima compressão'}
+                    {config.level <= 3
+                      ? 'Rápido'
+                      : config.level <= 6
+                        ? 'Equilibrado'
+                        : 'Máxima compressão'}
                   </p>
                 </div>
               )}
@@ -191,11 +239,18 @@ export const CompressionPanel: React.FC = () => {
                 <input
                   type="number"
                   value={editConfig.threshold ?? config.threshold}
-                  onChange={(e) => setEditConfig({ ...editConfig, threshold: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setEditConfig({
+                      ...editConfig,
+                      threshold: parseInt(e.target.value),
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               ) : (
-                <p className="text-sm text-gray-900">{formatBytes(config.threshold)}</p>
+                <p className="text-sm text-gray-900">
+                  {formatBytes(config.threshold)}
+                </p>
               )}
             </div>
 
@@ -206,17 +261,22 @@ export const CompressionPanel: React.FC = () => {
               {isEditing ? (
                 <select
                   value={editConfig.filter ? 'custom' : 'default'}
-                  onChange={(e) => setEditConfig({ 
-                    ...editConfig, 
-                    filter: e.target.value === 'custom' ? () => true : undefined 
-                  })}
+                  onChange={(e) =>
+                    setEditConfig({
+                      ...editConfig,
+                      filter:
+                        e.target.value === 'custom' ? () => true : undefined,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="default">Padrão (sempre comprimir)</option>
                   <option value="custom">Personalizado</option>
                 </select>
               ) : (
-                <p className="text-sm text-gray-900">Padrão (sempre comprimir)</p>
+                <p className="text-sm text-gray-900">
+                  Padrão (sempre comprimir)
+                </p>
               )}
             </div>
           </div>
@@ -226,19 +286,35 @@ export const CompressionPanel: React.FC = () => {
       {/* Estatísticas */}
       {stats && (
         <div className="bg-white border rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Estatísticas de Compressão</h3>
-          
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Estatísticas de Compressão
+          </h3>
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div className="bg-blue-50 rounded-lg p-4">
               <div className="flex items-center">
                 <div className="text-blue-600">
-                  <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <svg
+                    className="h-8 w-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-blue-600">Total de Requests</p>
-                  <p className="text-2xl font-bold text-blue-900">{stats.totalRequests.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-blue-600">
+                    Total de Requests
+                  </p>
+                  <p className="text-2xl font-bold text-blue-900">
+                    {stats.totalRequests.toLocaleString()}
+                  </p>
                 </div>
               </div>
             </div>
@@ -246,13 +322,27 @@ export const CompressionPanel: React.FC = () => {
             <div className="bg-green-50 rounded-lg p-4">
               <div className="flex items-center">
                 <div className="text-green-600">
-                  <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="h-8 w-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-green-600">Comprimidos</p>
-                  <p className="text-2xl font-bold text-green-900">{stats.compressedRequests.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-green-600">
+                    Comprimidos
+                  </p>
+                  <p className="text-2xl font-bold text-green-900">
+                    {stats.compressedRequests.toLocaleString()}
+                  </p>
                 </div>
               </div>
             </div>
@@ -260,12 +350,24 @@ export const CompressionPanel: React.FC = () => {
             <div className="bg-purple-50 rounded-lg p-4">
               <div className="flex items-center">
                 <div className="text-purple-600">
-                  <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  <svg
+                    className="h-8 w-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-purple-600">Taxa de Compressão</p>
+                  <p className="text-sm font-medium text-purple-600">
+                    Taxa de Compressão
+                  </p>
                   <p className="text-2xl font-bold text-purple-900">
                     {Math.round(stats.compressionRatio * 100)}%
                   </p>
@@ -276,13 +378,27 @@ export const CompressionPanel: React.FC = () => {
             <div className="bg-orange-50 rounded-lg p-4">
               <div className="flex items-center">
                 <div className="text-orange-600">
-                  <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  <svg
+                    className="h-8 w-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-orange-600">Bytes Economizados</p>
-                  <p className="text-2xl font-bold text-orange-900">{formatBytes(stats.bytesSaved)}</p>
+                  <p className="text-sm font-medium text-orange-600">
+                    Bytes Economizados
+                  </p>
+                  <p className="text-2xl font-bold text-orange-900">
+                    {formatBytes(stats.bytesSaved)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -290,16 +406,20 @@ export const CompressionPanel: React.FC = () => {
 
           {/* Gráfico de Performance */}
           <div className="mb-6">
-            <h4 className="text-md font-medium text-gray-900 mb-2">Performance da Compressão</h4>
+            <h4 className="text-md font-medium text-gray-900 mb-2">
+              Performance da Compressão
+            </h4>
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-gray-600">Taxa de Compressão Atual</p>
+                  <p className="text-sm text-gray-600">
+                    Taxa de Compressão Atual
+                  </p>
                   <div className="mt-2">
                     <div className="flex items-center">
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-purple-600 h-2 rounded-full" 
+                        <div
+                          className="bg-purple-600 h-2 rounded-full"
                           style={{ width: `${stats.compressionRatio * 100}%` }}
                         ></div>
                       </div>
@@ -310,13 +430,17 @@ export const CompressionPanel: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Taxa Média de Compressão</p>
+                  <p className="text-sm text-gray-600">
+                    Taxa Média de Compressão
+                  </p>
                   <div className="mt-2">
                     <div className="flex items-center">
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-600 h-2 rounded-full" 
-                          style={{ width: `${stats.averageCompressionRatio * 100}%` }}
+                        <div
+                          className="bg-green-600 h-2 rounded-full"
+                          style={{
+                            width: `${stats.averageCompressionRatio * 100}%`,
+                          }}
                         ></div>
                       </div>
                       <span className="ml-2 text-sm font-medium text-gray-900">
@@ -331,7 +455,9 @@ export const CompressionPanel: React.FC = () => {
 
           {/* Top Endpoints Comprimidos */}
           <div>
-            <h4 className="text-md font-medium text-gray-900 mb-2">Top Endpoints por Compressão</h4>
+            <h4 className="text-md font-medium text-gray-900 mb-2">
+              Top Endpoints por Compressão
+            </h4>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -360,13 +486,15 @@ export const CompressionPanel: React.FC = () => {
                         {endpoint.requests.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          endpoint.compressionRatio > 0.8 
-                            ? 'bg-green-100 text-green-800' 
-                            : endpoint.compressionRatio > 0.6 
-                            ? 'bg-yellow-100 text-yellow-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            endpoint.compressionRatio > 0.8
+                              ? 'bg-green-100 text-green-800'
+                              : endpoint.compressionRatio > 0.6
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                          }`}
+                        >
                           {Math.round(endpoint.compressionRatio * 100)}%
                         </span>
                       </td>

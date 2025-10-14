@@ -738,3 +738,66 @@ Com pelo menos 2 filtros específicos do domínio.
 Com entradas inválidas (page<1, limit>100).
 Utilizar stubs ou spies para simular o repositório, evitando o acesso real ao banco.
 Atingir uma cobertura de código de no mínimo 70% para o Service testado.
+---
+101--- Identificar oque deve ser implementado
+
+O objetivo principal do plano de padronização é **fundamentar o que falta padronizar/criar** (como *validators*, *interceptors*, *guards*, convenções de `enums/` e `dto` vs `dtos`), explicando o que são, para que servem, quando e como usá-los no projeto do serviço *users* no NestJS, aplicando as mudanças em *Pull Requests* (PRs) pequenos e incrementais.
+
+As principais frentes de implementação e padronização identificadas são:
+
+### 1. Padronização de Estrutura e Convenções
+
+A padronização de nomenclatura de pastas e a organização de tipos comuns são cruciais para a previsibilidade e ergonomia de navegação.
+
+*   **Convenção de DTOs:** Padronizar a nomenclatura de pasta para `dto/` (singular) em todo o repositório. Isso implica renomear `src/users/dtos/` para **`src/users/dto/`** e corrigir os imports.
+*   **Enums:** Criar uma pasta dedicada para tipos enumerados em `src/users/enums/` e **mover `src/users/domain/user-role.enum.ts`** para esse novo local, ajustando os imports. Se surgirem *enums* globais, eles devem ir para `src/common/enums/`.
+
+### 2. Implementação de Validadores Customizados
+
+Devem ser criados para impor regras de domínio e higiene de dados que não são nativas do `class-validator`/`class-transformer`. A pasta `src/common/validators/` deve ser criada.
+
+*   **`IsTrimmed` (Validator):** Garante a consistência de entrada ao verificar que o valor não contém espaços excedentes à esquerda ou à direita. Deve ser aplicado em campos como `name` nos DTOs.
+*   **`ToLowerCase` (Transform):** Normaliza valores para minúsculas. É essencial para campos como `email` ou `username`. Mesmo com o uso de CITEXT no banco de dados, a normalização é útil para consistência em logs e testes.
+*   **`IsStrongPassword` (Opcional):** Um validador de exemplo para impor regras de força de senha, como ter 8+ caracteres, maiúsculas, minúsculas e números, caso o *roadmap* inclua autenticação.
+
+### 3. Implementação de Interceptors (Cross-cutting Concerns)
+
+Interceptors são usados para aplicar lógica comum e comportamentos transversais (como logging e timeout) de forma centralizada, promovendo a separação de responsabilidades e evitando duplicação de código. A pasta `src/common/interceptors/` deve ser criada.
+
+*   **`LoggingInterceptor`:** Para logging estruturado, registrando informações como método, rota, status code e latência da requisição.
+    *   **Recomendação de Implementação:** Utilizar o `Logger` nativo do NestJS inicialmente, substituindo o `tap()` por **`finalize()`** para garantir que o log seja emitido tanto em casos de sucesso quanto de erro. Deve-se implementar lógica para determinar o nível de log (error/warn/info) baseado no status HTTP (ex: >= 500 como error).
+    *   **Meta de Produção:** Avaliar a migração para bibliotecas robustas como **`nestjs-pino` ou `nest-winston`** para logs estruturados em JSON, alto desempenho e rastreabilidade (Correlation ID) em ambientes de produção.
+*   **`TimeoutInterceptor`:** Para impor um tempo máximo de resposta (ex: 10 segundos) e evitar requisições penduradas, liberando recursos.
+*   **`TransformResponseInterceptor` (Opcional):** Usado para padronizar o formato de saída da resposta (envelopamento) em um padrão como `{ data }` ou `{ data, meta }`. Sua ativação deve ser alinhada com os clientes.
+
+**Registro de Interceptors:** `LoggingInterceptor` e `TimeoutInterceptor` devem ser registrados **globalmente** em `main.ts`.
+
+### 4. Implementação de Guards e Autorização
+
+Guards controlam o fluxo da requisição com base em autenticação e autorização, protegendo rotas sensíveis. A pasta `src/common/guards/` deve ser criada.
+
+*   **Decorator de Roles (`roles.decorator.ts`):** Para definir os papéis necessários para acessar um endpoint.
+*   **Guard de Roles (`roles.guard.ts`):** Usa o `Reflector` para ler a metadata de *roles* definida pelo decorator e verificar se o papel do usuário autenticado no *request* (quando existir) está incluído nas roles requeridas.
+*   **Guard de JWT (`jwt-auth.guard.ts`):** Deve ser implementado como um *placeholder* (estendendo `AuthGuard('jwt')`), mas **não deve ser aplicado globalmente** até que a estratégia JWT (Passport) seja configurada e implementada no projeto.
+
+### 5. Padronização de Tipagem de Banco de Dados (CITEXT)
+
+É fundamental garantir que as comparações e restrições de unicidade para o campo `email` sejam *case-insensitive* (não diferenciam maiúsculas de minúsculas).
+
+*   **CITEXT (Escolha Recomendada):** A extensão CITEXT do PostgreSQL é a solução ideal por simplificar consultas (`WHERE email = $1`), garantir unicidade nativa de forma *case-insensitive* e otimizar a performance de indexação.
+    *   **Implementação (Passo a Passo):**
+        1.  Ativar a extensão **`citext`** no banco de dados.
+        2.  Migrar a coluna `email` do tipo `TEXT`/`varchar` para o tipo **`CITEXT`**.
+        3.  Garantir a restrição `UNIQUE` na coluna `email`, recriando o índice único se necessário.
+        4.  Ajustar a entidade TypeORM (`user.entity.ts`) alterando o tipo da coluna para **`type: 'citext'`** e removendo a especificação de *length*.
+*   **Alternativa (Índice Funcional):** Caso a extensão CITEXT não seja permitida, pode-se usar um índice funcional no PostgreSQL com `LOWER()` (`CREATE UNIQUE INDEX uq_users_email_lower ON users (LOWER(email));`). Essa abordagem, porém, exige que o desenvolvedor aplique `LOWER(...)` manualmente em todas as consultas e validações da aplicação.
+
+### Roteiro de Implementação Sugerido (PRs)
+
+O plano sugere que a implementação seja dividida em cinco pequenos PRs para garantir a adoção facilitada e a verificação:
+
+1.  **PR#1 (Estrutura Básica):** Renomear `src/users/dtos/` para `src/users/dto/`, criar pastas em `src/common/`, e mover `user-role.enum`, ajustando todos os imports.
+2.  **PR#2 (Validadores em DTOs):** Desenvolver e aplicar `IsTrimmed` para campos de texto e a combinação `ToLowerCase` + `IsEmail` para o campo `email` nos DTOs.
+3.  **PR#3 (Interceptors de Logging):** Introduzir o `LoggingInterceptor` (com níveis de severidade) e registrar globalmente no `main.ts`.
+4.  **PR#4 (Guards e Decorators de Roles):** Implementar `roles.decorator.ts`, `roles.guard.ts` e o `jwt-auth.guard.ts` como *placeholder*.
+5.  **PR#5 (CITEXT ou Alternativa):** Aplicar a estratégia de *case-insensitive* para o campo `email` no banco de dados, com uma migração dedicada (CITEXT é a opção primária).

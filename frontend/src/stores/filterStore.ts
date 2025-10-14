@@ -2,14 +2,12 @@ import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import {
   AdvancedFilters,
-  FilterOption,
   FilterGroup,
-  FilterState,
   FilterPreset,
   FilterValidation,
   FilterPerformance,
   FilterSuggestion,
-  FilterAnalytics
+  FilterAnalytics,
 } from '../types/filters';
 import { filterService } from '../services/filterService';
 
@@ -45,7 +43,9 @@ interface FilterStoreState {
   getPerformance: (filters: AdvancedFilters) => Promise<void>;
 
   // Ações de presets
-  createPreset: (preset: Omit<FilterPreset, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  createPreset: (
+    preset: Omit<FilterPreset, 'id' | 'createdAt' | 'updatedAt'>,
+  ) => Promise<void>;
   updatePreset: (id: string, preset: Partial<FilterPreset>) => Promise<void>;
   deletePreset: (id: string) => Promise<void>;
   loadPreset: (id: string) => Promise<void>;
@@ -89,7 +89,7 @@ const defaultFilters: AdvancedFilters = {
   page: 1,
   limit: 20,
   sortBy: 'createdAt',
-  sortOrder: 'DESC'
+  sortOrder: 'DESC',
 };
 
 export const useFilterStore = create<FilterStoreState>()(
@@ -122,9 +122,12 @@ export const useFilterStore = create<FilterStoreState>()(
           const filterGroups = await filterService.getFilterOptions();
           set({ filterGroups, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar grupos de filtro',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar grupos de filtro',
+            isLoading: false,
           });
         }
       },
@@ -134,8 +137,9 @@ export const useFilterStore = create<FilterStoreState>()(
           const presets = await filterService.getFilterPresets();
           set({ presets });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar presets'
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao buscar presets',
           });
         }
       },
@@ -145,8 +149,11 @@ export const useFilterStore = create<FilterStoreState>()(
           const analytics = await filterService.getFilterAnalytics();
           set({ analytics });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar analytics'
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar analytics',
           });
         }
       },
@@ -155,16 +162,19 @@ export const useFilterStore = create<FilterStoreState>()(
         set({ isLoading: true, error: null });
         try {
           const results = await filterService.getAdvancedUsers(filters);
-          set({ 
+          set({
             currentFilters: filters,
             totalResults: results.total,
             performance: results.performance,
-            isLoading: false 
+            isLoading: false,
           });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao aplicar filtros',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao aplicar filtros',
+            isLoading: false,
           });
         }
       },
@@ -174,19 +184,28 @@ export const useFilterStore = create<FilterStoreState>()(
           const validation = await filterService.validateFilters(filters);
           set({ validation });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao validar filtros'
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao validar filtros',
           });
         }
       },
 
       getSuggestions: async (field: string, query: string) => {
         try {
-          const suggestions = await filterService.getFilterSuggestions(field, query);
+          const suggestions = await filterService.getFilterSuggestions(
+            field,
+            query,
+          );
           set({ suggestions });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar sugestões'
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar sugestões',
           });
         }
       },
@@ -196,8 +215,11 @@ export const useFilterStore = create<FilterStoreState>()(
           const performance = await filterService.getFilterPerformance(filters);
           set({ performance });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar performance'
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar performance',
           });
         }
       },
@@ -207,14 +229,15 @@ export const useFilterStore = create<FilterStoreState>()(
         set({ isLoading: true, error: null });
         try {
           const newPreset = await filterService.createFilterPreset(preset);
-          set(state => ({
+          set((state) => ({
             presets: [...state.presets, newPreset],
-            isLoading: false
+            isLoading: false,
           }));
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao criar preset',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao criar preset',
+            isLoading: false,
           });
         }
       },
@@ -222,15 +245,23 @@ export const useFilterStore = create<FilterStoreState>()(
       updatePreset: async (id: string, preset: Partial<FilterPreset>) => {
         set({ isLoading: true, error: null });
         try {
-          const updatedPreset = await filterService.updateFilterPreset(id, preset);
-          set(state => ({
-            presets: state.presets.map(p => p.id === id ? updatedPreset : p),
-            isLoading: false
+          const updatedPreset = await filterService.updateFilterPreset(
+            id,
+            preset,
+          );
+          set((state) => ({
+            presets: state.presets.map((p) =>
+              p.id === id ? updatedPreset : p,
+            ),
+            isLoading: false,
           }));
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao atualizar preset',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao atualizar preset',
+            isLoading: false,
           });
         }
       },
@@ -239,26 +270,28 @@ export const useFilterStore = create<FilterStoreState>()(
         set({ isLoading: true, error: null });
         try {
           await filterService.deleteFilterPreset(id);
-          set(state => ({
-            presets: state.presets.filter(p => p.id !== id),
-            selectedPreset: state.selectedPreset === id ? null : state.selectedPreset,
-            isLoading: false
+          set((state) => ({
+            presets: state.presets.filter((p) => p.id !== id),
+            selectedPreset:
+              state.selectedPreset === id ? null : state.selectedPreset,
+            isLoading: false,
           }));
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao deletar preset',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao deletar preset',
+            isLoading: false,
           });
         }
       },
 
       loadPreset: async (id: string) => {
         const state = get();
-        const preset = state.presets.find(p => p.id === id);
+        const preset = state.presets.find((p) => p.id === id);
         if (preset) {
-          set({ 
+          set({
             currentFilters: { ...preset.filters },
-            selectedPreset: id
+            selectedPreset: id,
           });
           await get().applyFilters(preset.filters);
         }
@@ -270,22 +303,22 @@ export const useFilterStore = create<FilterStoreState>()(
           name,
           description,
           filters: state.currentFilters,
-          isDefault: false
+          isDefault: false,
         });
       },
 
       // Ações de filtros
-      setFilter: (key, value) => {
-        set(state => ({
+      setFilter: (key: string, value: unknown) => {
+        set((state) => ({
           currentFilters: {
             ...state.currentFilters,
-            [key]: value
-          }
+            [key]: value,
+          },
         }));
       },
 
       removeFilter: (key) => {
-        set(state => {
+        set((state) => {
           const newFilters = { ...state.currentFilters };
           delete newFilters[key];
           return { currentFilters: newFilters };
@@ -293,75 +326,75 @@ export const useFilterStore = create<FilterStoreState>()(
       },
 
       clearFilters: () => {
-        set({ 
-          currentFilters: { ...defaultFilters },
-          appliedFilters: [],
-          totalResults: 0,
-          performance: null
-        });
-      },
-
-      resetFilters: () => {
-        set({ 
+        set({
           currentFilters: { ...defaultFilters },
           appliedFilters: [],
           totalResults: 0,
           performance: null,
-          selectedPreset: null
+        });
+      },
+
+      resetFilters: () => {
+        set({
+          currentFilters: { ...defaultFilters },
+          appliedFilters: [],
+          totalResults: 0,
+          performance: null,
+          selectedPreset: null,
         });
       },
 
       updateFilters: (filters) => {
-        set(state => ({
+        set((state) => ({
           currentFilters: {
             ...state.currentFilters,
-            ...filters
-          }
+            ...filters,
+          },
         }));
       },
 
       // Ações de paginação e ordenação
       setPage: (page) => {
-        set(state => ({
+        set((state) => ({
           currentPage: page,
           currentFilters: {
             ...state.currentFilters,
-            page
-          }
+            page,
+          },
         }));
       },
 
       setItemsPerPage: (items) => {
-        set(state => ({
+        set((state) => ({
           itemsPerPage: items,
           currentFilters: {
             ...state.currentFilters,
             limit: items,
-            page: 1
-          }
+            page: 1,
+          },
         }));
       },
 
       setSorting: (sortBy, sortOrder) => {
-        set(state => ({
+        set((state) => ({
           sortBy,
           sortOrder,
           currentFilters: {
             ...state.currentFilters,
             sortBy,
-            sortOrder
-          }
+            sortOrder,
+          },
         }));
       },
 
       // Ações de busca
       setSearchQuery: (query) => {
-        set(state => ({
+        set((state) => ({
           searchQuery: query,
           currentFilters: {
             ...state.currentFilters,
-            search: query
-          }
+            search: query,
+          },
         }));
       },
 
@@ -379,11 +412,16 @@ export const useFilterStore = create<FilterStoreState>()(
       optimizeFilters: async () => {
         const state = get();
         try {
-          const optimized = await filterService.optimizeFilters(state.currentFilters);
+          const optimized = await filterService.optimizeFilters(
+            state.currentFilters,
+          );
           set({ currentFilters: optimized });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao otimizar filtros'
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao otimizar filtros',
           });
         }
       },
@@ -391,12 +429,17 @@ export const useFilterStore = create<FilterStoreState>()(
       getRecommendations: async () => {
         const state = get();
         try {
-          const recommendations = await filterService.getFilterRecommendations(state.currentFilters);
+          const recommendations = await filterService.getFilterRecommendations(
+            state.currentFilters,
+          );
           // Aqui você pode implementar a lógica para mostrar as recomendações
           console.log('Recommendations:', recommendations);
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar recomendações'
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar recomendações',
           });
         }
       },
@@ -405,11 +448,17 @@ export const useFilterStore = create<FilterStoreState>()(
       exportResults: async (format) => {
         const state = get();
         try {
-          const blob = await filterService.exportFilterResults(state.currentFilters, format);
+          const blob = await filterService.exportFilterResults(
+            state.currentFilters,
+            format,
+          );
           return blob;
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao exportar resultados'
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao exportar resultados',
           });
           throw error;
         }
@@ -423,7 +472,7 @@ export const useFilterStore = create<FilterStoreState>()(
         set({ isMonitoring: true });
 
         // Monitorar analytics
-        filterService.subscribeToFilterStats((analytics) => {
+        void filterService.subscribeToFilterStats((analytics) => {
           set({ analytics });
         });
       },
@@ -434,6 +483,6 @@ export const useFilterStore = create<FilterStoreState>()(
     })),
     {
       name: 'filter-store',
-    }
-  )
+    },
+  ),
 );

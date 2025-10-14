@@ -1,10 +1,10 @@
 // Dashboard principal de utilitários de teste e qualidade de código
 
 import React, { useState, useEffect } from 'react';
-import type { 
-  TestSuite, 
-  QualityMetrics, 
-  CoverageSummary
+import type {
+  TestSuite,
+  QualityMetrics,
+  CoverageSummary,
 } from '../../types/testing';
 import { testingService } from '../../services/testing';
 import { TestDoublesPanel } from './TestDoublesPanel';
@@ -20,11 +20,15 @@ interface TestingDashboardProps {
 
 export const TestingDashboard: React.FC<TestingDashboardProps> = ({
   refreshInterval = 30000,
-  autoRefresh = true
+  autoRefresh = true,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'doubles' | 'mocks' | 'suites' | 'quality' | 'coverage'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'doubles' | 'mocks' | 'suites' | 'quality' | 'coverage'
+  >('overview');
   const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
-  const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics | null>(null);
+  const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics | null>(
+    null,
+  );
   const [coverage, setCoverage] = useState<CoverageSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +52,9 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
       // setTemplates(templatesData);
       setLastUpdate(new Date());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar dados de teste');
+      setError(
+        err instanceof Error ? err.message : 'Erro ao carregar dados de teste',
+      );
       console.error('Erro ao buscar dados de teste:', err);
     } finally {
       setLoading(false);
@@ -56,10 +62,12 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
   };
 
   useEffect(() => {
-    fetchData();
+    void fetchData();
 
     if (autoRefresh) {
-      const interval = setInterval(fetchData, refreshInterval);
+      const interval = setInterval(() => {
+        void fetchData();
+      }, refreshInterval);
       return () => clearInterval(interval);
     }
   }, [refreshInterval, autoRefresh]);
@@ -70,16 +78,25 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
     { id: 'mocks', name: 'Mocks', icon: '🎯' },
     { id: 'suites', name: 'Test Suites', icon: '🧪' },
     { id: 'quality', name: 'Qualidade', icon: '⭐' },
-    { id: 'coverage', name: 'Cobertura', icon: '📈' }
+    { id: 'coverage', name: 'Cobertura', icon: '📈' },
   ];
 
   const getOverallStatus = () => {
     if (!testSuites.length) return { status: 'unknown', color: 'gray' };
-    
-    const totalTests = testSuites.reduce((sum, suite) => sum + (suite.results?.total || 0), 0);
-    const passedTests = testSuites.reduce((sum, suite) => sum + (suite.results?.passed || 0), 0);
-    const failedTests = testSuites.reduce((sum, suite) => sum + (suite.results?.failed || 0), 0);
-    
+
+    const totalTests = testSuites.reduce(
+      (sum, suite) => sum + (suite.results?.total || 0),
+      0,
+    );
+    const passedTests = testSuites.reduce(
+      (sum, suite) => sum + (suite.results?.passed || 0),
+      0,
+    );
+    const failedTests = testSuites.reduce(
+      (sum, suite) => sum + (suite.results?.failed || 0),
+      0,
+    );
+
     if (failedTests > 0) return { status: 'failed', color: 'red' };
     if (passedTests === totalTests) return { status: 'passed', color: 'green' };
     return { status: 'partial', color: 'yellow' };
@@ -101,11 +118,17 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
         <div className="flex items-center">
           <div className="text-red-600">
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-red-800">Erro ao carregar dados</h3>
+            <h3 className="text-sm font-medium text-red-800">
+              Erro ao carregar dados
+            </h3>
             <p className="text-sm text-red-700 mt-1">{error}</p>
           </div>
         </div>
@@ -120,36 +143,55 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
           <div className="space-y-6">
             {/* Status Overview */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Status Geral dos Testes</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Status Geral dos Testes
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                    overallStatus.color === 'green' ? 'bg-green-100 text-green-800' :
-                    overallStatus.color === 'red' ? 'bg-red-100 text-red-800' :
-                    overallStatus.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {overallStatus.status === 'passed' ? '✅ Todos os testes passaram' :
-                     overallStatus.status === 'failed' ? '❌ Alguns testes falharam' :
-                     overallStatus.status === 'partial' ? '⚠️ Testes parciais' :
-                     '❓ Status desconhecido'}
+                  <div
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                      overallStatus.color === 'green'
+                        ? 'bg-green-100 text-green-800'
+                        : overallStatus.color === 'red'
+                          ? 'bg-red-100 text-red-800'
+                          : overallStatus.color === 'yellow'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    {overallStatus.status === 'passed'
+                      ? '✅ Todos os testes passaram'
+                      : overallStatus.status === 'failed'
+                        ? '❌ Alguns testes falharam'
+                        : overallStatus.status === 'partial'
+                          ? '⚠️ Testes parciais'
+                          : '❓ Status desconhecido'}
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">
-                    {testSuites.reduce((sum, suite) => sum + (suite.results?.total || 0), 0)}
+                    {testSuites.reduce(
+                      (sum, suite) => sum + (suite.results?.total || 0),
+                      0,
+                    )}
                   </div>
                   <div className="text-sm text-gray-600">Total de Testes</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-600">
-                    {testSuites.reduce((sum, suite) => sum + (suite.results?.passed || 0), 0)}
+                    {testSuites.reduce(
+                      (sum, suite) => sum + (suite.results?.passed || 0),
+                      0,
+                    )}
                   </div>
                   <div className="text-sm text-gray-600">Testes Passaram</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-red-600">
-                    {testSuites.reduce((sum, suite) => sum + (suite.results?.failed || 0), 0)}
+                    {testSuites.reduce(
+                      (sum, suite) => sum + (suite.results?.failed || 0),
+                      0,
+                    )}
                   </div>
                   <div className="text-sm text-gray-600">Testes Falharam</div>
                 </div>
@@ -159,13 +201,17 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
             {/* Quality Overview */}
             {qualityMetrics && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Métricas de Qualidade</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Métricas de Qualidade
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
                       {qualityMetrics.codeQuality.maintainability}%
                     </div>
-                    <div className="text-sm text-gray-600">Manutenibilidade</div>
+                    <div className="text-sm text-gray-600">
+                      Manutenibilidade
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
@@ -192,21 +238,29 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
             {/* Coverage Overview */}
             {coverage && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Cobertura de Código</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Cobertura de Código
+                </h2>
                 <div className="text-center">
                   <div className="text-4xl font-bold text-blue-600 mb-2">
                     {coverage.overall}%
                   </div>
                   <div className="text-sm text-gray-600">Cobertura Geral</div>
                   <div className="mt-4">
-                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                      coverage.overall >= 80 ? 'bg-green-100 text-green-800' :
-                      coverage.overall >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {coverage.overall >= 80 ? '✅ Excelente' :
-                       coverage.overall >= 60 ? '⚠️ Aceitável' :
-                       '❌ Precisa melhorar'}
+                    <div
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                        coverage.overall >= 80
+                          ? 'bg-green-100 text-green-800'
+                          : coverage.overall >= 60
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {coverage.overall >= 80
+                        ? '✅ Excelente'
+                        : coverage.overall >= 60
+                          ? '⚠️ Aceitável'
+                          : '❌ Precisa melhorar'}
                     </div>
                   </div>
                 </div>
@@ -215,21 +269,35 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
 
             {/* Recent Test Suites */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Suites de Teste Recentes</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Suites de Teste Recentes
+              </h2>
               <div className="space-y-3">
                 {testSuites.slice(0, 5).map((suite) => (
-                  <div key={suite.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={suite.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div>
-                      <h3 className="font-medium text-gray-900">{suite.name}</h3>
-                      <p className="text-sm text-gray-600">{suite.description}</p>
+                      <h3 className="font-medium text-gray-900">
+                        {suite.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {suite.description}
+                      </p>
                     </div>
                     <div className="flex items-center space-x-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        suite.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        suite.status === 'running' ? 'bg-blue-100 text-blue-800' :
-                        suite.status === 'failed' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          suite.status === 'completed'
+                            ? 'bg-green-100 text-green-800'
+                            : suite.status === 'running'
+                              ? 'bg-blue-100 text-blue-800'
+                              : suite.status === 'failed'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
                         {suite.status}
                       </span>
                       {suite.results && (
@@ -249,7 +317,14 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
       case 'mocks':
         return <MockConfigPanel />;
       case 'suites':
-        return <TestSuitesPanel testSuites={testSuites} onRefresh={fetchData} />;
+        return (
+          <TestSuitesPanel
+            testSuites={testSuites}
+            onRefresh={() => {
+              void fetchData();
+            }}
+          />
+        );
       case 'quality':
         return <QualityMetricsPanel qualityMetrics={qualityMetrics} />;
       case 'coverage':
@@ -264,7 +339,9 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard de Testes</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Dashboard de Testes
+          </h1>
           <p className="text-sm text-gray-600">
             Utilitários de teste, mocks e qualidade de código
           </p>
@@ -273,15 +350,27 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
           </p>
         </div>
         <button
-          onClick={fetchData}
+          onClick={() => {
+            void fetchData();
+          }}
           disabled={loading}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
         >
           {loading ? (
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
           ) : (
-            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <svg
+              className="h-4 w-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
           )}
           Atualizar
@@ -294,7 +383,17 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() =>
+                setActiveTab(
+                  tab.id as
+                    | 'overview'
+                    | 'doubles'
+                    | 'mocks'
+                    | 'suites'
+                    | 'quality'
+                    | 'coverage',
+                )
+              }
               className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'
@@ -309,9 +408,7 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
       </div>
 
       {/* Main Content */}
-      <div>
-        {renderContent()}
-      </div>
+      <div>{renderContent()}</div>
     </div>
   );
 };

@@ -1,15 +1,15 @@
 // Serviço de utilitários de teste e qualidade de código
 
-import type { 
-  TestDouble, 
-  MockConfig, 
-  TestSuite, 
-  TestExecution, 
-  QualityMetrics, 
+import type {
+  TestDouble,
+  MockConfig,
+  TestSuite,
+  TestExecution,
+  QualityMetrics,
   TestEnvironment,
   TestTemplate,
   TestConfiguration,
-  CoverageSummary
+  CoverageSummary,
 } from '../types/testing';
 
 const API_BASE_URL = 'http://localhost:3000';
@@ -28,7 +28,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao buscar test doubles:', error);
       // Retorna mock data para demonstração
@@ -36,7 +36,9 @@ export class TestingService {
     }
   }
 
-  async createTestDouble(testDouble: Omit<TestDouble, 'id'>): Promise<TestDouble> {
+  async createTestDouble(
+    testDouble: Omit<TestDouble, 'id'>,
+  ): Promise<TestDouble> {
     try {
       const response = await fetch(`${this.baseUrl}/testing/doubles`, {
         method: 'POST',
@@ -48,7 +50,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao criar test double:', error);
       throw error;
@@ -62,14 +64,16 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao buscar mock configs:', error);
       return this.getMockConfigurations();
     }
   }
 
-  async createMockConfig(mockConfig: Omit<MockConfig, 'id'>): Promise<MockConfig> {
+  async createMockConfig(
+    mockConfig: Omit<MockConfig, 'id'>,
+  ): Promise<MockConfig> {
     try {
       const response = await fetch(`${this.baseUrl}/testing/mocks`, {
         method: 'POST',
@@ -81,14 +85,17 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao criar mock config:', error);
       throw error;
     }
   }
 
-  async updateMockConfig(id: string, mockConfig: Partial<MockConfig>): Promise<MockConfig> {
+  async updateMockConfig(
+    id: string,
+    mockConfig: Partial<MockConfig>,
+  ): Promise<MockConfig> {
     try {
       const response = await fetch(`${this.baseUrl}/testing/mocks/${id}`, {
         method: 'PATCH',
@@ -100,7 +107,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao atualizar mock config:', error);
       throw error;
@@ -128,7 +135,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao buscar test suites:', error);
       return this.getMockTestSuites();
@@ -137,13 +144,16 @@ export class TestingService {
 
   async runTestSuite(suiteId: string): Promise<TestExecution> {
     try {
-      const response = await fetch(`${this.baseUrl}/testing/suites/${suiteId}/run`, {
-        method: 'POST',
-      });
+      const response = await fetch(
+        `${this.baseUrl}/testing/suites/${suiteId}/run`,
+        {
+          method: 'POST',
+        },
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao executar test suite:', error);
       throw error;
@@ -152,11 +162,13 @@ export class TestingService {
 
   async getTestExecution(executionId: string): Promise<TestExecution> {
     try {
-      const response = await fetch(`${this.baseUrl}/testing/executions/${executionId}`);
+      const response = await fetch(
+        `${this.baseUrl}/testing/executions/${executionId}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao buscar execução de teste:', error);
       throw error;
@@ -170,7 +182,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao buscar métricas de qualidade:', error);
       return this.getMockQualityMetrics();
@@ -184,7 +196,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao buscar relatório de cobertura:', error);
       return this.getMockCoverageReport();
@@ -198,7 +210,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao buscar ambientes de teste:', error);
       return this.getMockTestEnvironments();
@@ -212,7 +224,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao buscar templates de teste:', error);
       return this.getMockTestTemplates();
@@ -226,14 +238,16 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao buscar configuração de testes:', error);
       return this.getMockTestConfiguration();
     }
   }
 
-  async updateTestConfiguration(config: Partial<TestConfiguration>): Promise<TestConfiguration> {
+  async updateTestConfiguration(
+    config: Partial<TestConfiguration>,
+  ): Promise<TestConfiguration> {
     try {
       const response = await fetch(`${this.baseUrl}/testing/config`, {
         method: 'PATCH',
@@ -245,7 +259,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as TestDouble[];
     } catch (error) {
       console.error('Erro ao atualizar configuração de testes:', error);
       throw error;
@@ -253,14 +267,17 @@ export class TestingService {
   }
 
   // WebSocket para execução de testes em tempo real
-  createTestExecutionWebSocket(executionId: string, onUpdate: (execution: TestExecution) => void): WebSocket {
+  createTestExecutionWebSocket(
+    executionId: string,
+    onUpdate: (execution: TestExecution) => void,
+  ): WebSocket {
     const wsUrl = `${API_BASE_URL.replace('http', 'ws')}/v1/testing/executions/${executionId}/stream`;
     const ws = new WebSocket(wsUrl);
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        onUpdate(data);
+        const data = JSON.parse(String(event.data)) as unknown;
+        onUpdate(data as TestExecution);
       } catch (error) {
         console.error('Erro ao processar mensagem WebSocket de teste:', error);
       }
@@ -299,10 +316,12 @@ export class TestingService {
   expect(result).toEqual(mockUser);
   expect(mockUserRepository.create).toHaveBeenCalledWith(userData);
 });`,
-            description: 'Exemplo de uso do mock para testar criação de usuário',
-            expectedResult: 'Teste passa quando o mock retorna o usuário criado'
-          }
-        ]
+            description:
+              'Exemplo de uso do mock para testar criação de usuário',
+            expectedResult:
+              'Teste passa quando o mock retorna o usuário criado',
+          },
+        ],
       },
       {
         id: '2',
@@ -324,10 +343,10 @@ export class TestingService {
     .rejects.toThrow('DB Error');
 });`,
             description: 'Teste de rollback de transação',
-            expectedResult: 'Erro é lançado quando transação falha'
-          }
-        ]
-      }
+            expectedResult: 'Erro é lançado quando transação falha',
+          },
+        ],
+      },
     ];
   }
 
@@ -348,9 +367,9 @@ export class TestingService {
             field: 'query.role',
             operator: 'equals',
             value: 'admin',
-            description: 'Mock específico para usuários admin'
-          }
-        ]
+            description: 'Mock específico para usuários admin',
+          },
+        ],
       },
       {
         id: '2',
@@ -360,8 +379,8 @@ export class TestingService {
         response: { error: 'Validation failed' },
         statusCode: 400,
         enabled: false,
-        conditions: []
-      }
+        conditions: [],
+      },
     ];
   }
 
@@ -385,10 +404,10 @@ export class TestingService {
                 description: 'User should be created',
                 status: 'passed',
                 expected: 'User object',
-                actual: 'User object'
-              }
-            ]
-          }
+                actual: 'User object',
+              },
+            ],
+          },
         ],
         config: {
           timeout: 5000,
@@ -399,8 +418,8 @@ export class TestingService {
             enabled: true,
             threshold: 80,
             include: ['src/services/**/*.ts'],
-            exclude: ['src/services/**/*.spec.ts']
-          }
+            exclude: ['src/services/**/*.spec.ts'],
+          },
         },
         status: 'completed',
         results: {
@@ -416,13 +435,13 @@ export class TestingService {
               lines: 80,
               functions: 80,
               branches: 80,
-              statements: 80
-            }
+              statements: 80,
+            },
           },
           startTime: new Date().toISOString(),
-          endTime: new Date().toISOString()
-        }
-      }
+          endTime: new Date().toISOString(),
+        },
+      },
     ];
   }
 
@@ -432,20 +451,20 @@ export class TestingService {
         maintainability: 85,
         reliability: 90,
         security: 88,
-        performance: 82
+        performance: 82,
       },
       technicalDebt: {
         total: 120,
         byCategory: {
           'code-smell': 60,
-          'bug': 30,
-          'vulnerability': 20,
-          'security': 10
+          bug: 30,
+          vulnerability: 20,
+          security: 10,
         },
         byFile: [
           { file: 'src/services/user.service.ts', debt: 20, issues: 3 },
-          { file: 'src/controllers/user.controller.ts', debt: 15, issues: 2 }
-        ]
+          { file: 'src/controllers/user.controller.ts', debt: 15, issues: 2 },
+        ],
       },
       complexity: {
         cyclomatic: 12,
@@ -453,17 +472,17 @@ export class TestingService {
         halstead: {
           volume: 1200,
           difficulty: 15,
-          effort: 18000
-        }
+          effort: 18000,
+        },
       },
       duplications: {
         total: 45,
         percentage: 5.2,
         files: [
           { file: 'src/utils/validation.ts', lines: 20, percentage: 8.5 },
-          { file: 'src/utils/formatting.ts', lines: 15, percentage: 6.2 }
-        ]
-      }
+          { file: 'src/utils/formatting.ts', lines: 15, percentage: 6.2 },
+        ],
+      },
     };
   }
 
@@ -475,8 +494,8 @@ export class TestingService {
         lines: 80,
         functions: 80,
         branches: 80,
-        statements: 80
-      }
+        statements: 80,
+      },
     };
   }
 
@@ -492,15 +511,15 @@ export class TestingService {
           retries: 3,
           parallel: true,
           headless: true,
-          viewport: { width: 1920, height: 1080 }
+          viewport: { width: 1920, height: 1080 },
         },
         variables: {
           NODE_ENV: 'test',
-          DATABASE_URL: 'postgresql://test:test@localhost:5432/test_db'
+          DATABASE_URL: 'postgresql://test:test@localhost:5432/test_db',
         },
         mocks: [],
-        status: 'active'
-      }
+        status: 'active',
+      },
     ];
   }
 
@@ -530,8 +549,8 @@ describe('{{ServiceName}}', () => {
   });
 });`,
         examples: ['UserService', 'AuthService', 'CacheService'],
-        tags: ['service', 'unit', 'nestjs']
-      }
+        tags: ['service', 'unit', 'nestjs'],
+      },
     ];
   }
 
@@ -540,7 +559,7 @@ describe('{{ServiceName}}', () => {
       frameworks: {
         unit: 'jest',
         e2e: 'playwright',
-        coverage: 'istanbul'
+        coverage: 'istanbul',
       },
       settings: {
         watchMode: false,
@@ -550,15 +569,15 @@ describe('{{ServiceName}}', () => {
         testTimeout: 5000,
         setupFiles: ['<rootDir>/test/setup.ts'],
         globalSetup: ['<rootDir>/test/global-setup.ts'],
-        globalTeardown: ['<rootDir>/test/global-teardown.ts']
+        globalTeardown: ['<rootDir>/test/global-teardown.ts'],
       },
       paths: {
         tests: 'test/**/*.spec.ts',
         coverage: 'coverage/',
         reports: 'test-reports/',
         fixtures: 'test/fixtures/',
-        mocks: 'test/mocks/'
-      }
+        mocks: 'test/mocks/',
+      },
     };
   }
 }

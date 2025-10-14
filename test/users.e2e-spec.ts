@@ -234,18 +234,21 @@ describe('Users (e2e)', () => {
       expect(response.body).toHaveLength(2);
       expect(response.body[0]).toHaveProperty('id');
       expect(response.body[0]).toHaveProperty('name', 'Maria Santos');
-      expect(response.body[0]).toHaveProperty('email', 'maria.santos@example.com');
+      expect(response.body[0]).toHaveProperty(
+        'email',
+        'maria.santos@example.com',
+      );
       expect(response.body[0]).not.toHaveProperty('passwordHash');
       expect(response.body[1]).toHaveProperty('id');
       expect(response.body[1]).toHaveProperty('name', 'Pedro Costa');
-      expect(response.body[1]).toHaveProperty('email', 'pedro.costa@example.com');
+      expect(response.body[1]).toHaveProperty(
+        'email',
+        'pedro.costa@example.com',
+      );
     });
 
     it('should return 409 for empty array', async () => {
-      await request(httpServer)
-        .post('/v1/users/bulk')
-        .send([])
-        .expect(409);
+      await request(httpServer).post('/v1/users/bulk').send([]).expect(409);
     });
 
     it('should return 409 for duplicate emails in request', async () => {

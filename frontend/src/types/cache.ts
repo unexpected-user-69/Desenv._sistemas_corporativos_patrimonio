@@ -18,7 +18,13 @@ export interface CacheKey {
 
 export interface CacheConfig {
   maxmemory: string; // e.g., '100mb'
-  maxmemoryPolicy: 'noeviction' | 'allkeys-lru' | 'volatile-lru' | 'allkeys-random' | 'volatile-random' | 'volatile-ttl';
+  maxmemoryPolicy:
+    | 'noeviction'
+    | 'allkeys-lru'
+    | 'volatile-lru'
+    | 'allkeys-random'
+    | 'volatile-random'
+    | 'volatile-ttl';
   defaultTTL: number; // in seconds
 }
 

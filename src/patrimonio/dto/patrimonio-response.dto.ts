@@ -4,6 +4,7 @@ import {
   PatrimonioStatus,
   PatrimonioCategoria,
 } from '../entities/patrimonio.entity';
+import { UserResponseDto } from '../../users/dto/user-response.dto';
 
 export class PatrimonioResponseDto {
   @ApiProperty({
@@ -29,7 +30,7 @@ export class PatrimonioResponseDto {
 
   @ApiPropertyOptional({
     description: 'Descrição detalhada do patrimônio',
-    example: 'Notebook para uso administrativo com Windows 11',
+    example: 'Notebook para uso administrativo com processador Intel i5',
   })
   @Expose()
   descricao?: string;
@@ -51,11 +52,32 @@ export class PatrimonioResponseDto {
   status!: PatrimonioStatus;
 
   @ApiPropertyOptional({
-    description: 'Marca do patrimônio',
-    example: 'Dell',
+    description: 'Valor de aquisição do patrimônio',
+    example: 2500.0,
   })
   @Expose()
-  marca?: string;
+  valorAquisicao?: number;
+
+  @ApiPropertyOptional({
+    description: 'Data de aquisição do patrimônio',
+    example: '2024-01-15',
+  })
+  @Expose()
+  dataAquisicao?: Date;
+
+  @ApiPropertyOptional({
+    description: 'Data de garantia do patrimônio',
+    example: '2025-01-15',
+  })
+  @Expose()
+  dataGarantia?: Date;
+
+  @ApiPropertyOptional({
+    description: 'Número de série do patrimônio',
+    example: 'DL123456789',
+  })
+  @Expose()
+  numeroSerie?: string;
 
   @ApiPropertyOptional({
     description: 'Modelo do patrimônio',
@@ -65,35 +87,11 @@ export class PatrimonioResponseDto {
   modelo?: string;
 
   @ApiPropertyOptional({
-    description: 'Número de série do patrimônio',
-    example: 'ABC123456789',
+    description: 'Marca do patrimônio',
+    example: 'Dell',
   })
   @Expose()
-  numeroSerie?: string;
-
-  @ApiPropertyOptional({
-    description: 'Valor de aquisição do patrimônio',
-    example: 2500.0,
-  })
-  @Expose()
-  @Type(() => Number)
-  valorAquisicao?: number;
-
-  @ApiPropertyOptional({
-    description: 'Data de aquisição do patrimônio',
-    example: '2024-01-15',
-  })
-  @Expose()
-  @Type(() => Date)
-  dataAquisicao?: Date;
-
-  @ApiPropertyOptional({
-    description: 'Data de garantia do patrimônio',
-    example: '2025-01-15',
-  })
-  @Expose()
-  @Type(() => Date)
-  dataGarantia?: Date;
+  marca?: string;
 
   @ApiPropertyOptional({
     description: 'Localização física do patrimônio',
@@ -103,6 +101,20 @@ export class PatrimonioResponseDto {
   localizacao?: string;
 
   @ApiPropertyOptional({
+    description: 'Observações adicionais sobre o patrimônio',
+    example: 'Equipamento em perfeito estado, sem avarias',
+  })
+  @Expose()
+  observacoes?: string;
+
+  @ApiPropertyOptional({
+    description: 'URL da foto do patrimônio',
+    example: 'https://example.com/patrimonio-foto.jpg',
+  })
+  @Expose()
+  fotoUrl?: string;
+
+  @ApiPropertyOptional({
     description: 'ID do usuário responsável pelo patrimônio',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
@@ -110,25 +122,18 @@ export class PatrimonioResponseDto {
   responsavelId?: string;
 
   @ApiPropertyOptional({
-    description: 'Observações adicionais sobre o patrimônio',
-    example: 'Equipamento em perfeito estado de conservação',
+    description: 'Dados do usuário responsável pelo patrimônio',
+    type: UserResponseDto,
   })
   @Expose()
-  observacoes?: string;
-
-  @ApiPropertyOptional({
-    description: 'URL da foto do patrimônio',
-    example: 'https://example.com/fotos/patrimonio-001.jpg',
-  })
-  @Expose()
-  fotoUrl?: string;
+  @Type(() => UserResponseDto)
+  responsavel?: UserResponseDto;
 
   @ApiProperty({
     description: 'Data de criação do registro',
     example: '2024-01-15T10:30:00Z',
   })
   @Expose()
-  @Type(() => Date)
   createdAt!: Date;
 
   @ApiProperty({
@@ -136,7 +141,6 @@ export class PatrimonioResponseDto {
     example: '2024-01-15T10:30:00Z',
   })
   @Expose()
-  @Type(() => Date)
   updatedAt!: Date;
 
   @ApiProperty({

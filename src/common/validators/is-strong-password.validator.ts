@@ -43,6 +43,7 @@ export interface StrongPasswordOptions {
 export class IsStrongPasswordConstraint
   implements ValidatorConstraintInterface
 {
+  private readonly specialCharsRegex = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
   /**
    * Valida se a senha atende aos critérios de força configurados.
    *
@@ -85,10 +86,7 @@ export class IsStrongPasswordConstraint
     }
 
     // Verifica caracteres especiais
-    if (
-      requireSpecialChars &&
-      !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value)
-    ) {
+    if (requireSpecialChars && !this.specialCharsRegex.test(value)) {
       return false;
     }
 

@@ -20,18 +20,21 @@
     "useDefineForClassFields": false
   },
   "include": [
-    "src/app.module.ts",
-    "src/main.ts",
-    "src/app.controller.ts",
-    "src/app.service.ts",
-    "src/app.controller.spec.ts",
-    "src/common/**/*",
-    "src/config/**/*",
-    "src/database/**/*",
-    "src/migrations/**/*",
-    "src/patrimonio/**/*",
-    "src/users/**/*",
+    "src/**/*",
     "test/**/*"
   ],
-  "exclude": ["node_modules", "dist", "frontend", "frontend-new"]
+  "exclude": [
+    "node_modules", 
+    "dist", 
+    "frontend", 
+    "frontend-new",
+    "src/components/**/*",
+    "src/pages/**/*",
+    "src/services/advanced.ts",
+    "src/services/monitoring.ts", 
+    "src/services/performance.ts",
+    "src/types/advanced.ts",
+    "src/types/monitoring.ts",
+    "src/types/performance.ts"
+  ]
 }

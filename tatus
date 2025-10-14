@@ -1,0 +1,10 @@
+[33md3114cd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeat/trabalho-integrado-completo[m[33m, [m[1;31morigin/feat/trabalho-integrado-completo[m[33m)[m docs: adicionar exemplo completo de .env no README
+[33m3ea08af[m resolve: merge conflicts with origin/main - keep local implementations
+[33m4f54fe0[m fix: corrigir erros de TypeScript nos testes e implementar trabalho integrado
+[33m91efe92[m feat: Users Controller Tests (#30)
+[33m22107eb[m docs(repo): templates de governança (#28)
+[33m0145155[m feat(security): hash de senhas + citext para email (#27)
+[33mdd90f1e[m Merge Advanced Service Features to Main (#26)
+[33m488d2ea[m feat: Users Entity Migration (#29)
+[33m7e03818[m feat: Teste3 Branch Features (#31)
+[33mf55c704[m resolve merge conflicts: keep advanced service features implementation

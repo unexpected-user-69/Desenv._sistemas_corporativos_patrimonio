@@ -1,16 +1,19 @@
 // Serviço de testes de performance (M3)
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 
-import { 
-  LoadTestConfig, 
-  LoadTestResult, 
-  StressTestConfig, 
-  StressTestResult, 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
+import {
+  LoadTestConfig,
+  LoadTestResult,
   PerformanceReport,
   TestSuite,
-  TestExecution 
+  TestExecution,
 } from '../types/performance';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL =
+  (import.meta.env as { VITE_API_BASE_URL?: string }).VITE_API_BASE_URL ||
+  'http://localhost:3000';
 
 export class PerformanceService {
   private baseUrl: string;
@@ -33,7 +36,9 @@ export class PerformanceService {
     }
   }
 
-  async createTestConfig(config: Omit<LoadTestConfig, 'id'>): Promise<LoadTestConfig> {
+  async createTestConfig(
+    config: Omit<LoadTestConfig, 'id'>,
+  ): Promise<LoadTestConfig> {
     try {
       const response = await fetch(`${this.baseUrl}/performance/configs`, {
         method: 'POST',
@@ -52,15 +57,21 @@ export class PerformanceService {
     }
   }
 
-  async updateTestConfig(id: string, config: Partial<LoadTestConfig>): Promise<LoadTestConfig> {
+  async updateTestConfig(
+    id: string,
+    config: Partial<LoadTestConfig>,
+  ): Promise<LoadTestConfig> {
     try {
-      const response = await fetch(`${this.baseUrl}/performance/configs/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${this.baseUrl}/performance/configs/${id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(config),
         },
-        body: JSON.stringify(config),
-      });
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -73,9 +84,12 @@ export class PerformanceService {
 
   async deleteTestConfig(id: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/performance/configs/${id}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `${this.baseUrl}/performance/configs/${id}`,
+        {
+          method: 'DELETE',
+        },
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -105,7 +119,7 @@ export class PerformanceService {
     }
   }
 
-  async startStressTest(configId: string): Promise<StressTestResult> {
+  async startStressTest(configId: string): Promise<LoadTestResult> {
     try {
       const response = await fetch(`${this.baseUrl}/performance/tests/stress`, {
         method: 'POST',
@@ -126,9 +140,12 @@ export class PerformanceService {
 
   async stopTest(testId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/performance/tests/${testId}/stop`, {
-        method: 'POST',
-      });
+      const response = await fetch(
+        `${this.baseUrl}/performance/tests/${testId}/stop`,
+        {
+          method: 'POST',
+        },
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -141,7 +158,9 @@ export class PerformanceService {
   // Resultados de testes
   async getTestResult(testId: string): Promise<LoadTestResult> {
     try {
-      const response = await fetch(`${this.baseUrl}/performance/tests/${testId}`);
+      const response = await fetch(
+        `${this.baseUrl}/performance/tests/${testId}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -152,13 +171,15 @@ export class PerformanceService {
     }
   }
 
-  async getTestResults(params: {
-    configId?: string;
-    startDate?: string;
-    endDate?: string;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<{ results: LoadTestResult[]; total: number }> {
+  async getTestResults(
+    params: {
+      configId?: string;
+      startDate?: string;
+      endDate?: string;
+      limit?: number;
+      offset?: number;
+    } = {},
+  ): Promise<{ results: LoadTestResult[]; total: number }> {
     try {
       const queryParams = new URLSearchParams();
       if (params.configId) queryParams.append('configId', params.configId);
@@ -167,7 +188,9 @@ export class PerformanceService {
       if (params.limit) queryParams.append('limit', params.limit.toString());
       if (params.offset) queryParams.append('offset', params.offset.toString());
 
-      const response = await fetch(`${this.baseUrl}/performance/tests?${queryParams}`);
+      const response = await fetch(
+        `${this.baseUrl}/performance/tests?${queryParams}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -181,9 +204,12 @@ export class PerformanceService {
   // Relatórios de performance
   async generateReport(testId: string): Promise<PerformanceReport> {
     try {
-      const response = await fetch(`${this.baseUrl}/performance/tests/${testId}/report`, {
-        method: 'POST',
-      });
+      const response = await fetch(
+        `${this.baseUrl}/performance/tests/${testId}/report`,
+        {
+          method: 'POST',
+        },
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -196,7 +222,9 @@ export class PerformanceService {
 
   async getReport(reportId: string): Promise<PerformanceReport> {
     try {
-      const response = await fetch(`${this.baseUrl}/performance/reports/${reportId}`);
+      const response = await fetch(
+        `${this.baseUrl}/performance/reports/${reportId}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -242,9 +270,12 @@ export class PerformanceService {
 
   async executeTestSuite(suiteId: string): Promise<TestExecution> {
     try {
-      const response = await fetch(`${this.baseUrl}/performance/suites/${suiteId}/execute`, {
-        method: 'POST',
-      });
+      const response = await fetch(
+        `${this.baseUrl}/performance/suites/${suiteId}/execute`,
+        {
+          method: 'POST',
+        },
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -256,13 +287,16 @@ export class PerformanceService {
   }
 
   // WebSocket para monitoramento em tempo real
-  createTestWebSocket(testId: string, onUpdate: (result: LoadTestResult) => void): WebSocket {
+  createTestWebSocket(
+    testId: string,
+    onUpdate: (result: LoadTestResult) => void,
+  ): WebSocket {
     const wsUrl = `${API_BASE_URL.replace('http', 'ws')}/v1/performance/tests/${testId}/stream`;
     const ws = new WebSocket(wsUrl);
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data) as LoadTestResult;
         onUpdate(data);
       } catch (error) {
         console.error('Erro ao processar atualização do teste:', error);
@@ -277,9 +311,14 @@ export class PerformanceService {
   }
 
   // Exportar resultados
-  async exportResults(testId: string, format: 'json' | 'csv' | 'xlsx'): Promise<Blob> {
+  async exportResults(
+    testId: string,
+    format: 'json' | 'csv' | 'xlsx',
+  ): Promise<Blob> {
     try {
-      const response = await fetch(`${this.baseUrl}/performance/tests/${testId}/export?format=${format}`);
+      const response = await fetch(
+        `${this.baseUrl}/performance/tests/${testId}/export?format=${format}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -291,15 +330,20 @@ export class PerformanceService {
   }
 
   // Validação de configuração
-  async validateConfig(config: LoadTestConfig): Promise<{ valid: boolean; errors: string[] }> {
+  async validateConfig(
+    config: LoadTestConfig,
+  ): Promise<{ valid: boolean; errors: string[] }> {
     try {
-      const response = await fetch(`${this.baseUrl}/performance/configs/validate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${this.baseUrl}/performance/configs/validate`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(config),
         },
-        body: JSON.stringify(config),
-      });
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

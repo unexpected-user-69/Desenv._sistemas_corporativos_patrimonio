@@ -1,17 +1,19 @@
 // Serviço para funcionalidades avançadas
 
-import { 
-  AdvancedSearchParams, 
-  CursorPaginationParams, 
-  FuzzySearchParams, 
+import {
+  AdvancedSearchParams,
+  CursorPaginationParams,
+  FuzzySearchParams,
   DateRangeParams,
   SearchResult,
   FuzzySearchResult,
   ServiceStatus,
-  BulkOperationResult
+  BulkOperationResult,
 } from '../types/advanced';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL =
+  (import.meta.env as { VITE_API_BASE_URL?: string }).VITE_API_BASE_URL ||
+  'http://localhost:3000';
 
 export class AdvancedService {
   private baseUrl: string;
@@ -21,7 +23,9 @@ export class AdvancedService {
   }
 
   // Busca avançada
-  async advancedSearch<T = any>(params: AdvancedSearchParams): Promise<SearchResult<T>> {
+  async advancedSearch<T = unknown>(
+    params: AdvancedSearchParams,
+  ): Promise<SearchResult<T>> {
     try {
       const response = await fetch(`${this.baseUrl}/users/advanced/search`, {
         method: 'POST',
@@ -33,7 +37,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro na busca avançada:', error);
       throw error;
@@ -41,7 +45,9 @@ export class AdvancedService {
   }
 
   // Paginação baseada em cursor
-  async cursorSearch<T = any>(params: CursorPaginationParams): Promise<SearchResult<T>> {
+  async cursorSearch<T = unknown>(
+    params: CursorPaginationParams,
+  ): Promise<SearchResult<T>> {
     try {
       const queryParams = new URLSearchParams();
       if (params.cursor) queryParams.append('cursor', params.cursor);
@@ -50,11 +56,13 @@ export class AdvancedService {
       queryParams.append('sortField', params.sort.field);
       queryParams.append('sortOrder', params.sort.order);
 
-      const response = await fetch(`${this.baseUrl}/users/cursor/search?${queryParams}`);
+      const response = await fetch(
+        `${this.baseUrl}/users/cursor/search?${queryParams}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro na busca por cursor:', error);
       throw error;
@@ -62,7 +70,9 @@ export class AdvancedService {
   }
 
   // Busca fuzzy (aproximada)
-  async fuzzySearch<T = any>(params: FuzzySearchParams): Promise<FuzzySearchResult<T>> {
+  async fuzzySearch<T = unknown>(
+    params: FuzzySearchParams,
+  ): Promise<FuzzySearchResult<T>> {
     try {
       const response = await fetch(`${this.baseUrl}/users/fuzzy/search`, {
         method: 'POST',
@@ -74,7 +84,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as FuzzySearchResult<T>;
     } catch (error) {
       console.error('Erro na busca fuzzy:', error);
       throw error;
@@ -82,7 +92,9 @@ export class AdvancedService {
   }
 
   // Busca por intervalo de datas
-  async dateRangeSearch<T = any>(params: DateRangeParams): Promise<SearchResult<T>> {
+  async dateRangeSearch<T = unknown>(
+    params: DateRangeParams,
+  ): Promise<SearchResult<T>> {
     try {
       const queryParams = new URLSearchParams();
       queryParams.append('field', params.field);
@@ -91,11 +103,13 @@ export class AdvancedService {
       if (params.timezone) queryParams.append('timezone', params.timezone);
       if (params.format) queryParams.append('format', params.format);
 
-      const response = await fetch(`${this.baseUrl}/users/date-range?${queryParams}`);
+      const response = await fetch(
+        `${this.baseUrl}/users/date-range?${queryParams}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro na busca por intervalo de datas:', error);
       throw error;
@@ -109,7 +123,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao buscar estatísticas por role:', error);
       throw error;
@@ -117,20 +131,24 @@ export class AdvancedService {
   }
 
   // Usuários ativos recentes
-  async getRecentActiveUsers(params: {
-    limit?: number;
-    hours?: number;
-  } = {}): Promise<any[]> {
+  async getRecentActiveUsers(
+    params: {
+      limit?: number;
+      hours?: number;
+    } = {},
+  ): Promise<unknown[]> {
     try {
       const queryParams = new URLSearchParams();
       if (params.limit) queryParams.append('limit', params.limit.toString());
       if (params.hours) queryParams.append('hours', params.hours.toString());
 
-      const response = await fetch(`${this.baseUrl}/users/recent/active?${queryParams}`);
+      const response = await fetch(
+        `${this.baseUrl}/users/recent/active?${queryParams}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao buscar usuários ativos recentes:', error);
       throw error;
@@ -144,7 +162,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao buscar status dos serviços:', error);
       throw error;
@@ -152,20 +170,20 @@ export class AdvancedService {
   }
 
   // Configuração de hash
-  async getHashConfig(): Promise<any> {
+  async getHashConfig(): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/config/hash`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao buscar configuração de hash:', error);
       throw error;
     }
   }
 
-  async updateHashConfig(config: any): Promise<any> {
+  async updateHashConfig(config: unknown): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/config/hash`, {
         method: 'PATCH',
@@ -177,7 +195,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao atualizar configuração de hash:', error);
       throw error;
@@ -185,20 +203,20 @@ export class AdvancedService {
   }
 
   // Configuração de normalização
-  async getNormalizationConfig(): Promise<any> {
+  async getNormalizationConfig(): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/config/normalization`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao buscar configuração de normalização:', error);
       throw error;
     }
   }
 
-  async updateNormalizationConfig(config: any): Promise<any> {
+  async updateNormalizationConfig(config: unknown): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/config/normalization`, {
         method: 'PATCH',
@@ -210,7 +228,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao atualizar configuração de normalização:', error);
       throw error;
@@ -218,20 +236,20 @@ export class AdvancedService {
   }
 
   // Configuração de filtros
-  async getFilterConfig(): Promise<any> {
+  async getFilterConfig(): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/config/filters`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao buscar configuração de filtros:', error);
       throw error;
     }
   }
 
-  async updateFilterConfig(config: any): Promise<any> {
+  async updateFilterConfig(config: unknown): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/config/filters`, {
         method: 'PATCH',
@@ -243,7 +261,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao atualizar configuração de filtros:', error);
       throw error;
@@ -251,7 +269,7 @@ export class AdvancedService {
   }
 
   // Operações em lote
-  async bulkCreate<T = any>(data: T[]): Promise<BulkOperationResult<T>> {
+  async bulkCreate<T = unknown>(data: T[]): Promise<BulkOperationResult<T>> {
     try {
       const response = await fetch(`${this.baseUrl}/users/bulk`, {
         method: 'POST',
@@ -263,14 +281,16 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro na criação em lote:', error);
       throw error;
     }
   }
 
-  async bulkUpdate<T = any>(data: Array<{ id: string; data: Partial<T> }>): Promise<BulkOperationResult<T>> {
+  async bulkUpdate<T = unknown>(
+    data: Array<{ id: string; data: Partial<T> }>,
+  ): Promise<BulkOperationResult<T>> {
     try {
       const response = await fetch(`${this.baseUrl}/users/bulk`, {
         method: 'PATCH',
@@ -282,7 +302,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro na atualização em lote:', error);
       throw error;
@@ -301,7 +321,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro na exclusão em lote:', error);
       throw error;
@@ -309,7 +329,7 @@ export class AdvancedService {
   }
 
   // Validação de dados
-  async validateData<T = any>(data: T, rules: any): Promise<any> {
+  async validateData<T = unknown>(data: T, rules: unknown): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/validate`, {
         method: 'POST',
@@ -321,7 +341,7 @@ export class AdvancedService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro na validação de dados:', error);
       throw error;
@@ -329,13 +349,13 @@ export class AdvancedService {
   }
 
   // Cache management
-  async getCacheStats(): Promise<any> {
+  async getCacheStats(): Promise<unknown> {
     try {
       const response = await fetch(`${this.baseUrl}/cache/stats`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      return (await response.json()) as SearchResult<T>;
     } catch (error) {
       console.error('Erro ao buscar estatísticas de cache:', error);
       throw error;
@@ -344,10 +364,10 @@ export class AdvancedService {
 
   async clearCache(pattern?: string): Promise<void> {
     try {
-      const url = pattern 
+      const url = pattern
         ? `${this.baseUrl}/cache/clear?pattern=${encodeURIComponent(pattern)}`
         : `${this.baseUrl}/cache/clear`;
-      
+
       const response = await fetch(url, {
         method: 'DELETE',
       });

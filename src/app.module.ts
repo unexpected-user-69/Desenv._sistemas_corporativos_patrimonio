@@ -37,7 +37,7 @@ import { Patrimonio } from './patrimonio/entities/patrimonio.entity';
     PatrimonioModule,
     LoggerModule,
   ],
-  controllers: [AppController, MetricsController],
+  controllers: [AppController, MetricsController, CacheController],
   providers: [
     AppService,
     MetricsInterceptor,

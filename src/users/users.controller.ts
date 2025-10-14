@@ -26,7 +26,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { QueryUsersDto } from './dto/query-users.dto';
 import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
-import { AdvancedQueryUsersDto } from './dto/advanced-query-users.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -96,33 +95,27 @@ export class UsersController {
     description: 'Retorna um usuário pelo ID',
     type: UserResponseDto,
   })
-  @ApiNotFoundResponse({
+  @ApiNotFoundResponse({ 
     description: 'Usuário não encontrado',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 404 },
-        message: {
-          type: 'string',
-          example: 'User with ID "uuid-here" not found',
-        },
-        error: { type: 'string', example: 'Not Found' },
-      },
-    },
+        message: { type: 'string', example: 'User with ID "uuid-here" not found' },
+        error: { type: 'string', example: 'Not Found' }
+      }
+    }
   })
-  @ApiBadRequestResponse({
+  @ApiBadRequestResponse({ 
     description: 'ID inválido (não é um UUID válido)',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 400 },
-        message: {
-          type: 'string',
-          example: 'Validation failed (uuid is expected)',
-        },
-        error: { type: 'string', example: 'Bad Request' },
-      },
-    },
+        message: { type: 'string', example: 'Validation failed (uuid is expected)' },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
   })
   findOne(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -135,37 +128,36 @@ export class UsersController {
     description: 'Retorna um usuário pelo email',
     type: UserResponseDto,
   })
-  @ApiNotFoundResponse({
+  @ApiNotFoundResponse({ 
     description: 'Usuário não encontrado',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 404 },
-        message: {
-          type: 'string',
-          example: 'User with email "email@example.com" not found',
-        },
-        error: { type: 'string', example: 'Not Found' },
-      },
-    },
+        message: { type: 'string', example: 'User with email "email@example.com" not found' },
+        error: { type: 'string', example: 'Not Found' }
+      }
+    }
   })
-  @ApiBadRequestResponse({
+  @ApiBadRequestResponse({ 
     description: 'Email inválido',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 400 },
         message: { type: 'string', example: 'Invalid email format' },
-        error: { type: 'string', example: 'Bad Request' },
-      },
-    },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
   })
-  findByEmail(@Param('email') email: string): Promise<UserResponseDto> {
+  findByEmail(
+    @Param('email') email: string,
+  ): Promise<UserResponseDto> {
     return this.usersService.findByEmail(email);
   }
 
   @Post()
-  @ApiBody({
+  @ApiBody({ 
     type: CreateUserDto,
     description: 'Dados do usuário a ser criado',
     examples: {
@@ -176,8 +168,8 @@ export class UsersController {
           email: 'joao.silva@email.com',
           password: 'senha123',
           role: 'STUDENT',
-          isActive: true,
-        },
+          isActive: true
+        }
       },
       teacher: {
         summary: 'Criar professor',
@@ -186,47 +178,47 @@ export class UsersController {
           email: 'maria.santos@email.com',
           password: 'senha456',
           role: 'TEACHER',
-          isActive: true,
-        },
-      },
-    },
+          isActive: true
+        }
+      }
+    }
   })
   @ApiCreatedResponse({
     description: 'Usuário criado com sucesso',
     type: UserResponseDto,
   })
-  @ApiBadRequestResponse({
+  @ApiBadRequestResponse({ 
     description: 'Dados de entrada inválidos',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 400 },
-        message: {
-          type: 'array',
+        message: { 
+          type: 'array', 
           items: { type: 'string' },
-          example: ['name should not be empty', 'email must be a valid email'],
+          example: ['name should not be empty', 'email must be a valid email']
         },
-        error: { type: 'string', example: 'Bad Request' },
-      },
-    },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
   })
-  @ApiConflictResponse({
+  @ApiConflictResponse({ 
     description: 'Email já existe no sistema',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 409 },
         message: { type: 'string', example: 'Email already exists' },
-        error: { type: 'string', example: 'Conflict' },
-      },
-    },
+        error: { type: 'string', example: 'Conflict' }
+      }
+    }
   })
   create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     return this.usersService.create(dto);
   }
 
   @Post('bulk')
-  @ApiBody({
+  @ApiBody({ 
     type: [CreateUserDto],
     description: 'Lista de usuários a serem criados',
     examples: {
@@ -238,51 +230,48 @@ export class UsersController {
             email: 'joao.silva@email.com',
             password: 'senha123',
             role: 'STUDENT',
-            isActive: true,
+            isActive: true
           },
           {
             name: 'Maria Santos',
             email: 'maria.santos@email.com',
             password: 'senha456',
             role: 'TEACHER',
-            isActive: true,
-          },
-        ],
-      },
-    },
+            isActive: true
+          }
+        ]
+      }
+    }
   })
   @ApiCreatedResponse({
     description: 'Usuários criados com sucesso',
     type: [UserResponseDto],
   })
-  @ApiBadRequestResponse({
+  @ApiBadRequestResponse({ 
     description: 'Dados de entrada inválidos',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 400 },
-        message: {
-          type: 'array',
+        message: { 
+          type: 'array', 
           items: { type: 'string' },
-          example: ['name should not be empty', 'email must be a valid email'],
+          example: ['name should not be empty', 'email must be a valid email']
         },
-        error: { type: 'string', example: 'Bad Request' },
-      },
-    },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
   })
-  @ApiConflictResponse({
+  @ApiConflictResponse({ 
     description: 'Um ou mais emails já existem no sistema',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 409 },
-        message: {
-          type: 'string',
-          example: 'One or more emails already exist',
-        },
-        error: { type: 'string', example: 'Conflict' },
-      },
-    },
+        message: { type: 'string', example: 'One or more emails already exist' },
+        error: { type: 'string', example: 'Conflict' }
+      }
+    }
   })
   createBulk(@Body() dtos: CreateUserDto[]): Promise<UserResponseDto[]> {
     return this.usersService.createBulk(dtos);
@@ -309,6 +298,70 @@ export class UsersController {
   @ApiBadRequestResponse({ description: 'ID inválido' })
   remove(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     return this.usersService.remove(id);
+  }
+
+  @Get('advanced/search')
+  @ApiOkResponse({
+    description: 'Busca avançada com filtros full-text e ordenação dinâmica',
+    type: PaginatedUsersResponseDto,
+  })
+  @ApiQuery({
+    name: 'searchText',
+    required: false,
+    description: 'Texto para busca full-text',
+  })
+  @ApiQuery({ name: 'role', required: false, description: 'Filtrar por role' })
+  @ApiQuery({
+    name: 'isActive',
+    required: false,
+    description: 'Filtrar por status ativo',
+  })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    description: 'Data inicial (ISO string)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    description: 'Data final (ISO string)',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: 'Campo para ordenação',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    description: 'Direção da ordenação (ASC/DESC)',
+  })
+  @ApiQuery({ name: 'page', required: false, description: 'Número da página' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Itens por página' })
+  async findWithAdvancedFilters(
+    @Query('searchText') searchText?: string,
+    @Query('role') role?: string,
+    @Query('isActive') isActive?: boolean,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ): Promise<PaginatedUsersResponseDto> {
+    const options = {
+      searchText,
+      role: role as UserRole | undefined,
+      isActive,
+      dateFrom: dateFrom ? new Date(dateFrom) : undefined,
+      dateTo: dateTo ? new Date(dateTo) : undefined,
+      sortBy,
+      sortOrder,
+      page,
+      limit,
+    };
+
+    return this.usersService.findWithAdvancedFilters(options);
   }
 
   @Get('cursor/search')
@@ -453,108 +506,5 @@ export class UsersController {
     @Query('limit') limit?: number,
   ): Promise<UserResponseDto[]> {
     return this.usersService.findRecentActiveUsers(days, limit);
-  }
-
-  @Get('advanced')
-  @ApiOkResponse({
-    description: 'Lista usuários com filtros avançados e cache',
-    type: PaginatedUsersResponseDto,
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    description: 'Número da página',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: 'Número de itens por página',
-    example: 20,
-  })
-  @ApiQuery({
-    name: 'q',
-    required: false,
-    description: 'Busca textual (nome, email)',
-    example: 'joão silva',
-  })
-  @ApiQuery({
-    name: 'role',
-    required: false,
-    description: 'Filtro por role',
-    enum: UserRole,
-  })
-  @ApiQuery({
-    name: 'isActive',
-    required: false,
-    description: 'Filtro por status ativo',
-    example: true,
-  })
-  @ApiQuery({
-    name: 'createdAfter',
-    required: false,
-    description: 'Data de criação inicial (ISO 8601)',
-    example: '2024-01-01T00:00:00.000Z',
-  })
-  @ApiQuery({
-    name: 'createdBefore',
-    required: false,
-    description: 'Data de criação final (ISO 8601)',
-    example: '2024-12-31T23:59:59.999Z',
-  })
-  @ApiQuery({
-    name: 'updatedAfter',
-    required: false,
-    description: 'Data de atualização inicial (ISO 8601)',
-    example: '2024-01-01T00:00:00.000Z',
-  })
-  @ApiQuery({
-    name: 'updatedBefore',
-    required: false,
-    description: 'Data de atualização final (ISO 8601)',
-    example: '2024-12-31T23:59:59.999Z',
-  })
-  @ApiQuery({
-    name: 'sortBy',
-    required: false,
-    description: 'Campo para ordenação',
-    enum: ['name', 'email', 'role', 'isActive', 'createdAt', 'updatedAt'],
-  })
-  @ApiQuery({
-    name: 'sortOrder',
-    required: false,
-    description: 'Direção da ordenação',
-    enum: ['ASC', 'DESC'],
-  })
-  async findWithAdvancedFilters(
-    @Query() query: AdvancedQueryUsersDto,
-  ): Promise<PaginatedUsersResponseDto> {
-    return this.usersService.findWithAdvancedFilters(query);
-  }
-
-  @Get('stats')
-  @ApiOkResponse({
-    description: 'Estatísticas de usuários com cache',
-    schema: {
-      type: 'object',
-      properties: {
-        total: { type: 'number', description: 'Total de usuários' },
-        active: { type: 'number', description: 'Usuários ativos' },
-        inactive: { type: 'number', description: 'Usuários inativos' },
-        byRole: {
-          type: 'object',
-          description: 'Contagem por role',
-          additionalProperties: { type: 'number' },
-        },
-      },
-    },
-  })
-  async getUserStats(): Promise<{
-    total: number;
-    active: number;
-    inactive: number;
-    byRole: Record<string, number>;
-  }> {
-    return this.usersService.getUserStats();
   }
 }

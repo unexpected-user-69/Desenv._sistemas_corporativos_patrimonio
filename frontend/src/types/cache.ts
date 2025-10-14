@@ -1,93 +1,94 @@
-// Tipos para o sistema de cache Redis
+// Tipos para sistema de cache Redis
 
 export interface CacheStats {
   hits: number;
   misses: number;
-  hitRate: number;
-  totalKeys: number;
-  memoryUsage: string;
-  uptime: number;
-  connectedClients: number;
+  keys: number;
+  memoryUsage: number; // in bytes
+  uptime: number; // in seconds
+  evictions: number;
 }
 
 export interface CacheKey {
   key: string;
-  value: string;
-  ttl: number;
-  type: 'string' | 'hash' | 'list' | 'set' | 'zset';
-  size: number;
-  lastAccessed: string;
+  ttl: number; // time to live in seconds
+  type: string; // e.g., 'string', 'hash', 'list'
+  valuePreview: string; // A snippet of the value
 }
 
 export interface CacheConfig {
-  host: string;
-  port: number;
-  password?: string;
-  db: number;
-  ttl: number;
-  maxMemory: string;
-  evictionPolicy: 'allkeys-lru' | 'allkeys-lfu' | 'volatile-lru' | 'volatile-lfu' | 'noeviction';
+  maxmemory: string; // e.g., '100mb'
+  maxmemoryPolicy: 'noeviction' | 'allkeys-lru' | 'volatile-lru' | 'allkeys-random' | 'volatile-random' | 'volatile-ttl';
+  defaultTTL: number; // in seconds
+}
+
+export interface CacheAlert {
+  id: string;
+  message: string;
+  level: 'info' | 'warn' | 'error';
+  timestamp: string;
+  resolved: boolean;
 }
 
 export interface CacheOperation {
   id: string;
-  operation: 'GET' | 'SET' | 'DEL' | 'EXPIRE' | 'FLUSH';
+  type: 'GET' | 'SET' | 'DEL' | 'EXPIRE' | 'FLUSH';
   key: string;
-  value?: string;
-  ttl?: number;
   timestamp: string;
-  duration: number;
+  duration: number; // in milliseconds
   success: boolean;
   error?: string;
 }
 
 export interface CacheMetrics {
-  operationsPerSecond: number;
-  averageResponseTime: number;
-  p95ResponseTime: number;
-  p99ResponseTime: number;
-  errorRate: number;
-  memoryUsage: number;
-  cpuUsage: number;
-}
-
-export interface CacheAlert {
-  id: string;
-  type: 'error' | 'warning' | 'info';
-  message: string;
-  timestamp: string;
-  resolved: boolean;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  responseTime: {
+    min: number;
+    max: number;
+    avg: number;
+    p95: number;
+    p99: number;
+  };
+  throughput: {
+    operationsPerSecond: number;
+    totalOperations: number;
+  };
+  hitRate: {
+    percentage: number;
+    hits: number;
+    misses: number;
+  };
 }
 
 export interface CacheHealth {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: 'healthy' | 'warning' | 'critical';
   lastCheck: string;
-  responseTime: number;
-  memoryUsage: number;
-  connectedClients: number;
-  errors: number;
-  warnings: number;
+  memoryUsage: {
+    used: number;
+    total: number;
+    percentage: number;
+  };
+  connections: {
+    active: number;
+    max: number;
+  };
 }
 
 export interface CachePattern {
   pattern: string;
   count: number;
   memoryUsage: number;
-  lastAccessed: string;
+  avgTTL: number;
 }
 
 export interface CacheFlushOptions {
+  async: boolean;
   pattern?: string;
-  confirm: boolean;
 }
 
 export interface CacheSearchOptions {
   pattern: string;
-  limit: number;
-  offset: number;
-  includeValues: boolean;
-  includeTtl: boolean;
+  limit?: number;
+  offset?: number;
 }
 
 export interface CacheSearchResult {

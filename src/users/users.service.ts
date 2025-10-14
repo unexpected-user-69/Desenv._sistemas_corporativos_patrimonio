@@ -20,8 +20,6 @@ import {
   FilterService,
   AdvancedFilterOptions,
 } from '../common/services/filter.service';
-import { CacheService } from '../common/services/cache.service';
-import { AdvancedQueryUsersDto } from './dto/advanced-query-users.dto';
 
 @Injectable()
 export class UsersService {
@@ -31,7 +29,6 @@ export class UsersService {
     private readonly hashService: HashService,
     private readonly normalizationService: NormalizationService,
     private readonly filterService: FilterService,
-    private readonly cacheService: CacheService,
   ) {}
 
   /**
@@ -204,9 +201,7 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<UserResponseDto> {
     const normalizedEmail = this.normalizeEmail(email);
-    const user = await this.userRepository.findOne({
-      where: { email: normalizedEmail },
-    });
+    const user = await this.userRepository.findOne({ where: { email: normalizedEmail } });
     if (!user) {
       throw new NotFoundException(`User with email "${email}" not found`);
     }
@@ -257,14 +252,14 @@ export class UsersService {
     }
 
     // Normalizar todos os emails e nomes
-    const normalizedDtos = dtos.map((dto) => ({
+    const normalizedDtos = dtos.map(dto => ({
       ...dto,
       email: this.normalizeEmail(dto.email),
       name: this.normalizeName(dto.name),
     }));
 
     // Verificar emails duplicados na entrada
-    const emails = normalizedDtos.map((dto) => dto.email);
+    const emails = normalizedDtos.map(dto => dto.email);
     const uniqueEmails = new Set(emails);
     if (emails.length !== uniqueEmails.size) {
       throw new ConflictException('Duplicate emails in the request');
@@ -272,14 +267,12 @@ export class UsersService {
 
     // Verificar se algum email já existe no banco
     const existingUsers = await this.userRepository.find({
-      where: emails.map((email) => ({ email })),
+      where: emails.map(email => ({ email })),
     });
 
     if (existingUsers.length > 0) {
-      const existingEmails = existingUsers.map((user) => user.email);
-      throw new ConflictException(
-        `Emails already exist: ${existingEmails.join(', ')}`,
-      );
+      const existingEmails = existingUsers.map(user => user.email);
+      throw new ConflictException(`Emails already exist: ${existingEmails.join(', ')}`);
     }
 
     try {
@@ -292,17 +285,16 @@ export class UsersService {
             passwordHash: hashedPassword,
             isActive: dto.isActive ?? true,
           });
-        }),
+        })
       );
 
       // Salvar todos os usuários
       const savedUsers = await this.userRepository.save(entities);
-
+      
       // Serializar e retornar
-      return savedUsers.map((user) => this.serializeUser(user));
+      return savedUsers.map(user => this.serializeUser(user));
     } catch (error: any) {
       // Tratamento de erro de conflito do banco
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error?.code === '23505') {
         throw new ConflictException('One or more emails already exist');
       }
@@ -330,6 +322,31 @@ export class UsersService {
   async remove(id: string): Promise<void> {
     await this.findOne(id); // Verifica se existe
     await this.userRepository.softDelete(id);
+  }
+
+  /**
+   * Busca avançada com filtros full-text e ordenação dinâmica
+   */
+  async findWithAdvancedFilters(
+    options: AdvancedFilterOptions,
+  ): Promise<PaginatedUsersResponseDto> {
+    const findOptions = this.filterService.buildAdvancedFilters(options);
+    const [users, total] = await this.userRepository.findAndCount(findOptions);
+
+    const { page = 1, limit = 20 } = options;
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      data: users.map((user) => this.serializeUser(user)),
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNextPage,
+      hasPreviousPage,
+    };
   }
 
   /**
@@ -444,185 +461,5 @@ export class UsersService {
     });
 
     return users.map((user) => this.serializeUser(user));
-  }
-
-  /**
-   * Busca usuários com filtros avançados e cache
-   */
-  async findWithAdvancedFilters(
-    query: AdvancedQueryUsersDto,
-  ): Promise<PaginatedUsersResponseDto> {
-    const {
-      page = 1,
-      limit = 20,
-      q,
-      role,
-      isActive,
-      createdAfter,
-      createdBefore,
-      updatedAfter,
-      updatedBefore,
-      sortBy = 'createdAt',
-      sortOrder = 'DESC',
-    } = query;
-
-    // Gerar chave de cache baseada nos parâmetros
-    const cacheKey = this.cacheService.generateKey('users:advanced', {
-      page,
-      limit,
-      q,
-      role,
-      isActive,
-      createdAfter,
-      createdBefore,
-      updatedAfter,
-      updatedBefore,
-      sortBy,
-      sortOrder,
-    });
-
-    // Tentar obter do cache primeiro
-    const cached =
-      await this.cacheService.get<PaginatedUsersResponseDto>(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    // Construir query builder
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
-
-    // Aplicar filtros
-    if (q) {
-      const searchTerm = `%${q}%`;
-      queryBuilder.andWhere(
-        '(user.name ILIKE :searchTerm OR user.email ILIKE :searchTerm)',
-        { searchTerm },
-      );
-    }
-
-    if (role) {
-      queryBuilder.andWhere('user.role = :role', { role });
-    }
-
-    if (isActive !== undefined) {
-      queryBuilder.andWhere('user.isActive = :isActive', { isActive });
-    }
-
-    // Filtros de data
-    if (createdAfter) {
-      queryBuilder.andWhere('user.createdAt >= :createdAfter', {
-        createdAfter: new Date(createdAfter),
-      });
-    }
-
-    if (createdBefore) {
-      queryBuilder.andWhere('user.createdAt <= :createdBefore', {
-        createdBefore: new Date(createdBefore),
-      });
-    }
-
-    if (updatedAfter) {
-      queryBuilder.andWhere('user.updatedAt >= :updatedAfter', {
-        updatedAfter: new Date(updatedAfter),
-      });
-    }
-
-    if (updatedBefore) {
-      queryBuilder.andWhere('user.updatedAt <= :updatedBefore', {
-        updatedBefore: new Date(updatedBefore),
-      });
-    }
-
-    // Ordenação dinâmica
-    queryBuilder.orderBy(`user.${sortBy}`, sortOrder);
-
-    // Paginação
-    const skip = (page - 1) * limit;
-    queryBuilder.skip(skip).take(limit);
-
-    // Executar query
-    const [users, total] = await queryBuilder.getManyAndCount();
-
-    // Construir resposta
-    const result: PaginatedUsersResponseDto = {
-      data: users.map((user) => this.serializeUser(user)),
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-      hasNextPage: page < Math.ceil(total / limit),
-      hasPreviousPage: page > 1,
-    };
-
-    // Armazenar no cache por 5 minutos
-    await this.cacheService.set(cacheKey, result, 300);
-
-    return result;
-  }
-
-  /**
-   * Busca estatísticas de usuários com cache
-   */
-  async getUserStats(): Promise<{
-    total: number;
-    active: number;
-    inactive: number;
-    byRole: Record<string, number>;
-  }> {
-    const cacheKey = 'users:stats';
-
-    const cached = await this.cacheService.get<{
-      total: number;
-      active: number;
-      inactive: number;
-      byRole: Record<string, number>;
-    }>(cacheKey);
-
-    if (cached) {
-      return cached;
-    }
-
-    const [total, active, inactive, byRole] = await Promise.all([
-      this.userRepository.count(),
-      this.userRepository.count({ where: { isActive: true } }),
-      this.userRepository.count({ where: { isActive: false } }),
-      this.userRepository
-        .createQueryBuilder('user')
-        .select('user.role', 'role')
-        .addSelect('COUNT(*)', 'count')
-        .groupBy('user.role')
-        .getRawMany(),
-    ]);
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const roleStats = byRole.reduce(
-      (acc, item) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
-        acc[item.role] = parseInt(item.count);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-
-    const stats = {
-      total,
-      active,
-      inactive,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      byRole: roleStats,
-    };
-
-    // Cache por 10 minutos
-    await this.cacheService.set(cacheKey, stats, 600);
-
-    return stats;
-  }
-
-  /**
-   * Invalida cache relacionado a usuários
-   */
-  invalidateUserCache(): void {
-    this.cacheService.invalidatePattern('users:*');
   }
 }

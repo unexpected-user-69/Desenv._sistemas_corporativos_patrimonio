@@ -5,7 +5,6 @@ import { User, UserRole } from './entities/user.entity';
 import { HashService } from '../common/services/hash.service';
 import { NormalizationService } from '../common/services/normalization.service';
 import { FilterService } from '../common/services/filter.service';
-import { CacheService } from '../common/services/cache.service';
 import { Between, ILike } from 'typeorm';
 
 describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
@@ -39,37 +38,6 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
             save: jest.fn(),
             preload: jest.fn(),
             softDelete: jest.fn(),
-            createQueryBuilder: jest.fn().mockReturnValue({
-              select: jest.fn().mockReturnThis(),
-              addSelect: jest.fn().mockReturnThis(),
-              where: jest.fn().mockReturnThis(),
-              andWhere: jest.fn().mockReturnThis(),
-              orWhere: jest.fn().mockReturnThis(),
-              orderBy: jest.fn().mockReturnThis(),
-              addOrderBy: jest.fn().mockReturnThis(),
-              skip: jest.fn().mockReturnThis(),
-              take: jest.fn().mockReturnThis(),
-              limit: jest.fn().mockReturnThis(),
-              offset: jest.fn().mockReturnThis(),
-              groupBy: jest.fn().mockReturnThis(),
-              addGroupBy: jest.fn().mockReturnThis(),
-              having: jest.fn().mockReturnThis(),
-              andHaving: jest.fn().mockReturnThis(),
-              orHaving: jest.fn().mockReturnThis(),
-              leftJoin: jest.fn().mockReturnThis(),
-              innerJoin: jest.fn().mockReturnThis(),
-              leftJoinAndSelect: jest.fn().mockReturnThis(),
-              innerJoinAndSelect: jest.fn().mockReturnThis(),
-              getMany: jest.fn().mockResolvedValue([]),
-              getOne: jest.fn().mockResolvedValue(null),
-              getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
-              getRawMany: jest.fn().mockResolvedValue([]),
-              getRawOne: jest.fn().mockResolvedValue(null),
-              getCount: jest.fn().mockResolvedValue(0),
-              getSql: jest.fn().mockReturnValue('SELECT * FROM users'),
-              setParameter: jest.fn().mockReturnThis(),
-              setParameters: jest.fn().mockReturnThis(),
-            }),
           },
         },
         {
@@ -101,18 +69,6 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
             generateFuzzyPatterns: jest.fn(),
           },
         },
-        {
-          provide: CacheService,
-          useValue: {
-            get: jest.fn(),
-            set: jest.fn(),
-            del: jest.fn(),
-            reset: jest.fn(),
-            generateKey: jest.fn(),
-            getOrSet: jest.fn(),
-            invalidatePattern: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
@@ -128,65 +84,40 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
   describe('findWithAdvancedFilters', () => {
     it('should return paginated users with advanced filters', async () => {
       // Arrange
-      const query = {
+      const options = {
         page: 1,
         limit: 10,
-        q: 'joão',
+        searchText: 'joão',
         role: UserRole.STUDENT,
         isActive: true,
-        sortBy: 'createdAt' as const,
-        sortOrder: 'DESC' as const,
       };
 
-      const mockQueryBuilder = {
-        andWhere: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValue([[mockUser], 1]),
+      const mockFindOptions = {
+        where: { name: ILike('%joão%') },
+        skip: 0,
+        take: 10,
+        order: { createdAt: 'DESC' as const },
       };
 
-      userRepository.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
-      );
+      filterService.buildAdvancedFilters.mockReturnValue(mockFindOptions);
+      userRepository.findAndCount.mockResolvedValue([[mockUser], 1]);
 
       // Act
-      const result = await service.findWithAdvancedFilters(query);
+      const result = await service.findWithAdvancedFilters(options);
 
       // Assert
-      expect(userRepository.createQueryBuilder).toHaveBeenCalledWith('user');
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        '(user.name ILIKE :searchTerm OR user.email ILIKE :searchTerm)',
-        { searchTerm: '%joão%' },
-      );
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'user.role = :role',
-        { role: UserRole.STUDENT },
-      );
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'user.isActive = :isActive',
-        { isActive: true },
-      );
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
-        'user.createdAt',
-        'DESC',
-      );
-      expect(mockQueryBuilder.skip).toHaveBeenCalledWith(0);
-      expect(mockQueryBuilder.take).toHaveBeenCalledWith(10);
+      expect(filterService.buildAdvancedFilters).toHaveBeenCalledWith(options);
+      expect(userRepository.findAndCount).toHaveBeenCalledWith(mockFindOptions);
       expect(result).toEqual({
-        data: [
-          {
+        data: expect.arrayContaining([
+          expect.objectContaining({
             id: mockUser.id,
             name: mockUser.name,
             email: mockUser.email,
             role: mockUser.role,
             isActive: mockUser.isActive,
-            avatarUrl: mockUser.avatarUrl,
-            createdAt: mockUser.createdAt,
-            updatedAt: mockUser.updatedAt,
-            version: mockUser.version,
-          },
-        ],
+          }),
+        ]),
         total: 1,
         page: 1,
         limit: 10,
@@ -198,22 +129,14 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
 
     it('should handle empty results', async () => {
       // Arrange
-      const query = { page: 1, limit: 10 };
+      const options = { page: 1, limit: 10 };
+      const mockFindOptions = { where: {}, skip: 0, take: 10 };
 
-      const mockQueryBuilder = {
-        andWhere: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
-      };
-
-      userRepository.createQueryBuilder.mockReturnValue(
-        mockQueryBuilder as any,
-      );
+      filterService.buildAdvancedFilters.mockReturnValue(mockFindOptions);
+      userRepository.findAndCount.mockResolvedValue([[], 0]);
 
       // Act
-      const result = await service.findWithAdvancedFilters(query);
+      const result = await service.findWithAdvancedFilters(options);
 
       // Assert
       expect(result).toEqual({

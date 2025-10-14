@@ -4,9 +4,7 @@ import React, { useState, useEffect } from 'react';
 import type { 
   TestSuite, 
   QualityMetrics, 
-  CoverageSummary,
-  TestEnvironment,
-  TestTemplate
+  CoverageSummary
 } from '../../types/testing';
 import { testingService } from '../../services/testing';
 import { TestDoublesPanel } from './TestDoublesPanel';
@@ -48,8 +46,8 @@ export const TestingDashboard: React.FC<TestingDashboardProps> = ({
       setTestSuites(suitesData);
       setQualityMetrics(qualityData);
       setCoverage(coverageData);
-      setEnvironments(envData);
-      setTemplates(templatesData);
+      // setEnvironments(envData);
+      // setTemplates(templatesData);
       setLastUpdate(new Date());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados de teste');

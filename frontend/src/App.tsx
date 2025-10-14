@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import { MonitoringDashboard } from './components/monitoring/MonitoringDashboard';
 import { CacheDashboard } from './components/cache/CacheDashboard';
-import { ProductionPage } from './pages/production/ProductionPage';
-import { TestingPage } from './pages/testing/TestingPage';
+// import { ProductionPage } from './pages/production/ProductionPage';
+// import { TestingPage } from './pages/testing/TestingPage';
 
 type TabType = 'home' | 'cache' | 'filters' | 'analytics' | 'monitoring' | 'performance' | 'advanced' | 'production' | 'testing';
 
@@ -111,14 +111,7 @@ export const App: React.FC = () => {
         return (
           <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Cache Redis
-                </h2>
-                <p className="text-lg text-gray-600">
-                  Dashboard de monitoramento do cache Redis em desenvolvimento
-                </p>
-              </div>
+              <CacheDashboard />
             </div>
           </div>
         );
@@ -194,7 +187,14 @@ export const App: React.FC = () => {
         return (
           <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <ProductionPage />
+              <div className="text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Funcionalidades de Produção
+                </h2>
+                <p className="text-lg text-gray-600">
+                  Rate limiting, CORS, compression em desenvolvimento
+                </p>
+              </div>
             </div>
           </div>
         );
@@ -202,7 +202,14 @@ export const App: React.FC = () => {
         return (
           <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <TestingPage />
+              <div className="text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Utilitários de Teste
+                </h2>
+                <p className="text-lg text-gray-600">
+                  Test doubles, mocks avançados em desenvolvimento
+                </p>
+              </div>
             </div>
           </div>
         );

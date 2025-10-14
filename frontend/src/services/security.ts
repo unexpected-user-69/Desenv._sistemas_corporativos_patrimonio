@@ -115,10 +115,10 @@ const generateMockInterceptorStats = (): InterceptorStats => ({
 });
 
 class SecurityService {
-  private baseUrl: string;
+  private _baseUrl: string;
 
   constructor() {
-    this.baseUrl = 'http://localhost:3000';
+    this._baseUrl = 'http://localhost:3000';
   }
 
   // Rate Limiting

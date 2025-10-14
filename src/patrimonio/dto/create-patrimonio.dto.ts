@@ -1,18 +1,22 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsNotEmpty,
   IsString,
-  IsEnum,
+  IsNotEmpty,
   IsOptional,
+  IsEnum,
   IsNumber,
   IsDateString,
   IsUUID,
   MinLength,
   MaxLength,
   Min,
+  IsUrl,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PatrimonioStatus, PatrimonioCategoria } from '../entities/patrimonio.entity';
-import { IsTrimmed, ToLowerCase } from '../../common/validators';
+import { Transform } from 'class-transformer';
+import {
+  PatrimonioStatus,
+  PatrimonioCategoria,
+} from '../entities/patrimonio.entity';
 
 export class CreatePatrimonioDto {
   @ApiProperty({
@@ -21,11 +25,13 @@ export class CreatePatrimonioDto {
     minLength: 3,
     maxLength: 50,
   })
-  @IsNotEmpty({ message: 'O código é obrigatório' })
-  @IsString({ message: 'O código deve ser uma string' })
-  @MinLength(3, { message: 'O código deve ter pelo menos 3 caracteres' })
-  @MaxLength(50, { message: 'O código deve ter no máximo 50 caracteres' })
-  @IsTrimmed({ message: 'O código não pode conter espaços no início ou fim' })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(50)
+  @Transform(({ value }) => {
+    return typeof value === 'string' ? value.trim().toUpperCase() : value;
+  })
   codigo!: string;
 
   @ApiProperty({
@@ -33,18 +39,19 @@ export class CreatePatrimonioDto {
     example: 'Notebook Dell Inspiron 15',
     maxLength: 255,
   })
-  @IsNotEmpty({ message: 'O nome é obrigatório' })
-  @IsString({ message: 'O nome deve ser uma string' })
-  @MaxLength(255, { message: 'O nome deve ter no máximo 255 caracteres' })
-  @IsTrimmed({ message: 'O nome não pode conter espaços no início ou fim' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   nome!: string;
 
   @ApiPropertyOptional({
     description: 'Descrição detalhada do patrimônio',
-    example: 'Notebook para uso administrativo com processador Intel i5',
+    example: 'Notebook para uso administrativo com Windows 11',
   })
   @IsOptional()
-  @IsString({ message: 'A descrição deve ser uma string' })
+  @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   descricao?: string;
 
   @ApiProperty({
@@ -52,7 +59,7 @@ export class CreatePatrimonioDto {
     enum: PatrimonioCategoria,
     example: PatrimonioCategoria.EQUIPAMENTO,
   })
-  @IsEnum(PatrimonioCategoria, { message: 'Categoria deve ser um valor válido' })
+  @IsEnum(PatrimonioCategoria)
   categoria!: PatrimonioCategoria;
 
   @ApiPropertyOptional({
@@ -62,67 +69,69 @@ export class CreatePatrimonioDto {
     default: PatrimonioStatus.ATIVO,
   })
   @IsOptional()
-  @IsEnum(PatrimonioStatus, { message: 'Status deve ser um valor válido' })
-  status?: PatrimonioStatus = PatrimonioStatus.ATIVO;
+  @IsEnum(PatrimonioStatus)
+  status?: PatrimonioStatus;
+
+  @ApiPropertyOptional({
+    description: 'Marca do patrimônio',
+    example: 'Dell',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  marca?: string;
+
+  @ApiPropertyOptional({
+    description: 'Modelo do patrimônio',
+    example: 'Inspiron 15 3000',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  modelo?: string;
+
+  @ApiPropertyOptional({
+    description: 'Número de série do patrimônio',
+    example: 'ABC123456789',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  numeroSerie?: string;
 
   @ApiPropertyOptional({
     description: 'Valor de aquisição do patrimônio',
-    example: 2500.00,
+    example: 2500.0,
     minimum: 0,
   })
   @IsOptional()
-  @IsNumber({}, { message: 'O valor de aquisição deve ser um número' })
-  @Min(0, { message: 'O valor de aquisição deve ser maior ou igual a zero' })
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
   valorAquisicao?: number;
 
   @ApiPropertyOptional({
     description: 'Data de aquisição do patrimônio',
     example: '2024-01-15',
+    format: 'date',
   })
   @IsOptional()
-  @IsDateString({}, { message: 'A data de aquisição deve estar no formato ISO' })
+  @IsDateString()
   dataAquisicao?: string;
 
   @ApiPropertyOptional({
     description: 'Data de garantia do patrimônio',
     example: '2025-01-15',
+    format: 'date',
   })
   @IsOptional()
-  @IsDateString({}, { message: 'A data de garantia deve estar no formato ISO' })
+  @IsDateString()
   dataGarantia?: string;
-
-  @ApiPropertyOptional({
-    description: 'Número de série do patrimônio',
-    example: 'DL123456789',
-    maxLength: 255,
-  })
-  @IsOptional()
-  @IsString({ message: 'O número de série deve ser uma string' })
-  @MaxLength(255, { message: 'O número de série deve ter no máximo 255 caracteres' })
-  @IsTrimmed({ message: 'O número de série não pode conter espaços no início ou fim' })
-  numeroSerie?: string;
-
-  @ApiPropertyOptional({
-    description: 'Modelo do patrimônio',
-    example: 'Inspiron 15 3000',
-    maxLength: 255,
-  })
-  @IsOptional()
-  @IsString({ message: 'O modelo deve ser uma string' })
-  @MaxLength(255, { message: 'O modelo deve ter no máximo 255 caracteres' })
-  @IsTrimmed({ message: 'O modelo não pode conter espaços no início ou fim' })
-  modelo?: string;
-
-  @ApiPropertyOptional({
-    description: 'Marca do patrimônio',
-    example: 'Dell',
-    maxLength: 255,
-  })
-  @IsOptional()
-  @IsString({ message: 'A marca deve ser uma string' })
-  @MaxLength(255, { message: 'A marca deve ter no máximo 255 caracteres' })
-  @IsTrimmed({ message: 'A marca não pode conter espaços no início ou fim' })
-  marca?: string;
 
   @ApiPropertyOptional({
     description: 'Localização física do patrimônio',
@@ -130,34 +139,37 @@ export class CreatePatrimonioDto {
     maxLength: 255,
   })
   @IsOptional()
-  @IsString({ message: 'A localização deve ser uma string' })
-  @MaxLength(255, { message: 'A localização deve ter no máximo 255 caracteres' })
-  @IsTrimmed({ message: 'A localização não pode conter espaços no início ou fim' })
+  @IsString()
+  @MaxLength(255)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   localizacao?: string;
-
-  @ApiPropertyOptional({
-    description: 'Observações adicionais sobre o patrimônio',
-    example: 'Equipamento em perfeito estado, sem avarias',
-  })
-  @IsOptional()
-  @IsString({ message: 'As observações devem ser uma string' })
-  observacoes?: string;
-
-  @ApiPropertyOptional({
-    description: 'URL da foto do patrimônio',
-    example: 'https://example.com/patrimonio-foto.jpg',
-    maxLength: 500,
-  })
-  @IsOptional()
-  @IsString({ message: 'A URL da foto deve ser uma string' })
-  @MaxLength(500, { message: 'A URL da foto deve ter no máximo 500 caracteres' })
-  fotoUrl?: string;
 
   @ApiPropertyOptional({
     description: 'ID do usuário responsável pelo patrimônio',
     example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
   })
   @IsOptional()
-  @IsUUID('4', { message: 'O ID do responsável deve ser um UUID válido' })
+  @IsUUID()
   responsavelId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Observações adicionais sobre o patrimônio',
+    example: 'Equipamento em perfeito estado de conservação',
+  })
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  observacoes?: string;
+
+  @ApiPropertyOptional({
+    description: 'URL da foto do patrimônio',
+    example: 'https://example.com/fotos/patrimonio-001.jpg',
+    maxLength: 500,
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  @MaxLength(500)
+  fotoUrl?: string;
 }

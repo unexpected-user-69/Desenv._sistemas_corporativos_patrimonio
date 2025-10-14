@@ -43,7 +43,6 @@ export class AdvancedQueryUsersDto {
   })
   @IsOptional()
   @IsString()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   q?: string;
 

@@ -2,13 +2,16 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  MinLength,
   IsOptional,
   IsBoolean,
   IsUrl,
 } from 'class-validator';
 import { UserRole } from '../enums/user-role.enum';
-import { IsTrimmed, ToLowerCase, IsStrongPassword } from '../../common/validators';
+import {
+  IsTrimmed,
+  ToLowerCase,
+  IsStrongPassword,
+} from '../../common/validators';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -30,7 +33,7 @@ export class UpdateUserDto {
       requireNumbers: true,
       requireSpecialChars: false,
     },
-    { message: 'A senha deve ser forte' }
+    { message: 'A senha deve ser forte' },
   )
   password?: string;
 

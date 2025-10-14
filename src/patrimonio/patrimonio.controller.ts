@@ -7,13 +7,11 @@ import {
   Param,
   Delete,
   Query,
-  HttpCode,
-  HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
@@ -27,80 +25,30 @@ import { PatrimonioService } from './patrimonio.service';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
 import { UpdatePatrimonioDto } from './dto/update-patrimonio.dto';
 import { PatrimonioResponseDto } from './dto/patrimonio-response.dto';
-import { QueryPatrimonioDto } from './dto/query-patrimonio.dto';
-import { PaginatedPatrimonioResponseDto } from './dto/paginated-patrimonio-response.dto';
+import { FilterPatrimoniosDto } from './dto/filter-patrimonios.dto';
+import { PaginatedPatrimoniosResponseDto } from './dto/paginated-patrimonios-response.dto';
+import {
+  PatrimonioCategoria,
+  PatrimonioStatus,
+} from './entities/patrimonio.entity';
 
-@ApiTags('Patrimônio')
-@Controller('patrimonios')
+@ApiTags('patrimonio')
+@Controller('patrimonio')
 export class PatrimonioController {
   constructor(private readonly patrimonioService: PatrimonioService) {}
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Criar novo patrimônio' })
+  @ApiOperation({ summary: 'Criar um novo patrimônio' })
+  @ApiBody({ type: CreatePatrimonioDto })
   @ApiCreatedResponse({
     description: 'Patrimônio criado com sucesso',
     type: PatrimonioResponseDto,
   })
   @ApiBadRequestResponse({
-    description: 'Dados inválidos fornecidos',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 400 },
-        message: { type: 'array', items: { type: 'string' } },
-        error: { type: 'string', example: 'Bad Request' },
-      },
-    },
+    description: 'Dados de entrada inválidos',
   })
   @ApiConflictResponse({
-    description: 'Código de patrimônio já existe',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 409 },
-        message: { type: 'string', example: 'Código de patrimônio já existe' },
-        error: { type: 'string', example: 'Conflict' },
-      },
-    },
-  })
-  @ApiBody({
-    type: CreatePatrimonioDto,
-    examples: {
-      equipamento: {
-        summary: 'Equipamento de informática',
-        value: {
-          codigo: 'PAT-2024-001',
-          nome: 'Notebook Dell Inspiron 15',
-          descricao: 'Notebook para uso administrativo com Windows 11',
-          categoria: 'EQUIPAMENTO',
-          status: 'ATIVO',
-          marca: 'Dell',
-          modelo: 'Inspiron 15 3000',
-          numeroSerie: 'ABC123456789',
-          valorAquisicao: 2500.0,
-          dataAquisicao: '2024-01-15',
-          dataGarantia: '2025-01-15',
-          localizacao: 'Sala 101 - Setor Administrativo',
-          observacoes: 'Equipamento em perfeito estado de conservação',
-        },
-      },
-      mobiliario: {
-        summary: 'Mobiliário de escritório',
-        value: {
-          codigo: 'PAT-2024-002',
-          nome: 'Mesa de Escritório',
-          descricao: 'Mesa de escritório com 4 gavetas',
-          categoria: 'MOBILIARIO',
-          status: 'ATIVO',
-          marca: 'Steelcase',
-          modelo: 'Think V2',
-          valorAquisicao: 1200.0,
-          dataAquisicao: '2024-02-01',
-          localizacao: 'Sala 201 - Setor Comercial',
-        },
-      },
-    },
+    description: 'Código do patrimônio já existe',
   })
   create(
     @Body() createPatrimonioDto: CreatePatrimonioDto,
@@ -112,122 +60,140 @@ export class PatrimonioController {
   @ApiOperation({ summary: 'Listar patrimônios com filtros e paginação' })
   @ApiOkResponse({
     description: 'Lista de patrimônios retornada com sucesso',
-    type: PaginatedPatrimonioResponseDto,
+    type: PaginatedPatrimoniosResponseDto,
   })
   @ApiQuery({
     name: 'page',
     required: false,
-    description: 'Número da página',
+    type: Number,
+    description: 'Número da página (padrão: 1)',
     example: 1,
   })
   @ApiQuery({
     name: 'limit',
     required: false,
-    description: 'Itens por página',
+    type: Number,
+    description: 'Itens por página (padrão: 10, máximo: 100)',
     example: 10,
   })
   @ApiQuery({
     name: 'q',
     required: false,
-    description: 'Busca textual',
-    example: 'notebook dell',
+    type: String,
+    description: 'Busca textual genérica (código, nome, descrição)',
+    example: 'notebook',
   })
   @ApiQuery({
     name: 'categoria',
     required: false,
+    enum: PatrimonioCategoria,
     description: 'Filtrar por categoria',
-    example: 'EQUIPAMENTO',
+    example: PatrimonioCategoria.EQUIPAMENTO,
   })
   @ApiQuery({
     name: 'status',
     required: false,
+    enum: PatrimonioStatus,
     description: 'Filtrar por status',
-    example: 'ATIVO',
+    example: PatrimonioStatus.ATIVO,
   })
   @ApiQuery({
     name: 'marca',
     required: false,
+    type: String,
     description: 'Filtrar por marca',
     example: 'Dell',
   })
   @ApiQuery({
+    name: 'modelo',
+    required: false,
+    type: String,
+    description: 'Filtrar por modelo',
+    example: 'Inspiron 15',
+  })
+  @ApiQuery({
     name: 'localizacao',
     required: false,
+    type: String,
     description: 'Filtrar por localização',
     example: 'Sala 101',
   })
   @ApiQuery({
     name: 'responsavelId',
     required: false,
-    description: 'Filtrar por responsável',
+    type: String,
+    description: 'Filtrar por responsável (UUID)',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiQuery({
-    name: 'valorMin',
+    name: 'valorMinimo',
     required: false,
-    description: 'Valor mínimo',
+    type: Number,
+    description: 'Valor mínimo de aquisição',
     example: 1000,
   })
   @ApiQuery({
-    name: 'valorMax',
+    name: 'valorMaximo',
     required: false,
-    description: 'Valor máximo',
+    type: Number,
+    description: 'Valor máximo de aquisição',
     example: 5000,
   })
   @ApiQuery({
-    name: 'dataInicio',
+    name: 'dataInicial',
     required: false,
-    description: 'Data início (YYYY-MM-DD)',
+    type: String,
+    description: 'Data inicial de aquisição (ISO)',
     example: '2024-01-01',
   })
   @ApiQuery({
-    name: 'dataFim',
+    name: 'dataFinal',
     required: false,
-    description: 'Data fim (YYYY-MM-DD)',
+    type: String,
+    description: 'Data final de aquisição (ISO)',
     example: '2024-12-31',
   })
   @ApiQuery({
     name: 'sortBy',
     required: false,
+    enum: [
+      'codigo',
+      'nome',
+      'categoria',
+      'status',
+      'valorAquisicao',
+      'dataAquisicao',
+      'createdAt',
+    ],
     description: 'Campo para ordenação',
     example: 'nome',
   })
   @ApiQuery({
     name: 'sortOrder',
     required: false,
+    enum: ['ASC', 'DESC'],
     description: 'Direção da ordenação',
     example: 'ASC',
   })
   findAll(
-    @Query() query: QueryPatrimonioDto,
-  ): Promise<PaginatedPatrimonioResponseDto> {
-    return this.patrimonioService.findAllWithFilters(query);
+    @Query() filters: FilterPatrimoniosDto,
+  ): Promise<PaginatedPatrimoniosResponseDto> {
+    return this.patrimonioService.findAllWithFilters(filters);
   }
 
   @Get('codigo/:codigo')
   @ApiOperation({ summary: 'Buscar patrimônio por código' })
   @ApiParam({
     name: 'codigo',
-    description: 'Código do patrimônio',
+    description: 'Código único do patrimônio',
     example: 'PAT-2024-001',
   })
   @ApiOkResponse({
-    description: 'Patrimônio encontrado com sucesso',
+    description: 'Patrimônio encontrado',
     type: PatrimonioResponseDto,
   })
   @ApiNotFoundResponse({
     description: 'Patrimônio não encontrado',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 404 },
-        message: {
-          type: 'string',
-          example: 'Patrimônio com código "PAT-2024-001" não encontrado',
-        },
-        error: { type: 'string', example: 'Not Found' },
-      },
-    },
   })
   findByCodigo(
     @Param('codigo') codigo: string,
@@ -239,24 +205,43 @@ export class PatrimonioController {
   @ApiOperation({ summary: 'Buscar patrimônios por categoria' })
   @ApiParam({
     name: 'categoria',
+    enum: PatrimonioCategoria,
     description: 'Categoria do patrimônio',
-    example: 'EQUIPAMENTO',
+    example: PatrimonioCategoria.EQUIPAMENTO,
   })
   @ApiOkResponse({
     description: 'Lista de patrimônios da categoria',
     type: [PatrimonioResponseDto],
   })
   findByCategoria(
-    @Param('categoria') categoria: string,
+    @Param('categoria') categoria: PatrimonioCategoria,
   ): Promise<PatrimonioResponseDto[]> {
     return this.patrimonioService.findByCategoria(categoria);
+  }
+
+  @Get('status/:status')
+  @ApiOperation({ summary: 'Buscar patrimônios por status' })
+  @ApiParam({
+    name: 'status',
+    enum: PatrimonioStatus,
+    description: 'Status do patrimônio',
+    example: PatrimonioStatus.ATIVO,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios com o status',
+    type: [PatrimonioResponseDto],
+  })
+  findByStatus(
+    @Param('status') status: PatrimonioStatus,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findByStatus(status);
   }
 
   @Get('responsavel/:responsavelId')
   @ApiOperation({ summary: 'Buscar patrimônios por responsável' })
   @ApiParam({
     name: 'responsavelId',
-    description: 'ID do responsável',
+    description: 'ID do usuário responsável',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiOkResponse({
@@ -264,7 +249,7 @@ export class PatrimonioController {
     type: [PatrimonioResponseDto],
   })
   findByResponsavel(
-    @Param('responsavelId') responsavelId: string,
+    @Param('responsavelId', ParseUUIDPipe) responsavelId: string,
   ): Promise<PatrimonioResponseDto[]> {
     return this.patrimonioService.findByResponsavel(responsavelId);
   }
@@ -272,16 +257,15 @@ export class PatrimonioController {
   @Get('stats/categoria')
   @ApiOperation({ summary: 'Obter estatísticas por categoria' })
   @ApiOkResponse({
-    description: 'Estatísticas por categoria',
+    description: 'Estatísticas de patrimônios por categoria',
     schema: {
       type: 'object',
       example: {
         EQUIPAMENTO: 25,
         MOBILIARIO: 15,
-        VEICULO: 5,
-        IMOVEL: 3,
-        SOFTWARE: 8,
-        OUTROS: 2,
+        VEICULO: 3,
+        IMOVEL: 2,
+        OUTROS: 5,
       },
     },
   })
@@ -292,12 +276,12 @@ export class PatrimonioController {
   @Get('stats/status')
   @ApiOperation({ summary: 'Obter estatísticas por status' })
   @ApiOkResponse({
-    description: 'Estatísticas por status',
+    description: 'Estatísticas de patrimônios por status',
     schema: {
       type: 'object',
       example: {
-        ATIVO: 45,
-        INATIVO: 8,
+        ATIVO: 40,
+        INATIVO: 5,
         MANUTENCAO: 3,
         DESCARTADO: 2,
       },
@@ -305,6 +289,49 @@ export class PatrimonioController {
   })
   getStatsByStatus(): Promise<Record<string, number>> {
     return this.patrimonioService.getStatsByStatus();
+  }
+
+  @Get('stats/valor-total')
+  @ApiOperation({ summary: 'Obter valor total do patrimônio' })
+  @ApiOkResponse({
+    description: 'Valor total do patrimônio',
+    schema: {
+      type: 'object',
+      properties: {
+        valorTotal: {
+          type: 'number',
+          example: 125000.5,
+        },
+      },
+    },
+  })
+  async getValorTotal(): Promise<{ valorTotal: number }> {
+    const valorTotal = await this.patrimonioService.getValorTotal();
+    return { valorTotal };
+  }
+
+  @Get('vencimento-garantia')
+  @ApiOperation({
+    summary: 'Obter patrimônios próximos do vencimento de garantia',
+  })
+  @ApiQuery({
+    name: 'dias',
+    required: false,
+    type: Number,
+    description:
+      'Número de dias para considerar próximo do vencimento (padrão: 30)',
+    example: 30,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios próximos do vencimento de garantia',
+    type: [PatrimonioResponseDto],
+  })
+  getPatrimoniosProximosVencimentoGarantia(
+    @Query('dias') dias?: number,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.getPatrimoniosProximosVencimentoGarantia(
+      dias,
+    );
   }
 
   @Get(':id')
@@ -315,25 +342,18 @@ export class PatrimonioController {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiOkResponse({
-    description: 'Patrimônio encontrado com sucesso',
+    description: 'Patrimônio encontrado',
     type: PatrimonioResponseDto,
   })
   @ApiNotFoundResponse({
     description: 'Patrimônio não encontrado',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 404 },
-        message: {
-          type: 'string',
-          example:
-            'Patrimônio com ID "123e4567-e89b-12d3-a456-426614174000" não encontrado',
-        },
-        error: { type: 'string', example: 'Not Found' },
-      },
-    },
   })
-  findOne(@Param('id') id: string): Promise<PatrimonioResponseDto> {
+  @ApiBadRequestResponse({
+    description: 'ID inválido',
+  })
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PatrimonioResponseDto> {
     return this.patrimonioService.findOne(id);
   }
 
@@ -344,132 +364,44 @@ export class PatrimonioController {
     description: 'ID único do patrimônio',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
+  @ApiBody({ type: UpdatePatrimonioDto })
   @ApiOkResponse({
     description: 'Patrimônio atualizado com sucesso',
     type: PatrimonioResponseDto,
   })
   @ApiNotFoundResponse({
     description: 'Patrimônio não encontrado',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 404 },
-        message: {
-          type: 'string',
-          example:
-            'Patrimônio com ID "123e4567-e89b-12d3-a456-426614174000" não encontrado',
-        },
-        error: { type: 'string', example: 'Not Found' },
-      },
-    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos',
   })
   @ApiConflictResponse({
-    description: 'Código de patrimônio já existe',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 409 },
-        message: { type: 'string', example: 'Código de patrimônio já existe' },
-        error: { type: 'string', example: 'Conflict' },
-      },
-    },
+    description: 'Código do patrimônio já existe',
   })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePatrimonioDto: UpdatePatrimonioDto,
   ): Promise<PatrimonioResponseDto> {
     return this.patrimonioService.update(id, updatePatrimonioDto);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Remover patrimônio (soft delete)' })
+  @ApiOperation({ summary: 'Remover patrimônio' })
   @ApiParam({
     name: 'id',
     description: 'ID único do patrimônio',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @ApiResponse({ status: 204, description: 'Patrimônio removido com sucesso' })
+  @ApiOkResponse({
+    description: 'Patrimônio removido com sucesso',
+  })
   @ApiNotFoundResponse({
     description: 'Patrimônio não encontrado',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 404 },
-        message: {
-          type: 'string',
-          example:
-            'Patrimônio com ID "123e4567-e89b-12d3-a456-426614174000" não encontrado',
-        },
-        error: { type: 'string', example: 'Not Found' },
-      },
-    },
-  })
-  remove(@Param('id') id: string): Promise<void> {
-    return this.patrimonioService.remove(id);
-  }
-
-  @Post('bulk')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Criar múltiplos patrimônios' })
-  @ApiCreatedResponse({
-    description: 'Patrimônios criados com sucesso',
-    type: [PatrimonioResponseDto],
   })
   @ApiBadRequestResponse({
-    description: 'Dados inválidos fornecidos',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 400 },
-        message: { type: 'array', items: { type: 'string' } },
-        error: { type: 'string', example: 'Bad Request' },
-      },
-    },
+    description: 'ID inválido',
   })
-  @ApiConflictResponse({
-    description: 'Códigos duplicados ou já existentes',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 409 },
-        message: {
-          type: 'string',
-          example: 'Códigos já existem: PAT-2024-001, PAT-2024-002',
-        },
-        error: { type: 'string', example: 'Conflict' },
-      },
-    },
-  })
-  @ApiBody({
-    type: [CreatePatrimonioDto],
-    examples: {
-      multiple: {
-        summary: 'Criação em lote',
-        value: [
-          {
-            codigo: 'PAT-2024-003',
-            nome: 'Monitor Dell 24"',
-            categoria: 'EQUIPAMENTO',
-            marca: 'Dell',
-            valorAquisicao: 800.0,
-            localizacao: 'Sala 101',
-          },
-          {
-            codigo: 'PAT-2024-004',
-            nome: 'Teclado Logitech',
-            categoria: 'EQUIPAMENTO',
-            marca: 'Logitech',
-            valorAquisicao: 150.0,
-            localizacao: 'Sala 101',
-          },
-        ],
-      },
-    },
-  })
-  createBulk(
-    @Body() createPatrimonioDtos: CreatePatrimonioDto[],
-  ): Promise<PatrimonioResponseDto[]> {
-    return this.patrimonioService.createBulk(createPatrimonioDtos);
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    return this.patrimonioService.remove(id);
   }
 }

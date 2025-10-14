@@ -352,7 +352,6 @@ export class PatrimonioService {
   /**
    * Estatísticas por status
    */
-
   async getStatsByStatus(): Promise<Record<string, number>> {
     const result = await this.patrimonioRepository
       .createQueryBuilder('patrimonio')
@@ -368,6 +367,54 @@ export class PatrimonioService {
         return stats;
       },
       {} as Record<string, number>,
+    );
+  }
+
+  /**
+   * Buscar patrimônios por status
+   */
+  async findByStatus(status: string): Promise<PatrimonioResponseDto[]> {
+    const patrimonios = await this.patrimonioRepository.find({
+      where: { status: status as any },
+      relations: ['responsavel'],
+    });
+
+    return patrimonios.map((patrimonio) =>
+      this.serializePatrimonio(patrimonio),
+    );
+  }
+
+  /**
+   * Obter valor total do patrimônio
+   */
+  async getValorTotal(): Promise<number> {
+    const result = await this.patrimonioRepository
+      .createQueryBuilder('patrimonio')
+      .select('SUM(patrimonio.valorAquisicao)', 'total')
+      .where('patrimonio.valorAquisicao IS NOT NULL')
+      .getRawOne();
+
+    return parseFloat(result.total) || 0;
+  }
+
+  /**
+   * Obter patrimônios próximos do vencimento de garantia
+   */
+  async getPatrimoniosProximosVencimentoGarantia(
+    dias: number = 30,
+  ): Promise<PatrimonioResponseDto[]> {
+    const dataLimite = new Date();
+    dataLimite.setDate(dataLimite.getDate() + dias);
+
+    const patrimonios = await this.patrimonioRepository.find({
+      where: {
+        dataGarantia: Between(new Date(), dataLimite),
+      },
+      relations: ['responsavel'],
+    });
+
+    return patrimonios.map((patrimonio) =>
+      this.serializePatrimonio(patrimonio),
     );
   }
 }

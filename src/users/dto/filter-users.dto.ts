@@ -2,7 +2,7 @@ import { IsOptional, IsEnum, IsBoolean, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '../enums/user-role.enum';
 import { PaginationDto } from './pagination.dto';
-import { IsTrimmed, ToLowerCase } from '../../common/validators';
+import { IsTrimmed } from '../../common/validators';
 
 export class FilterUsersDto extends PaginationDto {
   @ApiPropertyOptional({
@@ -28,7 +28,13 @@ export class FilterUsersDto extends PaginationDto {
   })
   @IsOptional()
   @IsString({ message: 'O termo de busca deve ser uma string' })
+<<<<<<< HEAD
   @IsTrimmed({ message: 'O termo de busca não pode conter espaços no início ou fim' })
+=======
+  @IsTrimmed({
+    message: 'O termo de busca não pode conter espaços no início ou fim',
+  })
+>>>>>>> 836d9e7914df93dfd880c264bbd1bf63ba9d3daa
   search?: string;
 
   @ApiPropertyOptional({

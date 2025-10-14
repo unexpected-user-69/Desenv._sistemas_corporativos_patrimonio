@@ -2,13 +2,16 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  MinLength,
   IsOptional,
   IsBoolean,
   IsUrl,
 } from 'class-validator';
 import { UserRole } from '../enums/user-role.enum';
-import { IsTrimmed, ToLowerCase, IsStrongPassword } from '../../common/validators';
+import {
+  IsTrimmed,
+  ToLowerCase,
+  IsStrongPassword,
+} from '../../common/validators';
 
 export class CreateUserDto {
   @IsNotEmpty({ message: 'O nome é obrigatório' })
@@ -27,7 +30,11 @@ export class CreateUserDto {
       requireNumbers: true,
       requireSpecialChars: false,
     },
+<<<<<<< HEAD
     { message: 'A senha deve ser forte' }
+=======
+    { message: 'A senha deve ser forte' },
+>>>>>>> 836d9e7914df93dfd880c264bbd1bf63ba9d3daa
   )
   password!: string;
 

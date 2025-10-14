@@ -28,13 +28,9 @@ export class FilterUsersDto extends PaginationDto {
   })
   @IsOptional()
   @IsString({ message: 'O termo de busca deve ser uma string' })
-<<<<<<< HEAD
-  @IsTrimmed({ message: 'O termo de busca não pode conter espaços no início ou fim' })
-=======
   @IsTrimmed({
     message: 'O termo de busca não pode conter espaços no início ou fim',
   })
->>>>>>> 836d9e7914df93dfd880c264bbd1bf63ba9d3daa
   search?: string;
 
   @ApiPropertyOptional({

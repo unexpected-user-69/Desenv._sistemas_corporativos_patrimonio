@@ -8,12 +8,12 @@ export const ROLES_KEY = 'roles';
 
 /**
  * Decorator para definir os papéis (roles) necessários para acessar um endpoint.
- * 
+ *
  * Este decorator define quais roles são permitidos para acessar um endpoint específico.
  * Deve ser usado em conjunto com o RolesGuard para implementar autorização baseada em roles.
- * 
+ *
  * @param roles - Array de roles permitidos para acessar o endpoint
- * 
+ *
  * @example
  * ```typescript
  * @Controller('admin')
@@ -23,7 +23,7 @@ export const ROLES_KEY = 'roles';
  *   findAllUsers() {
  *     return this.userService.findAll();
  *   }
- * 
+ *
  *   @Post('users')
  *   @Roles(UserRole.ADMIN, UserRole.TEACHER)
  *   createUser(@Body() createUserDto: CreateUserDto) {

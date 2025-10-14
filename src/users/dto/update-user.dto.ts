@@ -33,11 +33,7 @@ export class UpdateUserDto {
       requireNumbers: true,
       requireSpecialChars: false,
     },
-<<<<<<< HEAD
-    { message: 'A senha deve ser forte' }
-=======
     { message: 'A senha deve ser forte' },
->>>>>>> 836d9e7914df93dfd880c264bbd1bf63ba9d3daa
   )
   password?: string;
 

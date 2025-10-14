@@ -11,7 +11,7 @@ import { ROLES_KEY } from './roles.decorator';
 
 /**
  * Interface para usuário autenticado.
- * 
+ *
  * Esta interface define a estrutura esperada do usuário autenticado
  * quando a autenticação JWT estiver implementada.
  */
@@ -24,11 +24,11 @@ interface AuthenticatedUser {
 
 /**
  * Guard para autorização baseada em roles.
- * 
+ *
  * Verifica se o usuário autenticado possui um dos roles necessários
  * para acessar o endpoint. Usa o Reflector para ler a metadata de roles
  * definida pelo decorator @Roles().
- * 
+ *
  * @example
  * ```typescript
  * // Registrado globalmente ou em módulos específicos
@@ -43,7 +43,7 @@ export class RolesGuard implements CanActivate {
 
   /**
    * Determina se a requisição pode prosseguir baseado nos roles do usuário.
-   * 
+   *
    * @param context - Contexto de execução da requisição
    * @returns true se o usuário tem permissão, false caso contrário
    */
@@ -71,7 +71,7 @@ export class RolesGuard implements CanActivate {
           method: request.method,
           url: request.url,
           timestamp: new Date().toISOString(),
-        }
+        },
       );
       throw new ForbiddenException('Usuário não autenticado');
     }
@@ -86,7 +86,7 @@ export class RolesGuard implements CanActivate {
           method: request.method,
           url: request.url,
           timestamp: new Date().toISOString(),
-        }
+        },
       );
       throw new ForbiddenException('Usuário inativo');
     }
@@ -105,10 +105,10 @@ export class RolesGuard implements CanActivate {
           method: request.method,
           url: request.url,
           timestamp: new Date().toISOString(),
-        }
+        },
       );
       throw new ForbiddenException(
-        `Acesso negado. Roles necessários: ${requiredRoles.join(', ')}`
+        `Acesso negado. Roles necessários: ${requiredRoles.join(', ')}`,
       );
     }
 
@@ -121,7 +121,7 @@ export class RolesGuard implements CanActivate {
         method: request.method,
         url: request.url,
         timestamp: new Date().toISOString(),
-      }
+      },
     );
 
     return true;

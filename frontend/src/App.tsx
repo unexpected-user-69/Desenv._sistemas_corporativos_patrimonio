@@ -1,21 +1,30 @@
 import React, { useState } from 'react';
-import { 
-  Database, 
-  Filter, 
-  BarChart3, 
+import {
+  Database,
+  Filter,
+  BarChart3,
   Home,
   Activity,
   Zap,
   Settings,
   Shield,
-  TestTube
+  TestTube,
 } from 'lucide-react';
 import { MonitoringDashboard } from './components/monitoring/MonitoringDashboard';
 import { CacheDashboard } from './components/cache/CacheDashboard';
 // import { ProductionPage } from './pages/production/ProductionPage';
 // import { TestingPage } from './pages/testing/TestingPage';
 
-type TabType = 'home' | 'cache' | 'filters' | 'analytics' | 'monitoring' | 'performance' | 'advanced' | 'production' | 'testing';
+type TabType =
+  | 'home'
+  | 'cache'
+  | 'filters'
+  | 'analytics'
+  | 'monitoring'
+  | 'performance'
+  | 'advanced'
+  | 'production'
+  | 'testing';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -29,7 +38,7 @@ export const App: React.FC = () => {
     { id: 'performance', name: 'Performance', icon: Zap },
     { id: 'advanced', name: 'Avançado', icon: Settings },
     { id: 'production', name: 'Produção', icon: Shield },
-    { id: 'testing', name: 'Testes', icon: TestTube }
+    { id: 'testing', name: 'Testes', icon: TestTube },
   ];
 
   const renderContent = () => {
@@ -43,61 +52,79 @@ export const App: React.FC = () => {
                   Sistema de Patrimônio/Inventário
                 </h2>
                 <p className="text-lg text-gray-600 mb-8">
-                  Frontend com funcionalidades avançadas de Cache Redis e Filtros
+                  Frontend com funcionalidades avançadas de Cache Redis e
+                  Filtros
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="card text-center">
                     <Database className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Cache Redis</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Cache Redis
+                    </h3>
                     <p className="text-gray-600">
-                      Gerenciamento e monitoramento do cache Redis com métricas em tempo real
+                      Gerenciamento e monitoramento do cache Redis com métricas
+                      em tempo real
                     </p>
                   </div>
                   <div className="card text-center">
                     <Filter className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Filtros Avançados</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Filtros Avançados
+                    </h3>
                     <p className="text-gray-600">
                       Busca avançada com filtros por intervalo de datas e mais
                     </p>
                   </div>
                   <div className="card text-center">
                     <BarChart3 className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Analytics</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Analytics
+                    </h3>
                     <p className="text-gray-600">
                       Análise de performance e uso dos filtros
                     </p>
                   </div>
                   <div className="card text-center">
                     <Activity className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Monitoramento</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Monitoramento
+                    </h3>
                     <p className="text-gray-600">
                       Dashboard de métricas em tempo real e logs estruturados
                     </p>
                   </div>
                   <div className="card text-center">
                     <Zap className="h-12 w-12 text-orange-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Performance</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Performance
+                    </h3>
                     <p className="text-gray-600">
                       Testes de carga e stress para avaliação de performance
                     </p>
                   </div>
                   <div className="card text-center">
                     <Settings className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Avançado</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Avançado
+                    </h3>
                     <p className="text-gray-600">
                       Funcionalidades avançadas e configurações do sistema
                     </p>
                   </div>
                   <div className="card text-center">
                     <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Produção</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Produção
+                    </h3>
                     <p className="text-gray-600">
                       Configurações de produção, segurança e monitoramento
                     </p>
                   </div>
                   <div className="card text-center">
                     <TestTube className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Testes</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Testes
+                    </h3>
                     <p className="text-gray-600">
                       Utilitários de teste, mocks e qualidade de código
                     </p>
@@ -265,19 +292,16 @@ export const App: React.FC = () => {
       </nav>
 
       {/* Main Content */}
-      <main>
-        {renderContent()}
-      </main>
+      <main>{renderContent()}</main>
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center text-sm text-gray-600">
-            <p>
-              Sistema de Patrimônio/Inventário - Frontend Avançado
-            </p>
+            <p>Sistema de Patrimônio/Inventário - Frontend Avançado</p>
             <p className="mt-1">
-              Implementado com React, TypeScript, Tailwind CSS, Zustand e funcionalidades avançadas
+              Implementado com React, TypeScript, Tailwind CSS, Zustand e
+              funcionalidades avançadas
             </p>
           </div>
         </div>

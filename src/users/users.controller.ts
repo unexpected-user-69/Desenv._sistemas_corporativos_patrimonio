@@ -95,27 +95,33 @@ export class UsersController {
     description: 'Retorna um usuário pelo ID',
     type: UserResponseDto,
   })
-  @ApiNotFoundResponse({ 
+  @ApiNotFoundResponse({
     description: 'Usuário não encontrado',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 404 },
-        message: { type: 'string', example: 'User with ID "uuid-here" not found' },
-        error: { type: 'string', example: 'Not Found' }
-      }
-    }
+        message: {
+          type: 'string',
+          example: 'User with ID "uuid-here" not found',
+        },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
   })
-  @ApiBadRequestResponse({ 
+  @ApiBadRequestResponse({
     description: 'ID inválido (não é um UUID válido)',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 400 },
-        message: { type: 'string', example: 'Validation failed (uuid is expected)' },
-        error: { type: 'string', example: 'Bad Request' }
-      }
-    }
+        message: {
+          type: 'string',
+          example: 'Validation failed (uuid is expected)',
+        },
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
   })
   findOne(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -128,36 +134,37 @@ export class UsersController {
     description: 'Retorna um usuário pelo email',
     type: UserResponseDto,
   })
-  @ApiNotFoundResponse({ 
+  @ApiNotFoundResponse({
     description: 'Usuário não encontrado',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 404 },
-        message: { type: 'string', example: 'User with email "email@example.com" not found' },
-        error: { type: 'string', example: 'Not Found' }
-      }
-    }
+        message: {
+          type: 'string',
+          example: 'User with email "email@example.com" not found',
+        },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
   })
-  @ApiBadRequestResponse({ 
+  @ApiBadRequestResponse({
     description: 'Email inválido',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 400 },
         message: { type: 'string', example: 'Invalid email format' },
-        error: { type: 'string', example: 'Bad Request' }
-      }
-    }
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
   })
-  findByEmail(
-    @Param('email') email: string,
-  ): Promise<UserResponseDto> {
+  findByEmail(@Param('email') email: string): Promise<UserResponseDto> {
     return this.usersService.findByEmail(email);
   }
 
   @Post()
-  @ApiBody({ 
+  @ApiBody({
     type: CreateUserDto,
     description: 'Dados do usuário a ser criado',
     examples: {
@@ -168,8 +175,8 @@ export class UsersController {
           email: 'joao.silva@email.com',
           password: 'senha123',
           role: 'STUDENT',
-          isActive: true
-        }
+          isActive: true,
+        },
       },
       teacher: {
         summary: 'Criar professor',
@@ -178,47 +185,47 @@ export class UsersController {
           email: 'maria.santos@email.com',
           password: 'senha456',
           role: 'TEACHER',
-          isActive: true
-        }
-      }
-    }
+          isActive: true,
+        },
+      },
+    },
   })
   @ApiCreatedResponse({
     description: 'Usuário criado com sucesso',
     type: UserResponseDto,
   })
-  @ApiBadRequestResponse({ 
+  @ApiBadRequestResponse({
     description: 'Dados de entrada inválidos',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 400 },
-        message: { 
-          type: 'array', 
+        message: {
+          type: 'array',
           items: { type: 'string' },
-          example: ['name should not be empty', 'email must be a valid email']
+          example: ['name should not be empty', 'email must be a valid email'],
         },
-        error: { type: 'string', example: 'Bad Request' }
-      }
-    }
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
   })
-  @ApiConflictResponse({ 
+  @ApiConflictResponse({
     description: 'Email já existe no sistema',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 409 },
         message: { type: 'string', example: 'Email already exists' },
-        error: { type: 'string', example: 'Conflict' }
-      }
-    }
+        error: { type: 'string', example: 'Conflict' },
+      },
+    },
   })
   create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     return this.usersService.create(dto);
   }
 
   @Post('bulk')
-  @ApiBody({ 
+  @ApiBody({
     type: [CreateUserDto],
     description: 'Lista de usuários a serem criados',
     examples: {
@@ -230,48 +237,51 @@ export class UsersController {
             email: 'joao.silva@email.com',
             password: 'senha123',
             role: 'STUDENT',
-            isActive: true
+            isActive: true,
           },
           {
             name: 'Maria Santos',
             email: 'maria.santos@email.com',
             password: 'senha456',
             role: 'TEACHER',
-            isActive: true
-          }
-        ]
-      }
-    }
+            isActive: true,
+          },
+        ],
+      },
+    },
   })
   @ApiCreatedResponse({
     description: 'Usuários criados com sucesso',
     type: [UserResponseDto],
   })
-  @ApiBadRequestResponse({ 
+  @ApiBadRequestResponse({
     description: 'Dados de entrada inválidos',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 400 },
-        message: { 
-          type: 'array', 
+        message: {
+          type: 'array',
           items: { type: 'string' },
-          example: ['name should not be empty', 'email must be a valid email']
+          example: ['name should not be empty', 'email must be a valid email'],
         },
-        error: { type: 'string', example: 'Bad Request' }
-      }
-    }
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
   })
-  @ApiConflictResponse({ 
+  @ApiConflictResponse({
     description: 'Um ou mais emails já existem no sistema',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 409 },
-        message: { type: 'string', example: 'One or more emails already exist' },
-        error: { type: 'string', example: 'Conflict' }
-      }
-    }
+        message: {
+          type: 'string',
+          example: 'One or more emails already exist',
+        },
+        error: { type: 'string', example: 'Conflict' },
+      },
+    },
   })
   createBulk(@Body() dtos: CreateUserDto[]): Promise<UserResponseDto[]> {
     return this.usersService.createBulk(dtos);

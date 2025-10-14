@@ -1,0 +1,215 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\.eslintrc.js
+  0:0  error  Parsing error: C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\.eslintrc.js was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\postcss.config.js
+  0:0  error  Parsing error: C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\postcss.config.js was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\cache\CacheDashboard.tsx
+  22:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  23:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  24:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  25:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  26:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  27:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  67:13  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  68:13  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  69:13  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\monitoring\MonitoringDashboard.tsx
+   47:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   50:36  error    Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
+  128:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\production\CompressionConfig.tsx
+   38:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   52:7   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   53:14  error    'error' is defined but never used                                                                                                                                   @typescript-eslint/no-unused-vars
+  352:23  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  365:23  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\production\CorsConfig.tsx
+   32:14  error  'error' is defined but never used                                                  @typescript-eslint/no-unused-vars
+  372:23  error  Promise-returning function provided to attribute where a void return was expected  @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\production\ProductionAlerts.tsx
+  113:42  warning  Unsafe argument of type `any` assigned to a parameter of type `SetStateAction<"all" | "unresolved" | "resolved">`  @typescript-eslint/no-unsafe-argument
+  235:31  error    Promise-returning function provided to attribute where a void return was expected                                  @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\production\ProductionDashboard.tsx
+   58:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  279:22  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  284:62  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  290:22  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  297:22  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  306:23  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  361:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\production\RateLimitConfig.tsx
+   31:14  error  'error' is defined but never used                                                  @typescript-eslint/no-unused-vars
+  287:23  error  Promise-returning function provided to attribute where a void return was expected  @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\production\RequestLogs.tsx
+  172:44  warning  Unsafe argument of type `any` assigned to a parameter of type `SetStateAction<"statusCode" | "timestamp" | "duration">`  @typescript-eslint/no-unsafe-argument
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\production\SecurityConfig.tsx
+   33:14  error  'error' is defined but never used                                                  @typescript-eslint/no-unused-vars
+   70:20  error  'removed' is assigned a value but never used                                       @typescript-eslint/no-unused-vars
+  442:23  error  Promise-returning function provided to attribute where a void return was expected  @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\security\CORSPanel.tsx
+   33:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   50:14  error    'err' is defined but never used                                                                                                                                     @typescript-eslint/no-unused-vars
+  153:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  192:25  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  219:21  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\security\CompressionPanel.tsx
+   33:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   50:14  error    'err' is defined but never used                                                                                                                                     @typescript-eslint/no-unused-vars
+   81:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  118:25  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  145:21  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\security\EnvironmentConfigPanel.tsx
+   28:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   45:14  error    'err' is defined but never used                                                                                                                                     @typescript-eslint/no-unused-vars
+   81:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  120:25  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  147:21  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  185:23  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\security\InterceptorPanel.tsx
+  26:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  27:34  error    Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
+  50:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  74:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\security\ProductionDashboard.tsx
+   48:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                               @typescript-eslint/no-floating-promises
+   49:34  error    Promise returned in function argument where a void return was expected                                                                                                                           @typescript-eslint/no-misused-promises
+  106:23  error    Promise-returning function provided to attribute where a void return was expected                                                                                                                @typescript-eslint/no-misused-promises
+  147:23  error    Promise-returning function provided to attribute where a void return was expected                                                                                                                @typescript-eslint/no-misused-promises
+  188:45  warning  Unsafe argument of type `any` assigned to a parameter of type `SetStateAction<"overview" | "rate-limit" | "cors" | "compression" | "security" | "environment" | "validation" | "interceptors">`  @typescript-eslint/no-unsafe-argument
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\security\RateLimitPanel.tsx
+   33:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   50:14  error    'err' is defined but never used                                                                                                                                     @typescript-eslint/no-unused-vars
+   79:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  116:25  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  143:21  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\security\SecurityHeadersPanel.tsx
+   33:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   50:14  error    'err' is defined but never used                                                                                                                                     @typescript-eslint/no-unused-vars
+  100:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  139:25  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  166:21  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\security\ValidationPanel.tsx
+  26:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  27:34  error    Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
+  44:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  72:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\testing\MockConfigPanel.tsx
+   17:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  187:29  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  206:29  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\testing\TestDoublesPanel.tsx
+  17:5  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\testing\TestSuitesPanel.tsx
+  116:27  error  Promise-returning function provided to attribute where a void return was expected  @typescript-eslint/no-misused-promises
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\components\testing\TestingDashboard.tsx
+   65:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   68:36  error    Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
+  319:62  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  346:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                   @typescript-eslint/no-misused-promises
+  377:43  warning  Unsafe argument of type `any` assigned to a parameter of type `SetStateAction<"overview" | "coverage" | "doubles" | "mocks" | "suites" | "quality">`                @typescript-eslint/no-unsafe-argument
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\main.tsx
+  6:21  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\services\cacheService.ts
+   46:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+   70:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+  117:9   error    Unsafe assignment of an `any` value                                           @typescript-eslint/no-unsafe-assignment
+  140:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+  155:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+  168:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+  205:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+  234:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+  277:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+  301:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+  344:7   error    Unsafe return of a value of type `any`                                        @typescript-eslint/no-unsafe-return
+  358:15  error    Unsafe assignment of an `any` value                                           @typescript-eslint/no-unsafe-assignment
+  358:33  warning  Unsafe argument of type `any` assigned to a parameter of type `string`        @typescript-eslint/no-unsafe-argument
+  359:19  warning  Unsafe argument of type `any` assigned to a parameter of type `CacheMetrics`  @typescript-eslint/no-unsafe-argument
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\services\monitoring.ts
+   27:7   error    Unsafe return of a value of type `any`                                       @typescript-eslint/no-unsafe-return
+   56:7   error    Unsafe return of a value of type `any`                                       @typescript-eslint/no-unsafe-return
+   70:7   error    Unsafe return of a value of type `any`                                       @typescript-eslint/no-unsafe-return
+   89:7   error    Unsafe return of a value of type `any`                                       @typescript-eslint/no-unsafe-return
+  111:7   error    Unsafe return of a value of type `any`                                       @typescript-eslint/no-unsafe-return
+  139:7   error    Unsafe return of a value of type `any`                                       @typescript-eslint/no-unsafe-return
+  160:7   error    Unsafe return of a value of type `any`                                       @typescript-eslint/no-unsafe-return
+  174:7   error    Unsafe return of a value of type `any`                                       @typescript-eslint/no-unsafe-return
+  201:7   error    Unsafe return of a value of type `any`                                       @typescript-eslint/no-unsafe-return
+  215:15  error    Unsafe assignment of an `any` value                                          @typescript-eslint/no-unsafe-assignment
+  215:33  warning  Unsafe argument of type `any` assigned to a parameter of type `string`       @typescript-eslint/no-unsafe-argument
+  216:19  warning  Unsafe argument of type `any` assigned to a parameter of type `MetricsData`  @typescript-eslint/no-unsafe-argument
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\services\production.ts
+  360:31  error  '_config' is defined but never used   @typescript-eslint/no-unused-vars
+  379:26  error  '_config' is defined but never used   @typescript-eslint/no-unused-vars
+  398:33  error  '_config' is defined but never used   @typescript-eslint/no-unused-vars
+  417:30  error  '_config' is defined but never used   @typescript-eslint/no-unused-vars
+  436:22  error  '_alertId' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\services\testing.ts
+   31:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+   53:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+   67:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+   88:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  110:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  138:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  156:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  171:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  185:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  199:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  213:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  227:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  241:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  262:7   error    Unsafe return of a value of type `any`                                         @typescript-eslint/no-unsafe-return
+  279:15  error    Unsafe assignment of an `any` value                                            @typescript-eslint/no-unsafe-assignment
+  279:33  warning  Unsafe argument of type `any` assigned to a parameter of type `string`         @typescript-eslint/no-unsafe-argument
+  280:18  warning  Unsafe argument of type `any` assigned to a parameter of type `TestExecution`  @typescript-eslint/no-unsafe-argument
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\src\stores\cacheStore.ts
+  236:11  error    Unsafe return of a value of type `any`                                                                                                                              @typescript-eslint/no-unsafe-return
+  250:11  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  264:11  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  278:11  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  310:11  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  311:11  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  325:11  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  377:30  error    '_options' is defined but never used                                                                                                                                @typescript-eslint/no-unused-vars
+  378:31  error    '_options' is defined but never used                                                                                                                                @typescript-eslint/no-unused-vars
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\tailwind.config.js
+  0:0  error  Parsing error: C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\tailwind.config.js was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\vite.config.ts
+  0:0  error  Parsing error: C:\SCRIPT\Desenv._sistemas_corporativos_patrimonio\frontend\vite.config.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+Ô£û 145 problems (105 errors, 40 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

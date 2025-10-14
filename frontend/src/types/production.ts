@@ -147,7 +147,12 @@ export interface ProductionDashboard {
 
 export interface ProductionAlert {
   id: string;
-  type: 'rate_limit' | 'cors_violation' | 'security_threat' | 'compression_error' | 'performance_degradation';
+  type:
+    | 'rate_limit'
+    | 'cors_violation'
+    | 'security_threat'
+    | 'compression_error'
+    | 'performance_degradation';
   severity: 'low' | 'medium' | 'high' | 'critical';
   title: string;
   description: string;

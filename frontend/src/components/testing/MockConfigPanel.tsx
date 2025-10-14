@@ -8,11 +8,13 @@ export const MockConfigPanel: React.FC = () => {
   const [mockConfigs, setMockConfigs] = useState<MockConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'list' | 'create' | 'edit'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'create' | 'edit'>(
+    'list',
+  );
   const [editingMock, setEditingMock] = useState<MockConfig | null>(null);
 
   useEffect(() => {
-    fetchMockConfigs();
+    void fetchMockConfigs();
   }, []);
 
   const fetchMockConfigs = async () => {
@@ -22,7 +24,9 @@ export const MockConfigPanel: React.FC = () => {
       const configs = await testingService.getMockConfigs();
       setMockConfigs(configs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar mock configs');
+      setError(
+        err instanceof Error ? err.message : 'Erro ao carregar mock configs',
+      );
       console.error('Erro ao buscar mock configs:', err);
     } finally {
       setLoading(false);
@@ -32,9 +36,9 @@ export const MockConfigPanel: React.FC = () => {
   const handleToggleMock = async (mockId: string, enabled: boolean) => {
     try {
       await testingService.updateMockConfig(mockId, { enabled });
-      setMockConfigs(prev => prev.map(mock => 
-        mock.id === mockId ? { ...mock, enabled } : mock
-      ));
+      setMockConfigs((prev) =>
+        prev.map((mock) => (mock.id === mockId ? { ...mock, enabled } : mock)),
+      );
     } catch (err) {
       console.error('Erro ao atualizar mock:', err);
     }
@@ -44,7 +48,7 @@ export const MockConfigPanel: React.FC = () => {
     if (window.confirm('Tem certeza que deseja deletar este mock?')) {
       try {
         await testingService.deleteMockConfig(mockId);
-        setMockConfigs(prev => prev.filter(mock => mock.id !== mockId));
+        setMockConfigs((prev) => prev.filter((mock) => mock.id !== mockId));
       } catch (err) {
         console.error('Erro ao deletar mock:', err);
       }
@@ -52,20 +56,28 @@ export const MockConfigPanel: React.FC = () => {
   };
 
   const getStatusColor = (statusCode: number) => {
-    if (statusCode >= 200 && statusCode < 300) return 'text-green-600 bg-green-100';
-    if (statusCode >= 400 && statusCode < 500) return 'text-yellow-600 bg-yellow-100';
+    if (statusCode >= 200 && statusCode < 300)
+      return 'text-green-600 bg-green-100';
+    if (statusCode >= 400 && statusCode < 500)
+      return 'text-yellow-600 bg-yellow-100';
     if (statusCode >= 500) return 'text-red-600 bg-red-100';
     return 'text-gray-600 bg-gray-100';
   };
 
   const getMethodColor = (method: string) => {
     switch (method) {
-      case 'GET': return 'bg-blue-100 text-blue-800';
-      case 'POST': return 'bg-green-100 text-green-800';
-      case 'PUT': return 'bg-yellow-100 text-yellow-800';
-      case 'DELETE': return 'bg-red-100 text-red-800';
-      case 'PATCH': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'GET':
+        return 'bg-blue-100 text-blue-800';
+      case 'POST':
+        return 'bg-green-100 text-green-800';
+      case 'PUT':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'DELETE':
+        return 'bg-red-100 text-red-800';
+      case 'PATCH':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -83,11 +95,17 @@ export const MockConfigPanel: React.FC = () => {
         <div className="flex items-center">
           <div className="text-red-600">
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-red-800">Erro ao carregar mock configs</h3>
+            <h3 className="text-sm font-medium text-red-800">
+              Erro ao carregar mock configs
+            </h3>
             <p className="text-sm text-red-700 mt-1">{error}</p>
           </div>
         </div>
@@ -100,7 +118,9 @@ export const MockConfigPanel: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Configuração de Mocks</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Configuração de Mocks
+          </h2>
           <p className="text-sm text-gray-600">
             Configure mocks para simular respostas da API durante testes
           </p>
@@ -109,8 +129,8 @@ export const MockConfigPanel: React.FC = () => {
           <button
             onClick={() => setActiveTab('list')}
             className={`px-3 py-1 rounded-md text-sm font-medium ${
-              activeTab === 'list' 
-                ? 'bg-blue-100 text-blue-700' 
+              activeTab === 'list'
+                ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -122,8 +142,8 @@ export const MockConfigPanel: React.FC = () => {
               setEditingMock(null);
             }}
             className={`px-3 py-1 rounded-md text-sm font-medium ${
-              activeTab === 'create' 
-                ? 'bg-blue-100 text-blue-700' 
+              activeTab === 'create'
+                ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -139,25 +159,37 @@ export const MockConfigPanel: React.FC = () => {
             <div key={mock.id} className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <h3 className="text-lg font-medium text-gray-900">{mock.name}</h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getMethodColor(mock.method)}`}>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {mock.name}
+                  </h3>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getMethodColor(mock.method)}`}
+                  >
                     {mock.method}
                   </span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mock.statusCode)}`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mock.statusCode)}`}
+                  >
                     {mock.statusCode}
                   </span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    mock.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      mock.enabled
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
                     {mock.enabled ? 'Ativo' : 'Inativo'}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => handleToggleMock(mock.id, !mock.enabled)}
+                    onClick={() =>
+                      void handleToggleMock(mock.id, !mock.enabled)
+                    }
                     className={`px-3 py-1 rounded-md text-sm font-medium ${
-                      mock.enabled 
-                        ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                      mock.enabled
+                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
                         : 'bg-green-100 text-green-700 hover:bg-green-200'
                     }`}
                   >
@@ -173,29 +205,39 @@ export const MockConfigPanel: React.FC = () => {
                     Editar
                   </button>
                   <button
-                    onClick={() => handleDeleteMock(mock.id)}
+                    onClick={() => void handleDeleteMock(mock.id)}
                     className="px-3 py-1 bg-red-100 text-red-700 rounded-md text-sm font-medium hover:bg-red-200"
                   >
                     Deletar
                   </button>
                 </div>
               </div>
-              
+
               <div className="space-y-3">
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Endpoint:</span>
-                  <span className="ml-2 text-sm text-gray-600 font-mono">{mock.endpoint}</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    Endpoint:
+                  </span>
+                  <span className="ml-2 text-sm text-gray-600 font-mono">
+                    {mock.endpoint}
+                  </span>
                 </div>
-                
+
                 {mock.delay && (
                   <div>
-                    <span className="text-sm font-medium text-gray-700">Delay:</span>
-                    <span className="ml-2 text-sm text-gray-600">{mock.delay}ms</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      Delay:
+                    </span>
+                    <span className="ml-2 text-sm text-gray-600">
+                      {mock.delay}ms
+                    </span>
                   </div>
                 )}
 
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Resposta:</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    Resposta:
+                  </span>
                   <pre className="mt-1 bg-gray-100 p-3 rounded text-sm overflow-x-auto">
                     <code>{JSON.stringify(mock.response, null, 2)}</code>
                   </pre>
@@ -203,14 +245,23 @@ export const MockConfigPanel: React.FC = () => {
 
                 {mock.conditions && mock.conditions.length > 0 && (
                   <div>
-                    <span className="text-sm font-medium text-gray-700">Condições:</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      Condições:
+                    </span>
                     <div className="mt-1 space-y-1">
                       {mock.conditions.map((condition) => (
-                        <div key={condition.id} className="text-sm text-gray-600">
+                        <div
+                          key={condition.id}
+                          className="text-sm text-gray-600"
+                        >
                           <span className="font-mono">{condition.field}</span>
                           <span className="mx-1">{condition.operator}</span>
-                          <span className="font-mono">{JSON.stringify(condition.value)}</span>
-                          <span className="ml-2 text-gray-500">({condition.description})</span>
+                          <span className="font-mono">
+                            {JSON.stringify(condition.value)}
+                          </span>
+                          <span className="ml-2 text-gray-500">
+                            ({condition.description})
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -300,7 +351,11 @@ export const MockConfigPanel: React.FC = () => {
               </label>
               <textarea
                 rows={6}
-                defaultValue={editingMock ? JSON.stringify(editingMock.response, null, 2) : '{\n  "message": "Mock response"\n}'}
+                defaultValue={
+                  editingMock
+                    ? JSON.stringify(editingMock.response, null, 2)
+                    : '{\n  "message": "Mock response"\n}'
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                 placeholder='{"message": "Mock response"}'
               />

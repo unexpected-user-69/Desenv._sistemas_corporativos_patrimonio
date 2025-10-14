@@ -13,7 +13,7 @@ import {
   CachePattern,
   CacheFlushOptions,
   CacheSearchOptions,
-  CacheSearchResult
+  CacheSearchResult,
 } from '../types/cache';
 import { cacheService } from '../services/cacheService';
 
@@ -114,9 +114,12 @@ export const useCacheStore = create<CacheState>()(
           const stats = await cacheService.getStats();
           set({ stats, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar estatísticas',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar estatísticas',
+            isLoading: false,
           });
         }
       },
@@ -127,9 +130,10 @@ export const useCacheStore = create<CacheState>()(
           const keys = await cacheService.getKeys(pattern, limit);
           set({ keys, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar chaves',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao buscar chaves',
+            isLoading: false,
           });
         }
       },
@@ -140,9 +144,12 @@ export const useCacheStore = create<CacheState>()(
           const config = await cacheService.getConfig();
           set({ config, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar configuração',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar configuração',
+            isLoading: false,
           });
         }
       },
@@ -153,9 +160,12 @@ export const useCacheStore = create<CacheState>()(
           const operations = await cacheService.getOperations(limit);
           set({ operations, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar operações',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar operações',
+            isLoading: false,
           });
         }
       },
@@ -166,9 +176,12 @@ export const useCacheStore = create<CacheState>()(
           const metrics = await cacheService.getMetrics();
           set({ metrics, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar métricas',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar métricas',
+            isLoading: false,
           });
         }
       },
@@ -179,9 +192,10 @@ export const useCacheStore = create<CacheState>()(
           const alerts = await cacheService.getAlerts();
           set({ alerts, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar alertas',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao buscar alertas',
+            isLoading: false,
           });
         }
       },
@@ -192,9 +206,12 @@ export const useCacheStore = create<CacheState>()(
           const health = await cacheService.getHealth();
           set({ health, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar saúde do cache',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao buscar saúde do cache',
+            isLoading: false,
           });
         }
       },
@@ -205,19 +222,23 @@ export const useCacheStore = create<CacheState>()(
           const patterns = await cacheService.getPatterns();
           set({ patterns, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar padrões',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao buscar padrões',
+            isLoading: false,
           });
         }
       },
 
       // Ações para gerenciar chaves
-      getKey: async (key: string) => {
+      getKey: async (key: string): Promise<unknown> => {
         try {
           return await cacheService.getKey(key);
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Erro ao buscar chave' });
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao buscar chave',
+          });
           throw error;
         }
       },
@@ -226,9 +247,12 @@ export const useCacheStore = create<CacheState>()(
         try {
           await cacheService.setKey(key, value, ttl);
           // Atualizar lista de chaves
-          get().fetchKeys();
+          void get().fetchKeys();
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Erro ao definir chave' });
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao definir chave',
+          });
           throw error;
         }
       },
@@ -237,21 +261,27 @@ export const useCacheStore = create<CacheState>()(
         try {
           await cacheService.deleteKey(key);
           // Atualizar lista de chaves
-          get().fetchKeys();
+          void get().fetchKeys();
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Erro ao deletar chave' });
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao deletar chave',
+          });
           throw error;
         }
       },
 
       deleteKeys: async (keys: string[]) => {
         try {
-          await Promise.all(keys.map(key => cacheService.deleteKey(key)));
+          await Promise.all(keys.map((key) => cacheService.deleteKey(key)));
           // Atualizar lista de chaves
-          get().fetchKeys();
+          void get().fetchKeys();
           set({ selectedKeys: [] });
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Erro ao deletar chaves' });
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao deletar chaves',
+          });
           throw error;
         }
       },
@@ -262,7 +292,12 @@ export const useCacheStore = create<CacheState>()(
           const updatedConfig = await cacheService.updateConfig(config);
           set({ config: updatedConfig });
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Erro ao atualizar configuração' });
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao atualizar configuração',
+          });
           throw error;
         }
       },
@@ -272,10 +307,13 @@ export const useCacheStore = create<CacheState>()(
         try {
           await cacheService.flushCache(options);
           // Atualizar dados após limpeza
-          get().fetchStats();
-          get().fetchKeys();
+          void get().fetchStats();
+          void get().fetchKeys();
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Erro ao limpar cache' });
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao limpar cache',
+          });
           throw error;
         }
       },
@@ -284,9 +322,14 @@ export const useCacheStore = create<CacheState>()(
         try {
           await cacheService.resolveAlert(alertId);
           // Atualizar lista de alertas
-          get().fetchAlerts();
+          void get().fetchAlerts();
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Erro ao resolver alerta' });
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Erro ao resolver alerta',
+          });
           throw error;
         }
       },
@@ -298,9 +341,10 @@ export const useCacheStore = create<CacheState>()(
           const result = await cacheService.searchKeys(options);
           set({ searchResult: result, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Erro ao buscar chaves',
-            isLoading: false 
+          set({
+            error:
+              error instanceof Error ? error.message : 'Erro ao buscar chaves',
+            isLoading: false,
           });
         }
       },
@@ -311,11 +355,14 @@ export const useCacheStore = create<CacheState>()(
       clearSelection: () => set({ selectedKeys: [] }),
 
       // Ações para adicionar dados (para simulação)
-      addKey: (key: CacheKey) => set((state) => ({ keys: [key, ...state.keys] })),
-      addOperation: (operation: CacheOperation) => set((state) => ({ 
-        operations: [operation, ...state.operations.slice(0, 49)] 
-      })),
-      addAlert: (alert: CacheAlert) => set((state) => ({ alerts: [alert, ...state.alerts] })),
+      addKey: (key: CacheKey) =>
+        set((state) => ({ keys: [key, ...state.keys] })),
+      addOperation: (operation: CacheOperation) =>
+        set((state) => ({
+          operations: [operation, ...state.operations.slice(0, 49)],
+        })),
+      addAlert: (alert: CacheAlert) =>
+        set((state) => ({ alerts: [alert, ...state.alerts] })),
       clearOperations: () => set({ operations: [] }),
       clearAlerts: () => set({ alerts: [] }),
 
@@ -327,12 +374,13 @@ export const useCacheStore = create<CacheState>()(
       setCacheAlerts: (alerts: CacheAlert[]) => set({ alerts }),
       setCachePatterns: (patterns: CachePattern[]) => set({ patterns }),
       setCacheMetrics: (metrics: CacheMetrics) => set({ metrics }),
-      setCacheFlushOptions: (_options: CacheFlushOptions) => set({}),
-      setCacheSearchOptions: (_options: CacheSearchOptions) => set({}),
-      setCacheSearchResult: (result: CacheSearchResult) => set({ searchResult: result }),
+      setCacheFlushOptions: () => set({}),
+      setCacheSearchOptions: () => set({}),
+      setCacheSearchResult: (result: CacheSearchResult) =>
+        set({ searchResult: result }),
     })),
     {
       name: 'cache-store',
-    }
-  )
+    },
+  ),
 );

@@ -1,18 +1,18 @@
 // Serviço para funcionalidades avançadas de produção e segurança
 
-import type { 
-  RateLimitConfig, 
-  RateLimitStats, 
-  CORSConfig, 
-  CORSStats, 
-  CompressionConfig, 
-  CompressionStats, 
-  SecurityHeaders, 
-  SecurityStats, 
-  EnvironmentConfig, 
-  ValidationStats, 
-  InterceptorStats, 
-  ProductionDashboard 
+import type {
+  RateLimitConfig,
+  RateLimitStats,
+  CORSConfig,
+  CORSStats,
+  CompressionConfig,
+  CompressionStats,
+  SecurityHeaders,
+  SecurityStats,
+  EnvironmentConfig,
+  ValidationStats,
+  InterceptorStats,
+  ProductionDashboard,
 } from '../types/security';
 
 // Mock data para demonstração
@@ -23,29 +23,36 @@ const generateMockRateLimitStats = (): RateLimitStats => ({
   currentWindow: {
     start: new Date(Date.now() - 60000).toISOString(),
     end: new Date().toISOString(),
-    requests: Math.floor(Math.random() * 100) + 50
+    requests: Math.floor(Math.random() * 100) + 50,
   },
   topIPs: [
     { ip: '192.168.1.100', requests: 150, blocked: 5 },
     { ip: '10.0.0.50', requests: 120, blocked: 3 },
     { ip: '172.16.0.25', requests: 95, blocked: 8 },
     { ip: '203.0.113.10', requests: 80, blocked: 2 },
-    { ip: '198.51.100.5', requests: 65, blocked: 1 }
-  ]
+    { ip: '198.51.100.5', requests: 65, blocked: 1 },
+  ],
 });
 
 const generateMockCORSStats = (): CORSStats => ({
   totalRequests: Math.floor(Math.random() * 5000) + 2000,
   preflightRequests: Math.floor(Math.random() * 500) + 100,
   blockedRequests: Math.floor(Math.random() * 50) + 5,
-  allowedOrigins: ['http://localhost:3000', 'https://app.example.com', 'https://admin.example.com'],
-  blockedOrigins: ['http://malicious-site.com', 'https://suspicious-domain.org'],
+  allowedOrigins: [
+    'http://localhost:3000',
+    'https://app.example.com',
+    'https://admin.example.com',
+  ],
+  blockedOrigins: [
+    'http://malicious-site.com',
+    'https://suspicious-domain.org',
+  ],
   topOrigins: [
     { origin: 'http://localhost:3000', requests: 800 },
     { origin: 'https://app.example.com', requests: 600 },
     { origin: 'https://admin.example.com', requests: 400 },
-    { origin: 'https://mobile.example.com', requests: 200 }
-  ]
+    { origin: 'https://mobile.example.com', requests: 200 },
+  ],
 });
 
 const generateMockCompressionStats = (): CompressionStats => ({
@@ -55,28 +62,64 @@ const generateMockCompressionStats = (): CompressionStats => ({
   bytesSaved: Math.floor(Math.random() * 1000000) + 500000,
   averageCompressionRatio: Math.random() * 0.3 + 0.7, // 70-100%
   topCompressedEndpoints: [
-    { endpoint: '/api/users', requests: 500, compressionRatio: 0.75, bytesSaved: 150000 },
-    { endpoint: '/api/patrimonios', requests: 300, compressionRatio: 0.80, bytesSaved: 120000 },
-    { endpoint: '/api/reports', requests: 200, compressionRatio: 0.85, bytesSaved: 100000 },
-    { endpoint: '/api/health', requests: 1000, compressionRatio: 0.60, bytesSaved: 50000 }
-  ]
+    {
+      endpoint: '/api/users',
+      requests: 500,
+      compressionRatio: 0.75,
+      bytesSaved: 150000,
+    },
+    {
+      endpoint: '/api/patrimonios',
+      requests: 300,
+      compressionRatio: 0.8,
+      bytesSaved: 120000,
+    },
+    {
+      endpoint: '/api/reports',
+      requests: 200,
+      compressionRatio: 0.85,
+      bytesSaved: 100000,
+    },
+    {
+      endpoint: '/api/health',
+      requests: 1000,
+      compressionRatio: 0.6,
+      bytesSaved: 50000,
+    },
+  ],
 });
 
 const generateMockSecurityStats = (): SecurityStats => ({
   totalRequests: Math.floor(Math.random() * 15000) + 8000,
   blockedRequests: Math.floor(Math.random() * 200) + 50,
   securityViolations: [
-    { type: 'XSS Attempt', count: 15, lastOccurrence: new Date(Date.now() - 300000).toISOString() },
-    { type: 'SQL Injection', count: 8, lastOccurrence: new Date(Date.now() - 600000).toISOString() },
-    { type: 'CSRF Attack', count: 12, lastOccurrence: new Date(Date.now() - 900000).toISOString() },
-    { type: 'Rate Limit Exceeded', count: 25, lastOccurrence: new Date(Date.now() - 120000).toISOString() }
+    {
+      type: 'XSS Attempt',
+      count: 15,
+      lastOccurrence: new Date(Date.now() - 300000).toISOString(),
+    },
+    {
+      type: 'SQL Injection',
+      count: 8,
+      lastOccurrence: new Date(Date.now() - 600000).toISOString(),
+    },
+    {
+      type: 'CSRF Attack',
+      count: 12,
+      lastOccurrence: new Date(Date.now() - 900000).toISOString(),
+    },
+    {
+      type: 'Rate Limit Exceeded',
+      count: 25,
+      lastOccurrence: new Date(Date.now() - 120000).toISOString(),
+    },
   ],
   topViolations: [
     { violation: 'Rate Limit Exceeded', count: 25, percentage: 50 },
     { violation: 'XSS Attempt', count: 15, percentage: 30 },
     { violation: 'CSRF Attack', count: 12, percentage: 24 },
-    { violation: 'SQL Injection', count: 8, percentage: 16 }
-  ]
+    { violation: 'SQL Injection', count: 8, percentage: 16 },
+  ],
 });
 
 const generateMockValidationStats = (): ValidationStats => ({
@@ -87,13 +130,13 @@ const generateMockValidationStats = (): ValidationStats => ({
     { field: 'email', error: 'Invalid email format', count: 150 },
     { field: 'password', error: 'Password too weak', count: 120 },
     { field: 'name', error: 'Name is required', count: 80 },
-    { field: 'role', error: 'Invalid role value', count: 60 }
+    { field: 'role', error: 'Invalid role value', count: 60 },
   ],
   validationPerformance: {
     averageTime: Math.random() * 5 + 1, // 1-6ms
     maxTime: Math.random() * 20 + 10, // 10-30ms
-    minTime: Math.random() * 2 + 0.5 // 0.5-2.5ms
-  }
+    minTime: Math.random() * 2 + 0.5, // 0.5-2.5ms
+  },
 });
 
 const generateMockInterceptorStats = (): InterceptorStats => ({
@@ -101,17 +144,37 @@ const generateMockInterceptorStats = (): InterceptorStats => ({
     totalRequests: Math.floor(Math.random() * 25000) + 15000,
     averageResponseTime: Math.random() * 100 + 50, // 50-150ms
     slowestRequests: [
-      { method: 'POST', url: '/api/users/bulk', responseTime: 2500, timestamp: new Date(Date.now() - 300000).toISOString() },
-      { method: 'GET', url: '/api/reports/export', responseTime: 1800, timestamp: new Date(Date.now() - 600000).toISOString() },
-      { method: 'PUT', url: '/api/patrimonios/123', responseTime: 1200, timestamp: new Date(Date.now() - 900000).toISOString() },
-      { method: 'GET', url: '/api/users/search', responseTime: 950, timestamp: new Date(Date.now() - 1200000).toISOString() }
-    ]
+      {
+        method: 'POST',
+        url: '/api/users/bulk',
+        responseTime: 2500,
+        timestamp: new Date(Date.now() - 300000).toISOString(),
+      },
+      {
+        method: 'GET',
+        url: '/api/reports/export',
+        responseTime: 1800,
+        timestamp: new Date(Date.now() - 600000).toISOString(),
+      },
+      {
+        method: 'PUT',
+        url: '/api/patrimonios/123',
+        responseTime: 1200,
+        timestamp: new Date(Date.now() - 900000).toISOString(),
+      },
+      {
+        method: 'GET',
+        url: '/api/users/search',
+        responseTime: 950,
+        timestamp: new Date(Date.now() - 1200000).toISOString(),
+      },
+    ],
   },
   metrics: {
     totalMetrics: Math.floor(Math.random() * 1000) + 500,
     lastUpdate: new Date().toISOString(),
-    systemHealth: Math.random() > 0.1 ? 'healthy' : 'warning'
-  }
+    systemHealth: Math.random() > 0.1 ? 'healthy' : 'warning',
+  },
 });
 
 class SecurityService {
@@ -136,7 +199,7 @@ class SecurityService {
         standardHeaders: true,
         legacyHeaders: false,
         skipSuccessfulRequests: false,
-        skipFailedRequests: false
+        skipFailedRequests: false,
       };
 
       return new Promise((resolve) => {
@@ -148,7 +211,9 @@ class SecurityService {
     }
   }
 
-  async updateRateLimitConfig(config: Partial<RateLimitConfig>): Promise<RateLimitConfig> {
+  async updateRateLimitConfig(
+    config: Partial<RateLimitConfig>,
+  ): Promise<RateLimitConfig> {
     try {
       // Em produção, fazer requisição real para o backend
       // const response = await fetch(`${this.baseUrl}/v1/security/rate-limit/config`, {
@@ -200,7 +265,7 @@ class SecurityService {
         credentials: true,
         maxAge: 86400, // 24 horas
         preflightContinue: false,
-        optionsSuccessStatus: 204
+        optionsSuccessStatus: 204,
       };
 
       return new Promise((resolve) => {
@@ -260,7 +325,7 @@ class SecurityService {
         enabled: true,
         level: 6, // 1-9, onde 6 é um bom equilíbrio
         threshold: 1024, // 1KB
-        filter: () => true // Sempre comprimir
+        filter: () => true, // Sempre comprimir
       };
 
       return new Promise((resolve) => {
@@ -272,7 +337,9 @@ class SecurityService {
     }
   }
 
-  async updateCompressionConfig(config: Partial<CompressionConfig>): Promise<CompressionConfig> {
+  async updateCompressionConfig(
+    config: Partial<CompressionConfig>,
+  ): Promise<CompressionConfig> {
     try {
       // Em produção, fazer requisição real para o backend
       // const response = await fetch(`${this.baseUrl}/v1/security/compression/config`, {
@@ -331,13 +398,17 @@ class SecurityService {
           originAgentCluster: true,
           permittedCrossDomainPolicies: true,
           referrerPolicy: true,
-          xssFilter: true
+          xssFilter: true,
         },
         customHeaders: [
           { name: 'X-Custom-Security', value: 'enabled', enabled: true },
           { name: 'X-API-Version', value: '1.0.0', enabled: true },
-          { name: 'X-Response-Time', value: '${responseTime}ms', enabled: false }
-        ]
+          {
+            name: 'X-Response-Time',
+            value: '${responseTime}ms',
+            enabled: false,
+          },
+        ],
       };
 
       return new Promise((resolve) => {
@@ -349,7 +420,9 @@ class SecurityService {
     }
   }
 
-  async updateSecurityHeaders(headers: Partial<SecurityHeaders>): Promise<SecurityHeaders> {
+  async updateSecurityHeaders(
+    headers: Partial<SecurityHeaders>,
+  ): Promise<SecurityHeaders> {
     try {
       // Em produção, fazer requisição real para o backend
       // const response = await fetch(`${this.baseUrl}/v1/security/headers`, {
@@ -404,8 +477,8 @@ class SecurityService {
           level: 'info',
           format: 'combined',
           enableConsole: true,
-          enableFile: true
-        }
+          enableFile: true,
+        },
       };
 
       return new Promise((resolve) => {
@@ -417,7 +490,9 @@ class SecurityService {
     }
   }
 
-  async updateEnvironmentConfig(config: Partial<EnvironmentConfig>): Promise<EnvironmentConfig> {
+  async updateEnvironmentConfig(
+    config: Partial<EnvironmentConfig>,
+  ): Promise<EnvironmentConfig> {
     try {
       // Em produção, fazer requisição real para o backend
       // const response = await fetch(`${this.baseUrl}/v1/security/environment`, {
@@ -488,7 +563,7 @@ class SecurityService {
         interceptors: await this.getInterceptorStats(),
         environment: await this.getEnvironmentConfig(),
         lastUpdate: new Date().toISOString(),
-        systemStatus: 'healthy'
+        systemStatus: 'healthy',
       };
 
       return new Promise((resolve) => {

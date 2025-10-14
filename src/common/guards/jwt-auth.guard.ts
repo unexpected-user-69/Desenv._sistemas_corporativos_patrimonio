@@ -8,11 +8,11 @@ import {
 
 /**
  * Guard de autenticação JWT (placeholder).
- * 
+ *
  * Este guard é um placeholder que implementa CanActivate diretamente.
  * NÃO deve ser aplicado globalmente até que a estratégia JWT seja
  * configurada e implementada no projeto.
- * 
+ *
  * @example
  * ```typescript
  * // Aplicação em endpoints específicos (quando JWT estiver implementado)
@@ -25,7 +25,7 @@ import {
  *   }
  * }
  * ```
- * 
+ *
  * @warning
  * Este guard não deve ser registrado globalmente até que:
  * 1. A estratégia JWT do Passport seja configurada
@@ -38,22 +38,22 @@ export class JwtAuthGuard implements CanActivate {
 
   /**
    * Determina se a requisição pode prosseguir baseado na autenticação JWT.
-   * 
+   *
    * @param context - Contexto de execução da requisição
    * @returns true se o usuário estiver autenticado, false caso contrário
    */
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    
+    const request = context.switchToHttp().getRequest() as any;
+
     // Log para debug (remover em produção)
     this.logger.debug(
       `JwtAuthGuard: verificando autenticação para ${request.method} ${request.url}`,
       {
-        method: request.method,
-        url: request.url,
-        hasAuthHeader: !!request.headers.authorization,
+        method: (request as any).method,
+        url: (request as any).url,
+        hasAuthHeader: !!(request as any).headers.authorization,
         timestamp: new Date().toISOString(),
-      }
+      },
     );
 
     // Por enquanto, sempre retorna true (placeholder)
@@ -61,10 +61,10 @@ export class JwtAuthGuard implements CanActivate {
     this.logger.warn(
       'JwtAuthGuard está funcionando como placeholder. Implementar estratégia JWT real.',
       {
-        method: request.method,
-        url: request.url,
+        method: (request as any).method,
+        url: (request as any).url,
         timestamp: new Date().toISOString(),
-      }
+      },
     );
 
     return true;
@@ -72,7 +72,7 @@ export class JwtAuthGuard implements CanActivate {
 
   /**
    * Manipula erros de autenticação.
-   * 
+   *
    * @param err - Erro de autenticação
    * @param user - Usuário autenticado (se houver)
    * @param info - Informações adicionais do erro
@@ -80,26 +80,20 @@ export class JwtAuthGuard implements CanActivate {
    */
   handleRequest(err: any, user: any, info: any) {
     if (err || !user) {
-      this.logger.error(
-        'Falha na autenticação JWT',
-        {
-          error: err?.message,
-          info: info?.message,
-          timestamp: new Date().toISOString(),
-        }
-      );
+      this.logger.error('Falha na autenticação JWT', {
+        error: err?.message,
+        info: info?.message,
+        timestamp: new Date().toISOString(),
+      });
       throw err || new UnauthorizedException('Token JWT inválido ou expirado');
     }
 
-    this.logger.log(
-      `Usuário autenticado: ${user.email}`,
-      {
-        userId: user.id,
-        userEmail: user.email,
-        userRole: user.role,
-        timestamp: new Date().toISOString(),
-      }
-    );
+    this.logger.log(`Usuário autenticado: ${user.email}`, {
+      userId: user.id,
+      userEmail: user.email,
+      userRole: user.role,
+      timestamp: new Date().toISOString(),
+    });
 
     return user;
   }

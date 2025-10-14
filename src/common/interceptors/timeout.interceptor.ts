@@ -11,15 +11,15 @@ import { catchError, timeout } from 'rxjs/operators';
 
 /**
  * Interceptor para impor timeout em requisições HTTP.
- * 
+ *
  * Evita requisições penduradas liberando recursos do servidor.
  * Configurável via parâmetro no construtor.
- * 
+ *
  * @example
  * ```typescript
  * // Timeout padrão de 10 segundos
  * app.useGlobalInterceptors(new TimeoutInterceptor());
- * 
+ *
  * // Timeout customizado de 30 segundos
  * app.useGlobalInterceptors(new TimeoutInterceptor(30000));
  * ```
@@ -31,7 +31,7 @@ export class TimeoutInterceptor implements NestInterceptor {
 
   /**
    * Construtor do interceptor de timeout.
-   * 
+   *
    * @param timeoutMs - Tempo limite em milissegundos (padrão: 10000ms = 10s)
    */
   constructor(timeoutMs: number = 10000) {
@@ -40,7 +40,7 @@ export class TimeoutInterceptor implements NestInterceptor {
 
   /**
    * Intercepta a requisição e aplica timeout.
-   * 
+   *
    * @param context - Contexto de execução da requisição
    * @param next - Handler da próxima função no pipeline
    * @returns Observable com timeout aplicado
@@ -60,18 +60,19 @@ export class TimeoutInterceptor implements NestInterceptor {
               url,
               timeoutMs: this.timeoutMs,
               timestamp: new Date().toISOString(),
-            }
+            },
           );
-          
+
           return throwError(
-            () => new RequestTimeoutException(
-              `A requisição excedeu o tempo limite de ${this.timeoutMs}ms`
-            )
+            () =>
+              new RequestTimeoutException(
+                `A requisição excedeu o tempo limite de ${this.timeoutMs}ms`,
+              ),
           );
         }
-        
+
         return throwError(() => error);
-      })
+      }),
     );
   }
 }

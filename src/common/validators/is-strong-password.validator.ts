@@ -24,11 +24,11 @@ export interface StrongPasswordOptions {
 
 /**
  * Validador customizado que verifica se uma senha atende aos critérios de força.
- * 
+ *
  * @example
  * ```typescript
  * class CreateUserDto {
- *   @IsStrongPassword({ 
+ *   @IsStrongPassword({
  *     minLength: 8,
  *     requireUppercase: true,
  *     requireLowercase: true,
@@ -40,10 +40,12 @@ export interface StrongPasswordOptions {
  * ```
  */
 @ValidatorConstraint({ async: false })
-export class IsStrongPasswordConstraint implements ValidatorConstraintInterface {
+export class IsStrongPasswordConstraint
+  implements ValidatorConstraintInterface
+{
   /**
    * Valida se a senha atende aos critérios de força configurados.
-   * 
+   *
    * @param value - Valor a ser validado
    * @param args - Argumentos de validação
    * @returns true se a senha for forte, false caso contrário
@@ -83,7 +85,10 @@ export class IsStrongPasswordConstraint implements ValidatorConstraintInterface 
     }
 
     // Verifica caracteres especiais
-    if (requireSpecialChars && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value)) {
+    if (
+      requireSpecialChars &&
+      !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value)
+    ) {
       return false;
     }
 
@@ -92,7 +97,7 @@ export class IsStrongPasswordConstraint implements ValidatorConstraintInterface 
 
   /**
    * Mensagem de erro padrão quando a validação falha.
-   * 
+   *
    * @param args - Argumentos de validação
    * @returns Mensagem de erro
    */
@@ -107,21 +112,21 @@ export class IsStrongPasswordConstraint implements ValidatorConstraintInterface 
     } = options;
 
     const requirements: string[] = [];
-    
+
     requirements.push(`pelo menos ${minLength} caracteres`);
-    
+
     if (requireUppercase) {
       requirements.push('uma letra maiúscula');
     }
-    
+
     if (requireLowercase) {
       requirements.push('uma letra minúscula');
     }
-    
+
     if (requireNumbers) {
       requirements.push('um número');
     }
-    
+
     if (requireSpecialChars) {
       requirements.push('um caractere especial');
     }
@@ -132,7 +137,7 @@ export class IsStrongPasswordConstraint implements ValidatorConstraintInterface 
 
 /**
  * Decorator que aplica a validação IsStrongPassword a uma propriedade.
- * 
+ *
  * @param options - Opções de configuração da validação
  * @param validationOptions - Opções de validação (mensagem customizada, etc.)
  * @returns Decorator de validação
@@ -141,7 +146,7 @@ export function IsStrongPassword(
   options?: StrongPasswordOptions,
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

@@ -25,10 +25,10 @@ interface LogData {
 
 /**
  * Interceptor para logging estruturado de requisições HTTP.
- * 
+ *
  * Registra informações como método, rota, status code, latência e dados do usuário.
  * Utiliza o Logger nativo do NestJS com níveis de log baseados no status HTTP.
- * 
+ *
  * @example
  * ```typescript
  * // Registrado globalmente em main.ts
@@ -41,7 +41,7 @@ export class LoggingInterceptor implements NestInterceptor {
 
   /**
    * Intercepta a requisição e adiciona logging estruturado.
-   * 
+   *
    * @param context - Contexto de execução da requisição
    * @param next - Handler da próxima função no pipeline
    * @returns Observable com a resposta
@@ -49,11 +49,11 @@ export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
-    
+
     const startTime = Date.now();
     const { method, url, headers, ip } = request;
     const userAgent = headers['user-agent'];
-    
+
     // Extrai userId se disponível (quando autenticação estiver implementada)
     const userId = (request as any).user?.id;
 
@@ -89,18 +89,27 @@ export class LoggingInterceptor implements NestInterceptor {
       finalize(() => {
         // Garante que o log seja emitido mesmo em casos de erro
         // Este bloco é executado sempre, independente do resultado
-      })
+      }),
     );
   }
 
   /**
    * Registra a requisição com o nível de log apropriado.
-   * 
+   *
    * @param logData - Dados estruturados para o log
    */
   private logRequest(logData: LogData): void {
-    const { method, url, statusCode, responseTime, timestamp, userId, ip, userAgent } = logData;
-    
+    const {
+      method,
+      url,
+      statusCode,
+      responseTime,
+      timestamp,
+      userId,
+      ip,
+      userAgent,
+    } = logData;
+
     const logMessage = `${method} ${url} ${statusCode} ${responseTime}ms`;
     const logContext = {
       method,

@@ -1,8 +1,19 @@
 // Serviço de monitoramento e observabilidade (M2)
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 
-import { MetricsData, LogEntry, AlertRule, DashboardConfig, SystemHealth } from '../types/monitoring';
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import {
+  MetricsData,
+  LogEntry,
+  AlertRule,
+  DashboardConfig,
+  SystemHealth,
+} from '../types/monitoring';
+
+const API_BASE_URL =
+  (import.meta.env as { VITE_API_BASE_URL?: string }).VITE_API_BASE_URL ||
+  'http://localhost:3000';
 
 export class MonitoringService {
   private baseUrl: string;
@@ -26,13 +37,15 @@ export class MonitoringService {
   }
 
   // Logs estruturados
-  async getLogs(params: {
-    level?: string;
-    startDate?: string;
-    endDate?: string;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<{ logs: LogEntry[]; total: number }> {
+  async getLogs(
+    params: {
+      level?: string;
+      startDate?: string;
+      endDate?: string;
+      limit?: number;
+      offset?: number;
+    } = {},
+  ): Promise<{ logs: LogEntry[]; total: number }> {
     try {
       const queryParams = new URLSearchParams();
       if (params.level) queryParams.append('level', params.level);
@@ -85,7 +98,10 @@ export class MonitoringService {
     }
   }
 
-  async updateAlertRule(id: string, rule: Partial<AlertRule>): Promise<AlertRule> {
+  async updateAlertRule(
+    id: string,
+    rule: Partial<AlertRule>,
+  ): Promise<AlertRule> {
     try {
       const response = await fetch(`${this.baseUrl}/alerts/rules/${id}`, {
         method: 'PATCH',
@@ -132,7 +148,9 @@ export class MonitoringService {
     }
   }
 
-  async createDashboard(dashboard: Omit<DashboardConfig, 'id'>): Promise<DashboardConfig> {
+  async createDashboard(
+    dashboard: Omit<DashboardConfig, 'id'>,
+  ): Promise<DashboardConfig> {
     try {
       const response = await fetch(`${this.baseUrl}/dashboards`, {
         method: 'POST',
@@ -177,9 +195,11 @@ export class MonitoringService {
       queryParams.append('startDate', params.startDate);
       queryParams.append('endDate', params.endDate);
       queryParams.append('interval', params.interval);
-      params.metrics.forEach(metric => queryParams.append('metrics', metric));
+      params.metrics.forEach((metric) => queryParams.append('metrics', metric));
 
-      const response = await fetch(`${this.baseUrl}/metrics/historical?${queryParams}`);
+      const response = await fetch(
+        `${this.baseUrl}/metrics/historical?${queryParams}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -197,7 +217,7 @@ export class MonitoringService {
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data) as MetricsData;
         onMessage(data);
       } catch (error) {
         console.error('Erro ao processar mensagem WebSocket:', error);
@@ -223,9 +243,11 @@ export class MonitoringService {
       queryParams.append('startDate', params.startDate);
       queryParams.append('endDate', params.endDate);
       queryParams.append('format', params.format);
-      params.metrics.forEach(metric => queryParams.append('metrics', metric));
+      params.metrics.forEach((metric) => queryParams.append('metrics', metric));
 
-      const response = await fetch(`${this.baseUrl}/metrics/export?${queryParams}`);
+      const response = await fetch(
+        `${this.baseUrl}/metrics/export?${queryParams}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

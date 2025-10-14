@@ -2,16 +2,18 @@ import {
   IsOptional,
   IsString,
   IsEnum,
-  IsBoolean,
   IsDateString,
   IsUUID,
   IsNumber,
   Min,
   Max,
 } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { PatrimonioStatus, PatrimonioCategoria } from '../entities/patrimonio.entity';
+import {
+  PatrimonioStatus,
+  PatrimonioCategoria,
+} from '../entities/patrimonio.entity';
 import { IsTrimmed } from '../../common/validators';
 
 export class FilterPatrimoniosDto {
@@ -56,7 +58,9 @@ export class FilterPatrimoniosDto {
     example: PatrimonioCategoria.EQUIPAMENTO,
   })
   @IsOptional()
-  @IsEnum(PatrimonioCategoria, { message: 'Categoria deve ser um valor válido' })
+  @IsEnum(PatrimonioCategoria, {
+    message: 'Categoria deve ser um valor válido',
+  })
   categoria?: PatrimonioCategoria;
 
   @ApiPropertyOptional({
@@ -92,7 +96,9 @@ export class FilterPatrimoniosDto {
   })
   @IsOptional()
   @IsString({ message: 'A localização deve ser uma string' })
-  @IsTrimmed({ message: 'A localização não pode conter espaços no início ou fim' })
+  @IsTrimmed({
+    message: 'A localização não pode conter espaços no início ou fim',
+  })
   localizacao?: string;
 
   @ApiPropertyOptional({
@@ -105,7 +111,7 @@ export class FilterPatrimoniosDto {
 
   @ApiPropertyOptional({
     description: 'Valor mínimo de aquisição',
-    example: 1000.00,
+    example: 1000.0,
     minimum: 0,
   })
   @IsOptional()
@@ -116,7 +122,7 @@ export class FilterPatrimoniosDto {
 
   @ApiPropertyOptional({
     description: 'Valor máximo de aquisição',
-    example: 5000.00,
+    example: 5000.0,
     minimum: 0,
   })
   @IsOptional()
@@ -143,13 +149,28 @@ export class FilterPatrimoniosDto {
 
   @ApiPropertyOptional({
     description: 'Ordenar por campo',
-    enum: ['codigo', 'nome', 'categoria', 'status', 'valorAquisicao', 'dataAquisicao', 'createdAt'],
+    enum: [
+      'codigo',
+      'nome',
+      'categoria',
+      'status',
+      'valorAquisicao',
+      'dataAquisicao',
+      'createdAt',
+    ],
     default: 'createdAt',
     example: 'nome',
   })
   @IsOptional()
   @IsString({ message: 'O campo de ordenação deve ser uma string' })
-  sortBy?: 'codigo' | 'nome' | 'categoria' | 'status' | 'valorAquisicao' | 'dataAquisicao' | 'createdAt' = 'createdAt';
+  sortBy?:
+    | 'codigo'
+    | 'nome'
+    | 'categoria'
+    | 'status'
+    | 'valorAquisicao'
+    | 'dataAquisicao'
+    | 'createdAt' = 'createdAt';
 
   @ApiPropertyOptional({
     description: 'Direção da ordenação',

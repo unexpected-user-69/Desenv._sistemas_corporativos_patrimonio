@@ -129,16 +129,36 @@ export class CreatePatrimoniosTable1758646964165 implements MigrationInterface {
     );
 
     // Criar índices
-    await queryRunner.query(`CREATE UNIQUE INDEX "uq_patrimonios_codigo" ON "patrimonios" ("codigo")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_categoria" ON "patrimonios" ("categoria")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_status" ON "patrimonios" ("status")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_responsavel" ON "patrimonios" ("responsavel_id")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_nome" ON "patrimonios" ("nome")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_marca" ON "patrimonios" ("marca")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_modelo" ON "patrimonios" ("modelo")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_localizacao" ON "patrimonios" ("localizacao")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_data_aquisicao" ON "patrimonios" ("data_aquisicao")`);
-    await queryRunner.query(`CREATE INDEX "idx_patrimonios_valor_aquisicao" ON "patrimonios" ("valor_aquisicao")`);
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "uq_patrimonios_codigo" ON "patrimonios" ("codigo")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_categoria" ON "patrimonios" ("categoria")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_status" ON "patrimonios" ("status")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_responsavel" ON "patrimonios" ("responsavel_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_nome" ON "patrimonios" ("nome")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_marca" ON "patrimonios" ("marca")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_modelo" ON "patrimonios" ("modelo")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_localizacao" ON "patrimonios" ("localizacao")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_data_aquisicao" ON "patrimonios" ("data_aquisicao")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "idx_patrimonios_valor_aquisicao" ON "patrimonios" ("valor_aquisicao")`,
+    );
 
     // Criar foreign key para responsável
     await queryRunner.query(`
@@ -176,24 +196,40 @@ export class CreatePatrimoniosTable1758646964165 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Remover foreign key
-    await queryRunner.query(`ALTER TABLE "patrimonios" DROP CONSTRAINT IF EXISTS "fk_patrimonios_responsavel"`);
+    await queryRunner.query(
+      `ALTER TABLE "patrimonios" DROP CONSTRAINT IF EXISTS "fk_patrimonios_responsavel"`,
+    );
 
     // Remover constraints
-    await queryRunner.query(`ALTER TABLE "patrimonios" DROP CONSTRAINT IF EXISTS "chk_patrimonios_categoria"`);
-    await queryRunner.query(`ALTER TABLE "patrimonios" DROP CONSTRAINT IF EXISTS "chk_patrimonios_status"`);
-    await queryRunner.query(`ALTER TABLE "patrimonios" DROP CONSTRAINT IF EXISTS "chk_patrimonios_valor_aquisicao"`);
+    await queryRunner.query(
+      `ALTER TABLE "patrimonios" DROP CONSTRAINT IF EXISTS "chk_patrimonios_categoria"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "patrimonios" DROP CONSTRAINT IF EXISTS "chk_patrimonios_status"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "patrimonios" DROP CONSTRAINT IF EXISTS "chk_patrimonios_valor_aquisicao"`,
+    );
 
     // Remover índices
     await queryRunner.query(`DROP INDEX IF EXISTS "uq_patrimonios_codigo"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_categoria"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_status"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_responsavel"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_patrimonios_responsavel"`,
+    );
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_nome"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_marca"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_modelo"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_localizacao"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_data_aquisicao"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_patrimonios_valor_aquisicao"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_patrimonios_localizacao"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_patrimonios_data_aquisicao"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_patrimonios_valor_aquisicao"`,
+    );
 
     // Remover tabela
     await queryRunner.dropTable('patrimonios');

@@ -6,10 +6,7 @@ import { Patrimonio } from './entities/patrimonio.entity';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Patrimonio]),
-    UsersModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Patrimonio]), UsersModule],
   controllers: [PatrimonioController],
   providers: [PatrimonioService],
   exports: [PatrimonioService],

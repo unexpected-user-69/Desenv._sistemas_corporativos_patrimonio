@@ -1,15 +1,15 @@
 /**
  * Enum que define os papéis (roles) disponíveis para usuários no sistema.
- * 
+ *
  * @enum {string}
  */
 export enum UserRole {
   /** Estudante - papel padrão para usuários comuns */
   STUDENT = 'STUDENT',
-  
+
   /** Professor - papel para educadores e instrutores */
   TEACHER = 'TEACHER',
-  
+
   /** Administrador - papel com privilégios elevados */
   ADMIN = 'ADMIN',
 }
@@ -21,7 +21,7 @@ export const USER_ROLES = Object.values(UserRole);
 
 /**
  * Verifica se um valor é um role válido.
- * 
+ *
  * @param value - Valor a ser verificado
  * @returns true se o valor for um role válido, false caso contrário
  */

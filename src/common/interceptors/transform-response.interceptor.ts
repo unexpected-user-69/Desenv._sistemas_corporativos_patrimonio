@@ -21,14 +21,14 @@ export interface StandardResponse<T = any> {
 
 /**
  * Interceptor para padronizar o formato de resposta da API.
- * 
+ *
  * Envelopa todas as respostas em um formato consistente com `data` e `meta`.
  * Sua ativação deve ser alinhada com os clientes da API.
- * 
+ *
  * @example
  * ```typescript
  * // Resposta original: { id: 1, name: "João" }
- * // Resposta transformada: { 
+ * // Resposta transformada: {
  * //   data: { id: 1, name: "João" },
  * //   meta: { timestamp: "2025-10-14T14:30:00Z", path: "/users", method: "GET" }
  * // }
@@ -40,7 +40,7 @@ export class TransformResponseInterceptor<T>
 {
   /**
    * Intercepta a resposta e aplica o formato padronizado.
-   * 
+   *
    * @param context - Contexto de execução da requisição
    * @param next - Handler da próxima função no pipeline
    * @returns Observable com resposta transformada

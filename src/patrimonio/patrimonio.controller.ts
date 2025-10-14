@@ -12,7 +12,6 @@ import {
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
@@ -28,7 +27,10 @@ import { UpdatePatrimonioDto } from './dto/update-patrimonio.dto';
 import { PatrimonioResponseDto } from './dto/patrimonio-response.dto';
 import { FilterPatrimoniosDto } from './dto/filter-patrimonios.dto';
 import { PaginatedPatrimoniosResponseDto } from './dto/paginated-patrimonios-response.dto';
-import { PatrimonioCategoria, PatrimonioStatus } from './entities/patrimonio.entity';
+import {
+  PatrimonioCategoria,
+  PatrimonioStatus,
+} from './entities/patrimonio.entity';
 
 @ApiTags('patrimonio')
 @Controller('patrimonio')
@@ -48,7 +50,9 @@ export class PatrimonioController {
   @ApiConflictResponse({
     description: 'Código do patrimônio já existe',
   })
-  create(@Body() createPatrimonioDto: CreatePatrimonioDto): Promise<PatrimonioResponseDto> {
+  create(
+    @Body() createPatrimonioDto: CreatePatrimonioDto,
+  ): Promise<PatrimonioResponseDto> {
     return this.patrimonioService.create(createPatrimonioDto);
   }
 
@@ -152,7 +156,15 @@ export class PatrimonioController {
   @ApiQuery({
     name: 'sortBy',
     required: false,
-    enum: ['codigo', 'nome', 'categoria', 'status', 'valorAquisicao', 'dataAquisicao', 'createdAt'],
+    enum: [
+      'codigo',
+      'nome',
+      'categoria',
+      'status',
+      'valorAquisicao',
+      'dataAquisicao',
+      'createdAt',
+    ],
     description: 'Campo para ordenação',
     example: 'nome',
   })
@@ -163,7 +175,9 @@ export class PatrimonioController {
     description: 'Direção da ordenação',
     example: 'ASC',
   })
-  findAll(@Query() filters: FilterPatrimoniosDto): Promise<PaginatedPatrimoniosResponseDto> {
+  findAll(
+    @Query() filters: FilterPatrimoniosDto,
+  ): Promise<PaginatedPatrimoniosResponseDto> {
     return this.patrimonioService.findAllWithFilters(filters);
   }
 
@@ -181,7 +195,9 @@ export class PatrimonioController {
   @ApiNotFoundResponse({
     description: 'Patrimônio não encontrado',
   })
-  findByCodigo(@Param('codigo') codigo: string): Promise<PatrimonioResponseDto> {
+  findByCodigo(
+    @Param('codigo') codigo: string,
+  ): Promise<PatrimonioResponseDto> {
     return this.patrimonioService.findByCodigo(codigo);
   }
 
@@ -197,7 +213,9 @@ export class PatrimonioController {
     description: 'Lista de patrimônios da categoria',
     type: [PatrimonioResponseDto],
   })
-  findByCategoria(@Param('categoria') categoria: PatrimonioCategoria): Promise<PatrimonioResponseDto[]> {
+  findByCategoria(
+    @Param('categoria') categoria: PatrimonioCategoria,
+  ): Promise<PatrimonioResponseDto[]> {
     return this.patrimonioService.findByCategoria(categoria);
   }
 
@@ -213,7 +231,9 @@ export class PatrimonioController {
     description: 'Lista de patrimônios com o status',
     type: [PatrimonioResponseDto],
   })
-  findByStatus(@Param('status') status: PatrimonioStatus): Promise<PatrimonioResponseDto[]> {
+  findByStatus(
+    @Param('status') status: PatrimonioStatus,
+  ): Promise<PatrimonioResponseDto[]> {
     return this.patrimonioService.findByStatus(status);
   }
 
@@ -228,7 +248,9 @@ export class PatrimonioController {
     description: 'Lista de patrimônios do responsável',
     type: [PatrimonioResponseDto],
   })
-  findByResponsavel(@Param('responsavelId', ParseUUIDPipe) responsavelId: string): Promise<PatrimonioResponseDto[]> {
+  findByResponsavel(
+    @Param('responsavelId', ParseUUIDPipe) responsavelId: string,
+  ): Promise<PatrimonioResponseDto[]> {
     return this.patrimonioService.findByResponsavel(responsavelId);
   }
 
@@ -278,7 +300,7 @@ export class PatrimonioController {
       properties: {
         valorTotal: {
           type: 'number',
-          example: 125000.50,
+          example: 125000.5,
         },
       },
     },
@@ -289,20 +311,27 @@ export class PatrimonioController {
   }
 
   @Get('vencimento-garantia')
-  @ApiOperation({ summary: 'Obter patrimônios próximos do vencimento de garantia' })
+  @ApiOperation({
+    summary: 'Obter patrimônios próximos do vencimento de garantia',
+  })
   @ApiQuery({
     name: 'dias',
     required: false,
     type: Number,
-    description: 'Número de dias para considerar próximo do vencimento (padrão: 30)',
+    description:
+      'Número de dias para considerar próximo do vencimento (padrão: 30)',
     example: 30,
   })
   @ApiOkResponse({
     description: 'Lista de patrimônios próximos do vencimento de garantia',
     type: [PatrimonioResponseDto],
   })
-  getPatrimoniosProximosVencimentoGarantia(@Query('dias') dias?: number): Promise<PatrimonioResponseDto[]> {
-    return this.patrimonioService.getPatrimoniosProximosVencimentoGarantia(dias);
+  getPatrimoniosProximosVencimentoGarantia(
+    @Query('dias') dias?: number,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.getPatrimoniosProximosVencimentoGarantia(
+      dias,
+    );
   }
 
   @Get(':id')
@@ -322,7 +351,9 @@ export class PatrimonioController {
   @ApiBadRequestResponse({
     description: 'ID inválido',
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<PatrimonioResponseDto> {
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PatrimonioResponseDto> {
     return this.patrimonioService.findOne(id);
   }
 

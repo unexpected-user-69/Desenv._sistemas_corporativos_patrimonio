@@ -1,6 +1,6 @@
 /**
  * Exportações dos guards customizados.
- * 
+ *
  * Este arquivo centraliza todas as exportações dos guards
  * para facilitar a importação e manutenção.
  */

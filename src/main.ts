@@ -57,6 +57,7 @@ async function bootstrap() {
     .setDescription('API para gestão de patrimônio e inventário')
     .setVersion('1.0.0')
     .addTag('users')
+    .addTag('patrimonio')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);

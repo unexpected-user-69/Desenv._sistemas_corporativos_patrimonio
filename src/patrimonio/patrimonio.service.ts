@@ -2,16 +2,17 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindManyOptions, ILike, Between } from 'typeorm';
+import { Repository, ILike, Between, FindManyOptions } from 'typeorm';
 import { plainToClass } from 'class-transformer';
-import { Patrimonio } from './entities/patrimonio.entity';
+import { Patrimonio, PatrimonioStatus, PatrimonioCategoria } from './entities/patrimonio.entity';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
 import { UpdatePatrimonioDto } from './dto/update-patrimonio.dto';
 import { PatrimonioResponseDto } from './dto/patrimonio-response.dto';
-import { QueryPatrimonioDto } from './dto/query-patrimonio.dto';
-import { PaginatedPatrimonioResponseDto } from './dto/paginated-patrimonio-response.dto';
+import { FilterPatrimoniosDto } from './dto/filter-patrimonios.dto';
+import { PaginatedPatrimoniosResponseDto } from './dto/paginated-patrimonios-response.dto';
 
 @Injectable()
 export class PatrimonioService {
@@ -30,18 +31,38 @@ export class PatrimonioService {
   }
 
   /**
-   * Normaliza string para busca
+   * Cria um novo patrimônio
    */
-  private normalizeSearchText(text: string): string {
-    return text.trim().toLowerCase();
+  async create(dto: CreatePatrimonioDto): Promise<PatrimonioResponseDto> {
+    // Verificar se o código já existe
+    const existingPatrimonio = await this.patrimonioRepository.findOne({
+      where: { codigo: dto.codigo },
+    });
+
+    if (existingPatrimonio) {
+      throw new ConflictException(`Patrimônio com código "${dto.codigo}" já existe`);
+    }
+
+    // Converter datas de string para Date se fornecidas
+    const patrimonioData = {
+      ...dto,
+      dataAquisicao: dto.dataAquisicao ? new Date(dto.dataAquisicao) : undefined,
+      dataGarantia: dto.dataGarantia ? new Date(dto.dataGarantia) : undefined,
+    };
+
+    // Criar e salvar o patrimônio
+    const patrimonio = this.patrimonioRepository.create(patrimonioData);
+    const savedPatrimonio = await this.patrimonioRepository.save(patrimonio);
+
+    return this.serializePatrimonio(savedPatrimonio);
   }
 
   /**
-   * Lista patrimônios com paginação e filtros avançados
+   * Busca patrimônios com filtros avançados e paginação
    */
   async findAllWithFilters(
-    query: QueryPatrimonioDto,
-  ): Promise<PaginatedPatrimonioResponseDto> {
+    filters: FilterPatrimoniosDto,
+  ): Promise<PaginatedPatrimoniosResponseDto> {
     const {
       page = 1,
       limit = 10,
@@ -49,91 +70,104 @@ export class PatrimonioService {
       categoria,
       status,
       marca,
+      modelo,
       localizacao,
       responsavelId,
-      valorMin,
-      valorMax,
-      dataInicio,
-      dataFim,
-      sortBy = 'nome',
-      sortOrder = 'ASC',
-    } = query;
+      valorMinimo,
+      valorMaximo,
+      dataInicial,
+      dataFinal,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+    } = filters;
 
     const skip = (page - 1) * limit;
-    const where: any = {};
 
-    // Busca textual
-    if (q) {
-      const searchText = this.normalizeSearchText(q);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      where.$or = [
-        { nome: ILike(`%${searchText}%`) },
-        { codigo: ILike(`%${searchText}%`) },
-        { descricao: ILike(`%${searchText}%`) },
-        { marca: ILike(`%${searchText}%`) },
-        { modelo: ILike(`%${searchText}%`) },
-      ];
-    }
+    // Construir condições de busca
+    const whereConditions: any[] = [];
 
     // Filtros específicos
     if (categoria) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      where.categoria = categoria;
+      whereConditions.push({ categoria });
     }
+
     if (status) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      where.status = status;
+      whereConditions.push({ status });
     }
+
     if (marca) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      where.marca = ILike(`%${marca}%`);
+      whereConditions.push({ marca: ILike(`%${marca}%`) });
     }
+
+    if (modelo) {
+      whereConditions.push({ modelo: ILike(`%${modelo}%`) });
+    }
+
     if (localizacao) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      where.localizacao = ILike(`%${localizacao}%`);
+      whereConditions.push({ localizacao: ILike(`%${localizacao}%`) });
     }
+
     if (responsavelId) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      where.responsavelId = responsavelId;
+      whereConditions.push({ responsavelId });
     }
 
     // Filtros de valor
-    if (valorMin !== undefined || valorMax !== undefined) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      where.valorAquisicao = Between(
-        valorMin ?? 0,
-        valorMax ?? Number.MAX_SAFE_INTEGER,
-      );
+    if (valorMinimo !== undefined || valorMaximo !== undefined) {
+      const valorCondition: any = {};
+      if (valorMinimo !== undefined) {
+        valorCondition.valorAquisicao = { ...valorCondition.valorAquisicao, $gte: valorMinimo };
+      }
+      if (valorMaximo !== undefined) {
+        valorCondition.valorAquisicao = { ...valorCondition.valorAquisicao, $lte: valorMaximo };
+      }
+      whereConditions.push(valorCondition);
     }
 
     // Filtros de data
-    if (dataInicio || dataFim) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      where.dataAquisicao = Between(
-        dataInicio ? new Date(dataInicio) : new Date('1900-01-01'),
-        dataFim ? new Date(dataFim) : new Date(),
-      );
+    if (dataInicial && dataFinal) {
+      whereConditions.push({
+        dataAquisicao: Between(new Date(dataInicial), new Date(dataFinal)),
+      });
+    } else if (dataInicial) {
+      whereConditions.push({
+        dataAquisicao: Between(new Date(dataInicial), new Date('2099-12-31')),
+      });
+    } else if (dataFinal) {
+      whereConditions.push({
+        dataAquisicao: Between(new Date('1900-01-01'), new Date(dataFinal)),
+      });
     }
 
+    // Busca textual genérica (código, nome, descrição)
+    if (q) {
+      whereConditions.push([
+        { codigo: ILike(`%${q}%`) },
+        { nome: ILike(`%${q}%`) },
+        { descricao: ILike(`%${q}%`) },
+      ]);
+    }
+
+    // Construir opções de busca
     const findOptions: FindManyOptions<Patrimonio> = {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      where,
+      where: whereConditions.length > 0 ? whereConditions : undefined,
       skip,
       take: limit,
-      order: { [sortBy]: sortOrder },
+      order: {
+        [sortBy]: sortOrder,
+      },
+      relations: ['responsavel'],
     };
 
-    const [patrimonios, total] =
-      await this.patrimonioRepository.findAndCount(findOptions);
+    // Executar busca paginada
+    const [patrimonios, total] = await this.patrimonioRepository.findAndCount(findOptions);
 
+    // Calcular metadados de paginação
     const totalPages = Math.ceil(total / limit);
     const hasNextPage = page < totalPages;
     const hasPreviousPage = page > 1;
 
     return {
-      data: patrimonios.map((patrimonio) =>
-        this.serializePatrimonio(patrimonio),
-      ),
+      data: patrimonios.map((patrimonio) => this.serializePatrimonio(patrimonio)),
       total,
       page,
       limit,
@@ -144,103 +178,78 @@ export class PatrimonioService {
   }
 
   /**
-   * Busca patrimônio por ID
+   * Busca um patrimônio por ID
    */
   async findOne(id: string): Promise<PatrimonioResponseDto> {
     const patrimonio = await this.patrimonioRepository.findOne({
       where: { id },
+      relations: ['responsavel'],
     });
+
     if (!patrimonio) {
       throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
     }
+
     return this.serializePatrimonio(patrimonio);
   }
 
   /**
-   * Busca patrimônio por código
+   * Busca um patrimônio por código
    */
   async findByCodigo(codigo: string): Promise<PatrimonioResponseDto> {
     const patrimonio = await this.patrimonioRepository.findOne({
-      where: { codigo: codigo.toUpperCase() },
+      where: { codigo },
+      relations: ['responsavel'],
     });
+
     if (!patrimonio) {
-      throw new NotFoundException(
-        `Patrimônio com código "${codigo}" não encontrado`,
-      );
+      throw new NotFoundException(`Patrimônio com código "${codigo}" não encontrado`);
     }
+
     return this.serializePatrimonio(patrimonio);
   }
 
   /**
-   * Cria novo patrimônio
+   * Atualiza um patrimônio
    */
-  async create(dto: CreatePatrimonioDto): Promise<PatrimonioResponseDto> {
-    // Verificar se código já existe
-    const existingPatrimonio = await this.patrimonioRepository.findOne({
-      where: { codigo: dto.codigo },
-    });
-    if (existingPatrimonio) {
-      throw new ConflictException('Código de patrimônio já existe');
-    }
-
-    try {
-      const patrimonio = this.patrimonioRepository.create({
-        ...dto,
-        dataAquisicao: dto.dataAquisicao
-          ? new Date(dto.dataAquisicao)
-          : undefined,
-        dataGarantia: dto.dataGarantia ? new Date(dto.dataGarantia) : undefined,
-      });
-      const saved = await this.patrimonioRepository.save(patrimonio);
-      return this.serializePatrimonio(saved);
-    } catch (error: any) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (error?.code === '23505') {
-        throw new ConflictException('Código de patrimônio já existe');
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Atualiza patrimônio
-   */
-  async update(
-    id: string,
-    dto: UpdatePatrimonioDto,
-  ): Promise<PatrimonioResponseDto> {
-    const patrimonio = await this.patrimonioRepository.preload({
-      id,
-      ...dto,
-      dataAquisicao: dto.dataAquisicao
-        ? new Date(dto.dataAquisicao)
-        : undefined,
-      dataGarantia: dto.dataGarantia ? new Date(dto.dataGarantia) : undefined,
-    });
+  async update(id: string, dto: UpdatePatrimonioDto): Promise<PatrimonioResponseDto> {
+    const patrimonio = await this.patrimonioRepository.findOne({ where: { id } });
 
     if (!patrimonio) {
       throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
     }
 
-    try {
-      const saved = await this.patrimonioRepository.save(patrimonio);
-      return this.serializePatrimonio(saved);
-    } catch (error: any) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (error?.code === '23505') {
-        throw new ConflictException('Código de patrimônio já existe');
+    // Verificar se o novo código já existe (se fornecido e diferente do atual)
+    if (dto.codigo && dto.codigo !== patrimonio.codigo) {
+      const existingPatrimonio = await this.patrimonioRepository.findOne({
+        where: { codigo: dto.codigo },
+      });
+
+      if (existingPatrimonio) {
+        throw new ConflictException(`Patrimônio com código "${dto.codigo}" já existe`);
       }
-      throw error;
     }
+
+    // Converter datas de string para Date se fornecidas
+    const updateData = {
+      ...dto,
+      dataAquisicao: dto.dataAquisicao ? new Date(dto.dataAquisicao) : undefined,
+      dataGarantia: dto.dataGarantia ? new Date(dto.dataGarantia) : undefined,
+    };
+
+    // Atualizar o patrimônio
+    Object.assign(patrimonio, updateData);
+    const updatedPatrimonio = await this.patrimonioRepository.save(patrimonio);
+
+    return this.serializePatrimonio(updatedPatrimonio);
   }
 
   /**
-   * Remove patrimônio (soft delete)
+   * Remove um patrimônio (soft delete)
    */
   async remove(id: string): Promise<void> {
-    const patrimonio = await this.patrimonioRepository.findOne({
-      where: { id },
-    });
+    const patrimonio = await this.patrimonioRepository.findOne({ where: { id } });
+
     if (!patrimonio) {
       throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
     }
@@ -249,141 +258,109 @@ export class PatrimonioService {
   }
 
   /**
-   * Cria múltiplos patrimônios
+   * Busca patrimônios por categoria
    */
-  async createBulk(
-    dtos: CreatePatrimonioDto[],
-  ): Promise<PatrimonioResponseDto[]> {
-    if (!dtos || dtos.length === 0) {
-      throw new ConflictException('Nenhum patrimônio fornecido');
-    }
-
-    if (dtos.length > 100) {
-      throw new ConflictException(
-        'Máximo 100 patrimônios podem ser criados por vez',
-      );
-    }
-
-    // Verificar códigos duplicados na entrada
-    const codigos = dtos.map((dto) => dto.codigo);
-    const uniqueCodigos = new Set(codigos);
-    if (codigos.length !== uniqueCodigos.size) {
-      throw new ConflictException('Códigos duplicados na requisição');
-    }
-
-    // Verificar se algum código já existe no banco
-    const existingPatrimonios = await this.patrimonioRepository.find({
-      where: codigos.map((codigo) => ({ codigo })),
+  async findByCategoria(categoria: PatrimonioCategoria): Promise<PatrimonioResponseDto[]> {
+    const patrimonios = await this.patrimonioRepository.find({
+      where: { categoria },
+      relations: ['responsavel'],
+      order: { nome: 'ASC' },
     });
 
-    if (existingPatrimonios.length > 0) {
-      const existingCodigos = existingPatrimonios.map((p) => p.codigo);
-      throw new ConflictException(
-        `Códigos já existem: ${existingCodigos.join(', ')}`,
-      );
-    }
-
-    try {
-      const patrimonios = dtos.map((dto) =>
-        this.patrimonioRepository.create({
-          ...dto,
-          dataAquisicao: dto.dataAquisicao
-            ? new Date(dto.dataAquisicao)
-            : undefined,
-          dataGarantia: dto.dataGarantia
-            ? new Date(dto.dataGarantia)
-            : undefined,
-        }),
-      );
-
-      const savedPatrimonios =
-        await this.patrimonioRepository.save(patrimonios);
-      return savedPatrimonios.map((patrimonio) =>
-        this.serializePatrimonio(patrimonio),
-      );
-    } catch (error: any) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (error?.code === '23505') {
-        throw new ConflictException('Um ou mais códigos já existem');
-      }
-      throw error;
-    }
+    return patrimonios.map((patrimonio) => this.serializePatrimonio(patrimonio));
   }
 
   /**
-   * Busca patrimônios por categoria
+   * Busca patrimônios por status
    */
-  async findByCategoria(categoria: string): Promise<PatrimonioResponseDto[]> {
+  async findByStatus(status: PatrimonioStatus): Promise<PatrimonioResponseDto[]> {
     const patrimonios = await this.patrimonioRepository.find({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      where: { categoria: categoria as any },
+      where: { status },
+      relations: ['responsavel'],
       order: { nome: 'ASC' },
     });
-    return patrimonios.map((patrimonio) =>
-      this.serializePatrimonio(patrimonio),
-    );
+
+    return patrimonios.map((patrimonio) => this.serializePatrimonio(patrimonio));
   }
 
   /**
    * Busca patrimônios por responsável
    */
-  async findByResponsavel(
-    responsavelId: string,
-  ): Promise<PatrimonioResponseDto[]> {
+  async findByResponsavel(responsavelId: string): Promise<PatrimonioResponseDto[]> {
     const patrimonios = await this.patrimonioRepository.find({
       where: { responsavelId },
+      relations: ['responsavel'],
       order: { nome: 'ASC' },
     });
-    return patrimonios.map((patrimonio) =>
-      this.serializePatrimonio(patrimonio),
-    );
+
+    return patrimonios.map((patrimonio) => this.serializePatrimonio(patrimonio));
   }
 
   /**
-   * Estatísticas por categoria
+   * Obtém estatísticas de patrimônios por categoria
    */
-
   async getStatsByCategoria(): Promise<Record<string, number>> {
-    const result = await this.patrimonioRepository
+    const stats = await this.patrimonioRepository
       .createQueryBuilder('patrimonio')
       .select('patrimonio.categoria', 'categoria')
       .addSelect('COUNT(*)', 'count')
       .groupBy('patrimonio.categoria')
       .getRawMany();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return result.reduce(
-      (stats, row) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
-        stats[row.categoria] = parseInt(row.count);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return stats;
-      },
-      {} as Record<string, number>,
-    );
+    return stats.reduce((acc, stat) => {
+      acc[stat.categoria] = parseInt(stat.count);
+      return acc;
+    }, {} as Record<string, number>);
   }
 
   /**
-   * Estatísticas por status
+   * Obtém estatísticas de patrimônios por status
    */
-
   async getStatsByStatus(): Promise<Record<string, number>> {
-    const result = await this.patrimonioRepository
+    const stats = await this.patrimonioRepository
       .createQueryBuilder('patrimonio')
       .select('patrimonio.status', 'status')
       .addSelect('COUNT(*)', 'count')
       .groupBy('patrimonio.status')
       .getRawMany();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return result.reduce(
-      (stats, row) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
-        stats[row.status] = parseInt(row.count);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return stats;
+    return stats.reduce((acc, stat) => {
+      acc[stat.status] = parseInt(stat.count);
+      return acc;
+    }, {} as Record<string, number>);
+  }
+
+  /**
+   * Obtém o valor total do patrimônio
+   */
+  async getValorTotal(): Promise<number> {
+    const result = await this.patrimonioRepository
+      .createQueryBuilder('patrimonio')
+      .select('SUM(patrimonio.valorAquisicao)', 'total')
+      .where('patrimonio.valorAquisicao IS NOT NULL')
+      .getRawOne();
+
+    return parseFloat(result.total) || 0;
+  }
+
+  /**
+   * Obtém patrimônios próximos da data de vencimento de garantia
+   */
+  async getPatrimoniosProximosVencimentoGarantia(dias: number = 30): Promise<PatrimonioResponseDto[]> {
+    const dataLimite = new Date();
+    dataLimite.setDate(dataLimite.getDate() + dias);
+
+    // Esta é uma implementação simplificada
+    // Em um cenário real, você teria um campo de data de vencimento de garantia
+    const patrimonios = await this.patrimonioRepository.find({
+      where: {
+        status: PatrimonioStatus.ATIVO,
+        dataAquisicao: Between(new Date('2020-01-01'), dataLimite),
       },
-      {} as Record<string, number>,
-    );
+      relations: ['responsavel'],
+      order: { dataAquisicao: 'ASC' },
+    });
+
+    return patrimonios.map((patrimonio) => this.serializePatrimonio(patrimonio));
   }
 }

@@ -19,7 +19,12 @@ export class AppController {
   @ApiOkResponse({
     description: 'Aplicação saudável',
   })
-  health(): string {
-    return 'OK';
+  health() {
+    return {
+      status: 'OK',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: '1.0.0'
+    };
   }
 }

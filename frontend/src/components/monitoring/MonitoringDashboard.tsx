@@ -128,16 +128,16 @@ export const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Status do Sistema</h2>
           <div className="flex items-center space-x-4">
-            <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(systemHealth.status)}`}>
-              {systemHealth.status.toUpperCase()}
+            <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(systemHealth?.status || 'unknown')}`}>
+              {(systemHealth?.status || 'UNKNOWN').toUpperCase()}
             </div>
             <span className="text-sm text-gray-600">
-              Última verificação: {new Date(systemHealth.lastCheck).toLocaleString()}
+              Última verificação: {systemHealth?.lastCheck ? new Date(systemHealth.lastCheck).toLocaleString() : 'N/A'}
             </span>
           </div>
           
           <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-            {systemHealth.services.map((service) => (
+            {(systemHealth.services || []).map((service) => (
               <div key={service.name} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium text-gray-900">{service.name}</h3>
@@ -174,7 +174,7 @@ export const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Tempo de Resposta</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {metrics.performance.averageResponseTime.toFixed(0)}ms
+                  {metrics?.performance?.averageResponseTime?.toFixed(0) || '0'}ms
                 </p>
               </div>
             </div>
@@ -192,7 +192,7 @@ export const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Throughput</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {metrics.performance.throughput.toFixed(0)} req/s
+                  {metrics?.performance?.throughput?.toFixed(0) || '0'} req/s
                 </p>
               </div>
             </div>
@@ -210,7 +210,7 @@ export const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Latência P95</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {metrics.performance.p95Latency.toFixed(0)}ms
+                  {metrics?.performance?.p95Latency?.toFixed(0) || '0'}ms
                 </p>
               </div>
             </div>
@@ -228,7 +228,7 @@ export const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total de Requests</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {metrics.requests.total.toLocaleString()}
+                  {metrics?.requests?.total?.toLocaleString() || '0'}
                 </p>
               </div>
             </div>
@@ -242,7 +242,7 @@ export const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
           <h2 className="text-lg font-semibold text-gray-900">Logs Recentes</h2>
         </div>
         <div className="divide-y divide-gray-200">
-          {recentLogs.map((log) => (
+          {(recentLogs || []).map((log) => (
             <div key={log.id} className="px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">

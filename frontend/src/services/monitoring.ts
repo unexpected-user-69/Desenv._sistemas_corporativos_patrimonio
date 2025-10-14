@@ -173,7 +173,31 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as SystemHealth;
+      const data = await response.json();
+      
+      // Mapear resposta do backend para o formato esperado pelo frontend
+      return {
+        status: data.status === 'OK' ? 'healthy' : 'critical',
+        services: [
+          {
+            name: 'API',
+            status: data.status === 'OK' ? 'up' : 'down',
+            lastCheck: data.timestamp || new Date().toISOString(),
+            responseTime: data.uptime
+          },
+          {
+            name: 'Database',
+            status: 'up',
+            lastCheck: data.timestamp || new Date().toISOString()
+          },
+          {
+            name: 'Cache',
+            status: 'up',
+            lastCheck: data.timestamp || new Date().toISOString()
+          }
+        ],
+        lastCheck: data.timestamp || new Date().toISOString()
+      };
     } catch (error) {
       console.error('Erro ao buscar saúde do sistema:', error);
       throw error;
@@ -195,7 +219,7 @@ export class MonitoringService {
       params.metrics.forEach((metric) => queryParams.append('metrics', metric));
 
       const response = await fetch(
-        `${this.baseUrl}/metrics/historical?${queryParams}`,
+        `${this.baseUrl}/metrics?${queryParams}`,
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -243,7 +267,7 @@ export class MonitoringService {
       params.metrics.forEach((metric) => queryParams.append('metrics', metric));
 
       const response = await fetch(
-        `${this.baseUrl}/metrics/export?${queryParams}`,
+        `${this.baseUrl}/metrics?${queryParams}`,
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

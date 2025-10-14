@@ -1,5 +1,7 @@
 // Tipos para funcionalidades avançadas de produção e segurança
 
+import { ValidationError } from 'class-validator';
+
 export interface RateLimitConfig {
   windowMs: number;
   maxRequests: number;
@@ -53,7 +55,7 @@ export interface CompressionConfig {
   enabled: boolean;
   level: number;
   threshold: number;
-  filter: (req: any, res: any) => boolean;
+  filter: (req: Request, res: Response) => boolean;
 }
 
 export interface CompressionStats {
@@ -130,7 +132,7 @@ export interface ValidationPipeConfig {
   forbidNonWhitelisted: boolean;
   disableErrorMessages: boolean;
   validateCustomDecorators: boolean;
-  exceptionFactory: (errors: any[]) => any;
+  exceptionFactory: (errors: ValidationError[]) => Error;
 }
 
 export interface ValidationStats {

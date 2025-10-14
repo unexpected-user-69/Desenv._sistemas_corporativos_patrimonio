@@ -1,18 +1,29 @@
 // Configuração de ambiente
 
+import type { EnvironmentVariables } from '../types/global';
+
 // Helper function to safely get environment variables
-const getEnvVar = (key: string, defaultValue: string): string => {
-  const value = (import.meta.env as Record<string, string>)[key];
+const getEnvVar = (
+  key: keyof EnvironmentVariables,
+  defaultValue: string,
+): string => {
+  const value = (import.meta as any).env[key];
   return value || defaultValue;
 };
 
-const getEnvBoolean = (key: string, defaultValue: boolean): boolean => {
-  const value = (import.meta.env as Record<string, string>)[key];
+const getEnvBoolean = (
+  key: keyof EnvironmentVariables,
+  defaultValue: boolean,
+): boolean => {
+  const value = (import.meta as any).env[key];
   return value === 'true' || defaultValue;
 };
 
-const getEnvNumber = (key: string, defaultValue: number): number => {
-  const value = (import.meta.env as Record<string, string>)[key];
+const getEnvNumber = (
+  key: keyof EnvironmentVariables,
+  defaultValue: number,
+): number => {
+  const value = (import.meta as any).env[key];
   return value ? parseInt(value, 10) : defaultValue;
 };
 

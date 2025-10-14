@@ -53,7 +53,7 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as MetricsData;
+      return (await response.json()) as { logs: LogEntry[]; total: number };
     } catch (error) {
       console.error('Erro ao buscar logs:', error);
       throw error;
@@ -67,7 +67,7 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as MetricsData;
+      return (await response.json()) as AlertRule[];
     } catch (error) {
       console.error('Erro ao buscar regras de alerta:', error);
       throw error;
@@ -86,7 +86,7 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as MetricsData;
+      return (await response.json()) as AlertRule;
     } catch (error) {
       console.error('Erro ao criar regra de alerta:', error);
       throw error;
@@ -108,7 +108,7 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as MetricsData;
+      return (await response.json()) as AlertRule;
     } catch (error) {
       console.error('Erro ao atualizar regra de alerta:', error);
       throw error;
@@ -136,7 +136,7 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as MetricsData;
+      return (await response.json()) as DashboardConfig[];
     } catch (error) {
       console.error('Erro ao buscar dashboards:', error);
       throw error;
@@ -157,7 +157,7 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as MetricsData;
+      return (await response.json()) as DashboardConfig;
     } catch (error) {
       console.error('Erro ao criar dashboard:', error);
       throw error;
@@ -171,7 +171,7 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as MetricsData;
+      return (await response.json()) as SystemHealth;
     } catch (error) {
       console.error('Erro ao buscar saúde do sistema:', error);
       throw error;
@@ -198,7 +198,7 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as MetricsData;
+      return (await response.json()) as MetricsData[];
     } catch (error) {
       console.error('Erro ao buscar métricas históricas:', error);
       throw error;

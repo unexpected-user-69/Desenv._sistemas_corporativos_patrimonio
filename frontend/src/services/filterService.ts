@@ -15,8 +15,7 @@ class FilterService {
 
   constructor() {
     this.baseURL =
-      (import.meta.env as Record<string, string>).VITE_API_BASE_URL ||
-      'http://localhost:3101';
+      (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:3101';
     this.api = axios.create({
       baseURL: this.baseURL,
       timeout: 10000,
@@ -137,14 +136,14 @@ class FilterService {
   // Métodos de presets
   async getFilterPresets(): Promise<FilterPreset[]> {
     const response = await this.api.get('/v1/filters/presets');
-    return response.data as unknown;
+    return response.data as FilterPreset[];
   }
 
   async createFilterPreset(
     preset: Omit<FilterPreset, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<FilterPreset> {
     const response = await this.api.post('/v1/filters/presets', preset);
-    return response.data as unknown;
+    return response.data as FilterPreset;
   }
 
   async updateFilterPreset(
@@ -152,7 +151,7 @@ class FilterService {
     preset: Partial<FilterPreset>,
   ): Promise<FilterPreset> {
     const response = await this.api.put(`/v1/filters/presets/${id}`, preset);
-    return response.data as unknown;
+    return response.data as FilterPreset;
   }
 
   async deleteFilterPreset(id: string): Promise<void> {
@@ -162,14 +161,14 @@ class FilterService {
   // Métodos de analytics
   async getFilterAnalytics(): Promise<FilterAnalytics> {
     const response = await this.api.get('/v1/filters/analytics');
-    return response.data as unknown;
+    return response.data as FilterAnalytics;
   }
 
   async getFilterPerformance(
     filters: AdvancedFilters,
   ): Promise<FilterPerformance> {
     const response = await this.api.post('/v1/filters/performance', filters);
-    return response.data as unknown;
+    return response.data as FilterPerformance;
   }
 
   // Métodos utilitários
@@ -232,7 +231,9 @@ class FilterService {
     // Limitar o tamanho do cache
     if (this.filterCache.size > 100) {
       const firstKey = this.filterCache.keys().next().value;
-      this.filterCache.delete(firstKey);
+      if (firstKey) {
+        this.filterCache.delete(firstKey);
+      }
     }
   }
 
@@ -243,7 +244,7 @@ class FilterService {
   // Métodos de otimização
   async optimizeFilters(filters: AdvancedFilters): Promise<AdvancedFilters> {
     const response = await this.api.post('/v1/filters/optimize', filters);
-    return response.data as unknown;
+    return response.data as AdvancedFilters;
   }
 
   async getFilterRecommendations(currentFilters: AdvancedFilters): Promise<{
@@ -254,7 +255,10 @@ class FilterService {
       '/v1/filters/recommendations',
       currentFilters,
     );
-    return response.data as unknown;
+    return response.data as {
+      recommended: AdvancedFilters[];
+      reasons: string[];
+    };
   }
 
   // Métodos de exportação
@@ -272,7 +276,7 @@ class FilterService {
         responseType: 'blob',
       },
     );
-    return response.data as unknown;
+    return response.data as Blob;
   }
 
   // Métodos de estatísticas em tempo real

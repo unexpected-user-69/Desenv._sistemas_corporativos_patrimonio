@@ -28,7 +28,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao buscar test doubles:', error);
       // Retorna mock data para demonstração
@@ -50,7 +50,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao criar test double:', error);
       throw error;
@@ -64,7 +64,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao buscar mock configs:', error);
       return this.getMockConfigurations();
@@ -85,7 +85,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao criar mock config:', error);
       throw error;
@@ -107,7 +107,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao atualizar mock config:', error);
       throw error;
@@ -135,7 +135,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao buscar test suites:', error);
       return this.getMockTestSuites();
@@ -153,7 +153,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao executar test suite:', error);
       throw error;
@@ -168,7 +168,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao buscar execução de teste:', error);
       throw error;
@@ -182,7 +182,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao buscar métricas de qualidade:', error);
       return this.getMockQualityMetrics();
@@ -196,7 +196,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao buscar relatório de cobertura:', error);
       return this.getMockCoverageReport();
@@ -210,7 +210,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao buscar ambientes de teste:', error);
       return this.getMockTestEnvironments();
@@ -224,7 +224,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao buscar templates de teste:', error);
       return this.getMockTestTemplates();
@@ -238,7 +238,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao buscar configuração de testes:', error);
       return this.getMockTestConfiguration();
@@ -259,7 +259,7 @@ export class TestingService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return (await response.json()) as TestDouble[];
+      return (await response.json()) as any[];
     } catch (error) {
       console.error('Erro ao atualizar configuração de testes:', error);
       throw error;

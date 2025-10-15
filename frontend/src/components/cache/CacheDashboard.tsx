@@ -19,7 +19,14 @@ export const CacheDashboard: React.FC = () => {
   } = useCacheStore();
 
   // Debug temporário
-  console.log('CacheDashboard - keys:', keys, 'type:', typeof keys, 'isArray:', Array.isArray(keys));
+  console.log(
+    'CacheDashboard - keys:',
+    keys,
+    'type:',
+    typeof keys,
+    'isArray:',
+    Array.isArray(keys),
+  );
 
   useEffect(() => {
     void fetchStats();
@@ -178,21 +185,25 @@ export const CacheDashboard: React.FC = () => {
           </h2>
         </div>
         <div className="divide-y divide-gray-200">
-          {Array.isArray(keys) ? keys.slice(0, 10).map((key) => (
-            <div key={key.key} className="px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{key.key}</p>
-                  <p className="text-sm text-gray-600">
-                    TTL: {key.ttl}s | Tipo: {key.type}
-                  </p>
-                </div>
-                <div className="text-xs text-gray-500">
-                  {key.valuePreview.substring(0, 50)}...
+          {Array.isArray(keys) ? (
+            keys.slice(0, 10).map((key) => (
+              <div key={key.key} className="px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {key.key}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      TTL: {key.ttl}s | Tipo: {key.type}
+                    </p>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {key.valuePreview.substring(0, 50)}...
+                  </div>
                 </div>
               </div>
-            </div>
-          )) : (
+            ))
+          ) : (
             <div className="px-6 py-4 text-center text-gray-500">
               Carregando chaves do cache...
             </div>

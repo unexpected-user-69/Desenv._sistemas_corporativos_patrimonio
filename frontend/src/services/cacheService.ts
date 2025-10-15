@@ -135,11 +135,11 @@ class CacheService {
 
   // Configuração do cache
   async getConfig(): Promise<CacheConfig> {
-      try {
-        const response = await this.api.get('/v1/cache/config');
-        return response.data as CacheConfig;
-      } catch (error) {
-        console.error('Erro ao buscar configuração do cache:', error);
+    try {
+      const response = await this.api.get('/v1/cache/config');
+      return response.data as CacheConfig;
+    } catch (error) {
+      console.error('Erro ao buscar configuração do cache:', error);
       // Retorna configuração padrão
       return {
         maxmemory: '100mb',
@@ -150,24 +150,24 @@ class CacheService {
   }
 
   async updateConfig(config: Partial<CacheConfig>): Promise<CacheConfig> {
-      try {
-        const response = await this.api.patch('/v1/cache/config', config);
-        return response.data as CacheConfig;
-      } catch (error) {
-        console.error('Erro ao atualizar configuração do cache:', error);
+    try {
+      const response = await this.api.patch('/v1/cache/config', config);
+      return response.data as CacheConfig;
+    } catch (error) {
+      console.error('Erro ao atualizar configuração do cache:', error);
       throw error;
     }
   }
 
   // Operações do cache
   async getOperations(limit: number = 50): Promise<CacheOperation[]> {
-      try {
-        const response = await this.api.get('/v1/cache/operations', {
-          params: { limit },
-        });
-        return response.data as CacheOperation[];
-      } catch (error) {
-        console.error('Erro ao buscar operações do cache:', error);
+    try {
+      const response = await this.api.get('/v1/cache/operations', {
+        params: { limit },
+      });
+      return response.data as CacheOperation[];
+    } catch (error) {
+      console.error('Erro ao buscar operações do cache:', error);
       // Retorna dados mockados
       return [
         {
@@ -200,11 +200,11 @@ class CacheService {
 
   // Métricas do cache
   async getMetrics(): Promise<CacheMetrics> {
-      try {
-        const response = await this.api.get('/v1/cache/metrics');
-        return response.data as CacheMetrics;
-      } catch (error) {
-        console.error('Erro ao buscar métricas do cache:', error);
+    try {
+      const response = await this.api.get('/v1/cache/metrics');
+      return response.data as CacheMetrics;
+    } catch (error) {
+      console.error('Erro ao buscar métricas do cache:', error);
       // Retorna métricas mockadas
       return {
         responseTime: {
@@ -229,11 +229,11 @@ class CacheService {
 
   // Alertas do cache
   async getAlerts(): Promise<CacheAlert[]> {
-      try {
-        const response = await this.api.get('/v1/cache/alerts');
-        return response.data as CacheAlert[];
-      } catch (error) {
-        console.error('Erro ao buscar alertas do cache:', error);
+    try {
+      const response = await this.api.get('/v1/cache/alerts');
+      return response.data as CacheAlert[];
+    } catch (error) {
+      console.error('Erro ao buscar alertas do cache:', error);
       // Retorna alertas mockados
       return [
         {
@@ -272,11 +272,11 @@ class CacheService {
 
   // Saúde do cache
   async getHealth(): Promise<CacheHealth> {
-      try {
-        const response = await this.api.get('/v1/cache/health');
-        return response.data as CacheHealth;
-      } catch (error) {
-        console.error('Erro ao buscar saúde do cache:', error);
+    try {
+      const response = await this.api.get('/v1/cache/health');
+      return response.data as CacheHealth;
+    } catch (error) {
+      console.error('Erro ao buscar saúde do cache:', error);
       // Retorna dados mockados
       return {
         status: 'healthy',
@@ -296,11 +296,11 @@ class CacheService {
 
   // Padrões de chaves
   async getPatterns(): Promise<CachePattern[]> {
-      try {
-        const response = await this.api.get('/v1/cache/patterns');
-        return response.data as CachePattern[];
-      } catch (error) {
-        console.error('Erro ao buscar padrões do cache:', error);
+    try {
+      const response = await this.api.get('/v1/cache/patterns');
+      return response.data as CachePattern[];
+    } catch (error) {
+      console.error('Erro ao buscar padrões do cache:', error);
       // Retorna padrões mockados
       return [
         {

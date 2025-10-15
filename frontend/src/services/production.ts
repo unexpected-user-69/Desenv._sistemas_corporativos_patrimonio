@@ -444,7 +444,7 @@ class ProductionService {
     }
   }
 
-  async getCompressionStats(): Promise<CompressionStats> {
+  async getCompressionStats(): Promise<any> {
     try {
       // Em produção, fazer requisição real para o backend
       // const response = await fetch(`${this.baseUrl}/v1/production/compression/stats`);

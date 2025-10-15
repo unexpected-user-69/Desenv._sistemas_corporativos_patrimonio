@@ -8,7 +8,8 @@ import {
   SystemHealth,
 } from '../types/monitoring';
 
-const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:3101';
+const API_BASE_URL =
+  (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:3101';
 
 export class MonitoringService {
   private baseUrl: string;
@@ -24,14 +25,14 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
         console.warn('Resposta não é JSON válido:', text);
         throw new Error('Resposta do servidor não é JSON válido');
       }
-      
+
       return (await response.json()) as MetricsData;
     } catch (error) {
       console.error('Erro ao buscar métricas:', error);
@@ -57,18 +58,20 @@ export class MonitoringService {
       if (params.limit) queryParams.append('limit', params.limit.toString());
       if (params.offset) queryParams.append('offset', params.offset.toString());
 
-      const response = await fetch(`${this.baseUrl}/metrics/logs?${queryParams}`);
+      const response = await fetch(
+        `${this.baseUrl}/metrics/logs?${queryParams}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
         console.warn('Resposta não é JSON válido:', text);
         throw new Error('Resposta do servidor não é JSON válido');
       }
-      
+
       return (await response.json()) as { logs: LogEntry[]; total: number };
     } catch (error) {
       console.error('Erro ao buscar logs:', error);
@@ -189,7 +192,7 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
@@ -201,7 +204,7 @@ export class MonitoringService {
           lastCheck: new Date().toISOString(),
         };
       }
-      
+
       return (await response.json()) as SystemHealth;
     } catch (error) {
       console.error('Erro ao buscar saúde do sistema:', error);

@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import { 
-  User, 
-  LogOut, 
-  Settings, 
+import {
+  User,
+  LogOut,
+  Settings,
   ChevronDown,
   Database,
-  Bell
+  Bell,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
-import { UserRole } from '../../types/auth';
+import { UserRole } from '../../types/user';
 
 interface HeaderProps {
   title?: string;
   subtitle?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
-  title = "Sistema de Patrimônio/Inventário",
-  subtitle = "Sistema Avançado - Monitoramento, Performance & Cache"
+export const Header: React.FC<HeaderProps> = ({
+  title = 'Sistema de Patrimônio/Inventário',
+  subtitle = 'Sistema Avançado - Monitoramento, Performance & Cache',
 }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, logout, isAdmin, isTeacher, isStudent } = useAuthStore();
@@ -53,13 +53,9 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center">
             <Database className="h-8 w-8 text-blue-600 mr-3" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {title}
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
               {subtitle && (
-                <p className="text-sm text-gray-600 mt-1">
-                  {subtitle}
-                </p>
+                <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
               )}
             </div>
           </div>
@@ -98,7 +94,9 @@ export const Header: React.FC<HeaderProps> = ({
                     {user?.name}
                   </p>
                   <div className="flex items-center space-x-2">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getUserRoleColor()}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getUserRoleColor()}`}
+                    >
                       {getUserRoleLabel()}
                     </span>
                   </div>
@@ -112,9 +110,13 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
                   {/* Informações do Usuário */}
                   <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {user?.name}
+                    </p>
                     <p className="text-sm text-gray-500">{user?.email}</p>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1 ${getUserRoleColor()}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1 ${getUserRoleColor()}`}
+                    >
                       {getUserRoleLabel()}
                     </span>
                   </div>

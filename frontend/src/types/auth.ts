@@ -1,20 +1,8 @@
 // Tipos para o sistema de autenticação
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  isActive: boolean;
-  avatarUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { User, UserRole } from './user';
 
-export enum UserRole {
-  STUDENT = 'STUDENT',
-  TEACHER = 'TEACHER',
-  ADMIN = 'ADMIN'
-}
+// Re-exportar tipos de usuários para compatibilidade
+export type { User, UserRole };
 
 export interface LoginRequest {
   email: string;

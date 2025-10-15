@@ -62,7 +62,8 @@ export const UnauthorizedPage: React.FC = () => {
 
             <div className="mt-6">
               <p className="text-xs text-gray-500">
-                Se você acredita que deveria ter acesso a esta página, entre em contato com o administrador do sistema.
+                Se você acredita que deveria ter acesso a esta página, entre em
+                contato com o administrador do sistema.
               </p>
             </div>
           </div>

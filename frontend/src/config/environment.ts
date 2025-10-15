@@ -2,17 +2,17 @@
 
 // Helper function to safely get environment variables
 const getEnvVar = (key: string, defaultValue: string): string => {
-  const value = (import.meta.env as Record<string, string>)[key];
+  const value = (import.meta as any).env?.[key];
   return value || defaultValue;
 };
 
 const getEnvBoolean = (key: string, defaultValue: boolean): boolean => {
-  const value = (import.meta.env as Record<string, string>)[key];
+  const value = (import.meta as any).env?.[key];
   return value === 'true' || defaultValue;
 };
 
 const getEnvNumber = (key: string, defaultValue: number): number => {
-  const value = (import.meta.env as Record<string, string>)[key];
+  const value = (import.meta as any).env?.[key];
   return value ? parseInt(value, 10) : defaultValue;
 };
 

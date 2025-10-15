@@ -9,14 +9,30 @@ import {
   Settings,
   Shield,
   TestTube,
+  Users,
+  FileText,
+  Bell,
 } from 'lucide-react';
 import { MonitoringDashboard } from './components/monitoring/MonitoringDashboard';
 import { CacheDashboard } from './components/cache/CacheDashboard';
+import { UsersPage } from './pages/users/UsersPage';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { ReportsPage } from './pages/reports/ReportsPage';
+import { NotificationsPage } from './pages/notifications/NotificationsPage';
+import { AuthProvider } from './components/auth/AuthProvider';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { LogoutButton } from './components/auth/LogoutButton';
+import { useAuth } from './hooks/useAuth';
+import { UserRole } from './types/user';
 // import { ProductionPage } from './pages/production/ProductionPage';
 // import { TestingPage } from './pages/testing/TestingPage';
 
 type TabType =
   | 'home'
+  | 'dashboard'
+  | 'users'
+  | 'reports'
+  | 'notifications'
   | 'cache'
   | 'filters'
   | 'analytics'
@@ -26,114 +42,97 @@ type TabType =
   | 'production'
   | 'testing';
 
-export const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
+  const { user, isAuthenticated } = useAuth();
 
   const tabs = [
-    { id: 'home', name: 'Início', icon: Home },
-    { id: 'cache', name: 'Cache Redis', icon: Database },
-    { id: 'filters', name: 'Filtros Avançados', icon: Filter },
-    { id: 'analytics', name: 'Analytics', icon: BarChart3 },
-    { id: 'monitoring', name: 'Monitoramento', icon: Activity },
-    { id: 'performance', name: 'Performance', icon: Zap },
-    { id: 'advanced', name: 'Avançado', icon: Settings },
-    { id: 'production', name: 'Produção', icon: Shield },
-    { id: 'testing', name: 'Testes', icon: TestTube },
+    {
+      id: 'home',
+      name: 'Início',
+      icon: Home,
+      roles: [UserRole.STUDENT, UserRole.TEACHER, UserRole.ADMIN],
+    },
+    {
+      id: 'dashboard',
+      name: 'Dashboard',
+      icon: BarChart3,
+      roles: [UserRole.TEACHER, UserRole.ADMIN],
+    },
+    { id: 'users', name: 'Usuários', icon: Users, roles: [UserRole.ADMIN] },
+    {
+      id: 'reports',
+      name: 'Relatórios',
+      icon: FileText,
+      roles: [UserRole.TEACHER, UserRole.ADMIN],
+    },
+    {
+      id: 'notifications',
+      name: 'Notificações',
+      icon: Bell,
+      roles: [UserRole.TEACHER, UserRole.ADMIN],
+    },
+    {
+      id: 'cache',
+      name: 'Cache Redis',
+      icon: Database,
+      roles: [UserRole.TEACHER, UserRole.ADMIN],
+    },
+    {
+      id: 'filters',
+      name: 'Filtros Avançados',
+      icon: Filter,
+      roles: [UserRole.STUDENT, UserRole.TEACHER, UserRole.ADMIN],
+    },
+    {
+      id: 'analytics',
+      name: 'Analytics',
+      icon: BarChart3,
+      roles: [UserRole.TEACHER, UserRole.ADMIN],
+    },
+    {
+      id: 'monitoring',
+      name: 'Monitoramento',
+      icon: Activity,
+      roles: [UserRole.ADMIN],
+    },
+    {
+      id: 'performance',
+      name: 'Performance',
+      icon: Zap,
+      roles: [UserRole.ADMIN],
+    },
+    {
+      id: 'advanced',
+      name: 'Avançado',
+      icon: Settings,
+      roles: [UserRole.ADMIN],
+    },
+    {
+      id: 'production',
+      name: 'Produção',
+      icon: Shield,
+      roles: [UserRole.ADMIN],
+    },
+    { id: 'testing', name: 'Testes', icon: TestTube, roles: [UserRole.ADMIN] },
   ];
+
+  // Filtrar tabs baseado no role do usuário
+  const visibleTabs =
+    isAuthenticated && user
+      ? tabs.filter((tab) => tab.roles.includes(user.role))
+      : [];
 
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return (
-          <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Sistema de Patrimônio/Inventário
-                </h2>
-                <p className="text-lg text-gray-600 mb-8">
-                  Frontend com funcionalidades avançadas de Cache Redis e
-                  Filtros
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="card text-center">
-                    <Database className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Cache Redis
-                    </h3>
-                    <p className="text-gray-600">
-                      Gerenciamento e monitoramento do cache Redis com métricas
-                      em tempo real
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Filter className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Filtros Avançados
-                    </h3>
-                    <p className="text-gray-600">
-                      Busca avançada com filtros por intervalo de datas e mais
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <BarChart3 className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Analytics
-                    </h3>
-                    <p className="text-gray-600">
-                      Análise de performance e uso dos filtros
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Activity className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Monitoramento
-                    </h3>
-                    <p className="text-gray-600">
-                      Dashboard de métricas em tempo real e logs estruturados
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Zap className="h-12 w-12 text-orange-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Performance
-                    </h3>
-                    <p className="text-gray-600">
-                      Testes de carga e stress para avaliação de performance
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Settings className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Avançado
-                    </h3>
-                    <p className="text-gray-600">
-                      Funcionalidades avançadas e configurações do sistema
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Produção
-                    </h3>
-                    <p className="text-gray-600">
-                      Configurações de produção, segurança e monitoramento
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <TestTube className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Testes
-                    </h3>
-                    <p className="text-gray-600">
-                      Utilitários de teste, mocks e qualidade de código
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+        return <DashboardPage />;
+      case 'users':
+        return <UsersPage />;
+      case 'reports':
+        return <ReportsPage />;
+      case 'notifications':
+        return <NotificationsPage />;
       case 'cache':
         return (
           <div className="min-h-screen bg-gray-50">
@@ -258,6 +257,19 @@ export const App: React.FC = () => {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              {isAuthenticated && user && (
+                <div className="flex items-center space-x-3">
+                  {/* Dropdown de Notificações - Componente será implementado futuramente */}
+
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-gray-500">{user.role}</p>
+                  </div>
+                  <LogoutButton variant="dropdown" />
+                </div>
+              )}
               <span className="text-sm text-gray-600">
                 Sistema Avançado - Monitoramento, Performance & Cache
               </span>
@@ -270,7 +282,7 @@ export const App: React.FC = () => {
       <nav className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
-            {tabs.map((tab) => {
+            {visibleTabs.map((tab) => {
               const IconComponent = tab.icon;
               return (
                 <button
@@ -307,5 +319,16 @@ export const App: React.FC = () => {
         </div>
       </footer>
     </div>
+  );
+};
+
+// Componente principal que envolve tudo com autenticação
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <ProtectedRoute>
+        <AppContent />
+      </ProtectedRoute>
+    </AuthProvider>
   );
 };

@@ -43,15 +43,15 @@ export class JwtAuthGuard implements CanActivate {
    * @returns true se o usuário estiver autenticado, false caso contrário
    */
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest() as any;
 
     // Log para debug (remover em produção)
     this.logger.debug(
       `JwtAuthGuard: verificando autenticação para ${request.method} ${request.url}`,
       {
-        method: request.method,
-        url: request.url,
-        hasAuthHeader: !!request.headers.authorization,
+        method: (request as any).method,
+        url: (request as any).url,
+        hasAuthHeader: !!(request as any).headers.authorization,
         timestamp: new Date().toISOString(),
       },
     );
@@ -61,8 +61,8 @@ export class JwtAuthGuard implements CanActivate {
     this.logger.warn(
       'JwtAuthGuard está funcionando como placeholder. Implementar estratégia JWT real.',
       {
-        method: request.method,
-        url: request.url,
+        method: (request as any).method,
+        url: (request as any).url,
         timestamp: new Date().toISOString(),
       },
     );

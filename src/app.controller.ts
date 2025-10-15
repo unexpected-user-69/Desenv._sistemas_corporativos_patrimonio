@@ -21,10 +21,10 @@ export class AppController {
   })
   health() {
     return {
-      status: 'OK',
+      status: 'healthy',
+      message: 'OK',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      version: '1.0.0'
     };
   }
 }

@@ -79,7 +79,7 @@ export interface PerformanceMetrics {
 }
 
 export interface SystemHealth {
-  status: 'healthy' | 'warning' | 'critical';
+  status: 'healthy' | 'warning' | 'critical' | 'unknown';
   services: ServiceHealth[];
   lastCheck: string;
 }

@@ -236,7 +236,7 @@ export class UsersService {
       return this.serializeUser(saved);
     } catch (error: any) {
       // Tratamento de erro de conflito do banco (código '23505')
-
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error?.code === '23505') {
         throw new ConflictException('Email already exists');
       }

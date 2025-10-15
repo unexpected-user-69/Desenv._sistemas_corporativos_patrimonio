@@ -2,7 +2,7 @@
 
 ## 1. Swagger com Prefixo /v1 ✅
 
-**URL:** http://localhost:3001/docs
+**URL:** http://localhost:3101/docs
 
 **Evidência:** 
 - ✅ Prefixo global `/v1` configurado corretamente no `main.ts`
@@ -106,10 +106,10 @@ npm ci
 npm run test:cov
 
 # 5. Acessar Swagger
-# http://localhost:3001/docs
+# http://localhost:3101/docs
 
 # 6. Testar endpoint
-# GET http://localhost:3001/v1/users?page=1&limit=10&q=joão
+# GET http://localhost:3101/v1/users?page=1&limit=10&q=joão
 ```
 
 ## 7. Status Final

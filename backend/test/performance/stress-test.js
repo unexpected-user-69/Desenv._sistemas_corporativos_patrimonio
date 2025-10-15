@@ -34,7 +34,7 @@ async function runStressTest(config) {
   console.log('='.repeat(50));
 
   const autocannonConfig = {
-    url: 'http://localhost:3001',
+    url: 'http://localhost:3101',
     connections: config.connections,
     duration: config.duration,
     requests: [
@@ -95,7 +95,7 @@ async function runStressTest(config) {
 
 async function runAllStressTests() {
   console.log('🚀 Iniciando Testes de Stress');
-  console.log('🎯 URL: http://localhost:3001');
+  console.log('🎯 URL: http://localhost:3101');
   console.log('');
 
   const results = [];
@@ -143,7 +143,7 @@ async function runAllStressTests() {
 // Verificar se a aplicação está rodando
 async function checkAppHealth() {
   try {
-    const response = await fetch('http://localhost:3001/v1/health');
+    const response = await fetch('http://localhost:3101/v1/health');
     return response.ok;
   } catch (error) {
     return false;

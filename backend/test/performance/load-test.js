@@ -3,7 +3,7 @@ const { spawn } = require('child_process');
 
 // Configurações do teste de carga
 const config = {
-  url: 'http://localhost:3001',
+  url: 'http://localhost:3101',
   connections: 10, // Número de conexões simultâneas
   duration: 30, // Duração do teste em segundos
   requests: [

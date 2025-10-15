@@ -17,7 +17,7 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') || [
       'http://localhost:3000',
-      'http://localhost:3001',
+      'http://localhost:3101',
       'http://localhost:3002',
       'http://localhost:3101',
       'http://localhost:5173', // Vite dev server

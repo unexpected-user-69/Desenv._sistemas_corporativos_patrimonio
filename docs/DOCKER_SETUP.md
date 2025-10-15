@@ -29,10 +29,10 @@ DB_NAME=patrimonio_inventario
 
 # Configurações da aplicação
 NODE_ENV=production
-PORT=3001
+PORT=3101
 
 # Configurações do Docker
-APP_PORT=3001
+APP_PORT=3101
 ```
 
 ## Executando a Aplicação
@@ -93,7 +93,7 @@ docker-compose exec app npm run migration:run
 
 ### Serviço `app` (NestJS)
 - **Build**: Multi-stage Dockerfile
-- **Porta**: 3001
+- **Porta**: 3101
 - **Dependências**: Aguarda db estar saudável
 - **Script**: start.sh (migrações + start)
 
@@ -143,10 +143,10 @@ docker-compose build --no-cache
 
 ## URLs de Acesso
 
-- **Aplicação**: http://localhost:3001
-- **Swagger**: http://localhost:3001/docs
-- **Health Check**: http://localhost:3001/v1/health
-- **API Users**: http://localhost:3001/v1/users
+- **Aplicação**: http://localhost:3101
+- **Swagger**: http://localhost:3101/docs
+- **Health Check**: http://localhost:3101/v1/health
+- **API Users**: http://localhost:3101/v1/users
 
 ## Desenvolvimento
 

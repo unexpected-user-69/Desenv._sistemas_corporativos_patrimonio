@@ -48,3 +48,5 @@ ENV NODE_ENV=production
 
 # Comando de inicialização
 CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5173"]
+
+

@@ -4,6 +4,7 @@ import {
   IsString,
   IsEnum,
   IsNumber,
+  IsUUID,
   Min,
   Max,
 } from 'class-validator';
@@ -88,7 +89,7 @@ export class QueryPatrimonioDto {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsOptional()
-  @IsString()
+  @IsUUID('4', { message: 'O ID do responsável deve ser um UUID válido' })
   responsavelId?: string;
 
   @ApiPropertyOptional({
@@ -100,7 +101,7 @@ export class QueryPatrimonioDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  valorMin?: number;
+  valorMinimo?: number;
 
   @ApiPropertyOptional({
     description: 'Valor máximo de aquisição',
@@ -111,7 +112,7 @@ export class QueryPatrimonioDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  valorMax?: number;
+  valorMaximo?: number;
 
   @ApiPropertyOptional({
     description: 'Data de aquisição inicial (YYYY-MM-DD)',
@@ -119,7 +120,7 @@ export class QueryPatrimonioDto {
   })
   @IsOptional()
   @IsString()
-  dataInicio?: string;
+  dataInicial?: string;
 
   @ApiPropertyOptional({
     description: 'Data de aquisição final (YYYY-MM-DD)',
@@ -127,7 +128,7 @@ export class QueryPatrimonioDto {
   })
   @IsOptional()
   @IsString()
-  dataFim?: string;
+  dataFinal?: string;
 
   @ApiPropertyOptional({
     description: 'Campo para ordenação',

@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindManyOptions, ILike, Between } from 'typeorm';
+import { Repository, FindManyOptions, ILike, Between, Or } from 'typeorm';
 import { plainToClass } from 'class-transformer';
 import { Patrimonio } from './entities/patrimonio.entity';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
@@ -51,65 +51,74 @@ export class PatrimonioService {
       marca,
       localizacao,
       responsavelId,
-      valorMin,
-      valorMax,
-      dataInicio,
-      dataFim,
+      valorMinimo,
+      valorMaximo,
+      dataInicial,
+      dataFinal,
       sortBy = 'nome',
       sortOrder = 'ASC',
     } = query;
 
     const skip = (page - 1) * limit;
-    const where: any = {};
+    let whereConditions: any[] = [];
 
     // Busca textual
     if (q) {
       const searchText = this.normalizeSearchText(q);
-
-      where.$or = [
-        { nome: ILike(`%${searchText}%`) },
-        { codigo: ILike(`%${searchText}%`) },
-        { descricao: ILike(`%${searchText}%`) },
-        { marca: ILike(`%${searchText}%`) },
-        { modelo: ILike(`%${searchText}%`) },
-      ];
+      whereConditions.push(
+        Or([
+          { nome: ILike(`%${searchText}%`) },
+          { codigo: ILike(`%${searchText}%`) },
+          { descricao: ILike(`%${searchText}%`) },
+          { marca: ILike(`%${searchText}%`) },
+          { modelo: ILike(`%${searchText}%`) },
+        ])
+      );
     }
 
     // Filtros específicos
+    const baseWhere: any = {};
     if (categoria) {
-      where.categoria = categoria;
+      baseWhere.categoria = categoria;
     }
     if (status) {
-      where.status = status;
+      baseWhere.status = status;
     }
     if (marca) {
-      where.marca = ILike(`%${marca}%`);
+      baseWhere.marca = ILike(`%${marca}%`);
     }
     if (localizacao) {
-      where.localizacao = ILike(`%${localizacao}%`);
+      baseWhere.localizacao = ILike(`%${localizacao}%`);
     }
     if (responsavelId) {
-      where.responsavelId = responsavelId;
+      baseWhere.responsavelId = responsavelId;
     }
 
     // Filtros de valor
-    if (valorMin !== undefined || valorMax !== undefined) {
-      where.valorAquisicao = Between(
-        valorMin ?? 0,
-        valorMax ?? Number.MAX_SAFE_INTEGER,
+    if (valorMinimo !== undefined || valorMaximo !== undefined) {
+      baseWhere.valorAquisicao = Between(
+        valorMinimo ?? 0,
+        valorMaximo ?? Number.MAX_SAFE_INTEGER,
       );
     }
 
     // Filtros de data
-    if (dataInicio || dataFim) {
-      where.dataAquisicao = Between(
-        dataInicio ? new Date(dataInicio) : new Date('1900-01-01'),
-        dataFim ? new Date(dataFim) : new Date(),
+    if (dataInicial || dataFinal) {
+      baseWhere.dataAquisicao = Between(
+        dataInicial ? new Date(dataInicial) : new Date('1900-01-01'),
+        dataFinal ? new Date(dataFinal) : new Date(),
       );
     }
 
+    // Combinar condições
+    if (whereConditions.length > 0 && Object.keys(baseWhere).length > 0) {
+      whereConditions.push(baseWhere);
+    } else if (Object.keys(baseWhere).length > 0) {
+      whereConditions = [baseWhere];
+    }
+
     const findOptions: FindManyOptions<Patrimonio> = {
-      where,
+      where: whereConditions.length > 0 ? whereConditions : undefined,
       skip,
       take: limit,
       order: { [sortBy]: sortOrder },

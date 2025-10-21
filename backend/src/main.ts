@@ -27,7 +27,13 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Segurança básica
@@ -36,23 +42,12 @@ async function bootstrap() {
   // Prefixo global v1 (deve vir antes do Swagger)
   app.setGlobalPrefix('v1');
 
-  // ValidationPipe com configurações completas
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
-
   // Interceptors globais
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
     new TimeoutInterceptor(10000), // 10 segundos de timeout
     new ClassSerializerInterceptor(app.get('Reflector')),
   );
-
-  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Swagger configurado após o prefixo global
   const config = new DocumentBuilder()

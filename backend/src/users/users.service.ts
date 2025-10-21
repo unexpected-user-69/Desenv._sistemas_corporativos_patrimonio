@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, FindManyOptions, ILike, Between } from 'typeorm';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -42,7 +42,7 @@ export class UsersService {
    * Serializa User para UserResponseDto usando class-transformer
    */
   private serializeUser(user: User): UserResponseDto {
-    return plainToClass(UserResponseDto, user, {
+    return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
     });
   }
@@ -310,7 +310,8 @@ export class UsersService {
     const user = await this.userRepository.preload({
       id,
       ...dto,
-      ...(dto.email && { email: dto.email.toLowerCase() }),
+      ...(dto.email && { email: this.normalizeEmail(dto.email) }),
+      ...(dto.name && { name: this.normalizeName(dto.name) }),
       ...(dto.password && {
         passwordHash: await this.hash(dto.password),
       }),
@@ -320,7 +321,7 @@ export class UsersService {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }
     const saved = await this.userRepository.save(user);
-    return saved as UserResponseDto;
+    return this.serializeUser(saved);
   }
 
   async remove(id: string): Promise<void> {

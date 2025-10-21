@@ -25,7 +25,7 @@ import { PatrimonioService } from './patrimonio.service';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
 import { UpdatePatrimonioDto } from './dto/update-patrimonio.dto';
 import { PatrimonioResponseDto } from './dto/patrimonio-response.dto';
-import { FilterPatrimoniosDto } from './dto/filter-patrimonios.dto';
+import { QueryPatrimonioDto } from './dto/query-patrimonio.dto';
 import { PaginatedPatrimoniosResponseDto } from './dto/paginated-patrimonios-response.dto';
 import {
   PatrimonioCategoria,
@@ -176,7 +176,7 @@ export class PatrimonioController {
     example: 'ASC',
   })
   findAll(
-    @Query() filters: FilterPatrimoniosDto,
+    @Query() filters: QueryPatrimonioDto,
   ): Promise<PaginatedPatrimoniosResponseDto> {
     return this.patrimonioService.findAllWithFilters(filters);
   }

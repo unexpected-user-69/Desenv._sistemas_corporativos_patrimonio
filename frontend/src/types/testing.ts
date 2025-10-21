@@ -1,4 +1,5 @@
-// Tipos para utilitários de teste e qualidade de código
+// Tipos para sistema de testes e qualidade de código
+// IA_DesenvolvedorFrontend (IA 3) - Correção de erros de compilação
 
 export interface TestDouble {
   id: string;
@@ -7,156 +8,67 @@ export interface TestDouble {
   description: string;
   implementation: string;
   usage: string;
-  examples: TestDoubleExample[];
-}
-
-export interface TestDoubleExample {
-  id: string;
-  title: string;
-  code: string;
-  description: string;
-  expectedResult: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MockConfig {
   id: string;
   name: string;
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  response: any;
+  method: string;
   statusCode: number;
-  delay?: number;
-  enabled: boolean;
-  conditions?: MockCondition[];
+  response: any;
+  delay: number;
+  conditions: MockCondition[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MockCondition {
-  id: string;
   field: string;
-  operator: 'equals' | 'contains' | 'regex' | 'exists';
+  operator: 'equals' | 'contains' | 'regex';
   value: any;
-  description: string;
 }
 
 export interface TestSuite {
   id: string;
   name: string;
   description: string;
-  tests: TestCase[];
-  config: TestSuiteConfig;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  results?: TestSuiteResults;
-}
-
-export interface TestCase {
-  id: string;
-  name: string;
-  description: string;
-  type: 'unit' | 'integration' | 'e2e' | 'performance';
-  status: 'pending' | 'running' | 'passed' | 'failed' | 'skipped';
-  duration?: number;
-  error?: string;
-  coverage?: CoverageData;
-  assertions: TestAssertion[];
-}
-
-export interface TestAssertion {
-  id: string;
-  description: string;
-  status: 'passed' | 'failed' | 'pending';
-  expected: any;
-  actual: any;
-  error?: string;
-}
-
-export interface TestSuiteConfig {
-  timeout: number;
-  retries: number;
-  parallel: boolean;
-  environment: 'test' | 'staging' | 'production';
-  coverage: {
-    enabled: boolean;
-    threshold: number;
-    include: string[];
-    exclude: string[];
-  };
-}
-
-export interface TestSuiteResults {
-  total: number;
-  passed: number;
-  failed: number;
-  skipped: number;
-  duration: number;
-  coverage: CoverageSummary;
-  startTime: string;
-  endTime: string;
-}
-
-export interface CoverageData {
-  lines: {
-    total: number;
-    covered: number;
-    percentage: number;
-  };
-  functions: {
-    total: number;
-    covered: number;
-    percentage: number;
-  };
-  branches: {
-    total: number;
-    covered: number;
-    percentage: number;
-  };
-  statements: {
-    total: number;
-    covered: number;
-    percentage: number;
-  };
-}
-
-export interface CoverageSummary {
-  overall: number;
-  files: CoverageFile[];
-  thresholds: {
-    lines: number;
-    functions: number;
-    branches: number;
-    statements: number;
-  };
-}
-
-export interface CoverageFile {
-  path: string;
-  coverage: CoverageData;
-  uncoveredLines: number[];
-  uncoveredFunctions: string[];
-  uncoveredBranches: string[];
+  tests: string[];
+  status: 'ready' | 'running' | 'completed' | 'failed';
+  lastRun: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TestExecution {
   id: string;
   suiteId: string;
   startTime: string;
-  endTime?: string;
+  endTime: string | null;
   status: 'running' | 'completed' | 'failed' | 'cancelled';
-  progress: {
-    current: number;
-    total: number;
-    percentage: number;
-  };
-  results?: TestSuiteResults;
-  logs: TestLog[];
+  results: TestResult[];
+  summary: TestSummary;
 }
 
-export interface TestLog {
-  id: string;
-  timestamp: string;
-  level: 'info' | 'warn' | 'error' | 'debug';
-  message: string;
-  context?: Record<string, any>;
-  testId?: string;
+export interface TestResult {
+  testId: string;
+  name: string;
+  status: 'passed' | 'failed' | 'skipped';
+  duration: number;
+  error?: string;
+  logs: string[];
+}
+
+export interface TestSummary {
+  total: number;
+  passed: number;
+  failed: number;
+  skipped: number;
+  duration: number;
+  coverage: number;
 }
 
 export interface QualityMetrics {
@@ -168,121 +80,80 @@ export interface QualityMetrics {
   };
   technicalDebt: {
     total: number;
-    byCategory: Record<string, number>;
-    byFile: Array<{
-      file: string;
-      debt: number;
-      issues: number;
-    }>;
+    critical: number;
+    major: number;
+    minor: number;
   };
   complexity: {
     cyclomatic: number;
     cognitive: number;
-    halstead: {
-      volume: number;
-      difficulty: number;
-      effort: number;
-    };
+    halstead: number;
   };
   duplications: {
-    total: number;
-    percentage: number;
-    files: Array<{
-      file: string;
-      lines: number;
-      percentage: number;
-    }>;
+    lines: number;
+    blocks: number;
+    files: number;
+  };
+}
+
+export interface CoverageSummary {
+  overall: {
+    lines: number;
+    functions: number;
+    branches: number;
+    statements: number;
+  };
+  files: CoverageFile[];
+  thresholds: {
+    lines: number;
+    functions: number;
+    branches: number;
+    statements: number;
+  };
+}
+
+export interface CoverageFile {
+  name: string;
+  lines: number;
+  functions: number;
+  branches: number;
+  statements: number;
+}
+
+export interface TestConfiguration {
+  frameworks: {
+    unit: string;
+    integration: string;
+    e2e: string;
+  };
+  settings: {
+    timeout: number;
+    retries: number;
+    parallel: boolean;
+  };
+  paths: {
+    tests: string;
+    coverage: string;
+    reports: string;
   };
 }
 
 export interface TestEnvironment {
   id: string;
   name: string;
-  type: 'unit' | 'integration' | 'e2e' | 'performance';
-  config: {
-    baseUrl: string;
-    timeout: number;
-    retries: number;
-    parallel: boolean;
-    headless: boolean;
-    viewport: {
-      width: number;
-      height: number;
-    };
-  };
-  variables: Record<string, any>;
-  mocks: MockConfig[];
-  status: 'active' | 'inactive' | 'error';
-}
-
-export interface TestReport {
-  id: string;
-  executionId: string;
-  generatedAt: string;
-  summary: {
-    totalTests: number;
-    passed: number;
-    failed: number;
-    skipped: number;
-    duration: number;
-    coverage: number;
-  };
-  details: {
-    suites: Array<{
-      name: string;
-      tests: TestCase[];
-      coverage: CoverageData;
-    }>;
-    failures: Array<{
-      test: string;
-      error: string;
-      stack?: string;
-    }>;
-    performance: {
-      slowestTests: Array<{
-        name: string;
-        duration: number;
-      }>;
-      memoryUsage: Array<{
-        timestamp: string;
-        usage: number;
-      }>;
-    };
-  };
-  recommendations: string[];
+  description: string;
+  url: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TestTemplate {
   id: string;
   name: string;
   description: string;
-  type: 'component' | 'service' | 'hook' | 'utility';
-  template: string;
-  examples: string[];
-  tags: string[];
-}
-
-export interface TestConfiguration {
-  frameworks: {
-    unit: 'jest' | 'vitest' | 'mocha';
-    e2e: 'playwright' | 'cypress' | 'puppeteer';
-    coverage: 'istanbul' | 'c8' | 'v8';
-  };
-  settings: {
-    watchMode: boolean;
-    verbose: boolean;
-    bail: boolean;
-    maxWorkers: number;
-    testTimeout: number;
-    setupFiles: string[];
-    globalSetup: string[];
-    globalTeardown: string[];
-  };
-  paths: {
-    tests: string;
-    coverage: string;
-    reports: string;
-    fixtures: string;
-    mocks: string;
-  };
+  content: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
 }

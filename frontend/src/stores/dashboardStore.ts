@@ -5,7 +5,6 @@ import { devtools } from 'zustand/middleware';
 import { dashboardService } from '../services/dashboardService';
 import {
   DashboardStats,
-  ChartData,
   UserGrowthData,
   PatrimonioGrowthData,
   SystemMetricsData,
@@ -16,8 +15,6 @@ import {
   PerformanceMetrics,
   UserActivityMetrics,
   PatrimonioMetrics,
-  TrendData,
-  ComparisonData,
   DashboardInsight,
 } from '../types/dashboard';
 

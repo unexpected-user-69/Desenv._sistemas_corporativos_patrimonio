@@ -3,11 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Settings, Save, Bell, Mail, Smartphone, Monitor } from 'lucide-react';
 import { useNotificationsStore } from '../../stores/notificationsStore';
-import type {
-  NotificationPreferences as NotificationPreferencesType,
-  NotificationType,
-  NotificationChannel,
-} from '../../types/notifications';
+import type { NotificationPreferences as NotificationPreferencesType } from '../../types/notifications';
 
 export const NotificationPreferences: React.FC = () => {
   const { preferences, isLoading, fetchPreferences, updatePreferences } =

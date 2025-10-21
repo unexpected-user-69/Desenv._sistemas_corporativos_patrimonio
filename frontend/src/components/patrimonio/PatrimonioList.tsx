@@ -16,8 +16,6 @@ import {
 import {
   Patrimonio,
   PatrimonioFilters,
-  PatrimonioCategoria,
-  PatrimonioStatus,
   getCategoriaLabel,
   getStatusLabel,
   getStatusColor,

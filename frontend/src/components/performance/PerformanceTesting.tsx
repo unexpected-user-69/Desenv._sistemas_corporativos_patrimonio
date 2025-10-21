@@ -4,10 +4,9 @@ import React, { useState, useEffect } from 'react';
 import {
   LoadTestConfig,
   LoadTestResult,
-  StressTestConfig,
   StressTestResult,
 } from '../../types/performance';
-// import { performanceService } from '../../services/performance';
+import { performanceService } from '../../services/performance';
 
 interface PerformanceTestingProps {
   onTestComplete?: (result: LoadTestResult | StressTestResult) => void;

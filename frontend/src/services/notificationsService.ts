@@ -677,6 +677,40 @@ class NotificationsService {
       );
     }
   }
+
+  /**
+   * Dispensar notificação
+   */
+  async dismissNotification(id: string): Promise<void> {
+    try {
+      await axios.post(
+        `${this.baseURL}/${id}/dismiss`,
+        {},
+        { headers: this.getAuthHeaders() },
+      );
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || `Erro ao dispensar notificação ${id}`,
+      );
+    }
+  }
+
+  /**
+   * Executar ação de notificação
+   */
+  async executeAction(notificationId: string, actionId: string): Promise<void> {
+    try {
+      await axios.post(
+        `${this.baseURL}/${notificationId}/actions/${actionId}`,
+        {},
+        { headers: this.getAuthHeaders() },
+      );
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Erro ao executar ação da notificação',
+      );
+    }
+  }
 }
 
 export const notificationsService = new NotificationsService();

@@ -1,12 +1,13 @@
-// Tipos para testes de performance (M3)
+// Tipos para testes de performance
+// IA_DesenvolvedorFrontend (IA 3) - Correção de erros de compilação
 
 export interface LoadTestConfig {
   id: string;
   name: string;
-  description?: string;
+  description: string;
   target: {
     url: string;
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+    method: string;
     headers?: Record<string, string>;
     body?: any;
   };
@@ -15,138 +16,99 @@ export interface LoadTestConfig {
     duration: number; // em segundos
     rate: number; // requests por segundo
   };
-  rampUp: {
-    enabled: boolean;
-    duration: number; // tempo para atingir carga máxima
+  thresholds: {
+    maxResponseTime: number;
+    maxErrorRate: number;
+    minThroughput: number;
   };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LoadTestResult {
   id: string;
   configId: string;
+  status: 'running' | 'completed' | 'failed' | 'cancelled';
   startTime: string;
   endTime: string;
-  duration: number;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  duration: number; // em segundos
   summary: {
     totalRequests: number;
     successfulRequests: number;
     failedRequests: number;
     averageResponseTime: number;
-    minResponseTime: number;
-    maxResponseTime: number;
+    p95ResponseTime: number;
+    p99ResponseTime: number;
     requestsPerSecond: number;
     errorRate: number;
   };
-  latency: {
-    p50: number;
-    p90: number;
-    p95: number;
-    p99: number;
+  metrics: {
+    responseTime: Array<{
+      timestamp: string;
+      value: number;
+    }>;
+    throughput: Array<{
+      timestamp: string;
+      value: number;
+    }>;
+    errorRate: Array<{
+      timestamp: string;
+      value: number;
+    }>;
   };
-  throughput: {
-    average: number;
-    peak: number;
-    total: number;
-  };
-  errors: TestError[];
-  timeline: TimelinePoint[];
-}
-
-export interface TestError {
-  code: string;
-  message: string;
-  count: number;
-  percentage: number;
-}
-
-export interface TimelinePoint {
-  timestamp: string;
-  requestsPerSecond: number;
-  averageResponseTime: number;
-  errorRate: number;
-  activeConnections: number;
 }
 
 export interface StressTestConfig extends LoadTestConfig {
   stress: {
     maxConnections: number;
-    incrementStep: number;
-    incrementInterval: number;
-    breakpoint: {
-      errorRate: number;
-      responseTime: number;
-    };
+    rampUpTime: number;
+    holdTime: number;
   };
 }
 
 export interface StressTestResult extends LoadTestResult {
-  breakpoint: {
-    reached: boolean;
-    reason: 'errorRate' | 'responseTime' | 'maxConnections';
-    value: number;
-    timestamp: string;
+  summary: LoadTestResult['summary'] & {
+    maxConcurrentUsers: number;
+    breakingPoint: number;
   };
-  maxSustainedLoad: number;
+  metrics: LoadTestResult['metrics'] & {
+    concurrentUsers: Array<{
+      timestamp: string;
+      value: number;
+    }>;
+  };
 }
 
-export interface PerformanceReport {
+export interface PerformanceMetrics {
+  cpu: {
+    usage: number;
+    cores: number;
+  };
+  memory: {
+    used: number;
+    total: number;
+    percentage: number;
+  };
+  disk: {
+    used: number;
+    total: number;
+    percentage: number;
+  };
+  network: {
+    bytesIn: number;
+    bytesOut: number;
+    packetsIn: number;
+    packetsOut: number;
+  };
+}
+
+export interface PerformanceAlert {
   id: string;
-  testId: string;
-  generatedAt: string;
-  summary: {
-    overallScore: number; // 0-100
-    recommendations: string[];
-    criticalIssues: string[];
-  };
-  metrics: {
-    performance: number;
-    reliability: number;
-    scalability: number;
-  };
-  charts: {
-    responseTime: ChartData[];
-    throughput: ChartData[];
-    errorRate: ChartData[];
-    connections: ChartData[];
-  };
-}
-
-export interface ChartData {
+  type: 'cpu' | 'memory' | 'disk' | 'network' | 'response_time';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  threshold: number;
+  currentValue: number;
   timestamp: string;
-  value: number;
-  label?: string;
-}
-
-export interface TestSuite {
-  id: string;
-  name: string;
-  description?: string;
-  tests: LoadTestConfig[];
-  schedule?: {
-    enabled: boolean;
-    cron: string;
-    timezone: string;
-  };
-  notifications: {
-    email: string[];
-    webhook?: string;
-    onFailure: boolean;
-    onCompletion: boolean;
-  };
-}
-
-export interface TestExecution {
-  id: string;
-  suiteId: string;
-  startTime: string;
-  endTime?: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  results: LoadTestResult[];
-  summary: {
-    totalTests: number;
-    passedTests: number;
-    failedTests: number;
-    averageScore: number;
-  };
+  resolved: boolean;
 }

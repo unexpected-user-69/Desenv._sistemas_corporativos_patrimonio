@@ -132,12 +132,6 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
     }
   };
 
-  const handleActionClick = () => {
-    if (notification.actions?.[0]?.url && onAction) {
-      void onAction(notification.id, 'action');
-    }
-  };
-
   return (
     <div
       className={`border-l-4 ${getPriorityColor(notification.priority)} ${

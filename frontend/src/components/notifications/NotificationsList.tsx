@@ -6,36 +6,21 @@ import {
   Bell,
   Search,
   Filter,
-  MoreVertical,
-  CheckCircle,
   Archive,
   Trash2,
   RefreshCw,
-  Settings,
   Eye,
-  EyeOff,
-  Calendar,
-  Tag,
   AlertCircle,
-  Info,
-  AlertTriangle,
-  Shield,
-  User,
-  Building2,
-  FileText,
 } from 'lucide-react';
 import {
-  Notification,
   NotificationFilters,
   NotificationType,
   NotificationStatus,
   NotificationPriority,
-  NotificationCategory,
   NotificationListProps,
 } from '../../types/notifications';
 import { NotificationItem } from './NotificationItem';
 import {
-  useNotificationsStore,
   useNotificationActions,
   useNotificationFilters,
 } from '../../stores/notificationsStore';
@@ -46,12 +31,8 @@ export const NotificationsList: React.FC<NotificationListProps> = ({
   error,
   onLoadMore,
   onFilter,
-  onMarkAllRead,
-  onArchiveAll,
-  onDeleteAll,
   showFilters = true,
   showBulkActions = true,
-  groupBy = 'none',
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>(
@@ -65,20 +46,11 @@ export const NotificationsList: React.FC<NotificationListProps> = ({
     priority: [],
   });
 
-  const {
-    filters,
-    setFilters,
-    clearFilters,
-    search,
-    pagination,
-    setPage,
-    nextPage,
-    prevPage,
-  } = useNotificationFilters();
+  const { filters, clearFilters, search, pagination, nextPage, prevPage } =
+    useNotificationFilters();
 
   const {
     markAsRead,
-    markAllAsRead,
     archiveNotification,
     deleteNotification,
     dismissNotification,

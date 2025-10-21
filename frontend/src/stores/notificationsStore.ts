@@ -71,6 +71,12 @@ interface NotificationsActions {
   deleteNotification: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
   bulkAction: (action: NotificationBulkAction) => Promise<void>;
+  dismissNotification: (id: string) => Promise<void>;
+  executeAction: (notificationId: string, actionId: string) => Promise<void>;
+  batchOperation: (
+    operation: 'read' | 'archive' | 'delete' | 'dismiss',
+    notificationIds: string[],
+  ) => Promise<void>;
 
   // Templates CRUD
   fetchTemplates: () => Promise<void>;
@@ -365,6 +371,63 @@ export const useNotificationsStore = create<
         } catch (error: any) {
           set({
             error: error.message || 'Erro ao executar ação em lote',
+            isLoading: false,
+          });
+        }
+      },
+
+      dismissNotification: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          await notificationsService.dismissNotification(id);
+          set((state) => ({
+            notifications: state.notifications.filter((n) => n.id !== id),
+            unreadCount: Math.max(0, state.unreadCount - 1),
+            isLoading: false,
+          }));
+        } catch (error: any) {
+          set({
+            error: error.message || `Erro ao dispensar notificação ${id}`,
+            isLoading: false,
+          });
+        }
+      },
+
+      executeAction: async (notificationId: string, actionId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          await notificationsService.executeAction(notificationId, actionId);
+          // Atualizar notificação após executar ação
+          await get().fetchNotificationById(notificationId);
+        } catch (error: any) {
+          set({
+            error: error.message || 'Erro ao executar ação da notificação',
+            isLoading: false,
+          });
+        }
+      },
+
+      batchOperation: async (
+        operation: 'read' | 'archive' | 'delete' | 'dismiss',
+        notificationIds: string[],
+      ) => {
+        set({ isLoading: true, error: null });
+        try {
+          const bulkAction: NotificationBulkAction = {
+            action:
+              operation === 'read'
+                ? 'mark_read'
+                : operation === 'dismiss'
+                  ? 'delete'
+                  : operation,
+            notificationIds,
+          };
+          await notificationsService.bulkAction(bulkAction);
+          // Recarregar notificações após operação em lote
+          await get().fetchNotifications();
+        } catch (error: any) {
+          set({
+            error: error.message || `Erro na operação em lote: ${operation}`,
             isLoading: false,
           });
         }
@@ -787,3 +850,7 @@ export const useNotificationsStore = create<
     { name: 'notifications-store' },
   ),
 );
+
+// Exportar hooks personalizados
+export { useNotificationActions } from '../hooks/useNotificationActions';
+export { useNotificationFilters } from '../hooks/useNotificationFilters';

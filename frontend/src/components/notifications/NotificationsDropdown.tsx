@@ -4,29 +4,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Bell,
-  CheckCircle,
   AlertCircle,
   Info,
   AlertTriangle,
   X,
   Eye,
   Archive,
-  Trash2,
   Settings,
   ExternalLink,
   Clock,
 } from 'lucide-react';
 import {
-  Notification,
   NotificationType,
   NotificationStatus,
-  NotificationPriority,
 } from '../../types/notifications';
 import {
   useNotificationsStore,
-  // useNotificationActions,
+  useNotificationActions,
 } from '../../stores/notificationsStore';
-import { NotificationItem } from './NotificationItem';
 
 interface NotificationsDropdownProps {
   maxItems?: number;
@@ -47,33 +42,18 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const {
-    notifications,
-    // unreadNotifications,
-    // loading,
-    error,
-    fetchNotifications,
-    connectWebSocket,
-    // disconnectWebSocket,
-    // isConnected,
-  } = useNotificationsStore();
+  const { notifications, error, fetchNotifications, connectWebSocket } =
+    useNotificationsStore();
 
-  const {
-    markAsRead,
-    markAllAsRead,
-    archiveNotification,
-    deleteNotification,
-    dismissNotification,
-    executeAction,
-    clearError,
-  } = useNotificationActions();
+  const { markAsRead, markAllAsRead, archiveNotification, clearError } =
+    useNotificationActions();
 
   // Conectar WebSocket quando o dropdown é aberto
   useEffect(() => {
-    if (isOpen && !isConnected) {
+    if (isOpen) {
       connectWebSocket();
     }
-  }, [isOpen, isConnected, connectWebSocket]);
+  }, [isOpen, connectWebSocket]);
 
   // Fechar dropdown ao clicar fora
   useEffect(() => {
@@ -101,13 +81,15 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
 
   // Notificações para exibir (limitadas)
   const displayNotifications = notifications.slice(0, maxItems);
-  const unreadCount = unreadNotifications.length;
+  const unreadCount = notifications.filter(
+    (n) => n.status === NotificationStatus.UNREAD,
+  ).length;
 
   // Ícone do tipo de notificação
   const getTypeIcon = (type: NotificationType) => {
     switch (type) {
       case NotificationType.SUCCESS:
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+        return <AlertCircle className="h-4 w-4 text-green-600" />;
       case NotificationType.ERROR:
         return <AlertCircle className="h-4 w-4 text-red-600" />;
       case NotificationType.WARNING:
@@ -163,18 +145,6 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
     } catch (error) {
       console.error('Erro ao arquivar:', error);
     }
-  };
-
-  const handleDelete = async (_id: string) => {
-    // Implementar exclusão de notificação se necessário
-  };
-
-  const handleDismiss = async (_id: string) => {
-    // Implementar dispensa de notificação se necessário
-  };
-
-  const handleAction = async (_notificationId: string, _actionId: string) => {
-    // Implementar execução de ação se necessário
   };
 
   const handleRefresh = async () => {
@@ -266,7 +236,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
 
           {/* Lista de notificações */}
           <div className="max-h-96 overflow-y-auto">
-            {loading ? (
+            {isLoading ? (
               <div className="px-4 py-8 text-center">
                 <Clock className="h-6 w-6 text-gray-400 animate-spin mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Carregando...</p>
@@ -371,7 +341,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
           {/* Status da conexão */}
           <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>{isConnected ? 'Conectado' : 'Desconectado'}</span>
+              <span>{isWebSocketConnected ? 'Conectado' : 'Desconectado'}</span>
               <span>{notifications.length} notificações</span>
             </div>
           </div>

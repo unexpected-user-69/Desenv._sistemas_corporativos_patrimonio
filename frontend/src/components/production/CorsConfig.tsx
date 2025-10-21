@@ -23,7 +23,7 @@ export const CorsConfig: React.FC<Props> = ({ config, onUpdate }) => {
       setLoading(true);
       setMessage(null);
 
-      await productionService.updateCorsConfig(formData);
+      await productionService.updateCorsConfig();
       setMessage({
         type: 'success',
         text: 'Configuração de CORS salva com sucesso!',

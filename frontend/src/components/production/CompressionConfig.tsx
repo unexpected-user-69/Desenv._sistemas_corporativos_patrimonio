@@ -44,7 +44,7 @@ export const CompressionConfig: React.FC<Props> = ({ config, onUpdate }) => {
       setLoading(true);
       setMessage(null);
 
-      await productionService.updateCompressionConfig(formData);
+      await productionService.updateCompressionConfig();
       setMessage({
         type: 'success',
         text: 'Configuração de Compressão salva com sucesso!',

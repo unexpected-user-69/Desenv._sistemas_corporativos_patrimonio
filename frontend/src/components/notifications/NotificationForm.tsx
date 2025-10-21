@@ -2,7 +2,6 @@
 
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNotificationsStore } from '../../stores/notificationsStore';
 import {
@@ -14,30 +13,30 @@ import {
   NotificationChannel,
 } from '../../types/notifications';
 // UI components - usando elementos HTML básicos por enquanto
-// import { Button } from '../ui/button';
-// import { Input } from '../ui/input';
-// import { Textarea } from '../ui/textarea';
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from '../ui/select';
-// import { Label } from '../ui/label';
-// import {
-//   Form,
-//   FormControl,
-//   FormDescription,
-//   FormField,
-//   FormItem,
-//   FormLabel,
-//   FormMessage,
-// } from '../ui/form';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-// import { Switch } from '../ui/switch';
-// import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-// import { Calendar } from '../ui/calendar';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/Select';
+import { Label } from '../ui/Label';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/Form';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/Tabs';
+import { Switch } from '../ui/Switch';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/Popover';
+import { Calendar } from '../ui/Calendar';
 import {
   CalendarIcon,
   // Clock,
@@ -47,9 +46,9 @@ import {
   Settings,
   AlertTriangle,
 } from 'lucide-react';
-// import { cn } from '../../lib/utils';
-// import { format } from 'date-fns';
-// import { ptBR } from 'date-fns/locale';
+import { cn } from '../../lib/utils';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 // Schema de validação
 const NotificationFormSchema = z.object({
@@ -230,7 +229,9 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
           <Input
             placeholder="Adicionar tag..."
             value={newTag}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTag(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setNewTag(e.target.value)
+            }
             onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
@@ -268,7 +269,13 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
       </div>
 
       <Form {...form}>
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(form.getValues()); }} className="space-y-6">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(form.getValues());
+          }}
+          className="space-y-6"
+        >
           <Tabs defaultValue="basic" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="basic">Informações Básicas</TabsTrigger>
@@ -519,7 +526,9 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
                                 field.onChange([...currentChannels, channel]);
                               } else {
                                 field.onChange(
-                                  currentChannels.filter((c: NotificationChannel) => c !== channel),
+                                  currentChannels.filter(
+                                    (c: NotificationChannel) => c !== channel,
+                                  ),
                                 );
                               }
                             }}

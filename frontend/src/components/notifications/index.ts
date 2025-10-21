@@ -11,7 +11,6 @@ export type {
   Notification,
   NotificationFilters,
   NotificationSearchResult,
-  NotificationPreferences,
   NotificationStats,
   NotificationTemplate,
   NotificationBatchResponse,

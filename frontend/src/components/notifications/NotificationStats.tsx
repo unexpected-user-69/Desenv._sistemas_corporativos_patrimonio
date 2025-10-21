@@ -6,10 +6,8 @@ import {
   Bell,
   CheckCircle,
   AlertCircle,
-  Archive,
   Clock,
   TrendingUp,
-  Users,
   Activity,
 } from 'lucide-react';
 import { useNotificationsStore } from '../../stores/notificationsStore';

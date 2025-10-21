@@ -57,10 +57,12 @@ async function bootstrap() {
   // Swagger configurado após o prefixo global
   const config = new DocumentBuilder()
     .setTitle('Patrimonio & Inventario API')
-    .setDescription('API para gestão de patrimônio e inventário')
+    .setDescription('API para gestão de patrimônio e inventário com sistema de auditoria')
     .setVersion('1.0.0')
     .addTag('users')
     .addTag('patrimonio')
+    .addTag('audit')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);

@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { AuditService } from '../../modules/audit/audit.service';
+import { AuditService } from '../../audit/audit.service';
 import { AUDIT_KEY, AuditOptions } from '../decorators/audit.decorator';
 
 @Injectable()
@@ -44,7 +44,7 @@ export class AuditInterceptor implements NestInterceptor {
             ipAddress: request.ip,
             userAgent: request.headers['user-agent'],
             sessionId: request.sessionID,
-            service: 'audit-service',
+            service: 'patrimonio-backend',
             endpoint: request.url,
             description: auditOptions.description,
           });

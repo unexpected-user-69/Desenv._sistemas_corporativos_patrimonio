@@ -61,7 +61,7 @@ export class AuditService {
     };
   }
 
-  async findOne(id: string): Promise<AuditLog> {
+  async findOne(id: string): Promise<AuditLog | null> {
     return await this.auditLogRepository.findOne({ where: { id } });
   }
 

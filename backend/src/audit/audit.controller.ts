@@ -40,7 +40,11 @@ export class AuditController {
   @ApiResponse({ status: 200, description: 'Log de auditoria encontrado' })
   @ApiResponse({ status: 404, description: 'Log de auditoria não encontrado' })
   async findOne(@Param('id') id: string) {
-    return await this.auditService.findOne(id);
+    const auditLog = await this.auditService.findOne(id);
+    if (!auditLog) {
+      throw new Error('Log de auditoria não encontrado');
+    }
+    return auditLog;
   }
 
   @Get('logs/entity/:entityType/:entityId')

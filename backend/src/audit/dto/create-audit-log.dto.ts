@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID, IsObject, IsInet } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAuditLogDto {
@@ -32,7 +32,7 @@ export class CreateAuditLogDto {
 
   @ApiProperty({ description: 'Endereço IP' })
   @IsOptional()
-  @IsInet()
+  @IsString()
   ipAddress?: string;
 
   @ApiProperty({ description: 'User Agent' })

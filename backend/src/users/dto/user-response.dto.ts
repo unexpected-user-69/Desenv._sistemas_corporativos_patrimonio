@@ -1,4 +1,4 @@
-import { Expose, Exclude } from 'class-transformer';
+import { Expose, Exclude, Type } from 'class-transformer';
 import { UserRole } from '../enums/user-role.enum';
 
 export class UserResponseDto {
@@ -21,9 +21,11 @@ export class UserResponseDto {
   avatarUrl?: string;
 
   @Expose()
+  @Type(() => Date)
   createdAt!: Date;
 
   @Expose()
+  @Type(() => Date)
   updatedAt!: Date;
 
   @Expose()

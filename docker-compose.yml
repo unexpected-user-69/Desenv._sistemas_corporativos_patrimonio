@@ -67,6 +67,30 @@ services:
     networks:
       - patrimonio_network
 
+  # Service for running tests/migrations with source & dev dependencies mounted
+  backend-test:
+    image: node:22-bullseye-slim
+    container_name: patrimonio_inventario_backend_test
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      NODE_ENV: development
+      PORT: 3101
+    working_dir: /usr/src/app
+    volumes:
+      - ./backend:/usr/src/app:cached
+    networks:
+      - patrimonio_network
+
 # Rede dedicada para comunicação entre serviços
 networks:
   patrimonio_network:

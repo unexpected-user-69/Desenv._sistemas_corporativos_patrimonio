@@ -6,6 +6,7 @@ import {
   IsNumber,
   Min,
   Max,
+  IsUUID,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import {
@@ -88,7 +89,7 @@ export class QueryPatrimonioDto {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsOptional()
-  @IsString()
+  @IsUUID('4')
   responsavelId?: string;
 
   @ApiPropertyOptional({

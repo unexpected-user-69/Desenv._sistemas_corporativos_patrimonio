@@ -63,6 +63,7 @@ export class PatrimonioResponseDto {
     example: '2024-01-15',
   })
   @Expose()
+  @Type(() => Date)
   dataAquisicao?: Date;
 
   @ApiPropertyOptional({
@@ -70,6 +71,7 @@ export class PatrimonioResponseDto {
     example: '2025-01-15',
   })
   @Expose()
+  @Type(() => Date)
   dataGarantia?: Date;
 
   @ApiPropertyOptional({
@@ -134,6 +136,7 @@ export class PatrimonioResponseDto {
     example: '2024-01-15T10:30:00Z',
   })
   @Expose()
+  @Type(() => Date)
   createdAt!: Date;
 
   @ApiProperty({
@@ -141,6 +144,7 @@ export class PatrimonioResponseDto {
     example: '2024-01-15T10:30:00Z',
   })
   @Expose()
+  @Type(() => Date)
   updatedAt!: Date;
 
   @ApiProperty({

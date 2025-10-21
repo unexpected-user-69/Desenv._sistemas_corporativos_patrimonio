@@ -24,4 +24,19 @@ echo "✅ Migrações concluídas!"
 
 # Iniciar aplicação em modo produção
 echo "🎯 Iniciando aplicação em modo produção..."
-npm run start:prod
+EXECUTABLE=""
+if [ -f ./dist/src/main.js ]; then
+  EXECUTABLE="./dist/src/main.js"
+elif [ -f ./dist/main.js ]; then
+  EXECUTABLE="./dist/main.js"
+elif [ -f ./main.js ]; then
+  EXECUTABLE="./main.js"
+fi
+
+if [ -z "$EXECUTABLE" ]; then
+  echo "❌ Arquivo de entrada não encontrado (procurei dist/src/main.js, dist/main.js, main.js)"
+  exit 1
+else
+  echo "➡️ Executando: node $EXECUTABLE"
+  node $EXECUTABLE
+fi

@@ -2,19 +2,19 @@
 # Baseado em PDF 084 - Containerização e Configuração
 
 # Estágio base (Build)
-FROM node:22-alpine AS base
+FROM node:22-bullseye-slim AS base
 
 # Definir diretório de trabalho
 WORKDIR /usr/src/app
 
 # Instalar dependências de sistema operacional
-RUN apk add --no-cache bash
+RUN apt-get update && apt-get install -y --no-install-recommends bash && rm -rf /var/lib/apt/lists/*
 
-# Copiar package files
-COPY package*.json ./
+# Copiar package.json (evitar package-lock para permitir npm install resolver optional deps)
+COPY package.json ./
 
 # Instalar dependências completas
-RUN npm ci
+RUN npm install --no-audit --no-fund
 
 # Copiar código-fonte
 COPY . .
@@ -23,19 +23,19 @@ COPY . .
 RUN npm run build
 
 # Estágio prod (Produção/Runtime)
-FROM node:22-alpine AS prod
+FROM node:22-bullseye-slim AS prod
 
 # Instalar bash
-RUN apk add --no-cache bash
+RUN apt-get update && apt-get install -y --no-install-recommends bash && rm -rf /var/lib/apt/lists/*
 
 # Definir diretório de trabalho
 WORKDIR /usr/src/app
 
-# Copiar package files
-COPY package*.json ./
+# Copiar package.json para instalação de produção
+COPY package.json ./
 
 # Instalar apenas dependências de produção
-RUN npm ci --omit=dev
+RUN npm install --no-audit --no-fund --omit=dev
 
 # Copiar artefatos compilados do estágio base
 COPY --from=base /usr/src/app/dist ./dist
@@ -46,7 +46,10 @@ EXPOSE 5173
 # Definir variável de ambiente
 ENV NODE_ENV=production
 
-# Comando de inicialização
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5173"]
+# Instalar um servidor estático leve para servir o build
+RUN npm install -g serve
+
+# Comando de inicialização: servir a pasta dist estaticamente
+CMD ["serve", "-s", "dist", "-l", "5173"]
 
 

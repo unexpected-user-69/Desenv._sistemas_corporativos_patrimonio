@@ -11,6 +11,10 @@ import {
 import { Exclude } from 'class-transformer';
 import { UserRole } from '../enums/user-role.enum';
 
+// Re-export UserRole so tests and other modules that import from the entity file
+// continue to work when they import `{ UserRole }` from the entity path.
+export { UserRole };
+
 @Entity({ name: 'users' })
 @Index('uq_users_email', ['email'], { unique: true })
 export class User {

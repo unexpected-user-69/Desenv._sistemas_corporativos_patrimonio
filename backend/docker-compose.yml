@@ -1,5 +1,5 @@
-# Docker Compose para orquestração completa do projeto
-# Backend (NestJS) + Frontend (React) + Database (PostgreSQL)
+# Docker Compose para orquestração completa
+# Baseado em PDF 084 - Containerização e Configuração
 
 version: '3.9'
 
@@ -25,45 +25,27 @@ services:
     networks:
       - patrimonio_network
 
-  # Serviço do backend NestJS
-  backend:
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: patrimonio_inventario_backend
+  # Serviço da aplicação NestJS (apenas para desenvolvimento local)
+  # Para produção, use o docker-compose.yml da raiz do projeto
+  app:
+    build: .
+    container_name: patrimonio_inventario_app
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     env_file:
-      - ./backend/.env
+      - .env
     environment:
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: ${DB_USER:-postgres}
       DB_PASS: ${DB_PASS:-postgres}
       DB_NAME: ${DB_NAME:-patrimonio_inventario}
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3101
     ports:
-      - "${BACKEND_PORT:-3101}:3101"
-    networks:
-      - patrimonio_network
-
-  # Serviço do frontend React
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: patrimonio_inventario_frontend
-    restart: unless-stopped
-    depends_on:
-      - backend
-    environment:
-      VITE_API_BASE_URL: http://localhost:${BACKEND_PORT:-3101}
-      VITE_APP_NAME: Patrimônio Inventário
-    ports:
-      - "${FRONTEND_PORT:-5173}:5173"
+      - "${APP_PORT:-3101}:3101"
     networks:
       - patrimonio_network
 
@@ -75,3 +57,4 @@ networks:
 # Volume persistente para dados do PostgreSQL
 volumes:
   db_data:
+

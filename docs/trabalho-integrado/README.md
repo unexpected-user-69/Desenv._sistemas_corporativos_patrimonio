@@ -20,7 +20,7 @@ docker compose up -d --build
 docker compose logs -f app
 
 # Acessar aplicação
-# Swagger: http://localhost:3001/docs
+# Swagger: http://localhost:3101/docs
 # Banco: Postgres (DB_HOST=db)
 ```
 
@@ -125,7 +125,7 @@ npm run test:cov
 
 ### Swagger + Prefixo Global
 - ✅ Prefixo `/v1` definido **antes** da configuração do Swagger
-- ✅ URLs corretas: `http://localhost:3001/v1/users`
+- ✅ URLs corretas: `http://localhost:3101/v1/users`
 - ✅ Documentação completa com `@ApiQuery`, `@ApiOkResponse`
 - ✅ Exemplos e descrições detalhadas
 

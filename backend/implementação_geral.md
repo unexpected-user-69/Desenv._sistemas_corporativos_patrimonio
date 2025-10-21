@@ -402,7 +402,7 @@ Este tutorial aborda uma correção crucial de configuração para o NestJS ao u
         3.  **`app.setGlobalPrefix('v1');`** (Definir o prefixo global)
         4.  Configuração do Swagger (`DocumentBuilder`, `SwaggerModule.createDocument`, `SwaggerModule.setup('docs', app, document);`).
 3.  **Advertência:** Não utilizar `DocumentBuilder().addServer('/v1', 'API v1')` quando o prefixo global já estiver definido, para evitar URLs duplicadas (ex: `/v1/v1/...`).
-4.  **Validação:** Após a correção, a URL gerada no Swagger deve conter `/v1`, como em `http://localhost:3001/v1/users?...`.
+4.  **Validação:** Após a correção, a URL gerada no Swagger deve conter `/v1`, como em `http://localhost:3101/v1/users?...`.
 
 
 ---
@@ -455,7 +455,7 @@ Este arquivo define os serviços, redes e volumes necessários para rodar a apli
     *   Configurar a dependência no serviço `db` com condição de saúde: **`depends_on: { db: { condition: service_healthy } }`**.
     *   Carregar variáveis de ambiente do arquivo `.env` (`env_file: .env`).
     *   Definir variáveis de ambiente para a conexão com o banco de dados, crucialmente usando o nome do serviço `db` como host: **`DB_HOST: db`** e `DB_PORT: 5432`.
-    *   Mapear portas (`3001:3001`).
+    *   Mapear portas (`3101:3101`).
     *   Conectar à rede dedicada (`aurora_network`).
 3.  **Rede e Volumes:**
     *   Definir a rede `aurora_network` com `driver: bridge`.

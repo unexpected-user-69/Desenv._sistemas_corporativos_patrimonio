@@ -33,7 +33,7 @@ log_error() {
 
 # Verificar se estamos no diretório correto
 if [ ! -f "package.json" ]; then
-    log_error "Execute este script na raiz do projeto (onde está o package.json)"
+    log_error "Execute este script na pasta backend (onde está o package.json do backend)"
     exit 1
 fi
 

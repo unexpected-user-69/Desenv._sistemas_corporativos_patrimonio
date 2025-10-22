@@ -76,6 +76,15 @@ export class QueryPatrimonioDto {
   marca?: string;
 
   @ApiPropertyOptional({
+    description: 'Filtrar por modelo',
+    example: 'Inspiron 15',
+  })
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  modelo?: string;
+
+  @ApiPropertyOptional({
     description: 'Filtrar por localização',
     example: 'Sala 101',
   })
@@ -89,7 +98,7 @@ export class QueryPatrimonioDto {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsOptional()
-  @IsUUID('4', { message: 'O ID do responsável deve ser um UUID válido' })
+  @IsUUID('all', { message: 'O ID do responsável deve ser um UUID válido' })
   responsavelId?: string;
 
   @ApiPropertyOptional({

@@ -25,8 +25,8 @@ RUN npm run build
 # Estágio prod (Produção/Runtime)
 FROM node:22-alpine AS prod
 
-# Instalar bash para executar start.sh
-RUN apk add --no-cache bash
+# Instalar bash e postgresql-client para executar start.sh
+RUN apk add --no-cache bash postgresql-client
 
 # Definir diretório de trabalho
 WORKDIR /usr/src/app
@@ -50,4 +50,4 @@ RUN chmod +x ./start.sh
 ENV NODE_ENV=production
 
 # Comando de inicialização
-CMD ["./start.sh"]
+CMD ["bash", "./start.sh"]

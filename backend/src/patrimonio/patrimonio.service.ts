@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindManyOptions, ILike, Between, Or } from 'typeorm';
+import { Repository, FindManyOptions, ILike, Between } from 'typeorm';
 import { plainToClass } from 'class-transformer';
 import { Patrimonio } from './entities/patrimonio.entity';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
@@ -49,6 +49,7 @@ export class PatrimonioService {
       categoria,
       status,
       marca,
+      modelo,
       localizacao,
       responsavelId,
       valorMinimo,
@@ -60,23 +61,8 @@ export class PatrimonioService {
     } = query;
 
     const skip = (page - 1) * limit;
-    let whereConditions: any[] = [];
 
-    // Busca textual
-    if (q) {
-      const searchText = this.normalizeSearchText(q);
-      whereConditions.push(
-        Or([
-          { nome: ILike(`%${searchText}%`) },
-          { codigo: ILike(`%${searchText}%`) },
-          { descricao: ILike(`%${searchText}%`) },
-          { marca: ILike(`%${searchText}%`) },
-          { modelo: ILike(`%${searchText}%`) },
-        ])
-      );
-    }
-
-    // Filtros específicos
+    // Filtros específicos (base)
     const baseWhere: any = {};
     if (categoria) {
       baseWhere.categoria = categoria;
@@ -84,8 +70,13 @@ export class PatrimonioService {
     if (status) {
       baseWhere.status = status;
     }
-    if (marca) {
+    if (marca && !q) {
+      // Se não há busca textual, aplica filtro de marca normalmente
       baseWhere.marca = ILike(`%${marca}%`);
+    }
+    if (modelo && !q) {
+      // Se não há busca textual, aplica filtro de modelo normalmente
+      baseWhere.modelo = ILike(`%${modelo}%`);
     }
     if (localizacao) {
       baseWhere.localizacao = ILike(`%${localizacao}%`);
@@ -110,9 +101,17 @@ export class PatrimonioService {
       );
     }
 
-    // Combinar condições
-    if (whereConditions.length > 0 && Object.keys(baseWhere).length > 0) {
-      whereConditions.push(baseWhere);
+    // Busca textual (aplica filtros base em cada condição OR)
+    let whereConditions: any[] = [];
+    if (q) {
+      const searchText = this.normalizeSearchText(q);
+      whereConditions = [
+        { nome: ILike(`%${searchText}%`), ...baseWhere },
+        { codigo: ILike(`%${searchText}%`), ...baseWhere },
+        { descricao: ILike(`%${searchText}%`), ...baseWhere },
+        { marca: ILike(`%${searchText}%`), ...baseWhere },
+        { modelo: ILike(`%${searchText}%`), ...baseWhere },
+      ];
     } else if (Object.keys(baseWhere).length > 0) {
       whereConditions = [baseWhere];
     }

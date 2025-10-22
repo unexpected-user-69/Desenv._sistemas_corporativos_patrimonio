@@ -15,31 +15,31 @@ export class AuditLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ name: 'user_id', type: 'uuid', nullable: true })
   userId: string;
 
   @Column({ type: 'varchar', length: 100 })
   action: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ name: 'entity_type', type: 'varchar', length: 100 })
   entityType: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ name: 'entity_id', type: 'uuid', nullable: true })
   entityId: string;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ name: 'old_values', type: 'jsonb', nullable: true })
   oldValues: Record<string, any>;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ name: 'new_values', type: 'jsonb', nullable: true })
   newValues: Record<string, any>;
 
-  @Column({ type: 'inet', nullable: true })
+  @Column({ name: 'ip_address', type: 'inet', nullable: true })
   ipAddress: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'user_agent', type: 'text', nullable: true })
   userAgent: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ name: 'session_id', type: 'uuid', nullable: true })
   sessionId: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
@@ -54,6 +54,6 @@ export class AuditLog {
   @CreateDateColumn()
   timestamp: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

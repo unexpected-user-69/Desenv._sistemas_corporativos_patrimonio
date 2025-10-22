@@ -142,29 +142,32 @@ export class UsersService {
 
     const skip = (page - 1) * limit;
 
-    // Construir condições de busca de forma declarativa
-    const whereConditions: any[] = [];
+    // Construir condições de busca base (AND)
+    const baseWhere: any = {};
 
-    // Filtros específicos
+    // Filtros específicos (combinados com AND)
     if (role) {
-      whereConditions.push({ role });
+      baseWhere.role = role;
     }
 
     if (isActive !== undefined) {
-      whereConditions.push({ isActive });
+      baseWhere.isActive = isActive;
     }
 
-    // Busca textual genérica (nome e email) - mais eficiente
+    // Busca textual genérica (nome OU email) - combina filtros base com OR de busca textual
+    let whereConditions: any;
     if (q) {
-      whereConditions.push([
-        { name: ILike(`%${q}%`) },
-        { email: ILike(`%${q}%`) },
-      ]);
+      whereConditions = [
+        { name: ILike(`%${q}%`), ...baseWhere },
+        { email: ILike(`%${q}%`), ...baseWhere },
+      ];
+    } else if (Object.keys(baseWhere).length > 0) {
+      whereConditions = baseWhere;
     }
 
     // Construir opções de busca
     const findOptions: FindManyOptions<User> = {
-      where: whereConditions.length > 0 ? whereConditions : undefined,
+      where: whereConditions,
       skip,
       take: limit,
       order: {

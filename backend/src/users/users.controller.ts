@@ -20,6 +20,7 @@ import {
   ApiConflictResponse,
   ApiBody,
   ApiQuery,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -33,6 +34,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Listar todos os usuários' })
   @ApiOkResponse({
     description: 'Lista todos os usuários com paginação e filtros avançados',
     type: PaginatedUsersResponseDto,
@@ -91,6 +93,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar usuário por ID' })
   @ApiOkResponse({
     description: 'Retorna um usuário pelo ID',
     type: UserResponseDto,
@@ -130,6 +133,7 @@ export class UsersController {
   }
 
   @Get('email/:email')
+  @ApiOperation({ summary: 'Buscar usuário por email' })
   @ApiOkResponse({
     description: 'Retorna um usuário pelo email',
     type: UserResponseDto,
@@ -164,6 +168,7 @@ export class UsersController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Criar um novo usuário' })
   @ApiBody({
     type: CreateUserDto,
     description: 'Dados do usuário a ser criado',
@@ -225,6 +230,7 @@ export class UsersController {
   }
 
   @Post('bulk')
+  @ApiOperation({ summary: 'Criar múltiplos usuários em lote' })
   @ApiBody({
     type: [CreateUserDto],
     description: 'Lista de usuários a serem criados',
@@ -288,6 +294,7 @@ export class UsersController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Atualizar usuário por ID' })
   @ApiBody({ type: UpdateUserDto })
   @ApiOkResponse({
     description: 'Atualiza um usuário pelo ID',
@@ -303,6 +310,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Deletar usuário por ID' })
   @ApiOkResponse({ description: 'Remove um usuário pelo ID' })
   @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
   @ApiBadRequestResponse({ description: 'ID inválido' })
@@ -311,6 +319,7 @@ export class UsersController {
   }
 
   @Get('advanced/search')
+  @ApiOperation({ summary: 'Busca avançada de usuários' })
   @ApiOkResponse({
     description: 'Busca avançada com filtros full-text e ordenação dinâmica',
     type: PaginatedUsersResponseDto,
@@ -375,6 +384,7 @@ export class UsersController {
   }
 
   @Get('cursor/search')
+  @ApiOperation({ summary: 'Busca com paginação por cursor' })
   @ApiOkResponse({
     description: 'Busca com paginação baseada em cursor',
   })
@@ -427,6 +437,7 @@ export class UsersController {
   }
 
   @Get('fuzzy/search')
+  @ApiOperation({ summary: 'Busca fuzzy por nome ou email' })
   @ApiOkResponse({
     description: 'Busca fuzzy (aproximada) por nome ou email',
     type: [UserResponseDto],
@@ -449,6 +460,7 @@ export class UsersController {
   }
 
   @Get('date-range')
+  @ApiOperation({ summary: 'Buscar usuários por intervalo de datas' })
   @ApiOkResponse({
     description: 'Busca por intervalo de datas',
     type: [UserResponseDto],
@@ -489,6 +501,7 @@ export class UsersController {
   }
 
   @Get('stats/roles')
+  @ApiOperation({ summary: 'Estatísticas de usuários por role' })
   @ApiOkResponse({
     description: 'Estatísticas de usuários por role',
   })
@@ -497,6 +510,7 @@ export class UsersController {
   }
 
   @Get('recent/active')
+  @ApiOperation({ summary: 'Listar usuários ativos recentes' })
   @ApiOkResponse({
     description: 'Usuários ativos recentes',
     type: [UserResponseDto],

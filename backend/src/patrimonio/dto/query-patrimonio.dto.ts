@@ -9,10 +9,7 @@ import {
   Max,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import {
-  PatrimonioStatus,
-  PatrimonioCategoria,
-} from '../entities/patrimonio.entity';
+import { PatrimonioStatus } from '../entities/patrimonio.entity';
 
 export class QueryPatrimonioDto {
   @ApiPropertyOptional({
@@ -49,13 +46,13 @@ export class QueryPatrimonioDto {
   q?: string;
 
   @ApiPropertyOptional({
-    description: 'Filtrar por categoria',
-    enum: PatrimonioCategoria,
-    example: PatrimonioCategoria.EQUIPAMENTO,
+    description: 'Filtrar por ID da categoria',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
   })
   @IsOptional()
-  @IsEnum(PatrimonioCategoria)
-  categoria?: PatrimonioCategoria;
+  @IsUUID()
+  categoriaId?: string;
 
   @ApiPropertyOptional({
     description: 'Filtrar por status',

@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { User } from '../../users/entities/user.entity';
+import { Categoria } from '../../categorias/entities/categoria.entity';
 
 export enum PatrimonioStatus {
   ATIVO = 'ATIVO',
@@ -20,17 +21,9 @@ export enum PatrimonioStatus {
   DESCARTADO = 'DESCARTADO',
 }
 
-export enum PatrimonioCategoria {
-  EQUIPAMENTO = 'EQUIPAMENTO',
-  MOBILIARIO = 'MOBILIARIO',
-  VEICULO = 'VEICULO',
-  IMOVEL = 'IMOVEL',
-  OUTROS = 'OUTROS',
-}
-
 @Entity({ name: 'patrimonios' })
 @Index('uq_patrimonios_codigo', ['codigo'], { unique: true })
-@Index('idx_patrimonios_categoria', ['categoria'])
+@Index('idx_patrimonios_categoria_id', ['categoriaId'])
 @Index('idx_patrimonios_status', ['status'])
 @Index('idx_patrimonios_responsavel', ['responsavelId'])
 export class Patrimonio {
@@ -46,14 +39,12 @@ export class Patrimonio {
   @Column({ name: 'descricao', type: 'text', nullable: true })
   descricao?: string;
 
-  @Column({
-    name: 'categoria',
-    type: 'varchar',
-    length: 50,
-    enum: PatrimonioCategoria,
-    default: PatrimonioCategoria.EQUIPAMENTO,
-  })
-  categoria!: PatrimonioCategoria;
+  @Column({ name: 'categoria_id', type: 'uuid', nullable: true })
+  categoriaId?: string;
+
+  @ManyToOne(() => Categoria, { nullable: true, eager: true })
+  @JoinColumn({ name: 'categoria_id' })
+  categoria?: Categoria;
 
   @Column({
     name: 'status',

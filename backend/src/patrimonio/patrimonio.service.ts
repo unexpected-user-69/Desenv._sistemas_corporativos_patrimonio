@@ -46,7 +46,7 @@ export class PatrimonioService {
       page = 1,
       limit = 10,
       q,
-      categoria,
+      categoriaId,
       status,
       marca,
       modelo,
@@ -64,8 +64,8 @@ export class PatrimonioService {
 
     // Filtros específicos (base)
     const baseWhere: any = {};
-    if (categoria) {
-      baseWhere.categoria = categoria;
+    if (categoriaId) {
+      baseWhere.categoriaId = categoriaId;
     }
     if (status) {
       baseWhere.status = status;
@@ -116,11 +116,33 @@ export class PatrimonioService {
       whereConditions = [baseWhere];
     }
 
+    // Mapear sortBy para campos válidos
+    let orderField = sortBy;
+    const allowedSortFields = [
+      'codigo',
+      'nome',
+      'status',
+      'marca',
+      'modelo',
+      'valorAquisicao',
+      'dataAquisicao',
+      'localizacao',
+    ];
+
+    // Se tentar ordenar por categoria, usar categoriaId
+    if (sortBy === 'categoria') {
+      orderField = 'categoriaId';
+    } else if (!allowedSortFields.includes(sortBy)) {
+      // Default se campo não permitido
+      orderField = 'nome';
+    }
+
     const findOptions: FindManyOptions<Patrimonio> = {
       where: whereConditions.length > 0 ? whereConditions : undefined,
       skip,
       take: limit,
-      order: { [sortBy]: sortOrder },
+      order: { [orderField]: sortOrder },
+      relations: ['categoria'],
     };
 
     const [patrimonios, total] =
@@ -310,9 +332,9 @@ export class PatrimonioService {
   /**
    * Busca patrimônios por categoria
    */
-  async findByCategoria(categoria: string): Promise<PatrimonioResponseDto[]> {
+  async findByCategoria(categoriaId: string): Promise<PatrimonioResponseDto[]> {
     const patrimonios = await this.patrimonioRepository.find({
-      where: { categoria: categoria as any },
+      where: { categoriaId },
       order: { nome: 'ASC' },
     });
     return patrimonios.map((patrimonio) =>
@@ -338,19 +360,20 @@ export class PatrimonioService {
   /**
    * Estatísticas por categoria
    */
-
   async getStatsByCategoria(): Promise<Record<string, number>> {
     const result = await this.patrimonioRepository
       .createQueryBuilder('patrimonio')
-      .select('patrimonio.categoria', 'categoria')
+      .leftJoin('patrimonio.categoria', 'categoria')
+      .select('categoria.codigo', 'categoria')
       .addSelect('COUNT(*)', 'count')
-      .groupBy('patrimonio.categoria')
+      .groupBy('categoria.codigo')
       .getRawMany();
 
     return result.reduce(
       (stats, row) => {
-        stats[row.categoria] = parseInt(row.count);
-
+        if (row.categoria) {
+          stats[row.categoria] = parseInt(row.count);
+        }
         return stats;
       },
       {} as Record<string, number>,

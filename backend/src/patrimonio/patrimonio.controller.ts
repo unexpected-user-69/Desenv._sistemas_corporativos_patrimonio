@@ -27,10 +27,7 @@ import { UpdatePatrimonioDto } from './dto/update-patrimonio.dto';
 import { PatrimonioResponseDto } from './dto/patrimonio-response.dto';
 import { QueryPatrimonioDto } from './dto/query-patrimonio.dto';
 import { PaginatedPatrimoniosResponseDto } from './dto/paginated-patrimonios-response.dto';
-import {
-  PatrimonioCategoria,
-  PatrimonioStatus,
-} from './entities/patrimonio.entity';
+import { PatrimonioStatus } from './entities/patrimonio.entity';
 
 @ApiTags('patrimonio')
 @Controller('patrimonio')
@@ -84,11 +81,10 @@ export class PatrimonioController {
     example: 'notebook',
   })
   @ApiQuery({
-    name: 'categoria',
+    name: 'categoriaId',
     required: false,
-    enum: PatrimonioCategoria,
-    description: 'Filtrar por categoria',
-    example: PatrimonioCategoria.EQUIPAMENTO,
+    description: 'Filtrar por ID da categoria',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiQuery({
     name: 'status',
@@ -201,22 +197,22 @@ export class PatrimonioController {
     return this.patrimonioService.findByCodigo(codigo);
   }
 
-  @Get('categoria/:categoria')
+  @Get('categoria/:categoriaId')
   @ApiOperation({ summary: 'Buscar patrimônios por categoria' })
   @ApiParam({
-    name: 'categoria',
-    enum: PatrimonioCategoria,
-    description: 'Categoria do patrimônio',
-    example: PatrimonioCategoria.EQUIPAMENTO,
+    name: 'categoriaId',
+    description: 'ID da categoria do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
   })
   @ApiOkResponse({
     description: 'Lista de patrimônios da categoria',
     type: [PatrimonioResponseDto],
   })
   findByCategoria(
-    @Param('categoria') categoria: PatrimonioCategoria,
+    @Param('categoriaId') categoriaId: string,
   ): Promise<PatrimonioResponseDto[]> {
-    return this.patrimonioService.findByCategoria(categoria);
+    return this.patrimonioService.findByCategoria(categoriaId);
   }
 
   @Get('status/:status')

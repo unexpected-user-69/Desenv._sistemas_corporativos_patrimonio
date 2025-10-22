@@ -10,10 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  PatrimonioStatus,
-  PatrimonioCategoria,
-} from '../entities/patrimonio.entity';
+import { PatrimonioStatus } from '../entities/patrimonio.entity';
 import { IsTrimmed } from '../../common/validators';
 
 export class FilterPatrimoniosDto {
@@ -53,15 +50,12 @@ export class FilterPatrimoniosDto {
   q?: string;
 
   @ApiPropertyOptional({
-    description: 'Filtrar por categoria do patrimônio',
-    enum: PatrimonioCategoria,
-    example: PatrimonioCategoria.EQUIPAMENTO,
+    description: 'Filtrar por ID da categoria do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsOptional()
-  @IsEnum(PatrimonioCategoria, {
-    message: 'Categoria deve ser um valor válido',
-  })
-  categoria?: PatrimonioCategoria;
+  @IsUUID()
+  categoriaId?: string;
 
   @ApiPropertyOptional({
     description: 'Filtrar por status do patrimônio',

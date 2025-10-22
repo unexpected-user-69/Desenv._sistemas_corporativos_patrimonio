@@ -13,10 +13,7 @@ import {
   IsUrl,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import {
-  PatrimonioStatus,
-  PatrimonioCategoria,
-} from '../entities/patrimonio.entity';
+import { PatrimonioStatus } from '../entities/patrimonio.entity';
 
 export class CreatePatrimonioDto {
   @ApiProperty({
@@ -54,13 +51,14 @@ export class CreatePatrimonioDto {
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   descricao?: string;
 
-  @ApiProperty({
-    description: 'Categoria do patrimônio',
-    enum: PatrimonioCategoria,
-    example: PatrimonioCategoria.EQUIPAMENTO,
+  @ApiPropertyOptional({
+    description: 'ID da categoria do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
   })
-  @IsEnum(PatrimonioCategoria)
-  categoria!: PatrimonioCategoria;
+  @IsOptional()
+  @IsUUID()
+  categoriaId?: string;
 
   @ApiPropertyOptional({
     description: 'Status do patrimônio',

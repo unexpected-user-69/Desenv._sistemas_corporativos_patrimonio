@@ -2,6 +2,34 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS citext;
 
+-- Criar tabela de categorias
+CREATE TABLE IF NOT EXISTS categorias (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  codigo varchar(50) UNIQUE NOT NULL,
+  nome varchar(100) NOT NULL,
+  descricao text,
+  icone varchar(50),
+  cor varchar(20),
+  ativo boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at timestamp with time zone
+);
+
+-- Índices para categorias
+CREATE INDEX IF NOT EXISTS idx_categorias_codigo ON categorias(codigo);
+CREATE INDEX IF NOT EXISTS idx_categorias_ativo ON categorias(ativo);
+
+-- Popular categorias padrão
+INSERT INTO categorias (codigo, nome, descricao, icone, cor, ativo) VALUES
+('EQUIPAMENTO', 'Equipamento', 'Equipamentos eletrônicos, computadores e periféricos', 'laptop', '#3B82F6', true),
+('MOBILIARIO', 'Mobiliário', 'Móveis, cadeiras, mesas, armários', 'chair', '#8B5CF6', true),
+('VEICULO', 'Veículo', 'Carros, motos, veículos em geral', 'car', '#F59E0B', true),
+('IMOVEL', 'Imóvel', 'Terrenos, prédios, salas comerciais', 'building', '#10B981', true),
+('SOFTWARE', 'Software', 'Licenças de software, sistemas', 'code', '#6366F1', true),
+('OUTROS', 'Outros', 'Outros tipos de patrimônio', 'package', '#6B7280', true)
+ON CONFLICT (codigo) DO NOTHING;
+
 -- Criar tabela de usuários
 CREATE TABLE IF NOT EXISTS users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

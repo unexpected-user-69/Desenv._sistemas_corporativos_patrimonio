@@ -1,10 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import {
-  PatrimonioStatus,
-  PatrimonioCategoria,
-} from '../entities/patrimonio.entity';
+import { PatrimonioStatus } from '../entities/patrimonio.entity';
 import { UserResponseDto } from '../../users/dto/user-response.dto';
+import { CategoriaResponseDto } from '../../categorias/dto/categoria-response.dto';
 
 export class PatrimonioResponseDto {
   @ApiProperty({
@@ -35,13 +33,20 @@ export class PatrimonioResponseDto {
   @Expose()
   descricao?: string;
 
-  @ApiProperty({
-    description: 'Categoria do patrimônio',
-    enum: PatrimonioCategoria,
-    example: PatrimonioCategoria.EQUIPAMENTO,
+  @ApiPropertyOptional({
+    description: 'ID da categoria do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @Expose()
-  categoria!: PatrimonioCategoria;
+  categoriaId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Dados da categoria do patrimônio',
+    type: CategoriaResponseDto,
+  })
+  @Expose()
+  @Type(() => CategoriaResponseDto)
+  categoria?: CategoriaResponseDto;
 
   @ApiProperty({
     description: 'Status do patrimônio',

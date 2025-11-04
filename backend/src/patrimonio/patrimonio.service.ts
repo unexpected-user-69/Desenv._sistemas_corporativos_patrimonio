@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindManyOptions, ILike, Between } from 'typeorm';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { Patrimonio } from './entities/patrimonio.entity';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
 import { UpdatePatrimonioDto } from './dto/update-patrimonio.dto';
@@ -24,9 +24,15 @@ export class PatrimonioService {
    * Serializa Patrimonio para PatrimonioResponseDto usando class-transformer
    */
   private serializePatrimonio(patrimonio: Patrimonio): PatrimonioResponseDto {
-    return plainToClass(PatrimonioResponseDto, patrimonio, {
-      excludeExtraneousValues: true,
-    });
+    try {
+      return plainToInstance(PatrimonioResponseDto, patrimonio, {
+        excludeExtraneousValues: true,
+      });
+    } catch (error) {
+      console.error('Erro ao serializar patrimônio:', error);
+      console.error('Patrimônio:', JSON.stringify(patrimonio, null, 2));
+      throw error;
+    }
   }
 
   /**
@@ -171,6 +177,7 @@ export class PatrimonioService {
   async findOne(id: string): Promise<PatrimonioResponseDto> {
     const patrimonio = await this.patrimonioRepository.findOne({
       where: { id },
+      relations: ['categoria'],
     });
     if (!patrimonio) {
       throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
@@ -182,15 +189,40 @@ export class PatrimonioService {
    * Busca patrimônio por código
    */
   async findByCodigo(codigo: string): Promise<PatrimonioResponseDto> {
-    const patrimonio = await this.patrimonioRepository.findOne({
-      where: { codigo: codigo.toUpperCase() },
-    });
-    if (!patrimonio) {
-      throw new NotFoundException(
-        `Patrimônio com código "${codigo}" não encontrado`,
-      );
+    try {
+      // Primeiro tentar sem relações para ver se o patrimônio existe
+      let patrimonio = await this.patrimonioRepository.findOne({
+        where: { codigo: codigo.toUpperCase() },
+      });
+      
+      if (!patrimonio) {
+        throw new NotFoundException(
+          `Patrimônio com código "${codigo}" não encontrado`,
+        );
+      }
+
+      // Se encontrou, buscar com relações
+      patrimonio = await this.patrimonioRepository.findOne({
+        where: { codigo: codigo.toUpperCase() },
+        relations: ['categoria'],
+      });
+
+      if (!patrimonio) {
+        throw new NotFoundException(
+          `Patrimônio com código "${codigo}" não encontrado`,
+        );
+      }
+
+      return this.serializePatrimonio(patrimonio);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error('Erro ao buscar patrimônio por código:', error);
+      console.error('Stack:', error?.stack);
+      console.error('Código buscado:', codigo);
+      throw error;
     }
-    return this.serializePatrimonio(patrimonio);
   }
 
   /**

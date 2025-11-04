@@ -13,8 +13,61 @@ export class AuditService {
   ) {}
 
   async createAuditLog(createAuditLogDto: CreateAuditLogDto): Promise<AuditLog> {
-    const auditLog = this.auditLogRepository.create(createAuditLogDto);
-    return await this.auditLogRepository.save(auditLog);
+    try {
+      // Preparar dados: converter objetos vazios para null e undefined para null
+      const prepareData = (dto: CreateAuditLogDto): any => {
+        const data: any = {
+          action: dto.action,
+          entityType: dto.entityType,
+        };
+
+        // Tratar campos opcionais - não passar null, apenas undefined ou valores válidos
+        if (dto.userId !== undefined && dto.userId !== null) data.userId = dto.userId;
+        if (dto.entityId !== undefined && dto.entityId !== null) data.entityId = dto.entityId;
+        if (dto.sessionId !== undefined && dto.sessionId !== null) data.sessionId = dto.sessionId;
+        // ipAddress é do tipo 'inet' - não passar null, deixar undefined se vazio
+        if (dto.ipAddress !== undefined && dto.ipAddress !== null && dto.ipAddress !== '') {
+          data.ipAddress = dto.ipAddress;
+        }
+        if (dto.userAgent !== undefined && dto.userAgent !== null && dto.userAgent !== '') {
+          data.userAgent = dto.userAgent;
+        }
+        if (dto.service !== undefined && dto.service !== null && dto.service !== '') {
+          data.service = dto.service;
+        }
+        if (dto.endpoint !== undefined && dto.endpoint !== null && dto.endpoint !== '') {
+          data.endpoint = dto.endpoint;
+        }
+        if (dto.description !== undefined && dto.description !== null && dto.description !== '') {
+          data.description = dto.description;
+        }
+        
+        // Tratar JSONB: objetos vazios não são passados (undefined)
+        if (dto.oldValues !== undefined && dto.oldValues !== null) {
+          if (typeof dto.oldValues === 'object' && Object.keys(dto.oldValues).length > 0) {
+            data.oldValues = dto.oldValues;
+          }
+          // Se for objeto vazio ou null, não adicionar ao data (fica undefined)
+        }
+        if (dto.newValues !== undefined && dto.newValues !== null) {
+          if (typeof dto.newValues === 'object' && Object.keys(dto.newValues).length > 0) {
+            data.newValues = dto.newValues;
+          }
+          // Se for objeto vazio ou null, não adicionar ao data (fica undefined)
+        }
+
+        return data;
+      };
+
+      const dataToSave = prepareData(createAuditLogDto);
+      const auditLog = this.auditLogRepository.create(dataToSave);
+      const saved = await this.auditLogRepository.save(auditLog);
+      
+      return Array.isArray(saved) ? saved[0] : saved;
+    } catch (error) {
+      console.error('Erro ao salvar log de auditoria no banco de dados:', error);
+      throw error;
+    }
   }
 
   async findAll(searchDto: SearchAuditLogsDto): Promise<{

@@ -15,3 +15,6 @@ export {
 
 // Transformadores
 export { ToLowerCase } from './to-lowercase.transformer';
+
+// Validadores UUID
+export { IsUUIDOrEmpty, IsUUIDOrEmptyConstraint } from './is-uuid-or-empty.validator';

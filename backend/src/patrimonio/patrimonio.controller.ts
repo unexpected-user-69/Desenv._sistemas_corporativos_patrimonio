@@ -191,10 +191,15 @@ export class PatrimonioController {
   @ApiNotFoundResponse({
     description: 'Patrimônio não encontrado',
   })
-  findByCodigo(
+  async findByCodigo(
     @Param('codigo') codigo: string,
   ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.findByCodigo(codigo);
+    try {
+      return await this.patrimonioService.findByCodigo(codigo);
+    } catch (error) {
+      console.error('Erro no controller findByCodigo:', error);
+      throw error;
+    }
   }
 
   @Get('categoria/:categoriaId')

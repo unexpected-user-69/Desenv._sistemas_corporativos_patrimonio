@@ -10,7 +10,6 @@ import { QueryUsersDto } from './dto/query-users.dto';
 import * as bcrypt from 'bcryptjs';
 import {
   createMockUserRepository,
-  createStubBcryptService,
   createMockUser,
   createMockCreateUserDto,
   setupFakeTimers,

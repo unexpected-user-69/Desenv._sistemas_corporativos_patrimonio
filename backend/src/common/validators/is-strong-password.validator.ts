@@ -51,7 +51,7 @@ export class IsStrongPasswordConstraint
    * @param args - Argumentos de validação
    * @returns true se a senha for forte, false caso contrário
    */
-  validate(value: any, args: ValidationArguments): boolean {
+  validate(value: unknown, args: ValidationArguments): boolean {
     if (typeof value !== 'string') {
       return false;
     }

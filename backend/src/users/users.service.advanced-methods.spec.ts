@@ -283,7 +283,7 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
       userRepository.find.mockResolvedValue([]);
 
       // Act
-      const result = await service.findByDateRange(dateFrom, dateTo);
+      await service.findByDateRange(dateFrom, dateTo);
 
       // Assert
       expect(userRepository.find).toHaveBeenCalledWith({
@@ -366,7 +366,7 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
       userRepository.find.mockResolvedValue([]);
 
       // Act
-      const result = await service.findRecentActiveUsers();
+      await service.findRecentActiveUsers();
 
       // Assert
       expect(userRepository.find).toHaveBeenCalledWith({

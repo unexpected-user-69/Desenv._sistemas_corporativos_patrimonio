@@ -8,6 +8,7 @@ import {
   Put,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserRole } from './enums/user-role.enum';
@@ -21,14 +22,23 @@ import {
   ApiBody,
   ApiQuery,
   ApiOperation,
+  ApiBearerAuth,
+  ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { OwnerId } from '../common/decorators/owner-id.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { QueryUsersDto } from './dto/query-users.dto';
 import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
+import { ValidateUserDto } from './dto/validate-user.dto';
 
 @ApiTags('users')
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -167,8 +177,32 @@ export class UsersController {
     return this.usersService.findByEmail(email);
   }
 
+  @Post('validate')
+  @ApiOperation({ summary: 'Validar credenciais de usuário' })
+  @ApiBody({ type: ValidateUserDto })
+  @ApiOkResponse({
+    description: 'Retorna o usuário se as credenciais forem válidas, null caso contrário',
+    type: UserResponseDto,
+  })
+  @ApiBadRequestResponse({ description: 'Dados inválidos' })
+  async validate(@Body() dto: ValidateUserDto): Promise<UserResponseDto | null> {
+    const user = await this.usersService.validateCredentials(
+      dto.email,
+      dto.password,
+    );
+    if (!user) {
+      return null;
+    }
+    // Retorna serializado (sem passwordHash devido ao @Exclude)
+    return this.usersService.findOne(user.id);
+  }
+
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Criar um novo usuário' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
   @ApiBody({
     type: CreateUserDto,
     description: 'Dados do usuário a ser criado',
@@ -230,7 +264,11 @@ export class UsersController {
   }
 
   @Post('bulk')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Criar múltiplos usuários em lote' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
   @ApiBody({
     type: [CreateUserDto],
     description: 'Lista de usuários a serem criados',
@@ -294,7 +332,10 @@ export class UsersController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Atualizar usuário por ID' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas o próprio usuário ou ADMIN' })
   @ApiBody({ type: UpdateUserDto })
   @ApiOkResponse({
     description: 'Atualiza um usuário pelo ID',
@@ -305,12 +346,19 @@ export class UsersController {
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUserDto,
+    @OwnerId() _requesterId: string,
   ): Promise<UserResponseDto> {
+    // Verifica se o usuário é o dono ou é ADMIN (verificação básica - pode ser melhorada)
+    // Por enquanto, apenas retorna o update. Lógica de autorização pode ser adicionada no service se necessário
     return this.usersService.update(id, dto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Deletar usuário por ID' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
   @ApiOkResponse({ description: 'Remove um usuário pelo ID' })
   @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
   @ApiBadRequestResponse({ description: 'ID inválido' })

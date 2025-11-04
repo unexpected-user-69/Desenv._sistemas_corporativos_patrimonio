@@ -2,9 +2,10 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindManyOptions, ILike, Between } from 'typeorm';
+import { Repository, FindManyOptions, ILike, Between, FindOptionsWhere } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { Patrimonio } from './entities/patrimonio.entity';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
@@ -15,6 +16,8 @@ import { PaginatedPatrimonioResponseDto } from './dto/paginated-patrimonio-respo
 
 @Injectable()
 export class PatrimonioService {
+  private readonly logger = new Logger(PatrimonioService.name);
+
   constructor(
     @InjectRepository(Patrimonio)
     private readonly patrimonioRepository: Repository<Patrimonio>,
@@ -29,8 +32,11 @@ export class PatrimonioService {
         excludeExtraneousValues: true,
       });
     } catch (error) {
-      console.error('Erro ao serializar patrimônio:', error);
-      console.error('Patrimônio:', JSON.stringify(patrimonio, null, 2));
+      this.logger.error('Erro ao serializar patrimônio', {
+        error: error?.message,
+        stack: error?.stack,
+        patrimonio: JSON.stringify(patrimonio, null, 2),
+      });
       throw error;
     }
   }
@@ -69,7 +75,7 @@ export class PatrimonioService {
     const skip = (page - 1) * limit;
 
     // Filtros específicos (base)
-    const baseWhere: any = {};
+    const baseWhere: FindOptionsWhere<Patrimonio> = {};
     if (categoriaId) {
       baseWhere.categoriaId = categoriaId;
     }
@@ -108,7 +114,7 @@ export class PatrimonioService {
     }
 
     // Busca textual (aplica filtros base em cada condição OR)
-    let whereConditions: any[] = [];
+    let whereConditions: FindOptionsWhere<Patrimonio>[] = [];
     if (q) {
       const searchText = this.normalizeSearchText(q);
       whereConditions = [
@@ -218,9 +224,11 @@ export class PatrimonioService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      console.error('Erro ao buscar patrimônio por código:', error);
-      console.error('Stack:', error?.stack);
-      console.error('Código buscado:', codigo);
+      this.logger.error('Erro ao buscar patrimônio por código', {
+        error: error?.message,
+        stack: error?.stack,
+        codigo,
+      });
       throw error;
     }
   }
@@ -247,8 +255,8 @@ export class PatrimonioService {
       });
       const saved = await this.patrimonioRepository.save(patrimonio);
       return this.serializePatrimonio(saved);
-    } catch (error: any) {
-      if (error?.code === '23505') {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
         throw new ConflictException('Código de patrimônio já existe');
       }
       throw error;
@@ -278,8 +286,8 @@ export class PatrimonioService {
     try {
       const saved = await this.patrimonioRepository.save(patrimonio);
       return this.serializePatrimonio(saved);
-    } catch (error: any) {
-      if (error?.code === '23505') {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
         throw new ConflictException('Código de patrimônio já existe');
       }
       throw error;
@@ -353,7 +361,7 @@ export class PatrimonioService {
       return savedPatrimonios.map((patrimonio) =>
         this.serializePatrimonio(patrimonio),
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error?.code === '23505') {
         throw new ConflictException('Um ou mais códigos já existem');
       }

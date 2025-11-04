@@ -10,7 +10,4 @@ export { LoggingInterceptor } from './logging.interceptor';
 export { TimeoutInterceptor } from './timeout.interceptor';
 
 // Interceptors opcionais
-export {
-  TransformResponseInterceptor,
-  type StandardResponse,
-} from './transform-response.interceptor';
+export { TransformResponseInterceptor } from './transform-response.interceptor';

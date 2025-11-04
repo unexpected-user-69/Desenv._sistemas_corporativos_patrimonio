@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,7 +21,14 @@ import {
   ApiNotFoundResponse,
   ApiBadRequestResponse,
   ApiConflictResponse,
+  ApiBearerAuth,
+  ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '../users/enums/user-role.enum';
 import { PatrimonioService } from './patrimonio.service';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
 import { UpdatePatrimonioDto } from './dto/update-patrimonio.dto';
@@ -30,12 +38,17 @@ import { PaginatedPatrimoniosResponseDto } from './dto/paginated-patrimonios-res
 import { PatrimonioStatus } from './entities/patrimonio.entity';
 
 @ApiTags('patrimonio')
+@ApiBearerAuth()
 @Controller('patrimonio')
 export class PatrimonioController {
   constructor(private readonly patrimonioService: PatrimonioService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Criar um novo patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
   @ApiBody({ type: CreatePatrimonioDto })
   @ApiCreatedResponse({
     description: 'Patrimônio criado com sucesso',
@@ -194,12 +207,7 @@ export class PatrimonioController {
   async findByCodigo(
     @Param('codigo') codigo: string,
   ): Promise<PatrimonioResponseDto> {
-    try {
-      return await this.patrimonioService.findByCodigo(codigo);
-    } catch (error) {
-      console.error('Erro no controller findByCodigo:', error);
-      throw error;
-    }
+    return this.patrimonioService.findByCodigo(codigo);
   }
 
   @Get('categoria/:categoriaId')
@@ -359,7 +367,11 @@ export class PatrimonioController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Atualizar patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
   @ApiParam({
     name: 'id',
     description: 'ID único do patrimônio',
@@ -387,7 +399,11 @@ export class PatrimonioController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Remover patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
   @ApiParam({
     name: 'id',
     description: 'ID único do patrimônio',

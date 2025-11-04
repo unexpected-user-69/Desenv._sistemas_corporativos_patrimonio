@@ -1,13 +1,13 @@
-import { IsString, IsOptional, IsObject, ValidateIf } from 'class-validator';
+import { IsString, IsOptional, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
 export class CreateAuditLogDto {
   @ApiProperty({ 
-    description: 'ID do usuário que realizou a ação',
+    description: 'ID do usuário que realizou a ação (deve ser um UUID válido)',
     required: false,
     nullable: true,
-    example: null
+    example: '143b7f80-daca-4d0f-aa52-752f678e748e'
   })
   @Transform(({ value }) => {
     if (!value || value === 'string' || value === '' || value === null) {
@@ -27,10 +27,10 @@ export class CreateAuditLogDto {
   entityType: string;
 
   @ApiProperty({ 
-    description: 'ID da entidade',
+    description: 'ID da entidade (deve ser um UUID válido)',
     required: false,
     nullable: true,
-    example: null
+    example: 'b4e78c33-a198-452d-932d-a05d0794fad0'
   })
   @Transform(({ value }) => {
     if (!value || value === 'string' || value === '' || value === null) {
@@ -43,14 +43,30 @@ export class CreateAuditLogDto {
 
   @ApiProperty({ description: 'Valores anteriores', required: false })
   @IsOptional()
-  @ValidateIf((o) => o.oldValues !== null && o.oldValues !== undefined)
-  @IsObject()
+  @Transform(({ value }) => {
+    // Converter null ou objeto vazio para undefined
+    if (value === null || value === undefined) {
+      return undefined;
+    }
+    if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) {
+      return undefined;
+    }
+    return value;
+  })
   oldValues?: Record<string, any> | null;
 
   @ApiProperty({ description: 'Novos valores', required: false })
   @IsOptional()
-  @ValidateIf((o) => o.newValues !== null && o.newValues !== undefined)
-  @IsObject()
+  @Transform(({ value }) => {
+    // Converter null ou objeto vazio para undefined
+    if (value === null || value === undefined) {
+      return undefined;
+    }
+    if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) {
+      return undefined;
+    }
+    return value;
+  })
   newValues?: Record<string, any> | null;
 
   @ApiProperty({ 
@@ -58,7 +74,7 @@ export class CreateAuditLogDto {
     required: false,
     nullable: true,
     type: String,
-    example: null
+    example: '192.168.1.1'
   })
   @IsOptional()
   @ValidateIf((o) => o.ipAddress !== null && o.ipAddress !== undefined)
@@ -76,7 +92,7 @@ export class CreateAuditLogDto {
     required: false,
     nullable: true,
     type: String,
-    example: null
+    example: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
   })
   @IsOptional()
   @ValidateIf((o) => o.userAgent !== null && o.userAgent !== undefined)
@@ -90,10 +106,10 @@ export class CreateAuditLogDto {
   userAgent?: string | null;
 
   @ApiProperty({ 
-    description: 'ID da sessão',
+    description: 'ID da sessão (deve ser um UUID válido)',
     required: false,
     nullable: true,
-    example: null
+    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
   })
   @Transform(({ value }) => {
     if (!value || value === 'string' || value === '' || value === null) {
@@ -109,7 +125,7 @@ export class CreateAuditLogDto {
     required: false,
     nullable: true,
     type: String,
-    example: null
+    example: 'patrimonio-backend'
   })
   @IsOptional()
   @ValidateIf((o) => o.service !== null && o.service !== undefined)
@@ -127,7 +143,7 @@ export class CreateAuditLogDto {
     required: false,
     nullable: true,
     type: String,
-    example: null
+    example: '/v1/patrimonio'
   })
   @IsOptional()
   @ValidateIf((o) => o.endpoint !== null && o.endpoint !== undefined)
@@ -145,7 +161,7 @@ export class CreateAuditLogDto {
     required: false,
     nullable: true,
     type: String,
-    example: null
+    example: 'Criação de novo patrimônio'
   })
   @IsOptional()
   @ValidateIf((o) => o.description !== null && o.description !== undefined)

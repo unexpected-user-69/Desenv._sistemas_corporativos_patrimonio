@@ -4,7 +4,6 @@ import { UsersService } from '../../src/users/users.service';
 import { User, UserRole } from '../../src/users/entities/user.entity';
 import { CreateUserDto } from '../../src/users/dto/create-user.dto';
 import { UpdateUserDto } from '../../src/users/dto/update-user.dto';
-import { QueryUsersDto } from '../../src/users/dto/query-users.dto';
 import { FakeUserRepository } from '../utils/test-doubles';
 import * as bcrypt from 'bcryptjs';
 

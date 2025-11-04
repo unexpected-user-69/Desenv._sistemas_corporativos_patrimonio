@@ -2,10 +2,9 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike, FindManyOptions } from 'typeorm';
+import { Repository, ILike, FindManyOptions, FindOptionsWhere } from 'typeorm';
 import { Categoria } from './entities/categoria.entity';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
@@ -64,7 +63,7 @@ export class CategoriasService {
     const skip = (page - 1) * limit;
 
     // Construir filtros
-    const where: any = {};
+    const where: FindOptionsWhere<Categoria> = {};
 
     if (codigo) {
       where.codigo = codigo;
@@ -75,7 +74,7 @@ export class CategoriasService {
     }
 
     // Busca textual
-    let whereConditions: any[] = [];
+    let whereConditions: FindOptionsWhere<Categoria>[] = [];
     if (q) {
       whereConditions = [
         { nome: ILike(`%${q}%`), ...where },

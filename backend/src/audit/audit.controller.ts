@@ -10,10 +10,9 @@ import {
   NotFoundException,
   BadRequestException,
   HttpException,
-  UsePipes,
-  ValidationPipe,
+  Logger,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { AuditService } from './audit.service';
 import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 import { SearchAuditLogsDto } from './dto/search-audit-logs.dto';
@@ -23,63 +22,31 @@ import { TransformAndValidatePipe } from './pipes/transform-and-validate.pipe';
 @ApiBearerAuth()
 @Controller('audit')
 export class AuditController {
+  private readonly logger = new Logger(AuditController.name);
+
   constructor(private readonly auditService: AuditService) {}
 
   @Post('logs')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Criar log de auditoria' })
+  @ApiOperation({ 
+    summary: 'Criar log de auditoria',
+    description: 'Cria um novo log de auditoria. Campos obrigatórios: action e entityType. Campos userId, entityId e sessionId devem ser UUIDs válidos se fornecidos. Não inclua comentários no JSON.'
+  })
+  @ApiBody({ type: CreateAuditLogDto })
   @ApiResponse({ status: 201, description: 'Log de auditoria criado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos - verifique se os UUIDs estão no formato correto e se não há comentários no JSON' })
   async createAuditLog(@Body(new TransformAndValidatePipe()) createAuditLogDto: CreateAuditLogDto) {
     try {
-      // Validar e transformar UUIDs manualmente (após o pipe de transformação)
+      // Validação simples de UUIDs se presentes
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       
-      // Limpar strings vazias, objetos vazios e null dos outros campos
-      const cleanField = (value: any) => {
-        if (value === null || value === undefined || value === 'string' || value === '' || 
-            (typeof value === 'object' && value !== null && !Array.isArray(value) && Object.keys(value).length === 0)) {
-          return undefined;
-        }
-        return value;
-      };
-
-      // Tratar campos string opcionais (não JSONB)
-      if (createAuditLogDto.ipAddress !== undefined) {
-        createAuditLogDto.ipAddress = cleanField(createAuditLogDto.ipAddress);
-      }
-      if (createAuditLogDto.userAgent !== undefined) {
-        createAuditLogDto.userAgent = cleanField(createAuditLogDto.userAgent);
-      }
-      if (createAuditLogDto.service !== undefined) {
-        createAuditLogDto.service = cleanField(createAuditLogDto.service);
-      }
-      if (createAuditLogDto.endpoint !== undefined) {
-        createAuditLogDto.endpoint = cleanField(createAuditLogDto.endpoint);
-      }
-      if (createAuditLogDto.description !== undefined) {
-        createAuditLogDto.description = cleanField(createAuditLogDto.description);
-      }
-      
-      // Tratar UUIDs também
-      if (createAuditLogDto.userId !== undefined) {
-        createAuditLogDto.userId = cleanField(createAuditLogDto.userId);
-      }
-      if (createAuditLogDto.entityId !== undefined) {
-        createAuditLogDto.entityId = cleanField(createAuditLogDto.entityId);
-      }
-      if (createAuditLogDto.sessionId !== undefined) {
-        createAuditLogDto.sessionId = cleanField(createAuditLogDto.sessionId);
-      }
-      
-      // Validar UUIDs se ainda tiverem valor
-      if (createAuditLogDto.userId && !uuidRegex.test(createAuditLogDto.userId)) {
+      if (createAuditLogDto.userId && typeof createAuditLogDto.userId === 'string' && !uuidRegex.test(createAuditLogDto.userId)) {
         throw new BadRequestException('userId must be a valid UUID');
       }
-      if (createAuditLogDto.entityId && !uuidRegex.test(createAuditLogDto.entityId)) {
+      if (createAuditLogDto.entityId && typeof createAuditLogDto.entityId === 'string' && !uuidRegex.test(createAuditLogDto.entityId)) {
         throw new BadRequestException('entityId must be a valid UUID');
       }
-      if (createAuditLogDto.sessionId && !uuidRegex.test(createAuditLogDto.sessionId)) {
+      if (createAuditLogDto.sessionId && typeof createAuditLogDto.sessionId === 'string' && !uuidRegex.test(createAuditLogDto.sessionId)) {
         throw new BadRequestException('sessionId must be a valid UUID');
       }
 
@@ -87,17 +54,39 @@ export class AuditController {
       return auditLog;
     } catch (error) {
       // Se já for uma HttpException, apenas re-lançar
-      if (error instanceof BadRequestException || error instanceof HttpException) {
+      if (error instanceof HttpException) {
         throw error;
       }
+      
       // Log do erro completo para debug
-      console.error('Erro ao criar log de auditoria:', error);
-      console.error('Stack trace:', error?.stack);
-      console.error('DTO recebido:', JSON.stringify(createAuditLogDto, null, 2));
-      throw new BadRequestException({
-        message: 'Erro ao criar log de auditoria',
-        error: error?.message || String(error) || 'Erro desconhecido',
+      this.logger.error('Erro ao criar log de auditoria', {
+        errorType: error?.constructor?.name,
+        message: error?.message,
+        stack: error?.stack,
+        code: error?.code,
+        name: error?.name,
+        detail: error?.detail,
+        dto: createAuditLogDto,
       });
+      
+      // Se for um erro de banco de dados, retornar BadRequest
+      if (error?.name === 'QueryFailedError' || error?.code?.startsWith('23')) {
+        throw new BadRequestException({
+          message: 'Erro ao salvar log de auditoria no banco de dados',
+          error: error?.message || 'Erro desconhecido',
+          detail: error?.detail,
+        });
+      }
+      
+      // Para outros erros, relançar como Internal Server Error com detalhes
+      throw new HttpException(
+        {
+          message: 'Erro interno ao criar log de auditoria',
+          error: error?.message || String(error) || 'Erro desconhecido',
+          type: error?.constructor?.name || 'Unknown',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

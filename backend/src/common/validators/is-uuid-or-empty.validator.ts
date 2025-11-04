@@ -9,7 +9,7 @@ import { isUUID } from 'class-validator';
 
 @ValidatorConstraint({ async: false })
 export class IsUUIDOrEmptyConstraint implements ValidatorConstraintInterface {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown, _args: ValidationArguments) {
     // Se for undefined, null, string vazia ou "string", não valida (é opcional)
     if (value === undefined || value === null || value === '' || value === 'string') {
       return true;

@@ -85,7 +85,7 @@ export class MetricsController {
   @Get('logs')
   @ApiOperation({ summary: 'Obter logs do sistema' })
   @ApiResponse({ status: 200, description: 'Logs do sistema' })
-  getLogs(@Query('limit') limit = 10) {
+  getLogs(@Query('limit') _limit = 10) {
     return {
       logs: [
         {

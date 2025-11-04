@@ -1,100 +1,47 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-  Logger,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import type { Request } from 'express';
 
 /**
- * Guard de autenticação JWT (placeholder).
- *
- * Este guard é um placeholder que implementa CanActivate diretamente.
- * NÃO deve ser aplicado globalmente até que a estratégia JWT seja
- * configurada e implementada no projeto.
- *
- * @example
- * ```typescript
- * // Aplicação em endpoints específicos (quando JWT estiver implementado)
- * @Controller('protected')
- * export class ProtectedController {
- *   @Get('profile')
- *   @UseGuards(JwtAuthGuard)
- *   getProfile(@Request() req) {
- *     return req.user;
- *   }
- * }
- * ```
- *
- * @warning
- * Este guard não deve ser registrado globalmente até que:
- * 1. A estratégia JWT do Passport seja configurada
- * 2. O módulo de autenticação seja implementado
- * 3. Os tokens JWT sejam gerados e validados corretamente
+ * Guard de autenticação JWT baseado no padrão Aurora.
+ * 
+ * Utiliza Passport JWT Strategy quando configurada.
+ * Em desenvolvimento, pode auto-injetar usuário fake se DEV_AUTO_AUTH=true.
+ * 
+ * Adaptado para UUID (sub será string em vez de number).
  */
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
-  private readonly logger = new Logger(JwtAuthGuard.name);
-
-  /**
-   * Determina se a requisição pode prosseguir baseado na autenticação JWT.
-   *
-   * @param context - Contexto de execução da requisição
-   * @returns true se o usuário estiver autenticado, false caso contrário
-   */
+export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
+  // Preserve o comportamento de desenvolvimento: quando NODE_ENV !== 'production',
+  // injeta um usuário fake se DEV_AUTO_AUTH estiver habilitado.
+  // Em produção, delega para o AuthGuard('jwt') do Passport.
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
-    const request = context.switchToHttp().getRequest() as any;
+    const request = context.switchToHttp().getRequest<
+      Request & {
+        user?: { sub: string; isAdmin: boolean; roles?: string[] };
+      }
+    >();
 
-    // Log para debug (remover em produção)
-    this.logger.debug(
-      `JwtAuthGuard: verificando autenticação para ${request.method} ${request.url}`,
-      {
-        method: (request as any).method,
-        url: (request as any).url,
-        hasAuthHeader: !!(request as any).headers.authorization,
-        timestamp: new Date().toISOString(),
-      },
-    );
+    const authHeader = request.get?.('authorization') ?? '';
 
-    // Por enquanto, sempre retorna true (placeholder)
-    // TODO: Implementar validação JWT real quando a estratégia estiver configurada
-    this.logger.warn(
-      'JwtAuthGuard está funcionando como placeholder. Implementar estratégia JWT real.',
-      {
-        method: (request as any).method,
-        url: (request as any).url,
-        timestamp: new Date().toISOString(),
-      },
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      // Se houver um header Authorization, delega para o Passport para validar
+      // um token real mesmo em desenvolvimento.
+      if (authHeader?.startsWith('Bearer ')) {
+        return super.canActivate(context) as boolean | Promise<boolean>;
+      }
 
-    return true;
-  }
+      // Apenas auto-injeta um usuário fake se DEV_AUTO_AUTH estiver explicitamente
+      // definido como 'true'.
+      if ((process.env.DEV_AUTO_AUTH ?? 'false').toLowerCase() === 'true') {
+        request.user = { sub: '00000000-0000-0000-0000-000000000001', isAdmin: true, roles: ['admin'] };
+        return true;
+      }
 
-  /**
-   * Manipula erros de autenticação.
-   *
-   * @param err - Erro de autenticação
-   * @param user - Usuário autenticado (se houver)
-   * @param info - Informações adicionais do erro
-   * @returns true se a autenticação for bem-sucedida, false caso contrário
-   */
-  handleRequest(err: any, user: any, info: any) {
-    if (err || !user) {
-      this.logger.error('Falha na autenticação JWT', {
-        error: err?.message,
-        info: info?.message,
-        timestamp: new Date().toISOString(),
-      });
-      throw err || new UnauthorizedException('Token JWT inválido ou expirado');
+      // Sem header de auth e auto-auth desabilitado: nega acesso (comporta-se como produção).
+      return false;
     }
-
-    this.logger.log(`Usuário autenticado: ${user.email}`, {
-      userId: user.id,
-      userEmail: user.email,
-      userRole: user.role,
-      timestamp: new Date().toISOString(),
-    });
-
-    return user;
+    // AuthGuard retorna boolean | Promise<boolean> | Observable<boolean>
+    return super.canActivate(context) as boolean | Promise<boolean>;
   }
 }

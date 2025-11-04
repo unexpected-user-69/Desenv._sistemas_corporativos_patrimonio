@@ -10,7 +10,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Exclude } from 'class-transformer';
 import { User } from '../../users/entities/user.entity';
 import { Categoria } from '../../categorias/entities/categoria.entity';
 

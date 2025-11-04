@@ -8,7 +8,6 @@ import { UserRole } from './enums/user-role.enum';
 import { CreateUserDto } from './dto/create-user.dto';
 import { HashService } from '../common/services/hash.service';
 import { NormalizationService } from '../common/services/normalization.service';
-import { FilterService } from '../common/services/filter.service';
 import { createRepositoryMock } from '../../test/mocks/repository.mock';
 
 describe('UsersService - New Methods', () => {
@@ -16,7 +15,6 @@ describe('UsersService - New Methods', () => {
   let userRepository: jest.Mocked<Repository<User>>;
   let hashService: jest.Mocked<HashService>;
   let normalizationService: jest.Mocked<NormalizationService>;
-  let filterService: jest.Mocked<FilterService>;
 
   const mockUser: User = {
     id: 'user-1',
@@ -75,7 +73,6 @@ describe('UsersService - New Methods', () => {
     userRepository = module.get(getRepositoryToken(User));
     hashService = module.get(HashService);
     normalizationService = module.get(NormalizationService);
-    filterService = module.get(FilterService);
   });
 
   describe('findByEmail', () => {

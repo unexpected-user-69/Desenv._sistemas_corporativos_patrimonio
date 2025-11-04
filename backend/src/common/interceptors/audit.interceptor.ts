@@ -3,6 +3,7 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
@@ -12,6 +13,8 @@ import { AUDIT_KEY, AuditOptions } from '../decorators/audit.decorator';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(AuditInterceptor.name);
+
   constructor(
     private readonly auditService: AuditService,
     private readonly reflector: Reflector,
@@ -25,14 +28,13 @@ export class AuditInterceptor implements NestInterceptor {
     }
 
     const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
 
     const startTime = Date.now();
 
     return next.handle().pipe(
       tap(async (data) => {
         try {
-          const responseTime = Date.now() - startTime;
+          const _responseTime = Date.now() - startTime;
           
           await this.auditService.createAuditLog({
             userId: request.user?.id,
@@ -49,7 +51,7 @@ export class AuditInterceptor implements NestInterceptor {
             description: auditOptions.description,
           });
         } catch (error) {
-          console.error('Erro ao criar log de auditoria:', error);
+          this.logger.error('Erro ao criar log de auditoria', error);
         }
       }),
     );

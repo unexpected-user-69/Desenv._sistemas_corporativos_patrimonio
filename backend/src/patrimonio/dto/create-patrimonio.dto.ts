@@ -13,6 +13,7 @@ import {
   IsUrl,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsTrimmed } from '../../common/validators';
 import { PatrimonioStatus } from '../entities/patrimonio.entity';
 
 export class CreatePatrimonioDto {
@@ -24,6 +25,7 @@ export class CreatePatrimonioDto {
   })
   @IsString()
   @IsNotEmpty()
+  @IsTrimmed({ message: 'O código não pode conter espaços no início ou fim' })
   @MinLength(3)
   @MaxLength(50)
   @Transform(({ value }) => {
@@ -38,6 +40,7 @@ export class CreatePatrimonioDto {
   })
   @IsString()
   @IsNotEmpty()
+  @IsTrimmed({ message: 'O nome não pode conter espaços no início ou fim' })
   @MaxLength(255)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   nome!: string;
@@ -48,6 +51,7 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
+  @IsTrimmed({ message: 'A descrição não pode conter espaços no início ou fim' })
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   descricao?: string;
 
@@ -77,6 +81,7 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
+  @IsTrimmed({ message: 'A marca não pode conter espaços no início ou fim' })
   @MaxLength(100)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   marca?: string;
@@ -88,6 +93,7 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
+  @IsTrimmed({ message: 'O modelo não pode conter espaços no início ou fim' })
   @MaxLength(100)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   modelo?: string;
@@ -99,6 +105,7 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
+  @IsTrimmed({ message: 'O número de série não pode conter espaços no início ou fim' })
   @MaxLength(100)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   numeroSerie?: string;
@@ -138,6 +145,7 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
+  @IsTrimmed({ message: 'A localização não pode conter espaços no início ou fim' })
   @MaxLength(255)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   localizacao?: string;
@@ -157,6 +165,7 @@ export class CreatePatrimonioDto {
   })
   @IsOptional()
   @IsString()
+  @IsTrimmed({ message: 'As observações não podem conter espaços no início ou fim' })
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   observacoes?: string;
 

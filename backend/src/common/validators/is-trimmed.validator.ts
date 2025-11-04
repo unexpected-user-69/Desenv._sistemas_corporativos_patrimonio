@@ -27,7 +27,7 @@ export class IsTrimmedConstraint implements ValidatorConstraintInterface {
    * @param args - Argumentos de validação
    * @returns true se o valor for válido, false caso contrário
    */
-  validate(value: any): boolean {
+  validate(value: unknown): boolean {
     if (typeof value !== 'string') {
       return false;
     }

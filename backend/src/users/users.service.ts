@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, FindManyOptions, ILike, Between } from 'typeorm';
+import { Repository, Like, FindManyOptions, ILike, Between, FindOptionsWhere } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -143,7 +143,7 @@ export class UsersService {
     const skip = (page - 1) * limit;
 
     // Construir condições de busca base (AND)
-    const baseWhere: any = {};
+    const baseWhere: FindOptionsWhere<User> = {};
 
     // Filtros específicos (combinados com AND)
     if (role) {
@@ -155,7 +155,7 @@ export class UsersService {
     }
 
     // Busca textual genérica (nome OU email) - combina filtros base com OR de busca textual
-    let whereConditions: any;
+    let whereConditions: FindOptionsWhere<User>[] | FindOptionsWhere<User> | undefined;
     if (q) {
       whereConditions = [
         { name: ILike(`%${q}%`), ...baseWhere },
@@ -237,10 +237,9 @@ export class UsersService {
       });
       const saved = await this.userRepository.save(entity);
       return this.serializeUser(saved);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Tratamento de erro de conflito do banco (código '23505')
-       
-      if (error?.code === '23505') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
         throw new ConflictException('Email already exists');
       }
       throw error;
@@ -300,9 +299,9 @@ export class UsersService {
 
       // Serializar e retornar
       return savedUsers.map((user) => this.serializeUser(user));
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Tratamento de erro de conflito do banco
-      if (error?.code === '23505') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
         throw new ConflictException('One or more emails already exist');
       }
       throw error;
@@ -469,5 +468,45 @@ export class UsersService {
     });
 
     return users.map((user) => this.serializeUser(user));
+  }
+
+  /**
+   * Valida credenciais do usuário (email e senha).
+   * Usado pelo AuthService para autenticação.
+   * 
+   * @param email - Email do usuário
+   * @param password - Senha em texto plano
+   * @returns User | null - Entidade User se credenciais válidas, null caso contrário
+   */
+  async validateCredentials(
+    email: string,
+    password: string,
+  ): Promise<User | null> {
+    // Normaliza o email
+    const normalizedEmail = this.normalizeEmail(email);
+
+    // Busca o usuário incluindo o passwordHash (que normalmente não vem no select)
+    const user = await this.userRepository.findOne({
+      where: { email: normalizedEmail },
+      select: ['id', 'email', 'name', 'role', 'isActive', 'passwordHash', 'avatarUrl', 'createdAt', 'updatedAt', 'deletedAt', 'version'],
+    });
+
+    // Verifica se usuário existe e está ativo
+    if (!user || !user.isActive) {
+      return null;
+    }
+
+    // Verifica a senha usando HashService
+    const isValidPassword = await this.hashService.compare(
+      password,
+      user.passwordHash,
+    );
+
+    if (!isValidPassword) {
+      return null;
+    }
+
+    // Retorna a entidade User completa (sem passwordHash será excluído por @Exclude)
+    return user;
   }
 }

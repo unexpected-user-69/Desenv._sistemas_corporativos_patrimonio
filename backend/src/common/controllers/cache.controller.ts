@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Post, Body, Delete, Param } from '@nestjs/common';
+import { Controller, Get, Query, Post, Delete, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Cache')

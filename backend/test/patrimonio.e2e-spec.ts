@@ -1,19 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import {
-  Patrimonio,
   PatrimonioStatus,
   PatrimonioCategoria,
 } from '../src/patrimonio/entities/patrimonio.entity';
-import { User, UserRole } from '../src/users/entities/user.entity';
 
 describe('PatrimonioController (e2e)', () => {
   let app: INestApplication;
   let createdPatrimonioId: string;
-  let createdUserId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

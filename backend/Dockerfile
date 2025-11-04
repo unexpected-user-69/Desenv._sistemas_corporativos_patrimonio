@@ -50,4 +50,4 @@ RUN chmod +x ./start.sh
 ENV NODE_ENV=production
 
 # Comando de inicialização
-CMD ["bash", "./start.sh"]
+CMD ["/bin/bash", "./start.sh"]

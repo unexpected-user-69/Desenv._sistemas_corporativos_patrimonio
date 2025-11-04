@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
 
 // Configuração de conexão com PostgreSQL
 // Baseado em PDF 084 - Containerização e Configuração
@@ -18,8 +19,8 @@ export const AppDataSource = new DataSource({
   username,
   password,
   database,
-  entities: [User],
+  entities: [User, Patrimonio],
   migrations: ['src/migrations/*.ts'],
-  synchronize: false,
+  synchronize: true, // Temporariamente true para criar tabelas automaticamente
   logging: process.env.NODE_ENV === 'development',
 });

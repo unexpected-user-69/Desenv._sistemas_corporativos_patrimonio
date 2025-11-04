@@ -116,3 +116,5 @@ async function testAuditEndpoints() {
 
 // Executar testes
 testAuditEndpoints();
+
+

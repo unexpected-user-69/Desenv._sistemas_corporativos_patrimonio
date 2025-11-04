@@ -16,12 +16,6 @@ done
 
 echo "✅ Banco de dados está pronto!"
 
-# Executar migrações
-echo "🔄 Executando migrações..."
-npm run migration:run || echo "⚠️ Nenhuma migração pendente ou erro ignorado"
-
-echo "✅ Migrações concluídas!"
-
 # Iniciar aplicação em modo produção
 echo "🎯 Iniciando aplicação em modo produção..."
-npm run start:prod
+node dist/main.js

@@ -239,7 +239,7 @@ export class UsersService {
       return this.serializeUser(saved);
     } catch (error: unknown) {
       // Tratamento de erro de conflito do banco (código '23505')
-      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+      if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
         throw new ConflictException('Email already exists');
       }
       throw error;
@@ -301,7 +301,7 @@ export class UsersService {
       return savedUsers.map((user) => this.serializeUser(user));
     } catch (error: unknown) {
       // Tratamento de erro de conflito do banco
-      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+      if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
         throw new ConflictException('One or more emails already exist');
       }
       throw error;

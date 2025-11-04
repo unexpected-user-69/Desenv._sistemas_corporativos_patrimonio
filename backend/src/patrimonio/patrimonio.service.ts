@@ -256,7 +256,7 @@ export class PatrimonioService {
       const saved = await this.patrimonioRepository.save(patrimonio);
       return this.serializePatrimonio(saved);
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+      if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
         throw new ConflictException('Código de patrimônio já existe');
       }
       throw error;
@@ -287,7 +287,7 @@ export class PatrimonioService {
       const saved = await this.patrimonioRepository.save(patrimonio);
       return this.serializePatrimonio(saved);
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+      if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
         throw new ConflictException('Código de patrimônio já existe');
       }
       throw error;
@@ -362,7 +362,7 @@ export class PatrimonioService {
         this.serializePatrimonio(patrimonio),
       );
     } catch (error: unknown) {
-      if (error?.code === '23505') {
+      if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
         throw new ConflictException('Um ou mais códigos já existem');
       }
       throw error;

@@ -1,0 +1,28 @@
+import { Test } from '@nestjs/testing';
+import { PatrimonioController } from '../../../src/patrimonio/patrimonio.controller';
+import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { randomUUID } from 'crypto';
+
+describe('PatrimonioController – verificarDisponibilidade', () => {
+  let controller: PatrimonioController;
+  const service = { verificarDisponibilidade: jest.fn() };
+
+  beforeEach(async () => {
+    const mod = await Test.createTestingModule({
+      controllers: [PatrimonioController],
+      providers: [{ provide: PatrimonioService, useValue: service }],
+    }).compile();
+    controller = mod.get(PatrimonioController);
+    jest.clearAllMocks();
+  });
+
+  it('GET /patrimonio/:id/disponibilidade → delega ao service.verificarDisponibilidade', async () => {
+    const id = randomUUID();
+    service.verificarDisponibilidade.mockResolvedValue({ disponivel: true });
+
+    const res = await controller.verificarDisponibilidade(id);
+
+    expect(service.verificarDisponibilidade).toHaveBeenCalledWith(id);
+    expect(res).toEqual({ disponivel: true });
+  });
+});

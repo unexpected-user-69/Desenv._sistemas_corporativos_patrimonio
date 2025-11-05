@@ -1,12 +1,21 @@
-import { Controller, Get, Query, Post, Delete, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Query, Post, Delete, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth, ApiUnauthorizedResponse, ApiForbiddenResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
+import { Roles } from '../decorators/roles.decorator';
+import { UserRole } from '../../users/enums/user-role.enum';
 
 @ApiTags('Cache')
+@ApiBearerAuth()
 @Controller('cache')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
 export class CacheController {
   
   @Get('stats')
   @ApiOperation({ summary: 'Obter estatísticas do cache' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
   @ApiResponse({ status: 200, description: 'Estatísticas do cache retornadas com sucesso' })
   getStats() {
     return {

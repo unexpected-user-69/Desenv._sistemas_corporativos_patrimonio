@@ -9,7 +9,10 @@ import {
   Query,
   ParseUUIDPipe,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiTags,
   ApiOperation,
@@ -36,6 +39,30 @@ import { PatrimonioResponseDto } from './dto/patrimonio-response.dto';
 import { QueryPatrimonioDto } from './dto/query-patrimonio.dto';
 import { PaginatedPatrimoniosResponseDto } from './dto/paginated-patrimonios-response.dto';
 import { PatrimonioStatus } from './entities/patrimonio.entity';
+import { UpdateStatusPatrimonioDto } from './dto/update-status-patrimonio.dto';
+import { TransferirResponsavelDto } from './dto/transferir-responsavel.dto';
+import { DashboardResponseDto } from './dto/dashboard-response.dto';
+import { DescartePatrimonioDto } from './dto/descarte-patrimonio.dto';
+import { UpdateLocalizacaoPatrimonioDto } from './dto/update-localizacao-patrimonio.dto';
+import { LocalizacoesStatsResponseDto } from './dto/localizacoes-stats-response.dto';
+import { FaixaValorStatsResponseDto } from './dto/faixa-valor-stats-response.dto';
+import { AquisicaoStatsResponseDto } from './dto/aquisicao-stats-response.dto';
+import { EvolucaoStatsResponseDto } from './dto/evolucao-stats-response.dto';
+import { InventarioRelatorioDto } from './dto/inventario-relatorio.dto';
+import { QueryAquisicaoPeriodoDto } from './dto/query-aquisicao-periodo.dto';
+import { QueryValorRangeDto } from './dto/query-valor-range.dto';
+import { QueryStatusMultiplosDto } from './dto/query-status-multiplos.dto';
+import { QueryCategoriasMultiplasDto } from './dto/query-categorias-multiplas.dto';
+import { CreateBulkPatrimonioDto } from './dto/create-bulk-patrimonio.dto';
+import { UpdateBulkPatrimonioDto } from './dto/update-bulk-patrimonio.dto';
+import { TransferirResponsavelBulkDto } from './dto/transferir-responsavel-bulk.dto';
+import { ValidarCodigoResponseDto } from './dto/validar-codigo-response.dto';
+import { VerificarDuplicidadeDto } from './dto/verificar-duplicidade.dto';
+import { DuplicataResponseDto } from './dto/duplicata-response.dto';
+import { DisponibilidadeResponseDto } from './dto/disponibilidade-response.dto';
+import { BulkResponseDto } from './dto/bulk-response.dto';
+import { HistoricoAlteracaoResponseDto } from './dto/historico-alteracao-response.dto';
+import { HistoricoResponsaveisResponseDto } from './dto/historico-responsaveis-response.dto';
 
 @ApiTags('patrimonio')
 @ApiBearerAuth()
@@ -46,6 +73,7 @@ export class PatrimonioController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Throttle({ default: { limit: 20, ttl: 60000 } }) // 20 requisições por minuto
   @ApiOperation({ summary: 'Criar um novo patrimônio' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
@@ -343,6 +371,37 @@ export class PatrimonioController {
     );
   }
 
+  @Get('dashboard')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter todas as métricas principais para dashboard' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiOkResponse({
+    description: 'Métricas do dashboard retornadas com sucesso',
+    type: DashboardResponseDto,
+  })
+  async getDashboard(): Promise<DashboardResponseDto> {
+    return this.patrimonioService.getDashboard();
+  }
+
+  @Get('localizacao/:localizacao')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Listar patrimônios por localização' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'localizacao',
+    description: 'Localização para buscar',
+    example: 'Sala 205',
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios na localização',
+    type: [PatrimonioResponseDto],
+  })
+  async findByLocalizacao(
+    @Param('localizacao') localizacao: string,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findByLocalizacao(localizacao);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Buscar patrimônio por ID' })
   @ApiParam({
@@ -398,6 +457,66 @@ export class PatrimonioController {
     return this.patrimonioService.update(id, updatePatrimonioDto);
   }
 
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Alterar status de um patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiBody({ type: UpdateStatusPatrimonioDto })
+  @ApiOkResponse({
+    description: 'Status do patrimônio atualizado com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos ou status já é o atual',
+  })
+  async updateStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateStatusPatrimonioDto,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.updateStatus(id, dto);
+  }
+
+  @Post(':id/transferir-responsavel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Transferir patrimônio para outro responsável' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiBody({ type: TransferirResponsavelDto })
+  @ApiOkResponse({
+    description: 'Responsabilidade transferida com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio ou usuário não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos ou mesmo responsável',
+  })
+  async transferResponsavel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: TransferirResponsavelDto,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.transferResponsavel(id, dto);
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -420,5 +539,699 @@ export class PatrimonioController {
   })
   remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.patrimonioService.remove(id);
+  }
+
+  // ==================== FASE 2: GESTÃO DE STATUS ====================
+
+  @Patch(':id/ativar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Ativar patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Patrimônio ativado com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'O patrimônio já está ativo',
+  })
+  async ativar(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.ativar(id);
+  }
+
+  @Patch(':id/desativar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Desativar patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Patrimônio desativado com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'O patrimônio já está inativo',
+  })
+  async desativar(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.desativar(id);
+  }
+
+  @Post(':id/descarte')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Marcar patrimônio para descarte' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiBody({ type: DescartePatrimonioDto })
+  @ApiOkResponse({
+    description: 'Patrimônio marcado para descarte com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos',
+  })
+  async marcarDescarte(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DescartePatrimonioDto,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.marcarDescarte(id, dto);
+  }
+
+  // ==================== FASE 2: GESTÃO DE LOCALIZAÇÃO ====================
+
+  @Patch(':id/localizacao')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Atualizar localização do patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiBody({ type: UpdateLocalizacaoPatrimonioDto })
+  @ApiOkResponse({
+    description: 'Localização atualizada com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos',
+  })
+  async updateLocalizacao(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateLocalizacaoPatrimonioDto,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.updateLocalizacao(id, dto);
+  }
+
+  @Get('stats/localizacoes')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter estatísticas por localização' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiOkResponse({
+    description: 'Estatísticas por localização retornadas com sucesso',
+    type: LocalizacoesStatsResponseDto,
+  })
+  async getStatsLocalizacoes(): Promise<LocalizacoesStatsResponseDto> {
+    return this.patrimonioService.getStatsLocalizacoes();
+  }
+
+  // ==================== FASE 2: ESTATÍSTICAS AVANÇADAS ====================
+
+  @Get('stats/faixa-valor')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter estatísticas por faixa de valor' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'intervalo',
+    required: false,
+    type: Number,
+    description: 'Intervalo para calcular as faixas (padrão: 1000)',
+    example: 1000,
+  })
+  @ApiOkResponse({
+    description: 'Estatísticas por faixa de valor retornadas com sucesso',
+    type: FaixaValorStatsResponseDto,
+  })
+  async getStatsFaixaValor(
+    @Query('intervalo') intervalo?: number,
+  ): Promise<FaixaValorStatsResponseDto> {
+    return this.patrimonioService.getStatsFaixaValor(intervalo || 1000);
+  }
+
+  @Get('stats/aquisicao')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter estatísticas por período de aquisição' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'periodo',
+    required: false,
+    enum: ['mensal', 'trimestral', 'anual'],
+    description: 'Tipo de período (padrão: mensal)',
+    example: 'mensal',
+  })
+  @ApiOkResponse({
+    description: 'Estatísticas por período de aquisição retornadas com sucesso',
+    type: AquisicaoStatsResponseDto,
+  })
+  async getStatsAquisicao(
+    @Query('periodo') periodo?: 'mensal' | 'trimestral' | 'anual',
+  ): Promise<AquisicaoStatsResponseDto> {
+    return this.patrimonioService.getStatsAquisicao(periodo || 'mensal');
+  }
+
+  @Get('stats/evolucao')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter gráfico de evolução temporal' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'periodo',
+    required: false,
+    enum: ['mensal', 'trimestral', 'anual'],
+    description: 'Tipo de período (padrão: mensal)',
+    example: 'mensal',
+  })
+  @ApiQuery({
+    name: 'ano',
+    required: false,
+    type: Number,
+    description: 'Ano de referência (padrão: ano atual)',
+    example: 2025,
+  })
+  @ApiOkResponse({
+    description: 'Estatísticas de evolução temporal retornadas com sucesso',
+    type: EvolucaoStatsResponseDto,
+  })
+  async getStatsEvolucao(
+    @Query('periodo') periodo?: 'mensal' | 'trimestral' | 'anual',
+    @Query('ano') ano?: number,
+  ): Promise<EvolucaoStatsResponseDto> {
+    return this.patrimonioService.getStatsEvolucao(
+      periodo || 'mensal',
+      ano,
+    );
+  }
+
+  // ==================== FASE 2: EXPORTAÇÃO E RELATÓRIOS ====================
+
+  @Get('export/csv')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Exportar patrimônios para CSV' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'q', required: false, type: String })
+  @ApiQuery({ name: 'categoriaId', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, enum: PatrimonioStatus })
+  @ApiOkResponse({
+    description: 'Arquivo CSV gerado com sucesso',
+    schema: {
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  async exportToCsv(
+    @Query() query: QueryPatrimonioDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    return this.patrimonioService.exportToCsv(query, res);
+  }
+
+  @Get('export/excel')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Exportar patrimônios para Excel' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'q', required: false, type: String })
+  @ApiQuery({ name: 'categoriaId', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, enum: PatrimonioStatus })
+  @ApiOkResponse({
+    description: 'Arquivo Excel gerado com sucesso',
+    schema: {
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  async exportToExcel(
+    @Query() query: QueryPatrimonioDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    return this.patrimonioService.exportToExcel(query, res);
+  }
+
+  @Get('relatorio/inventario')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Gerar relatório de inventário' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiQuery({ name: 'dataReferencia', required: false, type: String })
+  @ApiQuery({ name: 'formato', required: false, enum: ['pdf', 'csv', 'excel'] })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'q', required: false, type: String })
+  @ApiQuery({ name: 'categoriaId', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, enum: PatrimonioStatus })
+  @ApiOkResponse({
+    description: 'Relatório de inventário gerado com sucesso',
+    schema: {
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  async gerarRelatorioInventario(
+    @Query() query: QueryPatrimonioDto & InventarioRelatorioDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    return this.patrimonioService.gerarRelatorioInventario(query, res);
+  }
+
+  // ==================== FASE 3: BUSCAS AVANÇADAS ====================
+
+  @Get('numero-serie/:numeroSerie')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Buscar patrimônio por número de série' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'numeroSerie',
+    description: 'Número de série do patrimônio',
+    example: 'DL123456',
+  })
+  @ApiOkResponse({
+    description: 'Patrimônio encontrado',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  async findByNumeroSerie(
+    @Param('numeroSerie') numeroSerie: string,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.findByNumeroSerie(numeroSerie);
+  }
+
+  @Get('aquisicao-periodo')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Buscar patrimônios por intervalo de data de aquisição' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'dataInicial',
+    required: true,
+    type: String,
+    description: 'Data inicial (YYYY-MM-DD)',
+    example: '2024-01-01',
+  })
+  @ApiQuery({
+    name: 'dataFinal',
+    required: true,
+    type: String,
+    description: 'Data final (YYYY-MM-DD)',
+    example: '2024-12-31',
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios encontrados',
+    type: [PatrimonioResponseDto],
+  })
+  async findByAquisicaoPeriodo(
+    @Query() query: QueryAquisicaoPeriodoDto,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findByAquisicaoPeriodo(query);
+  }
+
+  @Get('valor-range')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Buscar patrimônios por intervalo de valor' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'valorMinimo',
+    required: true,
+    type: Number,
+    description: 'Valor mínimo de aquisição',
+    example: 1000,
+  })
+  @ApiQuery({
+    name: 'valorMaximo',
+    required: true,
+    type: Number,
+    description: 'Valor máximo de aquisição',
+    example: 5000,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios encontrados',
+    type: [PatrimonioResponseDto],
+  })
+  async findByValorRange(
+    @Query() query: QueryValorRangeDto,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findByValorRange(query);
+  }
+
+  @Get('status-multiplos')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Buscar patrimônios por múltiplos status' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    type: [String],
+    enum: PatrimonioStatus,
+    description: 'Array de status para buscar',
+    example: [PatrimonioStatus.ATIVO, PatrimonioStatus.MANUTENCAO],
+    isArray: true,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios encontrados',
+    type: [PatrimonioResponseDto],
+  })
+  async findByStatusMultiplos(
+    @Query() query: QueryStatusMultiplosDto,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findByStatusMultiplos(query);
+  }
+
+  @Get('categorias-multiplas')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Buscar patrimônios por múltiplas categorias' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'categoriaIds',
+    required: true,
+    type: [String],
+    description: 'Array de IDs de categorias',
+    example: [
+      '123e4567-e89b-12d3-a456-426614174000',
+      '223e4567-e89b-12d3-a456-426614174001',
+    ],
+    isArray: true,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios encontrados',
+    type: [PatrimonioResponseDto],
+  })
+  async findByCategoriasMultiplas(
+    @Query() query: QueryCategoriasMultiplasDto,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findByCategoriasMultiplas(query);
+  }
+
+  // ==================== FASE 3: OPERAÇÕES EM LOTE ====================
+
+  @Post('bulk')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Criar múltiplos patrimônios em lote' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiBody({ type: CreateBulkPatrimonioDto })
+  @ApiCreatedResponse({
+    description: 'Patrimônios criados em lote',
+    type: BulkResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos',
+  })
+  async createBulk(
+    @Body() dto: CreateBulkPatrimonioDto,
+  ): Promise<BulkResponseDto> {
+    return this.patrimonioService.createBulkWithTransaction(dto);
+  }
+
+  @Patch('bulk')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Atualizar múltiplos patrimônios em lote' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiBody({ type: UpdateBulkPatrimonioDto })
+  @ApiOkResponse({
+    description: 'Patrimônios atualizados com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        atualizados: { type: 'number', example: 5 },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Um ou mais patrimônios não encontrados',
+  })
+  async updateBulk(
+    @Body() dto: UpdateBulkPatrimonioDto,
+  ): Promise<{ atualizados: number }> {
+    return this.patrimonioService.updateBulk(dto);
+  }
+
+  @Post('bulk/transferir-responsavel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Transferir múltiplos patrimônios para o mesmo responsável' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiBody({ type: TransferirResponsavelBulkDto })
+  @ApiOkResponse({
+    description: 'Patrimônios transferidos com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        transferidos: { type: 'number', example: 3 },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Um ou mais patrimônios ou usuário não encontrado',
+  })
+  async transferResponsavelBulk(
+    @Body() dto: TransferirResponsavelBulkDto,
+  ): Promise<{ transferidos: number }> {
+    return this.patrimonioService.transferResponsavelBulk(dto);
+  }
+
+  // ==================== FASE 3: VALIDAÇÕES ====================
+
+  @Get('validar-codigo/:codigo')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Validar se um código está disponível' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'codigo',
+    description: 'Código a validar',
+    example: 'PAT-2024-001',
+  })
+  @ApiOkResponse({
+    description: 'Validação realizada',
+    type: ValidarCodigoResponseDto,
+  })
+  async validarCodigo(
+    @Param('codigo') codigo: string,
+  ): Promise<ValidarCodigoResponseDto> {
+    return this.patrimonioService.validarCodigo(codigo);
+  }
+
+  @Post('verificar-duplicidade')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Verificar duplicidade de patrimônios' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiBody({ type: VerificarDuplicidadeDto })
+  @ApiOkResponse({
+    description: 'Lista de possíveis duplicatas',
+    type: DuplicataResponseDto,
+  })
+  async verificarDuplicidade(
+    @Body() dto: VerificarDuplicidadeDto,
+  ): Promise<DuplicataResponseDto> {
+    return this.patrimonioService.verificarDuplicidade(dto);
+  }
+
+  @Get(':id/disponibilidade')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Verificar disponibilidade de um patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Disponibilidade verificada',
+    type: DisponibilidadeResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  async verificarDisponibilidade(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<DisponibilidadeResponseDto> {
+    return this.patrimonioService.verificarDisponibilidade(id);
+  }
+
+  // ==================== FASE 3: ALERTAS ====================
+
+  @Get('garantia-expirada')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Buscar patrimônios com garantia expirada' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'dias',
+    required: false,
+    type: Number,
+    description: 'Dias desde a expiração (padrão: 0)',
+    example: 30,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios com garantia expirada',
+    type: [PatrimonioResponseDto],
+  })
+  async findGarantiaExpirada(
+    @Query('dias') dias?: number,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findGarantiaExpirada(dias || 0);
+  }
+
+  @Get('alertas/garantia')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Buscar patrimônios com garantia vencendo em breve' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'dias',
+    required: false,
+    type: Number,
+    description: 'Dias para considerar próximo do vencimento (padrão: 30)',
+    example: 30,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios com garantia vencendo',
+    type: [PatrimonioResponseDto],
+  })
+  async findGarantiaVencendo(
+    @Query('dias') dias?: number,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findGarantiaVencendo(dias || 30);
+  }
+
+  @Get('manutencao-prolongada')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Buscar patrimônios em manutenção prolongada' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiQuery({
+    name: 'dias',
+    required: false,
+    type: Number,
+    description: 'Dias em manutenção (padrão: 90)',
+    example: 90,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios em manutenção prolongada',
+    type: [PatrimonioResponseDto],
+  })
+  async findManutencaoProlongada(
+    @Query('dias') dias?: number,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findManutencaoProlongada(dias || 90);
+  }
+
+  @Get('sem-responsavel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Buscar patrimônios sem responsável' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios sem responsável',
+    type: [PatrimonioResponseDto],
+  })
+  async findSemResponsavel(): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.findSemResponsavel();
+  }
+
+  // ==================== FASE 3: HISTÓRICO ====================
+
+  @Get(':id/historico')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter histórico de alterações de um patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Histórico de alterações',
+    type: HistoricoAlteracaoResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  async getHistorico(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HistoricoAlteracaoResponseDto> {
+    return this.patrimonioService.getHistorico(id);
+  }
+
+  @Get(':id/historico/responsaveis')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter histórico de responsáveis de um patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Histórico de responsáveis',
+    type: HistoricoResponsaveisResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  async getHistoricoResponsaveis(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HistoricoResponsaveisResponseDto> {
+    return this.patrimonioService.getHistoricoResponsaveis(id);
+  }
+
+  @Get('responsavel/:id/historico')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter histórico de patrimônios por responsável' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do responsável',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios do responsável',
+    type: [PatrimonioResponseDto],
+  })
+  @ApiNotFoundResponse({
+    description: 'Usuário não encontrado',
+  })
+  async getHistoricoPorResponsavel(
+    @Param('id', ParseUUIDPipe) responsavelId: string,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.getHistoricoPorResponsavel(responsavelId);
   }
 }

@@ -1,0 +1,30 @@
+import { Test } from '@nestjs/testing';
+import { PatrimonioController } from '../../../src/patrimonio/patrimonio.controller';
+import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+
+describe('PatrimonioController – getHistoricoResponsaveis', () => {
+  let controller: PatrimonioController;
+  const service = { getHistoricoResponsaveis: jest.fn() };
+
+  beforeEach(async () => {
+    const mod = await Test.createTestingModule({
+      controllers: [PatrimonioController],
+      providers: [{ provide: PatrimonioService, useValue: service }],
+    }).compile();
+    controller = mod.get(PatrimonioController);
+    jest.clearAllMocks();
+  });
+
+  it('GET /patrimonio/:id/historico/responsaveis → delega ao service.getHistoricoResponsaveis', async () => {
+    const id = '123e4567-e89b-12d3-a456-426614174000';
+    service.getHistoricoResponsaveis.mockResolvedValue({
+      patrimonioId: id,
+      historico: [],
+    });
+
+    const res = await controller.getHistoricoResponsaveis(id);
+
+    expect(service.getHistoricoResponsaveis).toHaveBeenCalledWith(id);
+    expect(res).toBeDefined();
+  });
+});

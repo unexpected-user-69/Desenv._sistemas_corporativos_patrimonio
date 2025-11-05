@@ -13,6 +13,7 @@ import { CategoriasModule } from './categorias/categorias.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
+import { EventsModule } from './events/events.module';
 import { MetricsController } from './common/controllers/metrics.controller';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -35,6 +36,7 @@ import { AuditInterceptor } from './common/interceptors/audit.interceptor';
     LoggerModule,
     CommonModule,
     AuthModule,
+    EventsModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [

@@ -18,3 +18,9 @@ export { ToLowerCase } from './to-lowercase.transformer';
 
 // Validadores UUID
 export { IsUUIDOrEmpty, IsUUIDOrEmptyConstraint } from './is-uuid-or-empty.validator';
+
+// Validadores de data
+export { IsDateAfter, IsDateAfterConstraint } from './is-date-after.validator';
+
+// Validadores numéricos
+export { IsGreaterThanOrEqual, IsGreaterThanOrEqualConstraint } from './is-greater-than-or-equal.validator';

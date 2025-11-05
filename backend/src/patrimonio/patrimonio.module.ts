@@ -9,6 +9,6 @@ import { UsersModule } from '../users/users.module';
   imports: [TypeOrmModule.forFeature([Patrimonio]), UsersModule],
   controllers: [PatrimonioController],
   providers: [PatrimonioService],
-  exports: [PatrimonioService],
+  exports: [PatrimonioService, TypeOrmModule],
 })
 export class PatrimonioModule {}

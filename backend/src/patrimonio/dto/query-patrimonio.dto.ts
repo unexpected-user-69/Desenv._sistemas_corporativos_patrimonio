@@ -9,6 +9,7 @@ import {
   Max,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
+import { IsGreaterThanOrEqual } from '../../common/validators';
 import { PatrimonioStatus } from '../entities/patrimonio.entity';
 
 export class QueryPatrimonioDto {
@@ -118,6 +119,9 @@ export class QueryPatrimonioDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
+  @IsGreaterThanOrEqual('valorMinimo', { 
+    message: 'O valor máximo deve ser maior ou igual ao valor mínimo' 
+  })
   valorMaximo?: number;
 
   @ApiPropertyOptional({

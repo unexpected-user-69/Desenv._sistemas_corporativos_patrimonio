@@ -8,7 +8,7 @@ config();
 const common = {
   type: 'postgres' as const,
   entities: [__dirname + '/../**/*.entity.{ts,js}'],
-  // Migrations no padrão Aurora (database/migrations/)
+  // Migrations apenas no padrão Aurora (database/migrations/)
   migrations: [__dirname + '/migrations/*.{ts,js}'],
   synchronize: false, // nunca em prod
   migrationsRun: false, // rode pelos scripts

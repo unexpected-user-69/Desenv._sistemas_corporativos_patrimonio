@@ -11,12 +11,17 @@ import {
   BadRequestException,
   HttpException,
   Logger,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody, ApiUnauthorizedResponse, ApiForbiddenResponse } from '@nestjs/swagger';
 import { AuditService } from './audit.service';
 import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 import { SearchAuditLogsDto } from './dto/search-audit-logs.dto';
 import { TransformAndValidatePipe } from './pipes/transform-and-validate.pipe';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '../users/enums/user-role.enum';
 
 @ApiTags('audit')
 @ApiBearerAuth()
@@ -91,14 +96,22 @@ export class AuditController {
   }
 
   @Get('logs')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Buscar logs de auditoria' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
   @ApiResponse({ status: 200, description: 'Lista de logs de auditoria' })
   async searchAuditLogs(@Query() searchDto: SearchAuditLogsDto) {
     return await this.auditService.findAll(searchDto);
   }
 
   @Get('logs/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Buscar log de auditoria por ID' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
   @ApiParam({ 
     name: 'id', 
     description: 'ID do log de auditoria', 
@@ -125,7 +138,11 @@ export class AuditController {
   }
 
   @Get('logs/entity/:entityType/:entityId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Buscar logs por entidade' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
   @ApiParam({ 
     name: 'entityType', 
     description: 'Tipo da entidade', 
@@ -157,7 +174,11 @@ export class AuditController {
   }
 
   @Get('logs/user/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Buscar logs por usuário' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
   @ApiParam({ 
     name: 'userId', 
     description: 'ID do usuário', 
@@ -179,7 +200,11 @@ export class AuditController {
   }
 
   @Get('stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Obter estatísticas de auditoria' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
   @ApiResponse({ status: 200, description: 'Estatísticas de auditoria' })
   async getAuditStats() {
     return await this.auditService.getAuditStats();

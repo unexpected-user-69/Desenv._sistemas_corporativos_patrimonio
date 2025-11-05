@@ -1,0 +1,34 @@
+import { Test } from '@nestjs/testing';
+import { PatrimonioController } from '../../../src/patrimonio/patrimonio.controller';
+import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { TransferirResponsavelBulkDto } from '../../../src/patrimonio/dto/transferir-responsavel-bulk.dto';
+
+describe('PatrimonioController – transferResponsavelBulk', () => {
+  let controller: PatrimonioController;
+  const service = { transferResponsavelBulk: jest.fn() };
+
+  beforeEach(async () => {
+    const mod = await Test.createTestingModule({
+      controllers: [PatrimonioController],
+      providers: [{ provide: PatrimonioService, useValue: service }],
+    }).compile();
+    controller = mod.get(PatrimonioController);
+    jest.clearAllMocks();
+  });
+
+  it('POST /patrimonio/bulk/transferir-responsavel → delega ao service.transferResponsavelBulk', async () => {
+    const dto: TransferirResponsavelBulkDto = {
+      ids: [
+        '123e4567-e89b-12d3-a456-426614174000',
+        '223e4567-e89b-12d3-a456-426614174001',
+      ],
+      novoResponsavelId: '323e4567-e89b-12d3-a456-426614174002',
+    };
+    service.transferResponsavelBulk.mockResolvedValue({ transferidos: 2 });
+
+    const res = await controller.transferResponsavelBulk(dto);
+
+    expect(service.transferResponsavelBulk).toHaveBeenCalledWith(dto);
+    expect(res).toEqual({ transferidos: 2 });
+  });
+});

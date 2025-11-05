@@ -25,5 +25,6 @@ export const repositoryMockFactory = <
     delete: jest.fn(),
     softDelete: jest.fn(),
     preload: jest.fn(),
+    count: jest.fn(),
     // adicione outros que seu service usar (ex.: delete, softDelete, etc.)
   }) as unknown as MockType<Repository<Entity>>;

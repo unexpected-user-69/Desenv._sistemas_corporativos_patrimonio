@@ -17,6 +17,7 @@ import { LogoutDto } from './dto/logout.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse, ApiBody, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
@@ -34,6 +35,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requisições por minuto
   @ApiOperation({ 
     summary: 'Autenticar usuário',
     description: 'Valida as credenciais e retorna access token e refresh token. O access token expira em 15 minutos. Use o refresh token para renovar o access token.',
@@ -60,6 +62,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requisições por minuto
   @ApiOperation({ 
     summary: 'Renovar access token usando refresh token',
     description: 'Valida o refresh token e retorna um novo par de tokens (access + refresh). O refresh token antigo é revogado automaticamente.',

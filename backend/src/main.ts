@@ -62,6 +62,7 @@ async function bootstrap() {
     .addTag('users', 'Gerenciamento de usuários')
     .addTag('patrimonio', 'Gestão de patrimônio')
     .addTag('categorias', 'Categorias de patrimônio')
+    .addTag('events', 'Eventos relacionados a patrimônio')
     .addTag('audit', 'Sistema de auditoria')
     .addTag('common', 'Utilitários compartilhados')
     .addBearerAuth(

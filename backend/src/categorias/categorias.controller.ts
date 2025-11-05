@@ -10,12 +10,16 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
+  ApiBearerAuth,
+  ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { CategoriasService } from './categorias.service';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
@@ -25,6 +29,10 @@ import {
   CategoriaResponseDto,
   PaginatedCategoriaResponseDto,
 } from './dto/categoria-response.dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '../users/enums/user-role.enum';
 
 @Controller('categorias')
 @ApiTags('categorias')
@@ -32,10 +40,15 @@ export class CategoriasController {
   constructor(private readonly categoriasService: CategoriasService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Criar nova categoria',
-    description: 'Cria uma nova categoria de patrimônio',
+    description: 'Cria uma nova categoria de patrimônio. Requer permissão de TEACHER ou ADMIN.',
   })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
   @ApiResponse({
     status: 201,
     description: 'Categoria criada com sucesso',
@@ -114,10 +127,15 @@ export class CategoriasController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Atualizar categoria',
-    description: 'Atualiza todos os campos de uma categoria',
+    description: 'Atualiza todos os campos de uma categoria. Requer permissão de TEACHER ou ADMIN.',
   })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
   @ApiParam({
     name: 'id',
     description: 'ID da categoria (exemplo: categoria EQUIPAMENTO)',
@@ -144,11 +162,16 @@ export class CategoriasController {
   }
 
   @Patch(':id/desativar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Desativar categoria',
-    description: 'Marca a categoria como inativa',
+    description: 'Marca a categoria como inativa. Requer permissão de TEACHER ou ADMIN.',
   })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
   @ApiParam({
     name: 'id',
     description: 'ID da categoria (exemplo: categoria EQUIPAMENTO)',
@@ -167,11 +190,16 @@ export class CategoriasController {
   }
 
   @Patch(':id/ativar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Ativar categoria',
-    description: 'Marca a categoria como ativa',
+    description: 'Marca a categoria como ativa. Requer permissão de TEACHER ou ADMIN.',
   })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
   @ApiParam({
     name: 'id',
     description: 'ID da categoria (exemplo: categoria EQUIPAMENTO)',
@@ -190,11 +218,16 @@ export class CategoriasController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Deletar categoria',
-    description: 'Remove uma categoria (soft delete)',
+    description: 'Remove uma categoria (soft delete). Requer permissão de ADMIN.',
   })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
   @ApiParam({
     name: 'id',
     description: 'ID da categoria (exemplo: categoria EQUIPAMENTO)',

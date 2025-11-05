@@ -10,6 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
 import { UserRole } from './enums/user-role.enum';
 import {
@@ -44,7 +45,11 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TEACHER, UserRole.ADMIN)
   @ApiOperation({ summary: 'Listar todos os usuários' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
   @ApiOkResponse({
     description: 'Lista todos os usuários com paginação e filtros avançados',
     type: PaginatedUsersResponseDto,
@@ -103,7 +108,9 @@ export class UsersController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Buscar usuário por ID' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiOkResponse({
     description: 'Retorna um usuário pelo ID',
     type: UserResponseDto,
@@ -143,7 +150,9 @@ export class UsersController {
   }
 
   @Get('email/:email')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Buscar usuário por email' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiOkResponse({
     description: 'Retorna um usuário pelo email',
     type: UserResponseDto,
@@ -200,6 +209,7 @@ export class UsersController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requisições por minuto
   @ApiOperation({ summary: 'Criar um novo usuário' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })

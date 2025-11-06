@@ -15,6 +15,7 @@ import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
 import { IntegrationsErpModule } from './integrations-erp/integrations-erp.module';
+import { InventoryMobileModule } from './inventory-mobile/inventory-mobile.module';
 import { MetricsController } from './common/controllers/metrics.controller';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -39,6 +40,7 @@ import { AuditInterceptor } from './common/interceptors/audit.interceptor';
     AuthModule,
     EventsModule,
     IntegrationsErpModule,
+    InventoryMobileModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [

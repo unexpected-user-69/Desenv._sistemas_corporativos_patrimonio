@@ -1,3 +1,7 @@
+// Habilitar auto-auth para testes ANTES de importar módulos
+process.env.DEV_AUTO_AUTH = 'true';
+process.env.NODE_ENV = 'test';
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
@@ -44,6 +48,63 @@ describe('Integrations ERP (e2e)', () => {
     // Obter DataSource do NestJS
     dataSource = app.get(DataSource);
 
+    // Executar migrações do integrations-erp se as tabelas não existirem
+    try {
+      await dataSource.query('SELECT 1 FROM connectors LIMIT 1');
+    } catch (error) {
+      // Tabelas não existem, executar migrações
+      const queryRunner = dataSource.createQueryRunner();
+      await queryRunner.connect();
+      
+      try {
+        // Criar tabela connectors
+        await queryRunner.query(`
+          CREATE TABLE IF NOT EXISTS connectors (
+            id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+            key varchar(80) NOT NULL UNIQUE,
+            name varchar(120) NOT NULL,
+            config_json jsonb NOT NULL DEFAULT '{}',
+            enabled boolean NOT NULL DEFAULT true,
+            created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+          );
+          CREATE UNIQUE INDEX IF NOT EXISTS ux_connectors_key ON connectors(key);
+        `);
+
+        // Criar tabela executions
+        await queryRunner.query(`
+          CREATE TABLE IF NOT EXISTS executions (
+            id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+            connector_id uuid NOT NULL REFERENCES connectors(id) ON DELETE RESTRICT,
+            type varchar(16) NOT NULL CHECK (type IN ('import','export')),
+            status varchar(16) NOT NULL CHECK (status IN ('queued','running','success','failed','canceled')),
+            started_at timestamptz,
+            finished_at timestamptz,
+            error text,
+            created_by varchar(120),
+            created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+          );
+          CREATE INDEX IF NOT EXISTS ix_executions_connector_status_started_at ON executions(connector_id, status, started_at DESC);
+          CREATE INDEX IF NOT EXISTS ix_executions_created_by_started_at ON executions(created_by, started_at DESC);
+        `);
+
+        // Criar tabela execution_logs
+        await queryRunner.query(`
+          CREATE TABLE IF NOT EXISTS execution_logs (
+            id bigserial PRIMARY KEY,
+            execution_id uuid NOT NULL REFERENCES executions(id) ON DELETE CASCADE,
+            level varchar(10) NOT NULL CHECK (level IN ('debug','info','warn','error')),
+            message text NOT NULL,
+            meta_json jsonb NOT NULL DEFAULT '{}',
+            created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+          );
+          CREATE INDEX IF NOT EXISTS ix_execution_logs_execution_created_at ON execution_logs(execution_id, created_at ASC);
+        `);
+      } finally {
+        await queryRunner.release();
+      }
+    }
+
     // Criar conector de teste
     const connectorRepo = dataSource.getRepository(Connector);
     const testConnector = connectorRepo.create({
@@ -85,6 +146,7 @@ describe('Integrations ERP (e2e)', () => {
     }
 
     await app.close();
+    delete process.env.DEV_AUTO_AUTH;
   });
 
   describe('POST /v1/integrations/run', () => {
@@ -138,15 +200,22 @@ describe('Integrations ERP (e2e)', () => {
     });
 
     it('should return 400 for disabled connector', async () => {
-      // Criar conector desabilitado
+      // Criar conector desabilitado (verificar se já existe primeiro)
       const connectorRepo = dataSource.getRepository(Connector);
-      const disabledConnector = connectorRepo.create({
-        key: 'disabled-connector',
-        name: 'Disabled Connector',
-        configJson: { baseUrl: 'https://api.example.com' },
-        enabled: false,
-      });
-      await connectorRepo.save(disabledConnector);
+      let disabledConnector = await connectorRepo.findOne({ where: { key: 'disabled-connector' } });
+      if (!disabledConnector) {
+        disabledConnector = connectorRepo.create({
+          key: 'disabled-connector',
+          name: 'Disabled Connector',
+          configJson: { baseUrl: 'https://api.example.com' },
+          enabled: false,
+        });
+        await connectorRepo.save(disabledConnector);
+      } else {
+        // Se já existe, garantir que está desabilitado
+        disabledConnector.enabled = false;
+        await connectorRepo.save(disabledConnector);
+      }
 
       const runDto = {
         connectorKey: 'disabled-connector',

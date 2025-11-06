@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Execution, ExecutionStatus } from '../entities/execution.entity';
@@ -60,7 +60,7 @@ export class IntegrationMetricsService {
     });
 
     if (!connector) {
-      throw new Error(`Connector ${connectorKey} not found`);
+      throw new NotFoundException(`Connector ${connectorKey} not found`);
     }
 
     const executions = await this.executionRepository.find({
@@ -203,4 +203,5 @@ export class IntegrationMetricsService {
     return metrics;
   }
 }
+
 

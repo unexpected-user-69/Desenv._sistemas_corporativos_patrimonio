@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
 import { Connector } from '../entities/connector.entity';
@@ -65,7 +65,7 @@ export class HealthCheckService {
     });
 
     if (!connector) {
-      throw new Error(`Connector ${connectorKey} not found`);
+      throw new NotFoundException(`Connector ${connectorKey} not found`);
     }
 
     const now = new Date();
@@ -198,4 +198,5 @@ export class HealthCheckService {
     };
   }
 }
+
 

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Execution } from '../entities/execution.entity';
 import { ExecutionLog, LogLevel } from '../entities/execution-log.entity';
@@ -45,7 +45,7 @@ export class ReconciliationService {
     });
 
     if (!execution) {
-      throw new Error(`Execution ${executionId} not found`);
+      throw new NotFoundException(`Execution ${executionId} not found`);
     }
 
     const summary: ReconciliationSummary = {
@@ -157,4 +157,5 @@ export class ReconciliationService {
     await logRepo.save(log);
   }
 }
+
 

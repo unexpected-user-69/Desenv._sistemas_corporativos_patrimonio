@@ -34,7 +34,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       // Apenas auto-injeta um usuário fake se DEV_AUTO_AUTH estiver explicitamente
       // definido como 'true'.
       if ((process.env.DEV_AUTO_AUTH ?? 'false').toLowerCase() === 'true') {
-        request.user = { sub: '00000000-0000-0000-0000-000000000001', isAdmin: true, roles: ['admin'] };
+        request.user = { sub: '00000000-0000-0000-0000-000000000001', isAdmin: true, roles: ['ADMIN'] };
         return true;
       }
 

@@ -102,3 +102,4 @@ export interface EntityMappingConfig {
   globalValidations?: ValidationRule[];
 }
 
+

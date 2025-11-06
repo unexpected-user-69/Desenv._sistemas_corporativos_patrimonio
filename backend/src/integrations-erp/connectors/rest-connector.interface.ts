@@ -27,3 +27,4 @@ export interface IConnector {
   delete<T = any>(endpoint: string): Promise<ConnectorResponse<T>>;
 }
 
+

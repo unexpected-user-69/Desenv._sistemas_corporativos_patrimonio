@@ -103,3 +103,4 @@ npm run test:e2e -- integrations-erp --testNamePattern="should return 404|should
 - O conector de teste é criado automaticamente com a chave `test-connector`
 - Testes de erro não requerem autenticação (mas podem falhar se os guards estiverem ativos)
 
+

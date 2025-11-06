@@ -147,3 +147,4 @@ curl -X POST http://localhost:3101/v1/integrations/run \
 
 **Conclusão**: Todos os erros estão corretamente implementados. Os testes falham apenas porque o banco de dados não tem as tabelas criadas (migrações não executadas).
 
+

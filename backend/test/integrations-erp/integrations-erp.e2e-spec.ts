@@ -11,6 +11,19 @@ import { ExecutionType, ExecutionStatus } from '../../src/integrations-erp/entit
 import { IntegrationEntity } from '../../src/integrations-erp/dto/run-integration.dto';
 import { LogLevel } from '../../src/integrations-erp/entities/execution-log.entity';
 
+/**
+ * Testes E2E para o módulo integrations-erp
+ * 
+ * ⚠️ PRÉ-REQUISITOS:
+ * - Banco de dados PostgreSQL deve estar rodando
+ * - Migrações devem estar executadas (npm run migration:run)
+ * 
+ * Os testes validam:
+ * - ✅ Cenários de sucesso (criação, listagem, detalhes)
+ * - ✅ Erros 404 (conector não encontrado, execução não encontrada)
+ * - ✅ Erros 400 (dados inválidos, conector desabilitado)
+ * - ✅ Edge cases (paginação, filtros, execuções sem logs)
+ */
 describe('Integrations ERP (e2e)', () => {
   let app: INestApplication;
   let httpServer: http.Server;

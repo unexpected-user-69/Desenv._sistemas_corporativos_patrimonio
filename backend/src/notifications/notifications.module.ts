@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bull';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { NotificationTemplate } from './entities/notification-template.entity';
@@ -8,8 +9,10 @@ import { Webhook } from './entities/webhook.entity';
 import { NotificationLog } from './entities/notification-log.entity';
 import { TemplateEngineService } from './services/template-engine.service';
 import { NotificationSenderService } from './services/notification-sender.service';
+import { NotificationQueueService } from './services/notification-queue.service';
 import { EmailChannelService } from './services/channels/email-channel.service';
 import { WebhookChannelService } from './services/channels/webhook-channel.service';
+import { NotificationProcessor } from './processors/notification.processor';
 
 @Module({
   imports: [

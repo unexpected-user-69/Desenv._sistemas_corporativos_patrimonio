@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { BullModule } from '@nestjs/bull';
 import { AppDataSource } from './database/data-source';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -18,6 +19,7 @@ import { IntegrationsErpModule } from './integrations-erp/integrations-erp.modul
 import { InventoryMobileModule } from './inventory-mobile/inventory-mobile.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ReportsModule } from './reports/reports.module';
 import { MetricsController } from './common/controllers/metrics.controller';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -32,6 +34,15 @@ import { AuditInterceptor } from './common/interceptors/audit.interceptor';
         limit: 100, // 100 requests por minuto
       },
     ]),
+    // BullMQ configuration (Redis)
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
+        password: process.env.REDIS_PASSWORD,
+        db: parseInt(process.env.REDIS_DB || '0', 10),
+      },
+    }),
     TypeOrmModule.forRoot(AppDataSource.options),
     UsersModule,
     PatrimonioModule,
@@ -45,6 +56,7 @@ import { AuditInterceptor } from './common/interceptors/audit.interceptor';
     InventoryMobileModule,
     MaintenanceModule,
     NotificationsModule,
+    ReportsModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [

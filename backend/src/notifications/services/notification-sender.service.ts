@@ -8,6 +8,8 @@ import { NotificationLog, NotificationStatus } from '../entities/notification-lo
 import { TemplateEngineService } from './template-engine.service';
 import { EmailChannelService } from './channels/email-channel.service';
 import { WebhookChannelService } from './channels/webhook-channel.service';
+import { NotificationStructuredLoggerService } from '../observability/notification-structured-logger.service';
+import { NotificationTracingService } from '../observability/notification-tracing.service';
 
 /**
  * Serviço responsável por processar e enviar notificações
@@ -28,10 +30,13 @@ export class NotificationSenderService {
     private templateEngine: TemplateEngineService,
     private emailChannel: EmailChannelService,
     private webhookChannel: WebhookChannelService,
+    private structuredLogger: NotificationStructuredLoggerService,
+    private tracing: NotificationTracingService,
   ) {}
 
   /**
    * Processa e envia uma notificação baseada em um evento
+   * Este método é chamado pelo processor da fila ou diretamente (modo síncrono)
    */
   async sendNotification(
     eventKey: string,
@@ -39,6 +44,10 @@ export class NotificationSenderService {
     recipient?: string,
   ): Promise<void> {
     const startTime = Date.now();
+    const traceId = this.tracing.startTrace('send-notification', {
+      eventKey,
+      recipient: recipient || 'N/A',
+    });
 
     try {
       // Buscar política para o evento
@@ -53,13 +62,35 @@ export class NotificationSenderService {
 
       // Processar cada canal configurado
       for (const channel of policy.channels) {
-        await this.sendToChannel(channel, eventKey, data, recipient, policy.priority);
+        const spanId = this.tracing.addSpan(traceId, `send-to-${channel}`, { channel });
+        try {
+          await this.sendToChannel(channel, eventKey, data, recipient, policy.priority);
+          this.tracing.finishSpan(traceId, spanId, { success: 1 });
+        } catch (error: any) {
+          this.tracing.finishSpan(traceId, spanId, { success: 0, error: error.message });
+          throw error;
+        }
       }
+
+      this.tracing.finishTrace(traceId);
     } catch (error: any) {
+      const durationMs = Date.now() - startTime;
       this.logger.error(`Erro ao processar notificação para evento ${eventKey}:`, error);
+      
+      this.structuredLogger.logNotificationFailed(
+        eventKey,
+        'multi',
+        recipient || 'N/A',
+        `trace-${traceId}`,
+        error.message,
+        1,
+      );
+
+      this.tracing.finishTrace(traceId);
+
       await this.createLog(eventKey, NotificationChannel.EMAIL, NotificationStatus.FAILED, {
         error: error.message,
-        durationMs: Date.now() - startTime,
+        durationMs,
         recipient,
       });
     }
@@ -147,9 +178,31 @@ export class NotificationSenderService {
           throw new Error(`Canal desconhecido: ${channel}`);
       }
 
+      const durationMs = Date.now() - startTime;
+
+      // Log estruturado
+      if (status === NotificationStatus.SENT) {
+        this.structuredLogger.logNotificationSent(
+          eventKey,
+          channel,
+          recipient || 'N/A',
+          `trace-${Date.now()}`,
+          durationMs,
+        );
+      } else if (status === NotificationStatus.FAILED) {
+        this.structuredLogger.logNotificationFailed(
+          eventKey,
+          channel,
+          recipient || 'N/A',
+          `trace-${Date.now()}`,
+          error || 'Unknown error',
+          1,
+        );
+      }
+
       // Criar log de notificação
       await this.createLog(eventKey, channel as NotificationChannel, status, {
-        durationMs: Date.now() - startTime,
+        durationMs,
         recipient,
         error,
       });

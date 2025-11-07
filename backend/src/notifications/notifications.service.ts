@@ -213,7 +213,8 @@ export class NotificationsService {
     // Renderizar template usando Handlebars
     const rendered = this.templateEngine.renderTemplate(template, dto.data || {});
 
-    // Enviar notificação via NotificationSenderService
+    // Enviar notificação diretamente (modo síncrono para testes)
+    // Em produção, usar NotificationQueueService para enfileirar
     await this.notificationSender.sendNotification(
       dto.templateKey,
       dto.data || {},

@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
   UseGuards,
@@ -35,13 +36,22 @@ import { PolicyResponseDto } from './dto/policy-response.dto';
 import { CreateWebhookDto } from './dto/create-webhook.dto';
 import { WebhookResponseDto } from './dto/webhook-response.dto';
 import { NotificationTestDto } from './dto/notification-test.dto';
+import { QueueStatsResponseDto } from './dto/queue-stats-response.dto';
+import { MetricsQueryDto } from './dto/metrics-query.dto';
+import { MetricsResponseDto } from './dto/metrics-response.dto';
+import { NotificationQueueService } from './services/notification-queue.service';
+import { NotificationMetricsService } from './observability/notification-metrics.service';
 
 @ApiTags('notifications')
 @ApiBearerAuth()
 @Controller('v1/notifications')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(
+    private readonly notificationsService: NotificationsService,
+    private readonly queueService: NotificationQueueService,
+    private readonly metricsService: NotificationMetricsService,
+  ) {}
 
   @Post('test')
   @Roles(UserRole.ADMIN, UserRole.TEACHER)
@@ -242,6 +252,74 @@ export class NotificationsController {
   @ApiForbiddenResponse({ description: 'Sem permissão' })
   async findAllWebhooks(): Promise<WebhookResponseDto[]> {
     return this.notificationsService.findAllWebhooks();
+  }
+
+  // ========== QUEUE STATS ==========
+
+  @Get('queue/stats')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Estatísticas da fila de notificações',
+    description: 'Retorna estatísticas sobre jobs na fila (waiting, active, completed, failed)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas da fila',
+    type: QueueStatsResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  async getQueueStats(): Promise<QueueStatsResponseDto> {
+    return this.queueService.getQueueStats();
+  }
+
+  // ========== METRICS ==========
+
+  @Get('metrics')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Métricas de notificações',
+    description: 'Retorna métricas detalhadas de notificações (sucesso, falha, latência, throughput)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Métricas de notificações',
+    type: MetricsResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  async getMetrics(@Query() query: MetricsQueryDto): Promise<MetricsResponseDto> {
+    const fromDate = query.fromDate
+      ? new Date(query.fromDate)
+      : new Date(Date.now() - 24 * 60 * 60 * 1000); // Últimas 24h
+    const toDate = query.toDate ? new Date(query.toDate) : new Date();
+
+    return this.metricsService.getMetrics(
+      fromDate,
+      toDate,
+      query.eventKey,
+      query.channel,
+    );
+  }
+
+  @Get('metrics/summary')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Métricas resumidas (últimas 24h)',
+    description: 'Retorna métricas resumidas das últimas 24 horas',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Métricas resumidas',
+    type: MetricsResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  async getSummaryMetrics(): Promise<MetricsResponseDto> {
+    return this.metricsService.getSummaryMetrics();
   }
 }
 

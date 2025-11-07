@@ -3,6 +3,7 @@ import { Job } from 'bull';
 import { Logger } from '@nestjs/common';
 import { NotificationJobData, NotificationJobResult } from '../interfaces/notification-job-data.interface';
 import { NotificationSenderService } from '../services/notification-sender.service';
+import { NotificationStructuredLoggerService } from '../observability/notification-structured-logger.service';
 
 /**
  * Processor para processar jobs de notificação da fila
@@ -13,6 +14,7 @@ export class NotificationProcessor {
 
   constructor(
     private readonly notificationSender: NotificationSenderService,
+    private readonly structuredLogger: NotificationStructuredLoggerService,
   ) {}
 
   @Process('send-notification')
@@ -23,6 +25,14 @@ export class NotificationProcessor {
 
     this.logger.log(
       `Processando notificação: ${eventKey} (attempt ${attempt}/${job.opts.attempts}, messageId: ${messageId})`,
+    );
+
+    // Log estruturado
+    this.structuredLogger.logQueueProcessing(
+      messageId || `job-${job.id}`,
+      eventKey,
+      job.id.toString(),
+      attempt,
     );
 
     try {
@@ -50,8 +60,8 @@ export class NotificationProcessor {
 
   /**
    * Handler para jobs que falharam após todas as tentativas (DLQ)
+   * Este handler é chamado automaticamente pelo BullMQ quando um job falha
    */
-  @Process({ name: 'send-notification', concurrency: 1 })
   async handleFailedNotification(job: Job<NotificationJobData>, error: Error) {
     const { eventKey, messageId } = job.data;
 

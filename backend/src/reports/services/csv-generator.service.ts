@@ -67,12 +67,12 @@ export class CsvGeneratorService {
       queryBuilder.andWhere('patrimonio.status = :status', { status: filters.status });
     }
     if (filters?.categoriaId) {
-      queryBuilder.andWhere('patrimonio.categoriaId = :categoriaId', {
+      queryBuilder.andWhere('patrimonio.categoria_id = :categoriaId', {
         categoriaId: filters.categoriaId,
       });
     }
     if (filters?.responsavelId) {
-      queryBuilder.andWhere('patrimonio.responsavelId = :responsavelId', {
+      queryBuilder.andWhere('patrimonio.responsavel_id = :responsavelId', {
         responsavelId: filters.responsavelId,
       });
     }

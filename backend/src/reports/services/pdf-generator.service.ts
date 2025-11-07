@@ -147,7 +147,7 @@ export class PdfGeneratorService {
       queryBuilder.andWhere('patrimonio.status = :status', { status: filters.status });
     }
     if (filters?.categoriaId) {
-      queryBuilder.andWhere('patrimonio.categoriaId = :categoriaId', {
+      queryBuilder.andWhere('patrimonio.categoria_id = :categoriaId', {
         categoriaId: filters.categoriaId,
       });
     }

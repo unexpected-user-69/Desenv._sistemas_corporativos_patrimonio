@@ -25,7 +25,7 @@ import { LogoutResponseDto } from './dto/logout-response.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 
 @Controller('auth')
-@ApiTags('Auth')
+@ApiTags('auth')
 @ApiBearerAuth()
 // ValidationPipe está configurado globalmente no AppModule
 export class AuthController {

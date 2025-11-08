@@ -5,7 +5,7 @@ import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { UserRole } from '../../users/enums/user-role.enum';
 
-@ApiTags('Cache')
+@ApiTags('cache')
 @ApiBearerAuth()
 @Controller('cache')
 @UseGuards(JwtAuthGuard, RolesGuard)

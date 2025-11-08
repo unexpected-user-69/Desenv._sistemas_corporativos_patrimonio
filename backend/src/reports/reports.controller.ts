@@ -24,6 +24,7 @@ import {
   ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import { Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -37,11 +38,13 @@ import { ListReportsQueryDto } from './dto/list-reports-query.dto';
 @ApiBearerAuth()
 @Controller('v1/reports')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Throttle({ default: { limit: 60, ttl: 60000 } }) // 60 requisições por minuto por padrão
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Post('export')
   @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 solicitações por minuto
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Solicitar geração de relatório',
@@ -61,7 +64,8 @@ export class ReportsController {
     @Request() req: any,
   ): Promise<ReportRequestResponseDto> {
     const userId = req.user?.id || req.user?.sub;
-    return this.reportsService.createRequest(dto, userId);
+    const userRole = req.user?.role;
+    return this.reportsService.createRequest(dto, userId, userRole);
   }
 
   @Get('requests')

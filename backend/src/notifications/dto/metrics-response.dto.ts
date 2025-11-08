@@ -45,3 +45,5 @@ export class MetricsResponseDto {
   topErrors!: Array<{ error: string; count: number }>;
 }
 
+
+

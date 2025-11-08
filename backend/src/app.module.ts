@@ -4,6 +4,7 @@ import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { BullModule } from '@nestjs/bull';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppDataSource } from './database/data-source';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -27,6 +28,8 @@ import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 
 @Module({
   imports: [
+    // Schedule module for cron jobs
+    ScheduleModule.forRoot(),
     // Rate limiting configuration
     ThrottlerModule.forRoot([
       {

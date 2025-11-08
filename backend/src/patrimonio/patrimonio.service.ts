@@ -6,7 +6,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindManyOptions, ILike, Between, FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual, In } from 'typeorm';
+import { Repository, FindManyOptions, ILike, Between, FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual, In, Not, IsNull } from 'typeorm';
 import { DataSource } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { Patrimonio } from './entities/patrimonio.entity';
@@ -29,13 +29,22 @@ import { stringify } from 'csv-stringify/sync';
 import * as ExcelJS from 'exceljs';
 import { Response } from 'express';
 import { PatrimonioStatus } from './entities/patrimonio.entity';
+import { StorageService } from './services/storage.service';
 import { QueryAquisicaoPeriodoDto } from './dto/query-aquisicao-periodo.dto';
 import { QueryValorRangeDto } from './dto/query-valor-range.dto';
 import { QueryStatusMultiplosDto } from './dto/query-status-multiplos.dto';
 import { QueryCategoriasMultiplasDto } from './dto/query-categorias-multiplas.dto';
+import { ResponsavelStatsResponseDto } from './dto/responsavel-stats-response.dto';
+import { MarcaModeloStatsResponseDto, MarcaModeloStatsItemDto } from './dto/marca-modelo-stats-response.dto';
+import { TopValiososQueryDto } from './dto/top-valiosos-query.dto';
+import { NovosQueryDto } from './dto/novos-query.dto';
+import { PatrimonioLocalizacaoHistorico } from './entities/patrimonio-localizacao-historico.entity';
+import { HistoricoLocalizacoesResponseDto, HistoricoLocalizacaoItemDto } from './dto/historico-localizacoes-response.dto';
 import { CreateBulkPatrimonioDto } from './dto/create-bulk-patrimonio.dto';
 import { UpdateBulkPatrimonioDto } from './dto/update-bulk-patrimonio.dto';
 import { TransferirResponsavelBulkDto } from './dto/transferir-responsavel-bulk.dto';
+import { DeleteBulkPatrimonioDto } from './dto/delete-bulk-patrimonio.dto';
+import { DeleteBulkResponseDto } from './dto/delete-bulk-response.dto';
 import { ValidarCodigoResponseDto } from './dto/validar-codigo-response.dto';
 import { VerificarDuplicidadeDto } from './dto/verificar-duplicidade.dto';
 import { DuplicataResponseDto } from './dto/duplicata-response.dto';
@@ -51,8 +60,11 @@ export class PatrimonioService {
   constructor(
     @InjectRepository(Patrimonio)
     private readonly patrimonioRepository: Repository<Patrimonio>,
+    @InjectRepository(PatrimonioLocalizacaoHistorico)
+    private readonly historicoRepository: Repository<PatrimonioLocalizacaoHistorico>,
     private readonly usersService: UsersService,
     private readonly dataSource: DataSource,
+    private readonly storageService: StorageService,
   ) {}
 
   /**
@@ -301,7 +313,19 @@ export class PatrimonioService {
   async update(
     id: string,
     dto: UpdatePatrimonioDto,
+    userId?: string,
   ): Promise<PatrimonioResponseDto> {
+    // Buscar patrimônio atual para comparar localização
+    const patrimonioAtual = await this.patrimonioRepository.findOne({
+      where: { id },
+    });
+
+    if (!patrimonioAtual) {
+      throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
+    }
+
+    const localizacaoAnterior = patrimonioAtual.localizacao;
+
     const patrimonio = await this.patrimonioRepository.preload({
       id,
       ...dto,
@@ -313,6 +337,22 @@ export class PatrimonioService {
 
     if (!patrimonio) {
       throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
+    }
+
+    // Verificar se houve mudança de localização
+    const localizacaoNova = dto.localizacao;
+    if (localizacaoNova !== undefined && localizacaoAnterior !== localizacaoNova) {
+      // Registrar no histórico
+      const historico = this.historicoRepository.create({
+        patrimonioId: id,
+        localizacaoAnterior: localizacaoAnterior || undefined,
+        localizacaoNova: localizacaoNova,
+        dataMudanca: new Date(),
+        usuarioId: userId || undefined,
+      });
+
+      await this.historicoRepository.save(historico);
+      this.logger.log(`Histórico de localização registrado para patrimônio ${id} (via update)`);
     }
 
     try {
@@ -750,11 +790,12 @@ export class PatrimonioService {
   }
 
   /**
-   * Atualiza a localização de um patrimônio
+   * Atualiza a localização de um patrimônio e registra no histórico
    */
   async updateLocalizacao(
     id: string,
     dto: UpdateLocalizacaoPatrimonioDto,
+    userId?: string,
   ): Promise<PatrimonioResponseDto> {
     const patrimonio = await this.patrimonioRepository.findOne({
       where: { id },
@@ -762,6 +803,25 @@ export class PatrimonioService {
 
     if (!patrimonio) {
       throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
+    }
+
+    const localizacaoAnterior = patrimonio.localizacao;
+    const localizacaoNova = dto.localizacao;
+
+    // Verificar se houve mudança real de localização
+    if (localizacaoAnterior !== localizacaoNova) {
+      // Registrar no histórico
+      const historico = this.historicoRepository.create({
+        patrimonioId: id,
+        localizacaoAnterior: localizacaoAnterior || undefined,
+        localizacaoNova: localizacaoNova,
+        dataMudanca: new Date(),
+        usuarioId: userId || undefined,
+        observacoes: dto.observacoes || undefined,
+      });
+
+      await this.historicoRepository.save(historico);
+      this.logger.log(`Histórico de localização registrado para patrimônio ${id}`);
     }
 
     patrimonio.localizacao = dto.localizacao;
@@ -1806,5 +1866,405 @@ export class PatrimonioService {
     return patrimonios.map((patrimonio) =>
       this.serializePatrimonio(patrimonio),
     );
+  }
+
+  /**
+   * Faz upload de foto para um patrimônio
+   */
+  async uploadFoto(
+    id: string,
+    file: Express.Multer.File,
+  ): Promise<PatrimonioResponseDto> {
+    // Verificar se patrimônio existe
+    const patrimonio = await this.patrimonioRepository.findOne({
+      where: { id },
+    });
+
+    if (!patrimonio) {
+      throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
+    }
+
+    // Se já existe foto, remover a anterior
+    if (patrimonio.fotoUrl) {
+      await this.storageService.deleteFile(patrimonio.fotoUrl);
+    }
+
+    // Salvar nova foto
+    const fileResult = await this.storageService.saveFile(file, id);
+
+    // Atualizar patrimônio
+    patrimonio.fotoUrl = fileResult.url;
+    const updatedPatrimonio = await this.patrimonioRepository.save(patrimonio);
+
+    this.logger.log(`Foto uploadada para patrimônio ${id}: ${fileResult.url}`);
+
+    return this.serializePatrimonio(updatedPatrimonio);
+  }
+
+  /**
+   * Remove foto de um patrimônio
+   */
+  async removeFoto(id: string): Promise<PatrimonioResponseDto> {
+    // Verificar se patrimônio existe
+    const patrimonio = await this.patrimonioRepository.findOne({
+      where: { id },
+    });
+
+    if (!patrimonio) {
+      throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
+    }
+
+    // Remover arquivo do storage
+    if (patrimonio.fotoUrl) {
+      await this.storageService.deleteFile(patrimonio.fotoUrl);
+    }
+
+    // Limpar fotoUrl (usar null para compatibilidade com TypeORM)
+    (patrimonio as any).fotoUrl = null;
+    const updatedPatrimonio = await this.patrimonioRepository.save(patrimonio);
+
+    this.logger.log(`Foto removida do patrimônio ${id}`);
+
+    return this.serializePatrimonio(updatedPatrimonio);
+  }
+
+  /**
+   * Lista patrimônios que possuem foto
+   */
+  async findAllWithFoto(
+    query: QueryPatrimonioDto,
+  ): Promise<PaginatedPatrimonioResponseDto> {
+    // Criar query builder com filtro para fotoUrl não nulo
+    const queryBuilder = this.patrimonioRepository
+      .createQueryBuilder('patrimonio')
+      .where('patrimonio.fotoUrl IS NOT NULL')
+      .andWhere('patrimonio.fotoUrl != :empty', { empty: '' });
+
+    // Aplicar os mesmos filtros do findAllWithFilters
+    const {
+      page = 1,
+      limit = 10,
+      q,
+      categoriaId,
+      status,
+      marca,
+      modelo,
+      localizacao,
+      responsavelId,
+      valorMinimo,
+      valorMaximo,
+      dataInicial,
+      dataFinal,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+    } = query;
+
+    // Aplicar filtros
+    if (q) {
+      const searchText = `%${this.normalizeSearchText(q)}%`;
+      queryBuilder.andWhere(
+        '(LOWER(patrimonio.codigo) LIKE LOWER(:search) OR LOWER(patrimonio.nome) LIKE LOWER(:search) OR LOWER(patrimonio.descricao) LIKE LOWER(:search))',
+        { search: searchText },
+      );
+    }
+
+    if (categoriaId) {
+      queryBuilder.andWhere('patrimonio.categoriaId = :categoriaId', { categoriaId });
+    }
+
+    if (status) {
+      queryBuilder.andWhere('patrimonio.status = :status', { status });
+    }
+
+    if (marca) {
+      queryBuilder.andWhere('LOWER(patrimonio.marca) LIKE LOWER(:marca)', {
+        marca: `%${marca}%`,
+      });
+    }
+
+    if (modelo) {
+      queryBuilder.andWhere('LOWER(patrimonio.modelo) LIKE LOWER(:modelo)', {
+        modelo: `%${modelo}%`,
+      });
+    }
+
+    if (localizacao) {
+      queryBuilder.andWhere('LOWER(patrimonio.localizacao) LIKE LOWER(:localizacao)', {
+        localizacao: `%${localizacao}%`,
+      });
+    }
+
+    if (responsavelId) {
+      queryBuilder.andWhere('patrimonio.responsavelId = :responsavelId', { responsavelId });
+    }
+
+    if (valorMinimo !== undefined) {
+      queryBuilder.andWhere('patrimonio.valorAquisicao >= :valorMinimo', { valorMinimo });
+    }
+
+    if (valorMaximo !== undefined) {
+      queryBuilder.andWhere('patrimonio.valorAquisicao <= :valorMaximo', { valorMaximo });
+    }
+
+    if (dataInicial) {
+      queryBuilder.andWhere('patrimonio.dataAquisicao >= :dataInicial', {
+        dataInicial,
+      });
+    }
+
+    if (dataFinal) {
+      queryBuilder.andWhere('patrimonio.dataAquisicao <= :dataFinal', {
+        dataFinal,
+      });
+    }
+
+    // Aplicar ordenação
+    const validSortFields = ['nome', 'codigo', 'createdAt', 'updatedAt', 'valorAquisicao', 'dataAquisicao'];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const order = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    queryBuilder.orderBy(`patrimonio.${sortField}`, order);
+
+    // Contar total
+    const total = await queryBuilder.getCount();
+
+    // Aplicar paginação
+    const skip = (page - 1) * limit;
+    queryBuilder.skip(skip).take(limit);
+
+    // Carregar relações necessárias
+    queryBuilder.leftJoinAndSelect('patrimonio.categoria', 'categoria');
+    queryBuilder.leftJoinAndSelect('patrimonio.responsavel', 'responsavel');
+
+    // Executar query
+    const patrimonios = await queryBuilder.getMany();
+
+    const totalPages = Math.ceil(total / limit);
+    return {
+      data: patrimonios.map((p) => this.serializePatrimonio(p)),
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
+  }
+
+  /**
+   * Obtém estatísticas de patrimônios por responsável
+   */
+  async getStatsByResponsavel(responsavelId: string): Promise<ResponsavelStatsResponseDto> {
+    // Verificar se responsável existe
+    try {
+      await this.usersService.findOne(responsavelId);
+    } catch (error) {
+      throw new NotFoundException(`Responsável com ID "${responsavelId}" não encontrado`);
+    }
+
+    // Buscar todos os patrimônios do responsável
+    const patrimonios = await this.patrimonioRepository.find({
+      where: { responsavelId },
+      relations: ['categoria'],
+    });
+
+    // Calcular estatísticas
+    const total = patrimonios.length;
+    const valorTotal = patrimonios.reduce((sum, p) => sum + (parseFloat(String(p.valorAquisicao || 0)) || 0), 0);
+
+    // Agrupar por categoria
+    const porCategoria: Record<string, number> = {};
+    patrimonios.forEach((p) => {
+      const categoriaNome = p.categoria?.nome || 'SEM_CATEGORIA';
+      porCategoria[categoriaNome] = (porCategoria[categoriaNome] || 0) + 1;
+    });
+
+    // Agrupar por status
+    const porStatus: Record<string, number> = {};
+    patrimonios.forEach((p) => {
+      porStatus[p.status] = (porStatus[p.status] || 0) + 1;
+    });
+
+    return {
+      responsavelId,
+      total,
+      valorTotal,
+      porCategoria,
+      porStatus,
+    };
+  }
+
+  /**
+   * Obtém estatísticas agrupadas por marca e modelo
+   */
+  async getStatsByMarcaModelo(): Promise<MarcaModeloStatsResponseDto> {
+    // Buscar todos os patrimônios com marca e modelo usando QueryBuilder
+    const patrimonios = await this.patrimonioRepository
+      .createQueryBuilder('patrimonio')
+      .where('patrimonio.marca IS NOT NULL')
+      .andWhere('patrimonio.marca != :empty', { empty: '' })
+      .andWhere('patrimonio.modelo IS NOT NULL')
+      .andWhere('patrimonio.modelo != :empty2', { empty2: '' })
+      .getMany();
+
+    // Filtrar apenas os que têm marca E modelo (já filtrado na query, mas garantindo)
+    const patrimoniosComMarcaModelo = patrimonios.filter(
+      (p) => p.marca && p.modelo && p.marca.trim() !== '' && p.modelo.trim() !== '',
+    );
+
+    // Agrupar por marca/modelo
+    const statsMap = new Map<string, { quantidade: number; valorTotal: number }>();
+
+    patrimoniosComMarcaModelo.forEach((p) => {
+      const key = `${p.marca}|||${p.modelo}`;
+      if (!statsMap.has(key)) {
+        statsMap.set(key, { quantidade: 0, valorTotal: 0 });
+      }
+      const stats = statsMap.get(key)!;
+      stats.quantidade += 1;
+      stats.valorTotal += parseFloat(String(p.valorAquisicao || 0)) || 0;
+    });
+
+    // Converter para array de DTOs
+    const itens: MarcaModeloStatsItemDto[] = Array.from(statsMap.entries()).map(([key, stats]) => {
+      const [marca, modelo] = key.split('|||');
+      return {
+        marca,
+        modelo,
+        quantidade: stats.quantidade,
+        valorTotal: stats.valorTotal,
+      };
+    });
+
+    // Calcular total geral
+    const valorTotalGeral = itens.reduce((sum, item) => sum + item.valorTotal, 0);
+
+    return {
+      itens,
+      total: itens.length,
+      valorTotalGeral,
+    };
+  }
+
+  /**
+   * Obtém os patrimônios mais valiosos
+   */
+  async getTopValiosos(query: TopValiososQueryDto): Promise<PatrimonioResponseDto[]> {
+    const limit = query.limit || 10;
+
+    // Buscar patrimônios ordenados por valor de aquisição usando QueryBuilder
+    const patrimonios = await this.patrimonioRepository
+      .createQueryBuilder('patrimonio')
+      .where('patrimonio.valorAquisicao IS NOT NULL')
+      .orderBy('patrimonio.valorAquisicao', 'DESC')
+      .leftJoinAndSelect('patrimonio.categoria', 'categoria')
+      .leftJoinAndSelect('patrimonio.responsavel', 'responsavel')
+      .take(limit)
+      .getMany();
+
+    return patrimonios.map((p) => this.serializePatrimonio(p));
+  }
+
+  /**
+   * Obtém patrimônios adquiridos recentemente
+   */
+  async getNovos(query: NovosQueryDto): Promise<PatrimonioResponseDto[]> {
+    const dias = query.dias || 30;
+    const dataLimite = new Date();
+    dataLimite.setDate(dataLimite.getDate() - dias);
+    dataLimite.setHours(0, 0, 0, 0); // Zerar horas para comparação de data
+
+    // Buscar patrimônios adquiridos nos últimos X dias usando QueryBuilder
+    const patrimonios = await this.patrimonioRepository
+      .createQueryBuilder('patrimonio')
+      .where('patrimonio.dataAquisicao IS NOT NULL')
+      .andWhere('patrimonio.dataAquisicao >= :dataLimite', { dataLimite })
+      .orderBy('patrimonio.dataAquisicao', 'DESC')
+      .leftJoinAndSelect('patrimonio.categoria', 'categoria')
+      .leftJoinAndSelect('patrimonio.responsavel', 'responsavel')
+      .getMany();
+
+    return patrimonios.map((p) => this.serializePatrimonio(p));
+  }
+
+  /**
+   * Obtém histórico de localizações de um patrimônio
+   */
+  async getHistoricoLocalizacoes(id: string): Promise<HistoricoLocalizacoesResponseDto> {
+    // Verificar se patrimônio existe
+    const patrimonio = await this.patrimonioRepository.findOne({
+      where: { id },
+    });
+
+    if (!patrimonio) {
+      throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
+    }
+
+    // Buscar histórico ordenado por data de mudança (mais recente primeiro)
+    const historico = await this.historicoRepository.find({
+      where: { patrimonioId: id },
+      order: { dataMudanca: 'DESC' },
+      relations: ['usuario'],
+    });
+
+    // Converter para DTO
+    const historicoItems: HistoricoLocalizacaoItemDto[] = historico.map((h) => ({
+      id: h.id,
+      localizacaoAnterior: h.localizacaoAnterior,
+      localizacaoNova: h.localizacaoNova,
+      dataMudanca: h.dataMudanca,
+      usuarioId: h.usuarioId,
+      observacoes: h.observacoes,
+    }));
+
+    return {
+      patrimonioId: id,
+      historico: historicoItems,
+      total: historicoItems.length,
+    };
+  }
+
+  /**
+   * Deleta múltiplos patrimônios em lote (soft delete)
+   */
+  async deleteBulk(dto: DeleteBulkPatrimonioDto): Promise<DeleteBulkResponseDto> {
+    if (!dto.ids || dto.ids.length === 0) {
+      throw new BadRequestException('IDs não fornecidos');
+    }
+
+    if (dto.ids.length > 100) {
+      throw new BadRequestException('Máximo de 100 patrimônios podem ser deletados por vez');
+    }
+
+    // Remover IDs duplicados
+    const idsUnicos = [...new Set(dto.ids)];
+
+    // Buscar patrimônios existentes
+    const patrimonios = await this.patrimonioRepository.find({
+      where: idsUnicos.map((id) => ({ id })),
+    });
+
+    const idsEncontrados = patrimonios.map((p) => p.id);
+    const idsNaoEncontrados = idsUnicos.filter((id) => !idsEncontrados.includes(id));
+
+    if (patrimonios.length === 0) {
+      return {
+        deletados: 0,
+        naoEncontrados: idsNaoEncontrados.length,
+        idsDeletados: [],
+        idsNaoEncontrados,
+      };
+    }
+
+    // Soft delete usando TypeORM (define deletedAt)
+    await this.patrimonioRepository.softRemove(patrimonios);
+
+    this.logger.log(`Deletados ${patrimonios.length} patrimônios em lote`);
+
+    return {
+      deletados: patrimonios.length,
+      naoEncontrados: idsNaoEncontrados.length,
+      idsDeletados: idsEncontrados,
+      idsNaoEncontrados,
+    };
   }
 }

@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Patch,
+  Delete,
   Body,
   Param,
   HttpCode,
@@ -11,7 +12,9 @@ import {
   Query,
   ParseUUIDPipe,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -38,6 +41,14 @@ import { SlaMetricsQueryDto, SlaMetricsResponseDto, MttrResponseDto, MtbfRespons
 import { WorkOrderResponseDto } from './dto/work-order-response.dto';
 import { MaintenancePlanResponseDto } from './dto/maintenance-plan-response.dto';
 import { PaginatedWorkOrdersResponseDto } from './dto/paginated-work-orders-response.dto';
+import { CreatePartDto } from './dto/create-part.dto';
+import { PartResponseDto } from './dto/part-response.dto';
+import { DashboardResponseDto } from './dto/dashboard-response.dto';
+import { ReportQueryDto } from './dto/report-query.dto';
+import { ReportResponseDto } from './dto/report-response.dto';
+import { MaintenanceDashboardService } from './services/maintenance-dashboard.service';
+import { MaintenanceReportsService } from './services/maintenance-reports.service';
+import { MaintenanceExportService } from './services/maintenance-export.service';
 
 @ApiTags('maintenance')
 @Controller('v1/maintenance')
@@ -47,6 +58,9 @@ export class MaintenanceController {
   constructor(
     private readonly maintenanceService: MaintenanceService,
     private readonly slaService: SlaService,
+    private readonly dashboardService: MaintenanceDashboardService,
+    private readonly reportsService: MaintenanceReportsService,
+    private readonly exportService: MaintenanceExportService,
   ) {}
 
   @Get('os')
@@ -254,6 +268,182 @@ export class MaintenanceController {
   @ApiNotFoundResponse({ description: 'OS não encontrada' })
   async createWorkLog(@Body() dto: CreateWorkLogDto): Promise<void> {
     return this.maintenanceService.createWorkLog(dto);
+  }
+
+  @Post('os/:id/parts')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrar peça utilizada',
+    description: 'Registra uma peça utilizada em uma OS',
+  })
+  @ApiBody({ type: CreatePartDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Peça registrada com sucesso',
+    type: PartResponseDto,
+  })
+  @ApiBadRequestResponse({ description: 'Dados inválidos' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  @ApiNotFoundResponse({ description: 'OS não encontrada' })
+  async registerPart(
+    @Param('id', ParseUUIDPipe) workOrderId: string,
+    @Body() dto: CreatePartDto,
+  ): Promise<PartResponseDto> {
+    return this.maintenanceService.registerPart(workOrderId, dto);
+  }
+
+  @Get('os/:id/parts')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Listar peças de uma OS',
+    description: 'Retorna todas as peças utilizadas em uma OS',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de peças',
+    type: [PartResponseDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  @ApiNotFoundResponse({ description: 'OS não encontrada' })
+  async listParts(
+    @Param('id', ParseUUIDPipe) workOrderId: string,
+  ): Promise<PartResponseDto[]> {
+    return this.maintenanceService.listParts(workOrderId);
+  }
+
+  @Delete('os/:id/parts/:partId')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Remover peça de uma OS',
+    description: 'Remove uma peça registrada de uma OS',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Peça removida com sucesso',
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  @ApiNotFoundResponse({ description: 'OS ou peça não encontrada' })
+  async removePart(
+    @Param('id', ParseUUIDPipe) workOrderId: string,
+    @Param('partId', ParseUUIDPipe) partId: string,
+  ): Promise<void> {
+    return this.maintenanceService.removePart(workOrderId, partId);
+  }
+
+  @Get('dashboard')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Obter dados do dashboard',
+    description: 'Retorna dados consolidados para o dashboard de manutenção',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados do dashboard',
+    type: DashboardResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  async getDashboard(): Promise<DashboardResponseDto> {
+    return this.dashboardService.getDashboardData();
+  }
+
+  @Get('reports')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Gerar relatório de manutenção',
+    description: 'Gera relatório de manutenção para um período com filtros opcionais',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Relatório gerado com sucesso',
+    type: ReportResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  @ApiBadRequestResponse({ description: 'Dados inválidos' })
+  async generateReport(@Query() query: ReportQueryDto): Promise<ReportResponseDto> {
+    const fromDate = query.fromDate ? new Date(query.fromDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Últimos 30 dias por padrão
+    const toDate = query.toDate ? new Date(query.toDate) : new Date();
+    return this.reportsService.generateReport(
+      fromDate,
+      toDate,
+      query.patrimonioId,
+      query.status,
+    );
+  }
+
+  @Get('reports/export/csv')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Exportar relatório em CSV',
+    description: 'Exporta relatório de manutenção em formato CSV',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Arquivo CSV gerado',
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  @ApiBadRequestResponse({ description: 'Dados inválidos' })
+  async exportReportCsv(
+    @Query() query: ReportQueryDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const fromDate = query.fromDate ? new Date(query.fromDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const toDate = query.toDate ? new Date(query.toDate) : new Date();
+    const report = await this.reportsService.generateReport(
+      fromDate,
+      toDate,
+      query.patrimonioId,
+      query.status,
+    );
+    const csv = await this.exportService.exportToCsv(report);
+    const filename = `manutencao_${fromDate.toISOString().split('T')[0]}_${toDate.toISOString().split('T')[0]}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csv);
+  }
+
+  @Get('reports/export/excel')
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Exportar relatório em Excel',
+    description: 'Exporta relatório de manutenção em formato Excel',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Arquivo Excel gerado',
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão' })
+  @ApiBadRequestResponse({ description: 'Dados inválidos' })
+  async exportReportExcel(
+    @Query() query: ReportQueryDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const fromDate = query.fromDate ? new Date(query.fromDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const toDate = query.toDate ? new Date(query.toDate) : new Date();
+    const report = await this.reportsService.generateReport(
+      fromDate,
+      toDate,
+      query.patrimonioId,
+      query.status,
+    );
+    const excelBuffer = await this.exportService.exportToExcel(report);
+    const filename = `manutencao_${fromDate.toISOString().split('T')[0]}_${toDate.toISOString().split('T')[0]}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(excelBuffer);
   }
 }
 

@@ -100,3 +100,5 @@ export class CreateReportArtifactsTable1762438000005 implements MigrationInterfa
   }
 }
 
+
+

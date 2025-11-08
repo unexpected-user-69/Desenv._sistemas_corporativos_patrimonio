@@ -6,9 +6,16 @@ import { HttpExceptionFilter } from './common/http-exception.filter';
 import { LoggingInterceptor, TimeoutInterceptor } from './common/interceptors';
 import helmet from 'helmet';
 import compression from 'compression';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  
+  // Configurar diretório de arquivos estáticos para uploads
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   // Compressão gzip
   app.use(compression());

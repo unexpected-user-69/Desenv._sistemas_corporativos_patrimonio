@@ -10,7 +10,13 @@ import {
   ParseUUIDPipe,
   UseGuards,
   Res,
+  UploadedFile,
+  UseInterceptors,
+  HttpCode,
+  HttpStatus,
+  Request,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -27,6 +33,8 @@ import {
   ApiBearerAuth,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
+  ApiConsumes,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -63,12 +71,23 @@ import { DisponibilidadeResponseDto } from './dto/disponibilidade-response.dto';
 import { BulkResponseDto } from './dto/bulk-response.dto';
 import { HistoricoAlteracaoResponseDto } from './dto/historico-alteracao-response.dto';
 import { HistoricoResponsaveisResponseDto } from './dto/historico-responsaveis-response.dto';
+import { ResponsavelStatsResponseDto } from './dto/responsavel-stats-response.dto';
+import { MarcaModeloStatsResponseDto } from './dto/marca-modelo-stats-response.dto';
+import { TopValiososQueryDto } from './dto/top-valiosos-query.dto';
+import { NovosQueryDto } from './dto/novos-query.dto';
+import { HistoricoLocalizacoesResponseDto } from './dto/historico-localizacoes-response.dto';
+import { DeleteBulkPatrimonioDto } from './dto/delete-bulk-patrimonio.dto';
+import { DeleteBulkResponseDto } from './dto/delete-bulk-response.dto';
+import { PatrimonioPdfExportService } from './services/patrimonio-pdf-export.service';
 
 @ApiTags('patrimonio')
 @ApiBearerAuth()
 @Controller('patrimonio')
 export class PatrimonioController {
-  constructor(private readonly patrimonioService: PatrimonioService) {}
+  constructor(
+    private readonly patrimonioService: PatrimonioService,
+    private readonly pdfExportService: PatrimonioPdfExportService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -453,8 +472,10 @@ export class PatrimonioController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePatrimonioDto: UpdatePatrimonioDto,
+    @Request() req: any,
   ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.update(id, updatePatrimonioDto);
+    const userId = req.user?.sub;
+    return this.patrimonioService.update(id, updatePatrimonioDto, userId);
   }
 
   @Patch(':id/status')
@@ -657,8 +678,10 @@ export class PatrimonioController {
   async updateLocalizacao(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateLocalizacaoPatrimonioDto,
+    @Request() req: any,
   ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.updateLocalizacao(id, dto);
+    const userId = req.user?.sub;
+    return this.patrimonioService.updateLocalizacao(id, dto, userId);
   }
 
   @Get('stats/localizacoes')
@@ -1233,5 +1256,311 @@ export class PatrimonioController {
     @Param('id', ParseUUIDPipe) responsavelId: string,
   ): Promise<PatrimonioResponseDto[]> {
     return this.patrimonioService.getHistoricoPorResponsavel(responsavelId);
+  }
+
+  // ==================== FASE 1: GESTÃO DE FOTOS ====================
+
+  @Post(':id/foto')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Fazer upload de foto do patrimônio' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', description: 'ID do patrimônio' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo de imagem (JPG, PNG, WEBP)',
+        },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Foto uploadada com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiBadRequestResponse({ description: 'Arquivo inválido ou muito grande' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiNotFoundResponse({ description: 'Patrimônio não encontrado' })
+  async uploadFoto(
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.uploadFoto(id, file);
+  }
+
+  @Delete(':id/foto')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Remover foto do patrimônio' })
+  @ApiParam({ name: 'id', description: 'ID do patrimônio' })
+  @ApiOkResponse({
+    description: 'Foto removida com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiNotFoundResponse({ description: 'Patrimônio não encontrado' })
+  async removeFoto(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.removeFoto(id);
+  }
+
+  @Get('com-foto')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Listar patrimônios que possuem foto' })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios com foto retornada com sucesso',
+    type: PaginatedPatrimoniosResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  async findAllWithFoto(
+    @Query() query: QueryPatrimonioDto,
+  ): Promise<PaginatedPatrimoniosResponseDto> {
+    return this.patrimonioService.findAllWithFoto(query);
+  }
+
+  // ==================== FASE 2: ESTATÍSTICAS AVANÇADAS ====================
+
+  @Get('stats/responsavel/:responsavelId')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter estatísticas de patrimônios por responsável' })
+  @ApiParam({ name: 'responsavelId', description: 'ID do responsável' })
+  @ApiOkResponse({
+    description: 'Estatísticas do responsável',
+    type: ResponsavelStatsResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiNotFoundResponse({ description: 'Responsável não encontrado' })
+  async getStatsByResponsavel(
+    @Param('responsavelId', ParseUUIDPipe) responsavelId: string,
+  ): Promise<ResponsavelStatsResponseDto> {
+    return this.patrimonioService.getStatsByResponsavel(responsavelId);
+  }
+
+  @Get('stats/marca-modelo')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter estatísticas agrupadas por marca e modelo' })
+  @ApiOkResponse({
+    description: 'Estatísticas por marca/modelo',
+    type: MarcaModeloStatsResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  async getStatsByMarcaModelo(): Promise<MarcaModeloStatsResponseDto> {
+    return this.patrimonioService.getStatsByMarcaModelo();
+  }
+
+  @Get('top-valiosos')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Listar os patrimônios mais valiosos' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Número de patrimônios a retornar (padrão: 10, máximo: 100)',
+    example: 10,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios mais valiosos',
+    type: [PatrimonioResponseDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  async getTopValiosos(
+    @Query() query: TopValiososQueryDto,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.getTopValiosos(query);
+  }
+
+  @Get('novos')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Listar patrimônios adquiridos recentemente' })
+  @ApiQuery({
+    name: 'dias',
+    required: false,
+    type: Number,
+    description: 'Número de dias para considerar patrimônios como novos (padrão: 30)',
+    example: 30,
+  })
+  @ApiOkResponse({
+    description: 'Lista de patrimônios novos',
+    type: [PatrimonioResponseDto],
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  async getNovos(
+    @Query() query: NovosQueryDto,
+  ): Promise<PatrimonioResponseDto[]> {
+    return this.patrimonioService.getNovos(query);
+  }
+
+  // ==================== FASE 3: HISTÓRICO DE LOCALIZAÇÕES ====================
+
+  @Get(':id/historico/localizacoes')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter histórico de localizações do patrimônio' })
+  @ApiParam({ name: 'id', description: 'ID do patrimônio' })
+  @ApiOkResponse({
+    description: 'Histórico de localizações',
+    type: HistoricoLocalizacoesResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiNotFoundResponse({ description: 'Patrimônio não encontrado' })
+  async getHistoricoLocalizacoes(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HistoricoLocalizacoesResponseDto> {
+    return this.patrimonioService.getHistoricoLocalizacoes(id);
+  }
+
+  // ==================== FASE 4: OPERAÇÕES EM LOTE ====================
+
+  @Delete('bulk')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Deletar múltiplos patrimônios em lote (soft delete)' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
+  @ApiBody({ type: DeleteBulkPatrimonioDto })
+  @ApiOkResponse({
+    description: 'Patrimônios deletados com sucesso',
+    type: DeleteBulkResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos (IDs inválidos, limite excedido)',
+  })
+  async deleteBulk(
+    @Body() dto: DeleteBulkPatrimonioDto,
+  ): Promise<DeleteBulkResponseDto> {
+    return this.patrimonioService.deleteBulk(dto);
+  }
+
+  // ==================== FASE 5: EXPORTAÇÃO PDF ====================
+
+  @Get('export/pdf')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Exportar patrimônios filtrados para PDF' })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    type: String,
+    description: 'Busca textual (nome, código, descrição)',
+  })
+  @ApiQuery({
+    name: 'categoriaId',
+    required: false,
+    type: String,
+    description: 'Filtrar por ID da categoria',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: PatrimonioStatus,
+    description: 'Filtrar por status',
+  })
+  @ApiQuery({
+    name: 'marca',
+    required: false,
+    type: String,
+    description: 'Filtrar por marca',
+  })
+  @ApiQuery({
+    name: 'modelo',
+    required: false,
+    type: String,
+    description: 'Filtrar por modelo',
+  })
+  @ApiQuery({
+    name: 'localizacao',
+    required: false,
+    type: String,
+    description: 'Filtrar por localização',
+  })
+  @ApiQuery({
+    name: 'responsavelId',
+    required: false,
+    type: String,
+    description: 'Filtrar por ID do responsável',
+  })
+  @ApiQuery({
+    name: 'valorMinimo',
+    required: false,
+    type: Number,
+    description: 'Valor mínimo de aquisição',
+  })
+  @ApiQuery({
+    name: 'valorMaximo',
+    required: false,
+    type: Number,
+    description: 'Valor máximo de aquisição',
+  })
+  @ApiQuery({
+    name: 'dataInicial',
+    required: false,
+    type: String,
+    description: 'Data de aquisição inicial (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'dataFinal',
+    required: false,
+    type: String,
+    description: 'Data de aquisição final (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['nome', 'codigo', 'categoria', 'status', 'valorAquisicao', 'dataAquisicao', 'createdAt'],
+    description: 'Campo para ordenação',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['ASC', 'DESC'],
+    description: 'Direção da ordenação',
+  })
+  @ApiOkResponse({
+    description: 'PDF gerado com sucesso',
+    content: {
+      'application/pdf': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiResponse({
+    status: 500,
+    description: 'Erro ao gerar PDF',
+  })
+  async exportPdf(
+    @Query() query: QueryPatrimonioDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      const pdfBuffer = await this.pdfExportService.generatePdf(query);
+
+      const filename = `patrimonios_${new Date().toISOString().split('T')[0]}.pdf`;
+
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': pdfBuffer.length.toString(),
+      });
+
+      res.send(pdfBuffer);
+    } catch (error) {
+      res.status(500).json({
+        statusCode: 500,
+        message: 'Erro ao gerar PDF',
+        error: 'Internal Server Error',
+      });
+    }
   }
 }

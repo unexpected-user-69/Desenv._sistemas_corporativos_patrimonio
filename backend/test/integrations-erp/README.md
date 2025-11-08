@@ -104,3 +104,5 @@ npm run test:e2e -- integrations-erp --testNamePattern="should return 404|should
 - Testes de erro não requerem autenticação (mas podem falhar se os guards estiverem ativos)
 
 
+
+

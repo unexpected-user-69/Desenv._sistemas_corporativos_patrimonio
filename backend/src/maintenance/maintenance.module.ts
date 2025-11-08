@@ -7,6 +7,9 @@ import { WorkflowService } from './services/workflow.service';
 import { SchedulerService } from './services/scheduler.service';
 import { SlaService } from './services/sla.service';
 import { MaintenanceNotificationsService } from './services/notifications.service';
+import { MaintenanceDashboardService } from './services/maintenance-dashboard.service';
+import { MaintenanceReportsService } from './services/maintenance-reports.service';
+import { MaintenanceExportService } from './services/maintenance-export.service';
 import { WorkOrder } from './entities/work-order.entity';
 import { WorkLog } from './entities/work-log.entity';
 import { MaintenancePlan } from './entities/maintenance-plan.entity';
@@ -29,6 +32,9 @@ import { EventsModule } from '../events/events.module';
     SchedulerService,
     SlaService,
     MaintenanceNotificationsService,
+    MaintenanceDashboardService,
+    MaintenanceReportsService,
+    MaintenanceExportService,
   ],
   exports: [
     MaintenanceService,

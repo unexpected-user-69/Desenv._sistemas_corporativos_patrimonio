@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { WorkOrder, WorkOrderStatus, Prioridade } from './entities/work-order.entity';
 import { WorkLog, WorkLogType } from './entities/work-log.entity';
 import { MaintenancePlan } from './entities/maintenance-plan.entity';
+import { Part } from './entities/part.entity';
 import { CreateWorkOrderDto } from './dto/create-work-order.dto';
 import { UpdateWorkOrderStatusDto } from './dto/update-work-order-status.dto';
 import { CreateWorkLogDto } from './dto/create-work-log.dto';
@@ -17,6 +18,8 @@ import { QueryWorkOrdersDto } from './dto/query-work-orders.dto';
 import { WorkOrderResponseDto } from './dto/work-order-response.dto';
 import { MaintenancePlanResponseDto } from './dto/maintenance-plan-response.dto';
 import { PaginatedWorkOrdersResponseDto } from './dto/paginated-work-orders-response.dto';
+import { CreatePartDto } from './dto/create-part.dto';
+import { PartResponseDto } from './dto/part-response.dto';
 import { WorkflowService } from './services/workflow.service';
 import { MaintenanceNotificationsService } from './services/notifications.service';
 import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
@@ -34,6 +37,8 @@ export class MaintenanceService {
     private maintenancePlanRepository: Repository<MaintenancePlan>,
     @InjectRepository(Patrimonio)
     private patrimonioRepository: Repository<Patrimonio>,
+    @InjectRepository(Part)
+    private partRepository: Repository<Part>,
     private workflowService: WorkflowService,
     private notificationsService: MaintenanceNotificationsService,
   ) {}
@@ -289,6 +294,88 @@ export class MaintenanceService {
     this.logger.log(
       `Apontamento criado para OS ${dto.workOrderId}: ${dto.horas}h, R$ ${dto.custo || 0}`,
     );
+  }
+
+  /**
+   * Registra uma peça utilizada em uma OS
+   */
+  async registerPart(workOrderId: string, dto: CreatePartDto): Promise<PartResponseDto> {
+    // Verificar se a OS existe
+    const workOrder = await this.workOrderRepository.findOne({
+      where: { id: workOrderId },
+    });
+
+    if (!workOrder) {
+      throw new NotFoundException(`OS ${workOrderId} não encontrada`);
+    }
+
+    // Criar peça
+    const part = this.partRepository.create({
+      workOrderId,
+      descricao: dto.descricao,
+      quantidade: dto.quantidade,
+      custoUnitario: dto.custoUnitario,
+    });
+
+    const saved = await this.partRepository.save(part);
+
+    this.logger.log(
+      `Peça registrada na OS ${workOrderId}: ${dto.descricao} x${dto.quantidade} (R$ ${dto.custoUnitario})`,
+    );
+
+    return {
+      id: saved.id,
+      workOrderId: saved.workOrderId,
+      descricao: saved.descricao,
+      quantidade: saved.quantidade,
+      custoUnitario: saved.custoUnitario,
+      custoTotal: saved.quantidade * saved.custoUnitario,
+    };
+  }
+
+  /**
+   * Lista peças utilizadas em uma OS
+   */
+  async listParts(workOrderId: string): Promise<PartResponseDto[]> {
+    // Verificar se a OS existe
+    const workOrder = await this.workOrderRepository.findOne({
+      where: { id: workOrderId },
+    });
+
+    if (!workOrder) {
+      throw new NotFoundException(`OS ${workOrderId} não encontrada`);
+    }
+
+    const parts = await this.partRepository.find({
+      where: { workOrderId },
+      order: { descricao: 'ASC' },
+    });
+
+    return parts.map((part) => ({
+      id: part.id,
+      workOrderId: part.workOrderId,
+      descricao: part.descricao,
+      quantidade: part.quantidade,
+      custoUnitario: part.custoUnitario,
+      custoTotal: part.quantidade * part.custoUnitario,
+    }));
+  }
+
+  /**
+   * Remove uma peça de uma OS
+   */
+  async removePart(workOrderId: string, partId: string): Promise<void> {
+    const part = await this.partRepository.findOne({
+      where: { id: partId, workOrderId },
+    });
+
+    if (!part) {
+      throw new NotFoundException(`Peça ${partId} não encontrada na OS ${workOrderId}`);
+    }
+
+    await this.partRepository.remove(part);
+
+    this.logger.log(`Peça ${partId} removida da OS ${workOrderId}`);
   }
 
   /**

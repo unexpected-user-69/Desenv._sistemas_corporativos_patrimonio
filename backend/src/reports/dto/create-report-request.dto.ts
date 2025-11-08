@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsObject, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
 import { ReportType, ReportModel } from '../entities/report-request.entity';
 
 export class CreateReportRequestDto {
@@ -27,5 +27,15 @@ export class CreateReportRequestDto {
   @IsOptional()
   @IsObject()
   filters?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Chave do catálogo de relatório (opcional - se fornecido, usa dados do catálogo)',
+    example: 'patrimonio-inventario-completo',
+  })
+  @IsOptional()
+  @IsString()
+  catalogKey?: string;
 }
+
+
 

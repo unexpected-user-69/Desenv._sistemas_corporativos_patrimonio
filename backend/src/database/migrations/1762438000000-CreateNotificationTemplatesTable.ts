@@ -87,3 +87,5 @@ export class CreateNotificationTemplatesTable1762438000000 implements MigrationI
   }
 }
 
+
+

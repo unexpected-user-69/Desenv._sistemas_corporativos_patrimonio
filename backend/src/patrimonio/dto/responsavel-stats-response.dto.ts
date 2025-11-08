@@ -40,3 +40,4 @@ export class ResponsavelStatsResponseDto {
   porStatus!: Record<string, number>;
 }
 
+

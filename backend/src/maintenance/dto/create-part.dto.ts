@@ -31,3 +31,4 @@ export class CreatePartDto {
   custoUnitario!: number;
 }
 
+

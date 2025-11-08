@@ -46,3 +46,4 @@ export class MarcaModeloStatsResponseDto {
   valorTotalGeral!: number;
 }
 
+

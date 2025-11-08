@@ -77,3 +77,4 @@ export class CreateConnectorsTable1762437583567 implements MigrationInterface {
 
 
 
+

@@ -105,3 +105,4 @@ export class CreateReportCatalogVersionsTable1762438000007 implements MigrationI
   }
 }
 
+

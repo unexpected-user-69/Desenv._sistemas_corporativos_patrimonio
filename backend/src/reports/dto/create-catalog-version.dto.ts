@@ -35,3 +35,4 @@ export class CreateCatalogVersionDto {
   isCurrent?: boolean;
 }
 
+

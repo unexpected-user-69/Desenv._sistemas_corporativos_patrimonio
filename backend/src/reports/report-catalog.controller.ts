@@ -38,7 +38,7 @@ import { PermissionResponseDto } from './dto/permission-response.dto';
 
 @ApiTags('reports-catalog')
 @ApiBearerAuth()
-@Controller('v1/reports/catalog')
+@Controller('reports/catalog')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ReportCatalogController {
   constructor(
@@ -229,4 +229,5 @@ export class ReportCatalogController {
     await this.permissionService.remove(id);
   }
 }
+
 

@@ -140,3 +140,4 @@ export class CreateReportCatalogsTable1762438000006 implements MigrationInterfac
   }
 }
 
+

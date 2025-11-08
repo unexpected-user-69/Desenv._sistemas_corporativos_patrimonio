@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -99,7 +100,11 @@ export class CategoriasController {
     status: 404,
     description: 'Categoria não encontrada',
   })
-  findOne(@Param('id') id: string): Promise<CategoriaResponseDto> {
+  @ApiResponse({
+    status: 400,
+    description: 'ID inválido (UUID inválido)',
+  })
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<CategoriaResponseDto> {
     return this.categoriasService.findOne(id);
   }
 
@@ -154,8 +159,12 @@ export class CategoriasController {
     status: 409,
     description: 'Código da categoria já existe',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'ID inválido (UUID inválido)',
+  })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCategoriaDto: UpdateCategoriaDto,
   ): Promise<CategoriaResponseDto> {
     return this.categoriasService.update(id, updateCategoriaDto);
@@ -185,7 +194,11 @@ export class CategoriasController {
     status: 404,
     description: 'Categoria não encontrada',
   })
-  deactivate(@Param('id') id: string): Promise<void> {
+  @ApiResponse({
+    status: 400,
+    description: 'ID inválido (UUID inválido)',
+  })
+  deactivate(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.categoriasService.deactivate(id);
   }
 
@@ -213,7 +226,11 @@ export class CategoriasController {
     status: 404,
     description: 'Categoria não encontrada',
   })
-  activate(@Param('id') id: string): Promise<void> {
+  @ApiResponse({
+    status: 400,
+    description: 'ID inválido (UUID inválido)',
+  })
+  activate(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.categoriasService.activate(id);
   }
 
@@ -243,9 +260,9 @@ export class CategoriasController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Categoria não pode ser deletada (patrimônios associados)',
+    description: 'Categoria não pode ser deletada (patrimônios associados) ou ID inválido (UUID inválido)',
   })
-  remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.categoriasService.remove(id);
   }
 }

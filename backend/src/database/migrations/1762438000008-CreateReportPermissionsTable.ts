@@ -146,3 +146,4 @@ export class CreateReportPermissionsTable1762438000008 implements MigrationInter
   }
 }
 
+

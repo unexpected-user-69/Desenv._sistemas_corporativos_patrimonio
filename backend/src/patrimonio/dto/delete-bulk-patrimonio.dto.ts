@@ -17,3 +17,4 @@ export class DeleteBulkPatrimonioDto {
   ids!: string[];
 }
 
+

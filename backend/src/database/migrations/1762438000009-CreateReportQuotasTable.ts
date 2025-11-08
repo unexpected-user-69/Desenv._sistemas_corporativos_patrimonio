@@ -111,3 +111,4 @@ export class CreateReportQuotasTable1762438000009 implements MigrationInterface 
   }
 }
 
+

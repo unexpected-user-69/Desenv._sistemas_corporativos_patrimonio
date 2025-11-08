@@ -16,3 +16,4 @@ export class NovosQueryDto {
   dias?: number = 30;
 }
 
+

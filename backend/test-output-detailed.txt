@@ -1,0 +1,208 @@
+﻿
+> patrimonio_inventario@0.0.1 test:e2e
+> jest --config ./test/jest-e2e.json test/patrimonio/patrimonio-completo.e2e-spec.ts --testTimeout=600000
+
+  console.log
+    [dotenv@17.2.3] injecting env (11) from .env -- tip: Ô£à audit secrets and track compliance: https://dotenvx.com/ops
+
+      at _log (../node_modules/dotenv/lib/main.js:142:11)
+
+node.exe : [Nest] 17888  - 08/11/2025, 15:25:52   ERROR [ExceptionsHandler] Error: Undiscoverable Columns: header 
+option requires column option or object records
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([Nest] 17888  -... object records:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    at Object.__transform (C:\Node\desenvolvi\Desenv._sistemas_corporativos_patrimonio\backend\node_modules\csv-stringi
+fy\dist\cjs\sync.cjs:417:20)
+    at stringify (C:\Node\desenvolvi\Desenv._sistemas_corporativos_patrimonio\backend\node_modules\csv-stringify\dist\c
+js\sync.cjs:717:21)
+    at PatrimonioService.exportToCsv 
+(C:\Node\desenvolvi\Desenv._sistemas_corporativos_patrimonio\backend\src\patrimonio\patrimonio.service.ts:1160:30)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+[Nest] 17888  - 08/11/2025, 15:25:54   ERROR [ExceptionsHandler] Error: Undiscoverable Columns: header option requires 
+column option or object records
+    at Object.__transform (C:\Node\desenvolvi\Desenv._sistemas_corporativos_patrimonio\backend\node_modules\csv-stringi
+fy\dist\cjs\sync.cjs:417:20)
+    at stringify (C:\Node\desenvolvi\Desenv._sistemas_corporativos_patrimonio\backend\node_modules\csv-stringify\dist\c
+js\sync.cjs:717:21)
+    at PatrimonioService.exportToCsv 
+(C:\Node\desenvolvi\Desenv._sistemas_corporativos_patrimonio\backend\src\patrimonio\patrimonio.service.ts:1160:30)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at PatrimonioService.gerarRelatorioInventario 
+(C:\Node\desenvolvi\Desenv._sistemas_corporativos_patrimonio\backend\src\patrimonio\patrimonio.service.ts:1267:9)
+[Nest] 17888  - 08/11/2025, 15:26:21   ERROR [LoggingInterceptor] GET /v1/patrimonio/export/pdf?limit=10 500 - 536ms
+(node:17888) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL test/patrimonio/patrimonio-completo.e2e-spec.ts (83.32 s)
+  Patrimonio - Completo (e2e)
+    GRUPO 1: CRUD B├ísico
+      POST /v1/patrimonio - Criar patrim├┤nio
+        ÔêÜ deve criar patrim├┤nio com sucesso (ADMIN) (818 ms)
+        ÔêÜ deve criar patrim├┤nio com sucesso (TEACHER) (618 ms)
+        ÔêÜ deve retornar 403 para STUDENT (515 ms)
+        ÔêÜ deve retornar 409 para c├│digo duplicado (534 ms)
+        ÔêÜ deve retornar 400 para dados inv├ílidos (524 ms)
+      GET /v1/patrimonio - Listar patrim├┤nios
+        ÔêÜ deve listar patrim├┤nios com pagina├º├úo (537 ms)
+        ÔêÜ deve filtrar por status (524 ms)
+        ÔêÜ deve filtrar por categoria (544 ms)
+        ÔêÜ deve buscar por texto (q) (534 ms)
+        ÔêÜ deve filtrar por intervalo de valor (543 ms)
+        ÔêÜ deve ordenar por campo (525 ms)
+      GET /v1/patrimonio/:id - Buscar por ID
+        ÔêÜ deve buscar patrim├┤nio por ID (533 ms)
+        ÔêÜ deve retornar 404 para ID n├úo encontrado (521 ms)
+        ÔêÜ deve retornar 400 para UUID inv├ílido (516 ms)
+      PATCH /v1/patrimonio/:id - Atualizar patrim├┤nio
+        ÔêÜ deve atualizar patrim├┤nio com sucesso (651 ms)
+        ÔêÜ deve retornar 404 para patrim├┤nio n├úo encontrado (518 ms)
+        ÔêÜ deve retornar 403 para STUDENT (518 ms)
+      DELETE /v1/patrimonio/:id - Deletar patrim├┤nio
+        ÔêÜ deve deletar patrim├┤nio com sucesso (ADMIN) (794 ms)
+        ÔêÜ deve retornar 404 para patrim├┤nio n├úo encontrado (514 ms)
+        ÔêÜ deve retornar 403 para TEACHER (516 ms)
+    GRUPO 2: Buscas por Filtros
+      GET /v1/patrimonio/codigo/:codigo
+        ÔêÜ deve buscar patrim├┤nio por c├│digo (528 ms)
+        ÔêÜ deve retornar 404 para c├│digo n├úo encontrado (513 ms)
+      GET /v1/patrimonio/categoria/:categoriaId
+        ÔêÜ deve buscar patrim├┤nios por categoria (529 ms)
+      GET /v1/patrimonio/status/:status
+        ÔêÜ deve buscar patrim├┤nios por status (517 ms)
+      GET /v1/patrimonio/responsavel/:responsavelId
+        ÔêÜ deve buscar patrim├┤nios por respons├ível (550 ms)
+      GET /v1/patrimonio/localizacao/:localizacao
+        ÔêÜ deve buscar patrim├┤nios por localiza├º├úo (517 ms)
+      GET /v1/patrimonio/numero-serie/:numeroSerie
+        ÔêÜ deve buscar patrim├┤nio por n├║mero de s├®rie (1178 ms)
+        ÔêÜ deve retornar 404 para n├║mero de s├®rie n├úo encontrado (514 ms)
+      GET /v1/patrimonio/aquisicao-periodo
+        ÔêÜ deve buscar patrim├┤nios por per├¡odo de aquisi├º├úo (519 ms)
+      GET /v1/patrimonio/valor-range
+        ÔêÜ deve buscar patrim├┤nios por intervalo de valor (521 ms)
+    GRUPO 3: Estat├¡sticas B├ísicas
+      GET /v1/patrimonio/stats/categoria
+        ÔêÜ deve retornar estat├¡sticas por categoria (548 ms)
+      GET /v1/patrimonio/stats/status
+        ÔêÜ deve retornar estat├¡sticas por status (521 ms)
+      GET /v1/patrimonio/stats/valor-total
+        ÔêÜ deve retornar valor total do patrim├┤nio (535 ms)
+    GRUPO 4: Gest├úo de Status
+      PATCH /v1/patrimonio/:id/status
+        ÔêÜ deve alterar status do patrim├┤nio (541 ms)
+        ÔêÜ deve retornar 400 quando status ├® o mesmo (517 ms)
+      PATCH /v1/patrimonio/:id/ativar
+        ÔêÜ deve ativar patrim├┤nio (1237 ms)
+      PATCH /v1/patrimonio/:id/desativar
+        ÔêÜ deve desativar patrim├┤nio (637 ms)
+      POST /v1/patrimonio/:id/descarte
+        ÔêÜ deve marcar patrim├┤nio para descarte (ADMIN) (1165 ms)
+        ÔêÜ deve retornar 403 para TEACHER (515 ms)
+    GRUPO 5: Gest├úo de Localiza├º├úo
+      PATCH /v1/patrimonio/:id/localizacao
+        ÔêÜ deve atualizar localiza├º├úo do patrim├┤nio (711 ms)
+      GET /v1/patrimonio/stats/localizacoes
+        ÔêÜ deve retornar estat├¡sticas por localiza├º├úo (577 ms)
+    GRUPO 6: Estat├¡sticas Avan├ºadas
+      GET /v1/patrimonio/stats/faixa-valor
+        ÔêÜ deve retornar estat├¡sticas por faixa de valor (519 ms)
+      GET /v1/patrimonio/stats/aquisicao
+        ÔêÜ deve retornar estat├¡sticas por per├¡odo de aquisi├º├úo (533 ms)
+      GET /v1/patrimonio/stats/evolucao
+        ÔêÜ deve retornar gr├ífico de evolu├º├úo temporal (548 ms)
+      GET /v1/patrimonio/dashboard
+        ÔêÜ deve retornar m├®tricas do dashboard (528 ms)
+    GRUPO 7: Exporta├º├úo e Relat├│rios
+      GET /v1/patrimonio/export/csv
+        ÔêÜ deve exportar patrim├┤nios para CSV (670 ms)
+      GET /v1/patrimonio/export/excel
+        ÔêÜ deve exportar patrim├┤nios para Excel (674 ms)
+      GET /v1/patrimonio/relatorio/inventario
+        ÔêÜ deve gerar relat├│rio de invent├írio (708 ms)
+    GRUPO 8: Buscas Avan├ºadas
+      GET /v1/patrimonio/status-multiplos
+        ÔêÜ deve buscar patrim├┤nios por m├║ltiplos status (510 ms)
+      GET /v1/patrimonio/categorias-multiplas
+        ÔêÜ deve buscar patrim├┤nios por m├║ltiplas categorias (510 ms)
+    GRUPO 9: Opera├º├Áes em Lote
+      POST /v1/patrimonio/bulk
+        ÔêÜ deve criar m├║ltiplos patrim├┤nios em lote (580 ms)
+      PATCH /v1/patrimonio/bulk
+        ÔêÜ deve atualizar m├║ltiplos patrim├┤nios em lote (517 ms)
+      POST /v1/patrimonio/bulk/transferir-responsavel
+        ÔêÜ deve transferir m├║ltiplos patrim├┤nios para o mesmo respons├ível (1031 ms)
+      DELETE /v1/patrimonio/bulk
+        ÔêÜ deve deletar m├║ltiplos patrim├┤nios em lote (ADMIN) (1139 ms)
+    GRUPO 10: Valida├º├Áes
+      GET /v1/patrimonio/validar-codigo/:codigo
+        ÔêÜ deve validar c├│digo dispon├¡vel (510 ms)
+        ÔêÜ deve validar c├│digo indispon├¡vel (527 ms)
+      POST /v1/patrimonio/verificar-duplicidade
+        ÔêÜ deve verificar duplicidade de patrim├┤nios (549 ms)
+      GET /v1/patrimonio/:id/disponibilidade
+        ÔêÜ deve verificar disponibilidade do patrim├┤nio (598 ms)
+    GRUPO 11: Alertas
+      GET /v1/patrimonio/vencimento-garantia
+        ÔêÜ deve buscar patrim├┤nios pr├│ximos do vencimento de garantia (690 ms)
+      GET /v1/patrimonio/garantia-expirada
+        ÔêÜ deve buscar patrim├┤nios com garantia expirada (550 ms)
+      GET /v1/patrimonio/alertas/garantia
+        ÔêÜ deve buscar patrim├┤nios com garantia vencendo em breve (1034 ms)
+      GET /v1/patrimonio/manutencao-prolongada
+        ÔêÜ deve buscar patrim├┤nios em manuten├º├úo prolongada (509 ms)
+      GET /v1/patrimonio/sem-responsavel
+        ÔêÜ deve buscar patrim├┤nios sem respons├ível (1140 ms)
+    GRUPO 12: Hist├│rico
+      GET /v1/patrimonio/:id/historico
+        ÔêÜ deve obter hist├│rico de altera├º├Áes do patrim├┤nio (533 ms)
+      GET /v1/patrimonio/:id/historico/responsaveis
+        ÔêÜ deve obter hist├│rico de respons├íveis do patrim├┤nio (535 ms)
+      GET /v1/patrimonio/responsavel/:id/historico
+        ÔêÜ deve obter hist├│rico de patrim├┤nios por respons├ível (521 ms)
+    GRUPO 13: Gest├úo de Fotos
+      GET /v1/patrimonio/com-foto
+        ÔêÜ deve listar patrim├┤nios que possuem foto (514 ms)
+      POST /v1/patrimonio/:id/foto - Upload de foto
+        ÔêÜ deve fazer upload de foto JPG com sucesso (597 ms)
+        ÔêÜ deve fazer upload de foto PNG com sucesso (1253 ms)
+        ÔêÜ deve fazer upload de foto WEBP com sucesso (1267 ms)
+        ├ù deve retornar 403 para STUDENT (1375 ms)
+        ÔêÜ deve retornar 404 para patrim├┤nio n├úo encontrado (1119 ms)
+      DELETE /v1/patrimonio/:id/foto - Remover foto
+        ÔêÜ deve remover foto do patrim├┤nio com sucesso (1727 ms)
+        ÔêÜ deve retornar 403 para STUDENT (517 ms)
+        ÔêÜ deve retornar 404 para patrim├┤nio n├úo encontrado (652 ms)
+    GRUPO 14: Estat├¡sticas por Respons├ível/Marca
+      GET /v1/patrimonio/stats/responsavel/:responsavelId
+        ÔêÜ deve retornar estat├¡sticas de patrim├┤nios por respons├ível (651 ms)
+      GET /v1/patrimonio/stats/marca-modelo
+        ÔêÜ deve retornar estat├¡sticas agrupadas por marca e modelo (600 ms)
+      GET /v1/patrimonio/top-valiosos
+        ÔêÜ deve listar os patrim├┤nios mais valiosos (753 ms)
+      GET /v1/patrimonio/novos
+        ÔêÜ deve listar patrim├┤nios adquiridos recentemente (704 ms)
+    GRUPO 15: Hist├│rico de Localiza├º├Áes
+      GET /v1/patrimonio/:id/historico/localizacoes
+        ÔêÜ deve obter hist├│rico de localiza├º├Áes do patrim├┤nio (2606 ms)
+    GRUPO 16: Exporta├º├úo PDF
+      GET /v1/patrimonio/export/pdf
+        ÔêÜ deve exportar patrim├┤nios filtrados para PDF (1087 ms)
+    GRUPO 17: Transfer├¬ncia de Respons├ível
+      POST /v1/patrimonio/:id/transferir-responsavel
+        ÔêÜ deve transferir patrim├┤nio para outro respons├ível (639 ms)
+        ÔêÜ deve retornar 400 para mesmo respons├ível (555 ms)
+
+  ÔùÅ Patrimonio - Completo (e2e) ÔÇ║ GRUPO 13: Gest├úo de Fotos ÔÇ║ POST /v1/patrimonio/:id/foto - Upload de foto ÔÇ║ 
+deve retornar 403 para STUDENT
+
+    read ECONNRESET
+
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 82 passed, 83 total
+Snapshots:   0 total
+Time:        85.496 s, estimated 135 s
+Ran all test suites matching test/patrimonio/patrimonio-completo.e2e-spec.ts.

@@ -22,6 +22,7 @@ import { ReportMetricsService } from './services/report-metrics.service';
 import { ReportStructuredLoggerService } from './services/report-structured-logger.service';
 import { ReportProcessor } from './processors/report.processor';
 import { ReportQuota } from './entities/report-quota.entity';
+import { User } from '../users/entities/user.entity';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ReportQuota } from './entities/report-quota.entity';
       ReportCatalogVersion,
       ReportPermission,
       ReportQuota,
+      User, // Necessário para relações ManyToOne nas entidades de reports
     ]),
     BullModule.registerQueue({
       name: 'report-queue',

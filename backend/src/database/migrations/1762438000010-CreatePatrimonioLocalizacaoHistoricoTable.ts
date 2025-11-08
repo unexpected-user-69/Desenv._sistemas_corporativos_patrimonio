@@ -43,3 +43,4 @@ export class CreatePatrimonioLocalizacaoHistoricoTable1762438000010
   }
 }
 
+

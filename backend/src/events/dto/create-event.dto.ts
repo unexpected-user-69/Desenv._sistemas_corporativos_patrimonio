@@ -72,13 +72,13 @@ export class CreateEventDto {
   eventType!: EventType;
 
   @ApiPropertyOptional({
-    description: 'IDs dos patrimônios relacionados ao evento',
-    example: ['123e4567-e89b-12d3-a456-426614174000'],
+    description: 'IDs dos patrimônios relacionados ao evento. Use IDs de patrimônios que existem no sistema.',
+    example: ['00000000-0000-4000-8000-000000000000'],
     type: [String],
   })
   @IsOptional()
-  @IsArray()
-  @IsUUID('4', { each: true, message: 'Cada ID de patrimônio deve ser um UUID válido' })
+  @IsArray({ message: 'patrimonioIds deve ser um array' })
+  @IsUUID(undefined, { each: true, message: 'Cada ID de patrimônio deve ser um UUID válido' })
   patrimonioIds?: string[];
 
   @ApiPropertyOptional({

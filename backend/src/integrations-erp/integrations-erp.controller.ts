@@ -40,7 +40,7 @@ import { ConnectorMetricsDto } from './dto/metrics.dto';
 import { HealthCheckResultDto, IntegrationHealthDto } from './dto/health-check.dto';
 
 @ApiTags('integrations-erp')
-@Controller('v1/integrations')
+@Controller('integrations')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class IntegrationsErpController {
@@ -75,7 +75,7 @@ export class IntegrationsErpController {
   }
 
   @Get('executions')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Listar execuções',
     description: 'Lista execuções de integração com filtros e paginação',
@@ -98,7 +98,7 @@ export class IntegrationsErpController {
   }
 
   @Get('executions/:id')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Detalhes da execução',
     description: 'Retorna detalhes completos de uma execução, incluindo logs',
@@ -118,7 +118,7 @@ export class IntegrationsErpController {
   }
 
   @Get('executions/:id/reconciliation')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Sumário de reconciliação',
     description: 'Retorna sumário detalhado de reconciliação de uma execução',
@@ -138,7 +138,7 @@ export class IntegrationsErpController {
   }
 
   @Get('metrics')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Métricas de integrações',
     description: 'Retorna métricas de todas as integrações ou de um conector específico',
@@ -167,7 +167,7 @@ export class IntegrationsErpController {
   }
 
   @Get('health')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Health check das integrações',
     description: 'Verifica a saúde de todas as integrações ou de uma específica',

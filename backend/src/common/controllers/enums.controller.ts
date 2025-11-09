@@ -140,8 +140,8 @@ export class EnumsController {
           color: '#EF4444',
         },
         {
-          value: 'TEACHER',
-          label: 'Professor',
+          value: 'MANAGER',
+          label: 'Gerente de Patrimônio',
           description: 'Pode gerenciar patrimônios e visualizar relatórios',
           permissions: [
             'users.read',
@@ -153,10 +153,10 @@ export class EnumsController {
           color: '#3B82F6',
         },
         {
-          value: 'STUDENT',
-          label: 'Estudante',
-          description: 'Apenas visualização de patrimônios',
-          permissions: ['patrimonio.read'],
+          value: 'OPERATOR',
+          label: 'Operador de Inventário',
+          description: 'Acesso para operações de inventário e manutenção',
+          permissions: ['patrimonio.read', 'patrimonio.update', 'maintenance.read'],
           color: '#10B981',
         },
       ],

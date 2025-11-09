@@ -89,7 +89,35 @@ npm run dev
 # Iniciar tudo com Docker
 docker-compose up --build -d
 ```
+### **Obter Token de Desenvolvimento**
 
+#### Obter token completo (com informações do usuário)
+```powershell
+$response = Invoke-RestMethod -Uri "http://localhost:3101/v1/auth/dev-token" -Method POST -Headers @{"Content-Type"="application/json"} -ErrorAction Stop; Write-Host "✅ Novo token obtido:" -ForegroundColor Green; Write-Host "Token: $($response.accessToken)" -ForegroundColor Yellow; Write-Host "User: $($response.user.email)" -ForegroundColor Blue; Write-Host "Role: $($response.user.role)" -ForegroundColor Blue; $response.accessToken
+```
+
+#### Obter ID do usuário (com formatação)
+```powershell
+$userId = (Invoke-RestMethod -Uri "http://localhost:3101/v1/auth/dev-token" -Method POST -Headers @{"Content-Type"="application/json"}).user.id; Write-Host "✅ ID do usuário: $userId" -ForegroundColor Green; $userId
+```
+
+### **Gerenciar Relatórios**
+
+#### Listar todas as solicitações de relatório
+```powershell
+$token = (Invoke-RestMethod -Uri "http://localhost:3101/v1/auth/dev-token" -Method POST -Headers @{"Content-Type"="application/json"}).accessToken; $headers = @{"Authorization"="Bearer $token"; "Accept"="application/json"}; $requests = Invoke-RestMethod -Uri "http://localhost:3101/v1/reports/requests" -Method GET -Headers $headers; $requests | ForEach-Object { Write-Host "ID: $($_.id) | Status: $($_.status) | Tipo: $($_.type)" -ForegroundColor Cyan }
+```
+
+#### Encontrar ID de relatório válido para download (status: completed)
+```powershell
+$token = (Invoke-RestMethod -Uri "http://localhost:3101/v1/auth/dev-token" -Method POST -Headers @{"Content-Type"="application/json"}).accessToken; $headers = @{"Authorization"="Bearer $token"; "Accept"="application/json"}; $completed = Invoke-RestMethod -Uri "http://localhost:3101/v1/reports/requests?status=completed" -Method GET -Headers $headers; if ($completed.Count -gt 0) { Write-Host "✅ ID válido para download: $($completed[0].id)" -ForegroundColor Green; $completed[0].id } else { Write-Host "❌ Nenhum relatório com status 'completed' encontrado" -ForegroundColor Red; Write-Host "💡 Crie uma nova solicitação de relatório primeiro" -ForegroundColor Yellow }
+```
+
+#### Criar nova solicitação de relatório
+```powershell
+$token = (Invoke-RestMethod -Uri "http://localhost:3101/v1/auth/dev-token" -Method POST -Headers @{"Content-Type"="application/json"}).accessToken; $headers = @{"Authorization"="Bearer $token"; "Content-Type"="application/json"}; $body = @{ type = "csv"; model = "patrimonio"; filters = @{} } | ConvertTo-Json; $response = Invoke-RestMethod -Uri "http://localhost:3101/v1/reports/requests" -Method POST -Headers $headers -Body $body; Write-Host "✅ Solicitação criada: $($response.id)" -ForegroundColor Green; Write-Host "Status: $($response.status)" -ForegroundColor Yellow; $response.id
+```
+  
 ## 🔧 Configuração
 
 ### **Arquivo .env (Raiz do projeto)**

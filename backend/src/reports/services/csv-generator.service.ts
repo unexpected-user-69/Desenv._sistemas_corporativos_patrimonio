@@ -42,7 +42,37 @@ export class CsvGeneratorService {
     }
 
     // Gerar CSV
-    const csvData = stringify([headers, ...data], {
+    // Se não houver dados, retornar apenas os headers
+    if (data.length === 0) {
+      // Criar um objeto vazio com todas as propriedades dos headers
+      const emptyObject: Record<string, string> = {};
+      headers.forEach((header) => {
+        emptyObject[header] = '';
+      });
+      const csvData = stringify([emptyObject], {
+        header: true,
+        bom: true,
+      });
+      // Remover a linha de dados vazios, deixando apenas o header
+      const lines = csvData.split('\n');
+      const headerLine = lines[0];
+      return Buffer.from(headerLine + '\n', 'utf-8');
+    }
+
+    // Converter arrays de dados para objetos para usar com csv-stringify
+    // Cada linha de dados (array) é convertida para um objeto com as chaves dos headers
+    const dataObjects = data.map((row) => {
+      const obj: Record<string, any> = {};
+      headers.forEach((header, index) => {
+        // Garantir que o valor seja sempre uma string válida
+        const value = row[index];
+        obj[header] = value !== null && value !== undefined ? String(value) : '';
+      });
+      return obj;
+    });
+
+    // Gerar CSV com header: true (que usa as chaves dos objetos como headers)
+    const csvData = stringify(dataObjects, {
       header: true,
       bom: true, // UTF-8 BOM para Excel
     });
@@ -67,12 +97,12 @@ export class CsvGeneratorService {
       queryBuilder.andWhere('patrimonio.status = :status', { status: filters.status });
     }
     if (filters?.categoriaId) {
-      queryBuilder.andWhere('patrimonio.categoria_id = :categoriaId', {
+      queryBuilder.andWhere('categoria.id = :categoriaId', {
         categoriaId: filters.categoriaId,
       });
     }
     if (filters?.responsavelId) {
-      queryBuilder.andWhere('patrimonio.responsavel_id = :responsavelId', {
+      queryBuilder.andWhere('responsavel.id = :responsavelId', {
         responsavelId: filters.responsavelId,
       });
     }

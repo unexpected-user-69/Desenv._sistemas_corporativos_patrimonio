@@ -25,6 +25,24 @@ services:
     networks:
       - patrimonio_network
 
+  # Serviço Redis para filas (BullMQ) e cache
+  redis:
+    image: redis:7-alpine
+    container_name: patrimonio_inventario_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - patrimonio_network
+
   # Serviço do backend NestJS
   backend:
     build: 
@@ -34,6 +52,8 @@ services:
     restart: unless-stopped
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     env_file:
       - ./backend/.env
@@ -45,6 +65,11 @@ services:
       DB_NAME: ${DB_NAME:-patrimonio_inventario}
       NODE_ENV: production
       PORT: 3101
+      # Redis Configuration
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     ports:
       - "${BACKEND_PORT:-3101}:3101"
     networks:
@@ -72,6 +97,7 @@ networks:
   patrimonio_network:
     driver: bridge
 
-# Volume persistente para dados do PostgreSQL
+# Volumes persistentes para dados
 volumes:
   db_data:
+  redis_data:

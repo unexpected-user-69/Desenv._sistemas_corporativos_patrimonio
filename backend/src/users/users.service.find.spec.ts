@@ -21,7 +21,7 @@ describe('UsersService - Find Methods', () => {
       name: 'João Silva',
       email: 'joao.silva@example.com',
       passwordHash: 'hashed-password-1',
-      role: UserRole.STUDENT,
+      role: UserRole.OPERATOR,
       isActive: true,
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
@@ -32,7 +32,7 @@ describe('UsersService - Find Methods', () => {
       name: 'Maria Santos',
       email: 'maria.santos@example.com',
       passwordHash: 'hashed-password-2',
-      role: UserRole.TEACHER,
+      role: UserRole.MANAGER,
       isActive: true,
       createdAt: new Date('2024-01-02'),
       updatedAt: new Date('2024-01-02'),
@@ -115,7 +115,7 @@ describe('UsersService - Find Methods', () => {
         id: 'user-1',
         name: 'João Silva',
         email: 'joao.silva@example.com',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
@@ -154,7 +154,7 @@ describe('UsersService - Find Methods', () => {
             id: 'user-1',
             name: 'João Silva',
             email: 'joao.silva@example.com',
-            role: UserRole.STUDENT,
+            role: UserRole.OPERATOR,
             isActive: true,
           }),
         ]),
@@ -187,9 +187,9 @@ describe('UsersService - Find Methods', () => {
 
     it('should filter by role', async () => {
       // Arrange
-      const query: QueryUsersDto = { role: UserRole.STUDENT };
+      const query: QueryUsersDto = { role: UserRole.OPERATOR };
       const studentUsers = mockUsers.filter(
-        (user) => user.role === UserRole.STUDENT,
+        (user) => user.role === UserRole.OPERATOR,
       );
       userRepository.findAndCount.mockResolvedValue([studentUsers, 1]);
 
@@ -198,10 +198,10 @@ describe('UsersService - Find Methods', () => {
 
       // Assert
       expect(result.data).toHaveLength(1);
-      expect(result.data[0].role).toBe(UserRole.STUDENT);
+      expect(result.data[0].role).toBe(UserRole.OPERATOR);
       expect(userRepository.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: [{ role: UserRole.STUDENT }],
+          where: [{ role: UserRole.OPERATOR }],
         }),
       );
     });
@@ -251,13 +251,13 @@ describe('UsersService - Find Methods', () => {
     it('should combine multiple filters', async () => {
       // Arrange
       const query: QueryUsersDto = {
-        role: UserRole.TEACHER,
+        role: UserRole.MANAGER,
         isActive: true,
         page: 1,
         limit: 5,
       };
       const filteredUsers = mockUsers.filter(
-        (user) => user.role === UserRole.TEACHER && user.isActive === true,
+        (user) => user.role === UserRole.MANAGER && user.isActive === true,
       );
       userRepository.findAndCount.mockResolvedValue([filteredUsers, 1]);
 
@@ -266,7 +266,7 @@ describe('UsersService - Find Methods', () => {
 
       // Assert
       expect(result.data).toHaveLength(1);
-      expect(result.data[0].role).toBe(UserRole.TEACHER);
+      expect(result.data[0].role).toBe(UserRole.MANAGER);
       expect(result.data[0].isActive).toBe(true);
     });
 

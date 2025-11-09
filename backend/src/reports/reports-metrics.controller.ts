@@ -6,8 +6,10 @@ import {
   UseGuards,
   Request,
   ParseUUIDPipe,
+  ParseEnumPipe,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -30,7 +32,7 @@ import { ReportModel } from './entities/report-request.entity';
 
 @ApiTags('reports-metrics')
 @ApiBearerAuth()
-@Controller('v1/reports/metrics')
+@Controller('reports/metrics')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ReportsMetricsController {
   constructor(
@@ -39,7 +41,7 @@ export class ReportsMetricsController {
   ) {}
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Obter métricas de relatórios' })
   @ApiResponse({
@@ -66,7 +68,7 @@ export class ReportsMetricsController {
   }
 
   @Get('summary')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Obter métricas resumidas (últimas 24 horas)' })
   @ApiResponse({
@@ -83,7 +85,7 @@ export class ReportsMetricsController {
   }
 
   @Get('model/:model')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Obter métricas por modelo de relatório' })
   @ApiResponse({
@@ -93,8 +95,14 @@ export class ReportsMetricsController {
   })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiForbiddenResponse({ description: 'Sem permissão' })
+  @ApiResponse({ status: 400, description: 'Modelo inválido' })
   async getMetricsByModel(
-    @Param('model') model: ReportModel,
+    @Param('model', new ParseEnumPipe(ReportModel, {
+      errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      exceptionFactory: () => new BadRequestException(
+        `Modelo inválido. Valores válidos: ${Object.values(ReportModel).join(', ')}`
+      ),
+    })) model: ReportModel,
     @Query() query: MetricsQueryDto,
   ): Promise<ReportMetrics> {
     const toDate = query.toDate ? new Date(query.toDate) : new Date();
@@ -106,7 +114,7 @@ export class ReportsMetricsController {
   }
 
   @Get('quota')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Obter quota atual do usuário' })
   @ApiResponse({

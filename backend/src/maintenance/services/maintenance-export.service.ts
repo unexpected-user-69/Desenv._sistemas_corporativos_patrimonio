@@ -13,15 +13,26 @@ export class MaintenanceExportService {
   async exportToCsv(report: MaintenanceReport): Promise<string> {
     try {
       // Cabeçalho do CSV
+      // Converter valores numéricos para garantir que são números
+      const totalCost = typeof report.summary.totalCost === 'string' 
+        ? parseFloat(report.summary.totalCost) || 0 
+        : report.summary.totalCost || 0;
+      const totalLaborHours = typeof report.summary.totalLaborHours === 'string'
+        ? parseFloat(report.summary.totalLaborHours) || 0
+        : report.summary.totalLaborHours || 0;
+      const totalPartsCost = typeof report.summary.totalPartsCost === 'string'
+        ? parseFloat(report.summary.totalPartsCost) || 0
+        : report.summary.totalPartsCost || 0;
+      
       const csvData: any[] = [
         ['Relatório de Manutenção'],
         [`Período: ${report.period.from.toISOString().split('T')[0]} a ${report.period.to.toISOString().split('T')[0]}`],
         [],
         ['Resumo'],
         ['Total de OS', report.summary.totalOs],
-        ['Custo Total', `R$ ${report.summary.totalCost.toFixed(2)}`],
-        ['Total de Horas Trabalhadas', report.summary.totalLaborHours.toFixed(2)],
-        ['Custo Total de Peças', `R$ ${report.summary.totalPartsCost.toFixed(2)}`],
+        ['Custo Total', `R$ ${totalCost.toFixed(2)}`],
+        ['Total de Horas Trabalhadas', totalLaborHours.toFixed(2)],
+        ['Custo Total de Peças', `R$ ${totalPartsCost.toFixed(2)}`],
         [],
         ['OS por Status'],
         ...Object.entries(report.summary.osByStatus).map(([status, count]) => [status, count]),
@@ -39,18 +50,24 @@ export class MaintenanceExportService {
           'Custo Peças',
           'Quantidade Peças',
         ],
-        ...report.workOrders.map((wo) => [
-          wo.id,
-          wo.titulo,
-          wo.patrimonioId,
-          wo.status,
-          wo.openedAt.toISOString().split('T')[0],
-          wo.closedAt ? wo.closedAt.toISOString().split('T')[0] : '',
-          `R$ ${wo.totalCost.toFixed(2)}`,
-          wo.laborHours.toFixed(2),
-          `R$ ${wo.partsCost.toFixed(2)}`,
-          wo.partsCount,
-        ]),
+        ...report.workOrders.map((wo) => {
+          const woTotalCost = typeof wo.totalCost === 'string' ? parseFloat(wo.totalCost) || 0 : wo.totalCost || 0;
+          const woLaborHours = typeof wo.laborHours === 'string' ? parseFloat(wo.laborHours) || 0 : wo.laborHours || 0;
+          const woPartsCost = typeof wo.partsCost === 'string' ? parseFloat(wo.partsCost) || 0 : wo.partsCost || 0;
+          
+          return [
+            wo.id,
+            wo.titulo,
+            wo.patrimonioId,
+            wo.status,
+            wo.openedAt.toISOString().split('T')[0],
+            wo.closedAt ? wo.closedAt.toISOString().split('T')[0] : '',
+            `R$ ${woTotalCost.toFixed(2)}`,
+            woLaborHours.toFixed(2),
+            `R$ ${woPartsCost.toFixed(2)}`,
+            wo.partsCount,
+          ];
+        }),
       ];
 
       return stringify(csvData, {

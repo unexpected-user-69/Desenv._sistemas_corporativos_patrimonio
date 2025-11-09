@@ -1,12 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEnum, IsDateString, Matches } from 'class-validator';
+import { IsString, IsEnum, IsDateString, IsUUID } from 'class-validator';
 import { Periodicidade } from '../entities/maintenance-plan.entity';
 
 export class CreateMaintenancePlanDto {
   @ApiProperty({ description: 'ID da categoria', format: 'uuid' })
-  @Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, {
-    message: 'categoriaId deve ser um UUID válido',
-  })
+  @IsUUID('4', { message: 'categoriaId deve ser um UUID válido' })
   categoriaId!: string;
 
   @ApiProperty({

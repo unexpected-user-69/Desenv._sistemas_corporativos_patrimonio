@@ -21,7 +21,7 @@ export class CreatePermissionDto {
   @ApiPropertyOptional({
     description: 'Role (opcional - se null, aplica-se apenas ao usuário específico)',
     enum: UserRole,
-    example: UserRole.TEACHER,
+    example: UserRole.MANAGER,
   })
   @IsOptional()
   @IsEnum(UserRole)

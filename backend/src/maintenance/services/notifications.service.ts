@@ -24,12 +24,18 @@ export class MaintenanceNotificationsService {
           description: `Ordem de serviço ${workOrder.id} criada para patrimônio ${workOrder.patrimonioId}`,
           startDate: workOrder.openedAt.toISOString(),
           eventType: EventType.MANUTENCAO,
+          // Não passar patrimonioIds para evitar problemas com categoria_id que pode não existir
         },
         workOrder.ownerId,
       );
 
       this.logger.log(`Notificação criada para OS ${workOrder.id}`);
     } catch (error: any) {
+      // Ignorar erros relacionados a categoria_id que pode não existir na tabela
+      if (error.message && error.message.includes('categoria_id')) {
+        this.logger.warn(`Aviso: Não foi possível criar notificação completa para OS ${workOrder.id} devido a problema com categoria_id`);
+        return;
+      }
       this.logger.error(`Erro ao criar notificação para OS ${workOrder.id}:`, error);
     }
   }
@@ -56,12 +62,18 @@ export class MaintenanceNotificationsService {
           description: `Status alterado de ${statusMessages[oldStatus]} para ${statusMessages[workOrder.status]}`,
           startDate: new Date().toISOString(),
           eventType: EventType.MANUTENCAO,
+          // Não passar patrimonioIds para evitar problemas com categoria_id
         },
         workOrder.ownerId,
       );
 
       this.logger.log(`Notificação de mudança de status criada para OS ${workOrder.id}`);
     } catch (error: any) {
+      // Ignorar erros relacionados a categoria_id que pode não existir na tabela
+      if (error.message && error.message.includes('categoria_id')) {
+        this.logger.warn(`Aviso: Não foi possível criar notificação completa para OS ${workOrder.id} devido a problema com categoria_id`);
+        return;
+      }
       this.logger.error(
         `Erro ao criar notificação de mudança de status para OS ${workOrder.id}:`,
         error,

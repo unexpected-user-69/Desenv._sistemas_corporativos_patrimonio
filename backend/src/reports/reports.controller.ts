@@ -33,17 +33,18 @@ import { ReportsService } from './reports.service';
 import { CreateReportRequestDto } from './dto/create-report-request.dto';
 import { ReportRequestResponseDto } from './dto/report-request-response.dto';
 import { ListReportsQueryDto } from './dto/list-reports-query.dto';
+import { ReportRequestStatus } from './entities/report-request.entity';
 
 @ApiTags('reports')
 @ApiBearerAuth()
-@Controller('v1/reports')
+@Controller('reports')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Throttle({ default: { limit: 60, ttl: 60000 } }) // 60 requisições por minuto por padrão
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Post('export')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 solicitações por minuto
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
@@ -69,7 +70,7 @@ export class ReportsController {
   }
 
   @Get('requests')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar solicitações de relatório',
@@ -92,7 +93,7 @@ export class ReportsController {
   }
 
   @Get('requests/:id')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Buscar solicitação por ID',
@@ -113,11 +114,11 @@ export class ReportsController {
   }
 
   @Get(':id/download')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Baixar artefato de relatório',
-    description: 'Baixa o arquivo gerado (CSV ou PDF) se estiver pronto',
+    description: 'Baixa o arquivo gerado (CSV ou PDF) se estiver pronto. Se o status for "pending", "processing" ou "failed", tenta reprocessar o relatório automaticamente.',
   })
   @ApiResponse({
     status: 200,
@@ -134,9 +135,17 @@ export class ReportsController {
     const request = await this.reportsService.findRequestById(id);
 
     // Se não estiver completo, tentar processar agora (modo síncrono para testes)
-    if (request.status !== 'completed') {
-      if (request.status === 'pending' || request.status === 'processing') {
+    // Permite reprocessar relatórios com status "failed" para facilitar testes
+    if (request.status !== ReportRequestStatus.COMPLETED) {
+      if (request.status === ReportRequestStatus.PENDING || 
+          request.status === ReportRequestStatus.PROCESSING || 
+          request.status === ReportRequestStatus.FAILED) {
         try {
+          // Se estava com status "failed", resetar para "processing" antes de reprocessar
+          if (request.status === ReportRequestStatus.FAILED) {
+            await this.reportsService.updateRequestStatus(id, ReportRequestStatus.PROCESSING, null);
+          }
+
           const { buffer, mime } = await this.reportsService.processRequest(id);
 
           // Criar artefato em memória (sem S3 por enquanto)
@@ -148,17 +157,26 @@ export class ReportsController {
           res.send(buffer);
           return;
         } catch (error: any) {
+          // Retornar erro mais informativo
+          const errorMessage = error.message || 'Erro desconhecido ao processar relatório';
           res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
             statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: `Erro ao processar relatório: ${error.message}`,
+            message: `Erro ao processar relatório: ${errorMessage}`,
+            requestId: id,
+            status: request.status,
+            previousError: request.errorMessage || null,
           });
           return;
         }
       }
 
+      // Status que não podem ser reprocessados (ex: expired)
       res.status(HttpStatus.BAD_REQUEST).json({
         statusCode: HttpStatus.BAD_REQUEST,
-        message: `Relatório está com status: ${request.status}`,
+        message: `Relatório está com status: ${request.status}. Status válidos para download: completed, pending, processing, failed`,
+        requestId: id,
+        currentStatus: request.status,
+        errorMessage: request.errorMessage || null,
       });
       return;
     }

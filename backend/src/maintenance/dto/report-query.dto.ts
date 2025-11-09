@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsDateString, IsEnum, IsUUID } from 'class-validator';
+import { IsOptional, IsDateString, IsEnum, Matches } from 'class-validator';
 import { WorkOrderStatus } from '../entities/work-order.entity';
 
 export class ReportQueryDto {
@@ -21,9 +21,12 @@ export class ReportQueryDto {
 
   @ApiPropertyOptional({
     description: 'ID do patrimônio',
+    format: 'uuid',
   })
   @IsOptional()
-  @IsUUID()
+  @Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, {
+    message: 'patrimonioId deve ser um UUID válido',
+  })
   patrimonioId?: string;
 
   @ApiPropertyOptional({

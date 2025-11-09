@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class DashboardResponseDto {
+export class PatrimonioDashboardResponseDto {
   @ApiProperty({
     description: 'Total de patrimônios cadastrados',
     example: 1000,

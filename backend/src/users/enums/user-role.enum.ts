@@ -1,14 +1,14 @@
 /**
- * Enum que define os papéis (roles) disponíveis para usuários no sistema.
+ * Enum que define os papéis (roles) disponíveis para usuários no sistema de patrimônio e inventário.
  *
  * @enum {string}
  */
 export enum UserRole {
-  /** Estudante - papel padrão para usuários comuns */
-  STUDENT = 'STUDENT',
+  /** Operador - papel para operadores de inventário e manutenção */
+  OPERATOR = 'OPERATOR',
 
-  /** Professor - papel para educadores e instrutores */
-  TEACHER = 'TEACHER',
+  /** Gerente - papel para gerentes de patrimônio e inventário */
+  MANAGER = 'MANAGER',
 
   /** Administrador - papel com privilégios elevados */
   ADMIN = 'ADMIN',

@@ -240,6 +240,27 @@ export class MaintenanceService {
     dto: CreateMaintenancePlanDto,
     ownerId: string,
   ): Promise<MaintenancePlanResponseDto> {
+    // Verificar se a categoria existe (opcional - pode não ter foreign key constraint)
+    try {
+      const categoriaExists = await this.patrimonioRepository.manager
+        .createQueryBuilder()
+        .select('1')
+        .from('categorias', 'c')
+        .where('c.id = :categoriaId', { categoriaId: dto.categoriaId })
+        .getRawOne();
+      
+      if (!categoriaExists) {
+        throw new NotFoundException(`Categoria com ID "${dto.categoriaId}" não encontrada`);
+      }
+    } catch (error: any) {
+      // Se for NotFoundException, relançar
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      // Se for outro erro (tabela não existe, etc), apenas logar e continuar
+      this.logger.warn(`Não foi possível verificar categoria: ${error.message}`);
+    }
+
     const plan = this.maintenancePlanRepository.create({
       categoriaId: dto.categoriaId,
       periodicidade: dto.periodicidade,
@@ -247,24 +268,32 @@ export class MaintenanceService {
       ownerId,
     });
 
-    const saved = await this.maintenancePlanRepository.save(plan);
+    try {
+      const saved = await this.maintenancePlanRepository.save(plan);
 
-    this.logger.log(`Plano preventivo ${saved.id} criado para categoria ${dto.categoriaId}`);
+      this.logger.log(`Plano preventivo ${saved.id} criado para categoria ${dto.categoriaId}`);
 
-    // Notificar criação do plano
-    await this.notificationsService.notifyMaintenancePlanCreated(saved).catch((err) => {
-      this.logger.warn(`Erro ao notificar criação de plano: ${err.message}`);
-    });
+      // Notificar criação do plano
+      await this.notificationsService.notifyMaintenancePlanCreated(saved).catch((err) => {
+        this.logger.warn(`Erro ao notificar criação de plano: ${err.message}`);
+      });
 
-    return {
-      id: saved.id,
-      categoriaId: saved.categoriaId,
-      periodicidade: saved.periodicidade,
-      proximaExecucao: saved.proximaExecucao,
-      ownerId: saved.ownerId,
-      createdAt: saved.createdAt,
-      updatedAt: saved.updatedAt,
-    };
+      return {
+        id: saved.id,
+        categoriaId: saved.categoriaId,
+        periodicidade: saved.periodicidade,
+        proximaExecucao: saved.proximaExecucao,
+        ownerId: saved.ownerId,
+        createdAt: saved.createdAt,
+        updatedAt: saved.updatedAt,
+      };
+    } catch (error: any) {
+      // Se for erro de foreign key, retornar erro mais amigável
+      if (error.code === '23503' || error.message?.includes('foreign key')) {
+        throw new NotFoundException(`Categoria com ID "${dto.categoriaId}" não encontrada`);
+      }
+      throw error;
+    }
   }
 
   /**

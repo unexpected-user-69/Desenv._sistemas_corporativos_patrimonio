@@ -161,7 +161,7 @@ describe('CacheService', () => {
     it('should generate consistent key from parameters', () => {
       // Arrange
       const prefix = 'users';
-      const params = { page: 1, limit: 20, role: 'STUDENT' };
+      const params = { page: 1, limit: 20, role: 'OPERATOR' };
 
       // Act
       const key1 = service.generateKey(prefix, params);

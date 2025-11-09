@@ -195,7 +195,13 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<UserResponseDto> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    // TypeORM automaticamente filtra usuários soft deleted quando usamos findOne
+    const user = await this.userRepository.findOne({ 
+      where: { id },
+      // Garantir que estamos buscando apenas usuários não deletados
+      withDeleted: false,
+    });
+    
     if (!user) {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }

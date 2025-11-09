@@ -1,5 +1,3 @@
-// Habilitar auto-auth para testes ANTES de importar módulos
-process.env.DEV_AUTO_AUTH = 'true';
 process.env.NODE_ENV = 'test';
 
 import { Test, TestingModule } from '@nestjs/testing';
@@ -17,6 +15,10 @@ import { AppModule } from '../../src/app.module';
  * - GET /v1/enums/roles - Listar roles de usuário
  * - GET /v1/enums/campos-ordenacao - Listar campos de ordenação
  * - GET /v1/enums/direcoes-ordenacao - Listar direções de ordenação
+ * 
+ * Os testes validam:
+ * - ✅ Cenários de sucesso (retornando 200)
+ * - ✅ Endpoints públicos (não requerem autenticação)
  */
 
 describe('Enums (e2e)', () => {

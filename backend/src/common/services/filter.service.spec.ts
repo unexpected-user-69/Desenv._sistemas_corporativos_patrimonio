@@ -41,7 +41,7 @@ describe('FilterService', () => {
     it('should build filters with role and isActive', () => {
       // Arrange
       const options: AdvancedFilterOptions = {
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
         page: 2,
         limit: 20,
@@ -54,7 +54,7 @@ describe('FilterService', () => {
       expect(result.skip).toBe(20);
       expect(result.take).toBe(20);
       expect(result.where).toEqual([
-        { role: UserRole.STUDENT },
+        { role: UserRole.OPERATOR },
         { isActive: true },
       ]);
     });
@@ -102,7 +102,7 @@ describe('FilterService', () => {
       // Arrange
       const options: AdvancedFilterOptions = {
         searchText: 'joão',
-        role: UserRole.TEACHER,
+        role: UserRole.MANAGER,
         isActive: true,
         page: 1,
         limit: 10,
@@ -118,7 +118,7 @@ describe('FilterService', () => {
       // Verifica que temos combinações de filtros
       expect(result.where).toContainEqual(
         expect.objectContaining({
-          role: UserRole.TEACHER,
+          role: UserRole.MANAGER,
           name: expect.any(Object),
         }),
       );
@@ -188,7 +188,7 @@ describe('FilterService', () => {
         name: 'João Silva',
         email: 'joao@example.com',
         passwordHash: 'hashed',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
         createdAt: new Date('2023-06-01'),
         updatedAt: new Date('2023-06-01'),

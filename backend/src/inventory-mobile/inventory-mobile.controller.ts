@@ -44,7 +44,7 @@ import { Res } from '@nestjs/common';
 import type { Response } from 'express';
 
 @ApiTags('inventory-mobile')
-@Controller('v1/inventory')
+@Controller('inventory')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class InventoryMobileController {
@@ -56,7 +56,7 @@ export class InventoryMobileController {
   ) {}
 
   @Post('campaigns')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Criar campanha de inventário',
@@ -79,7 +79,7 @@ export class InventoryMobileController {
   }
 
   @Get('campaigns/:id/assignments')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Listar assignments de uma campanha',
     description: 'Retorna os lotes (assignments) distribuídos para uma campanha',
@@ -99,7 +99,7 @@ export class InventoryMobileController {
   }
 
   @Post('campaigns/:id/assignments')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Distribuir lotes para coletores',
@@ -123,7 +123,7 @@ export class InventoryMobileController {
   }
 
   @Post('sync/pull')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Sincronização pull (mobile)',
@@ -146,7 +146,7 @@ export class InventoryMobileController {
   }
 
   @Post('sync/push')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Sincronização push (mobile)',
@@ -169,7 +169,7 @@ export class InventoryMobileController {
   }
 
   @Post('reconcile')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Executar conciliação de campanha',
@@ -200,7 +200,7 @@ export class InventoryMobileController {
   }
 
   @Get('campaigns/:id/report')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Gerar relatório de campanha',
     description: 'Gera relatório completo com estatísticas da campanha',
@@ -220,7 +220,7 @@ export class InventoryMobileController {
   }
 
   @Get('campaigns/:id/export/csv')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Exportar divergências para CSV',
     description: 'Exporta todas as divergências da campanha em formato CSV',
@@ -238,7 +238,7 @@ export class InventoryMobileController {
   }
 
   @Get('campaigns/:id/export/excel')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Exportar relatório de campanha para Excel',
     description: 'Exporta relatório completo da campanha em formato Excel',
@@ -256,7 +256,7 @@ export class InventoryMobileController {
   }
 
   @Get('dashboard')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Dashboard de campanhas',
     description: 'Retorna estatísticas gerais de todas as campanhas',

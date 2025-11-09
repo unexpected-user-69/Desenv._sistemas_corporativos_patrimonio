@@ -49,7 +49,7 @@ export class AdvancedQueryUsersDto {
   @ApiPropertyOptional({
     description: 'Filtro por role do usuário',
     enum: UserRole,
-    example: UserRole.STUDENT,
+    example: UserRole.OPERATOR,
   })
   @IsOptional()
   @IsEnum(UserRole)

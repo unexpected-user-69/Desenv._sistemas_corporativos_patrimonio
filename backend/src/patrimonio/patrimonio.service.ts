@@ -17,7 +17,7 @@ import { QueryPatrimonioDto } from './dto/query-patrimonio.dto';
 import { PaginatedPatrimonioResponseDto } from './dto/paginated-patrimonio-response.dto';
 import { UpdateStatusPatrimonioDto } from './dto/update-status-patrimonio.dto';
 import { TransferirResponsavelDto } from './dto/transferir-responsavel.dto';
-import { DashboardResponseDto } from './dto/dashboard-response.dto';
+import { PatrimonioDashboardResponseDto } from './dto/dashboard-response.dto';
 import { DescartePatrimonioDto } from './dto/descarte-patrimonio.dto';
 import { UpdateLocalizacaoPatrimonioDto } from './dto/update-localizacao-patrimonio.dto';
 import { LocalizacoesStatsResponseDto, LocalizacaoStatsItemDto } from './dto/localizacoes-stats-response.dto';
@@ -613,11 +613,11 @@ export class PatrimonioService {
       await this.usersService.findOne(dto.novoResponsavelId);
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw new NotFoundException(
-          `Usuário com ID "${dto.novoResponsavelId}" não encontrado`,
-        );
+        throw error;
       }
-      throw error;
+      throw new NotFoundException(
+        `Usuário com ID "${dto.novoResponsavelId}" não encontrado`,
+      );
     }
 
     // Validar se o novo responsável é diferente do atual
@@ -644,7 +644,7 @@ export class PatrimonioService {
   /**
    * Obtém todas as métricas principais para o dashboard
    */
-  async getDashboard(): Promise<DashboardResponseDto> {
+  async getDashboard(): Promise<PatrimonioDashboardResponseDto> {
     // Contar total de patrimônios (não deletados - TypeORM ignora soft deletes por padrão)
     const total = await this.patrimonioRepository.count();
 

@@ -1,8 +1,21 @@
+process.env.NODE_ENV = 'test';
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import * as http from 'http';
 import { AppModule } from './../src/app.module';
+
+/**
+ * Testes E2E para AppController
+ * 
+ * Cobre o endpoint básico da aplicação:
+ * - GET / - Hello World
+ * 
+ * Os testes validam:
+ * - ✅ Endpoint básico da aplicação (retornando 200)
+ * - ✅ Endpoint público (não requer autenticação)
+ */
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -14,9 +27,9 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    // Não usar setGlobalPrefix aqui, pois o endpoint raiz '/' não funciona com prefixo
     await app.init();
 
-    // Correção: Asserção de tipo para resolver o erro de atribuição insegura.
     httpServer = app.getHttpServer() as http.Server;
   });
 

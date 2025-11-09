@@ -402,6 +402,7 @@ Este tutorial aborda uma correção crucial de configuração para o NestJS ao u
         3.  **`app.setGlobalPrefix('v1');`** (Definir o prefixo global)
         4.  Configuração do Swagger (`DocumentBuilder`, `SwaggerModule.createDocument`, `SwaggerModule.setup('docs', app, document);`).
 3.  **Advertência:** Não utilizar `DocumentBuilder().addServer('/v1', 'API v1')` quando o prefixo global já estiver definido, para evitar URLs duplicadas (ex: `/v1/v1/...`).
+
 4.  **Validação:** Após a correção, a URL gerada no Swagger deve conter `/v1`, como em `http://localhost:3101/v1/users?...`.
 
 

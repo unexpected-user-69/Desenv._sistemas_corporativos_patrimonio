@@ -82,7 +82,7 @@ describe('UsersService - Create Method', () => {
       name: 'João Silva',
       email: 'joao.silva@example.com',
       password: 'senha123',
-      role: UserRole.STUDENT,
+      role: UserRole.OPERATOR,
       isActive: true,
     };
 
@@ -102,7 +102,7 @@ describe('UsersService - Create Method', () => {
         name: 'João Silva',
         email: 'joao.silva@example.com',
         passwordHash: 'hashed-password-123',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -117,7 +117,7 @@ describe('UsersService - Create Method', () => {
         id: 'user-123',
         name: 'João Silva',
         email: 'joao.silva@example.com',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
@@ -138,7 +138,7 @@ describe('UsersService - Create Method', () => {
         name: 'João Silva',
         email: 'joao.silva@example.com',
         password: 'senha123',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
         passwordHash: 'hashed-password-123',
       });
@@ -173,7 +173,7 @@ describe('UsersService - Create Method', () => {
         name: 'João Silva',
         email: 'joao.silva@example.com',
         password: 'senha123',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
       };
       userRepository.findOne.mockResolvedValue(null);
       userRepository.create.mockReturnValue({} as User);
@@ -187,7 +187,7 @@ describe('UsersService - Create Method', () => {
         name: 'João Silva',
         email: 'joao.silva@example.com',
         password: 'senha123',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
         passwordHash: 'hashed-password-123',
       });
@@ -254,7 +254,7 @@ describe('UsersService - Create Method', () => {
         name: 'João Silva',
         email: 'joao.silva@example.com',
         passwordHash: 'hashed-password-123',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -275,7 +275,7 @@ describe('UsersService - Create Method', () => {
 
     it('should handle different user roles', async () => {
       // Arrange
-      const teacherDto = { ...validCreateUserDto, role: UserRole.TEACHER };
+      const teacherDto = { ...validCreateUserDto, role: UserRole.MANAGER };
       const adminDto = { ...validCreateUserDto, role: UserRole.ADMIN };
 
       userRepository.findOne.mockResolvedValue(null);
@@ -288,7 +288,7 @@ describe('UsersService - Create Method', () => {
 
       // Assert
       expect(userRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({ role: UserRole.TEACHER }),
+        expect.objectContaining({ role: UserRole.MANAGER }),
       );
       expect(userRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({ role: UserRole.ADMIN }),

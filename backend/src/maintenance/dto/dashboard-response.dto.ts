@@ -89,7 +89,7 @@ class RecentDto {
   upcomingPlans: UpcomingPlanDto[];
 }
 
-export class DashboardResponseDto {
+export class MaintenanceDashboardResponseDto {
   @ApiProperty({ description: 'Visão geral', type: OverviewDto })
   overview: OverviewDto;
 

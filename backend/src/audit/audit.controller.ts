@@ -97,10 +97,10 @@ export class AuditController {
 
   @Get('logs')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Buscar logs de auditoria' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiResponse({ status: 200, description: 'Lista de logs de auditoria' })
   async searchAuditLogs(@Query() searchDto: SearchAuditLogsDto) {
     return await this.auditService.findAll(searchDto);
@@ -108,10 +108,10 @@ export class AuditController {
 
   @Get('logs/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Buscar log de auditoria por ID' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiParam({ 
     name: 'id', 
     description: 'ID do log de auditoria', 
@@ -139,10 +139,10 @@ export class AuditController {
 
   @Get('logs/entity/:entityType/:entityId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Buscar logs por entidade' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiParam({ 
     name: 'entityType', 
     description: 'Tipo da entidade', 
@@ -175,10 +175,10 @@ export class AuditController {
 
   @Get('logs/user/:userId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Buscar logs por usuário' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiParam({ 
     name: 'userId', 
     description: 'ID do usuário', 

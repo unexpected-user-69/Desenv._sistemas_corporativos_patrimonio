@@ -45,10 +45,10 @@ export class EventsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  @Roles(UserRole.MANAGER, UserRole.ADMIN)
   @ApiOperation({
     summary: 'Criar um novo evento',
-    description: 'Cria um novo evento relacionado a patrimônio. Requer permissão de TEACHER ou ADMIN.',
+    description: 'Cria um novo evento relacionado a patrimônio. Requer permissão de MANAGER ou ADMIN.',
   })
   @ApiBody({ type: CreateEventDto })
   @ApiCreatedResponse({
@@ -56,7 +56,7 @@ export class EventsController {
     type: EventResponseDto,
   })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiBadRequestResponse({ description: 'Dados de entrada inválidos' })
   create(
     @Body() createEventDto: CreateEventDto,

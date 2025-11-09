@@ -18,7 +18,7 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
     name: 'João Silva',
     email: 'joao.silva@example.com',
     passwordHash: 'hashed-password-1',
-    role: UserRole.STUDENT,
+    role: UserRole.OPERATOR,
     isActive: true,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
@@ -89,7 +89,7 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
         page: 1,
         limit: 10,
         searchText: 'joão',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
       };
 
@@ -256,7 +256,7 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
       // Arrange
       const dateFrom = new Date('2024-01-01');
       const dateTo = new Date('2024-01-31');
-      const options = { role: UserRole.STUDENT, limit: 50 };
+      const options = { role: UserRole.OPERATOR, limit: 50 };
 
       userRepository.find.mockResolvedValue([mockUser]);
 
@@ -267,7 +267,7 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
       expect(userRepository.find).toHaveBeenCalledWith({
         where: {
           createdAt: Between(dateFrom, dateTo),
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
         },
         order: { createdAt: 'DESC' },
         take: 50,
@@ -300,9 +300,9 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
     it('should return statistics by role', async () => {
       // Arrange
       const users = [
-        { role: UserRole.STUDENT },
-        { role: UserRole.STUDENT },
-        { role: UserRole.TEACHER },
+        { role: UserRole.OPERATOR },
+        { role: UserRole.OPERATOR },
+        { role: UserRole.MANAGER },
         { role: UserRole.ADMIN },
       ] as User[];
 
@@ -316,8 +316,8 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
         select: ['role'],
       });
       expect(result).toEqual({
-        [UserRole.STUDENT]: 2,
-        [UserRole.TEACHER]: 1,
+        [UserRole.OPERATOR]: 2,
+        [UserRole.MANAGER]: 1,
         [UserRole.ADMIN]: 1,
       });
     });

@@ -63,7 +63,7 @@ export class ReportCatalogController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Listar catálogos de relatórios' })
   @ApiResponse({
@@ -79,7 +79,7 @@ export class ReportCatalogController {
   }
 
   @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Buscar catálogo por ID' })
   @ApiResponse({ status: 200, description: 'Catálogo encontrado', type: CatalogResponseDto })
@@ -91,7 +91,7 @@ export class ReportCatalogController {
   }
 
   @Get('key/:key')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Buscar catálogo por chave' })
   @ApiResponse({ status: 200, description: 'Catálogo encontrado', type: CatalogResponseDto })

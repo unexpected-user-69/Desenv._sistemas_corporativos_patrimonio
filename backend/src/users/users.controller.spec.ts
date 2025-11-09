@@ -62,7 +62,7 @@ describe('UsersController', () => {
       name: 'Jane',
       email: 'jane@example.com',
       password: 'secret12',
-      role: UserRole.STUDENT,
+      role: UserRole.OPERATOR,
     });
     expect(res).toEqual({ id: 'u2' });
   });

@@ -16,6 +16,11 @@ async function bootstrap() {
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',
   });
+  
+  // Servir arquivos estáticos públicos (para scripts do Swagger)
+  app.useStaticAssets(join(process.cwd(), 'public'), {
+    prefix: '/public/',
+  });
 
   // Compressão gzip
   app.use(compression());
@@ -65,6 +70,9 @@ async function bootstrap() {
     )
     .setVersion('1.0.0')
     .setContact('Equipe de Desenvolvimento', '', 'dev@example.com')
+    // Não adicionar servidor com /v1, pois o prefixo global já está configurado
+    // O Swagger automaticamente incluirá o prefixo /v1 nos endpoints documentados
+    // Usar ignoreGlobalPrefix: true no setup para servir o Swagger UI em /docs (sem /v1)
     .addTag('root', 'Endpoints raiz da API')
     .addTag('auth', 'Autenticação e autorização')
     .addTag('users', 'Gerenciamento de usuários')
@@ -94,7 +102,32 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  
+  // Customizar Swagger UI para autenticação automática (apenas em desenvolvimento)
+  const swaggerOptions = process.env.NODE_ENV === 'production' 
+    ? {
+        // Em produção, ignorar o prefixo global para evitar duplicação
+        ignoreGlobalPrefix: true,
+      }
+    : {
+        // Ignorar o prefixo global para o Swagger UI (serve em /docs, não /v1/docs)
+        // Isso evita duplicação do prefixo v1 nas URLs dos endpoints
+        ignoreGlobalPrefix: true,
+        customSiteTitle: 'Patrimonio & Inventario API - Swagger',
+        swaggerOptions: {
+          persistAuthorization: true, // Persiste a autorização entre recarregamentos
+          // Configurar URL base para scripts customizados
+          customCssUrl: undefined,
+        },
+        // URLs dos scripts customizados (relativas à raiz da aplicação)
+        customJs: [
+          // Usar URL absoluta desde a raiz (sem prefixo v1, pois o Swagger UI gerencia isso)
+          '/v1/swagger/auto-auth.js',
+        ],
+        customCss: undefined,
+      };
+  
+  SwaggerModule.setup('docs', app, document, swaggerOptions);
 
   await app.listen(process.env.PORT ?? 3101);
 }

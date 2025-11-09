@@ -9,7 +9,7 @@ export class UsersInit1758646964161 implements MigrationInterface {
         name varchar(255) NOT NULL,
         email citext NOT NULL,
         password_hash varchar(255) NOT NULL,
-        role varchar(32) NOT NULL DEFAULT 'STUDENT',
+        role varchar(32) NOT NULL DEFAULT 'OPERATOR',
         is_active boolean NOT NULL DEFAULT true,
         created_at timestamptz NOT NULL DEFAULT NOW(),
         updated_at timestamptz NOT NULL DEFAULT NOW()

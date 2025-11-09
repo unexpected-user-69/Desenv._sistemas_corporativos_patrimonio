@@ -44,7 +44,7 @@ import { NotificationMetricsService } from './observability/notification-metrics
 
 @ApiTags('notifications')
 @ApiBearerAuth()
-@Controller('v1/notifications')
+@Controller('notifications')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class NotificationsController {
   constructor(
@@ -54,7 +54,7 @@ export class NotificationsController {
   ) {}
 
   @Post('test')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Enviar notificação de teste',
@@ -95,7 +95,7 @@ export class NotificationsController {
   }
 
   @Get('templates')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar templates',
@@ -113,7 +113,7 @@ export class NotificationsController {
   }
 
   @Get('templates/:id')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Buscar template por ID',
@@ -197,7 +197,7 @@ export class NotificationsController {
   }
 
   @Get('policies')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar políticas de notificação',
@@ -237,7 +237,7 @@ export class NotificationsController {
   }
 
   @Get('webhooks')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar webhooks',
@@ -257,7 +257,7 @@ export class NotificationsController {
   // ========== QUEUE STATS ==========
 
   @Get('queue/stats')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Estatísticas da fila de notificações',
@@ -277,7 +277,7 @@ export class NotificationsController {
   // ========== METRICS ==========
 
   @Get('metrics')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Métricas de notificações',
@@ -305,7 +305,7 @@ export class NotificationsController {
   }
 
   @Get('metrics/summary')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Métricas resumidas (últimas 24h)',

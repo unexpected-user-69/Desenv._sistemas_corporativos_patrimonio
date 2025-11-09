@@ -46,10 +46,10 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.TEACHER, UserRole.ADMIN)
+  @Roles(UserRole.MANAGER, UserRole.ADMIN)
   @ApiOperation({ summary: 'Listar todos os usuários' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiOkResponse({
     description: 'Lista todos os usuários com paginação e filtros avançados',
     type: PaginatedUsersResponseDto,
@@ -78,9 +78,9 @@ export class UsersController {
   @ApiQuery({
     name: 'role',
     required: false,
-    enum: ['STUDENT', 'TEACHER', 'ADMIN'],
+    enum: ['OPERATOR', 'MANAGER', 'ADMIN'],
     description: 'Filtrar por role específico',
-    example: 'STUDENT',
+    example: 'OPERATOR',
   })
   @ApiQuery({
     name: 'isActive',
@@ -217,23 +217,23 @@ export class UsersController {
     type: CreateUserDto,
     description: 'Dados do usuário a ser criado',
     examples: {
-      student: {
-        summary: 'Criar estudante',
+      operator: {
+        summary: 'Criar operador',
         value: {
           name: 'João Silva',
           email: 'joao.silva@email.com',
           password: 'senha123',
-          role: 'STUDENT',
+          role: 'OPERATOR',
           isActive: true,
         },
       },
-      teacher: {
-        summary: 'Criar professor',
+      manager: {
+        summary: 'Criar gerente',
         value: {
           name: 'Maria Santos',
           email: 'maria.santos@email.com',
           password: 'senha456',
-          role: 'TEACHER',
+          role: 'MANAGER',
           isActive: true,
         },
       },
@@ -290,14 +290,14 @@ export class UsersController {
             name: 'João Silva',
             email: 'joao.silva@email.com',
             password: 'senha123',
-            role: 'STUDENT',
+            role: 'OPERATOR',
             isActive: true,
           },
           {
             name: 'Maria Santos',
             email: 'maria.santos@email.com',
             password: 'senha456',
-            role: 'TEACHER',
+            role: 'MANAGER',
             isActive: true,
           },
         ],

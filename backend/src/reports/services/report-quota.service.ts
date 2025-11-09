@@ -9,6 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { ReportQuota } from '../entities/report-quota.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Injectable()
 export class ReportQuotaService {
@@ -17,6 +18,8 @@ export class ReportQuotaService {
   constructor(
     @InjectRepository(ReportQuota)
     private readonly quotaRepository: Repository<ReportQuota>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   /**
@@ -27,6 +30,15 @@ export class ReportQuotaService {
     userId: string,
     periodType: 'daily' | 'weekly' | 'monthly' = 'monthly',
   ): Promise<void> {
+    // Verificar se o usuário existe
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${userId} não encontrado`);
+    }
+
     const { periodStart, periodEnd } = this.getPeriodDates(periodType);
 
     // Buscar ou criar quota
@@ -76,6 +88,15 @@ export class ReportQuotaService {
     userId: string,
     periodType: 'daily' | 'weekly' | 'monthly' = 'monthly',
   ): Promise<ReportQuota> {
+    // Verificar se o usuário existe
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${userId} não encontrado`);
+    }
+
     const { periodStart, periodEnd } = this.getPeriodDates(periodType);
 
     let quota = await this.quotaRepository.findOne({
@@ -113,6 +134,15 @@ export class ReportQuotaService {
   ): Promise<ReportQuota> {
     if (limit < 0) {
       throw new BadRequestException('Limite deve ser maior ou igual a zero');
+    }
+
+    // Verificar se o usuário existe
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${userId} não encontrado`);
     }
 
     const { periodStart, periodEnd } = this.getPeriodDates(periodType);

@@ -239,6 +239,16 @@ export class ReportsService {
   }
 
   /**
+   * Busca uma solicitação por ID (retorna null se não encontrar)
+   * Método interno para verificação de existência
+   */
+  async findOne(id: string): Promise<ReportRequest | null> {
+    return this.requestRepository.findOne({
+      where: { id },
+    });
+  }
+
+  /**
    * Busca uma solicitação por ID
    */
   async findRequestById(id: string): Promise<ReportRequestResponseDto> {
@@ -260,7 +270,7 @@ export class ReportsService {
   async updateRequestStatus(
     id: string,
     status: ReportRequestStatus,
-    errorMessage?: string,
+    errorMessage?: string | null,
   ): Promise<ReportRequestResponseDto> {
     const request = await this.requestRepository.findOne({ where: { id } });
 
@@ -269,8 +279,10 @@ export class ReportsService {
     }
 
     request.status = status;
-    if (errorMessage) {
-      request.errorMessage = errorMessage;
+    // Se errorMessage for explicitamente null, limpar a mensagem de erro
+    // Se for undefined, manter a mensagem atual
+    if (errorMessage !== undefined) {
+      request.errorMessage = errorMessage || undefined;
     }
 
     const saved = await this.requestRepository.save(request);

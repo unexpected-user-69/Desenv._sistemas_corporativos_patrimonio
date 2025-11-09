@@ -43,15 +43,19 @@ import { MaintenancePlanResponseDto } from './dto/maintenance-plan-response.dto'
 import { PaginatedWorkOrdersResponseDto } from './dto/paginated-work-orders-response.dto';
 import { CreatePartDto } from './dto/create-part.dto';
 import { PartResponseDto } from './dto/part-response.dto';
-import { DashboardResponseDto } from './dto/dashboard-response.dto';
+import { MaintenanceDashboardResponseDto } from './dto/dashboard-response.dto';
 import { ReportQueryDto } from './dto/report-query.dto';
 import { ReportResponseDto } from './dto/report-response.dto';
 import { MaintenanceDashboardService } from './services/maintenance-dashboard.service';
 import { MaintenanceReportsService } from './services/maintenance-reports.service';
 import { MaintenanceExportService } from './services/maintenance-export.service';
+import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { NotFoundException } from '@nestjs/common';
 
 @ApiTags('maintenance')
-@Controller('v1/maintenance')
+@Controller('maintenance')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class MaintenanceController {
@@ -61,10 +65,12 @@ export class MaintenanceController {
     private readonly dashboardService: MaintenanceDashboardService,
     private readonly reportsService: MaintenanceReportsService,
     private readonly exportService: MaintenanceExportService,
+    @InjectRepository(Patrimonio)
+    private readonly patrimonioRepository: Repository<Patrimonio>,
   ) {}
 
   @Get('os')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar ordens de serviço',
@@ -84,7 +90,7 @@ export class MaintenanceController {
   }
 
   @Post('os')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Abrir nova OS',
@@ -109,7 +115,7 @@ export class MaintenanceController {
   }
 
   @Patch('os/:id/status')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Atualizar status da OS',
@@ -133,7 +139,7 @@ export class MaintenanceController {
   }
 
   @Get('planos')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar planos preventivos',
@@ -151,7 +157,7 @@ export class MaintenanceController {
   }
 
   @Post('planos')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Criar plano preventivo',
@@ -175,7 +181,7 @@ export class MaintenanceController {
   }
 
   @Get('sla/metrics')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obter métricas de SLA',
@@ -197,7 +203,7 @@ export class MaintenanceController {
   }
 
   @Get('sla/mttr')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Calcular MTTR',
@@ -224,7 +230,7 @@ export class MaintenanceController {
   }
 
   @Get('sla/mtbf/:patrimonioId')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Calcular MTBF',
@@ -241,6 +247,15 @@ export class MaintenanceController {
     @Param('patrimonioId', ParseUUIDPipe) patrimonioId: string,
     @Query() query: SlaMetricsQueryDto,
   ): Promise<MtbfResponseDto> {
+    // Verificar se o patrimônio existe
+    const patrimonio = await this.patrimonioRepository.findOne({
+      where: { id: patrimonioId },
+    });
+    
+    if (!patrimonio) {
+      throw new NotFoundException(`Patrimônio com ID "${patrimonioId}" não encontrado`);
+    }
+    
     const startDate = query.startDate ? new Date(query.startDate) : undefined;
     const endDate = query.endDate ? new Date(query.endDate) : undefined;
     const mtbf = await this.slaService.calculateMTBF(patrimonioId, startDate, endDate);
@@ -251,7 +266,7 @@ export class MaintenanceController {
   }
 
   @Post('apontamentos')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar apontamento',
@@ -271,7 +286,7 @@ export class MaintenanceController {
   }
 
   @Post('os/:id/parts')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar peça utilizada',
@@ -295,7 +310,7 @@ export class MaintenanceController {
   }
 
   @Get('os/:id/parts')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OPERATOR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Listar peças de uma OS',
@@ -316,7 +331,7 @@ export class MaintenanceController {
   }
 
   @Delete('os/:id/parts/:partId')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Remover peça de uma OS',
@@ -337,7 +352,7 @@ export class MaintenanceController {
   }
 
   @Get('dashboard')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obter dados do dashboard',
@@ -346,16 +361,16 @@ export class MaintenanceController {
   @ApiResponse({
     status: 200,
     description: 'Dados do dashboard',
-    type: DashboardResponseDto,
+    type: MaintenanceDashboardResponseDto,
   })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiForbiddenResponse({ description: 'Sem permissão' })
-  async getDashboard(): Promise<DashboardResponseDto> {
+  async getDashboard(): Promise<MaintenanceDashboardResponseDto> {
     return this.dashboardService.getDashboardData();
   }
 
   @Get('reports')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Gerar relatório de manutenção',
@@ -381,7 +396,7 @@ export class MaintenanceController {
   }
 
   @Get('reports/export/csv')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Exportar relatório em CSV',
@@ -414,7 +429,7 @@ export class MaintenanceController {
   }
 
   @Get('reports/export/excel')
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Exportar relatório em Excel',

@@ -25,6 +25,7 @@ import { MetricsController } from './common/controllers/metrics.controller';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
+import { SwaggerController } from './swagger/swagger.controller';
 
 @Module({
   imports: [
@@ -61,7 +62,7 @@ import { AuditInterceptor } from './common/interceptors/audit.interceptor';
     NotificationsModule,
     ReportsModule,
   ],
-  controllers: [AppController, MetricsController],
+  controllers: [AppController, MetricsController, SwaggerController],
   providers: [
     AppService,
     MetricsInterceptor,

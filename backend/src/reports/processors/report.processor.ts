@@ -68,19 +68,76 @@ export class ReportProcessor {
         error.message,
       );
 
-      // Atualizar status para FAILED (já feito no processRequest, mas garantimos)
-      try {
-        await this.reportsService.updateRequestStatus(
-          requestId,
-          ReportRequestStatus.FAILED,
-          error.message || 'Erro desconhecido ao processar relatório',
+      // Verificar se o erro é porque a solicitação não existe
+      const isNotFoundError = error.message?.includes('não encontrada') || 
+                              error.message?.includes('not found') ||
+                              error.status === 404 ||
+                              error.statusCode === 404;
+
+      if (isNotFoundError) {
+        // Se a solicitação não existe, não tentar atualizar o status
+        // Apenas logar e marcar o job como concluído (sem rethrow)
+        this.logger.warn(
+          `Solicitação ${requestId} não encontrada no banco de dados. Job será marcado como concluído sem processar.`,
         );
-      } catch (updateError) {
-        this.logger.error(`Erro ao atualizar status da solicitação ${requestId}:`, updateError);
+        
+        // Retornar resultado indicando que o job foi concluído mas não processado
+        // Isso evita que o BullMQ tente reprocessar indefinidamente
+        return {
+          success: false,
+          requestId,
+          artifactId: undefined,
+          skipped: true,
+          reason: 'Solicitação não encontrada no banco de dados',
+        };
       }
 
-      // Re-throw para que o BullMQ gerencie a reentrega
-      throw error;
+      // Para outros erros, tentar atualizar o status para FAILED
+      // Mas verificar se a solicitação existe antes
+      try {
+        // Verificar se a solicitação existe antes de tentar atualizar
+        const request = await this.reportsService.findOne(requestId);
+        if (request) {
+          await this.reportsService.updateRequestStatus(
+            requestId,
+            ReportRequestStatus.FAILED,
+            error.message || 'Erro desconhecido ao processar relatório',
+          );
+        } else {
+          this.logger.warn(
+            `Solicitação ${requestId} não encontrada. Não é possível atualizar o status.`,
+          );
+        }
+      } catch (updateError: any) {
+        // Se também for erro de não encontrado, apenas logar
+        if (updateError.message?.includes('não encontrada') || 
+            updateError.status === 404 ||
+            updateError.statusCode === 404) {
+          this.logger.warn(
+            `Solicitação ${requestId} não encontrada. Status não pode ser atualizado.`,
+          );
+        } else {
+          this.logger.error(
+            `Erro ao atualizar status da solicitação ${requestId}:`,
+            updateError.message || updateError,
+          );
+        }
+      }
+
+      // Re-throw apenas se não for erro de "não encontrado"
+      // Isso evita que jobs de solicitações inexistentes fiquem sendo reprocessados
+      if (!isNotFoundError) {
+        throw error;
+      }
+
+      // Para erros de "não encontrado", retornar resultado sem rethrow
+      return {
+        success: false,
+        requestId,
+        artifactId: undefined,
+        skipped: true,
+        reason: 'Solicitação não encontrada',
+      };
     }
   }
 

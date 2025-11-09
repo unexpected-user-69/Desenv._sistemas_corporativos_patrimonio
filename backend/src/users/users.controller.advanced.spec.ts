@@ -140,7 +140,7 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
         const query: QueryUsersDto = {
           page: 2,
           limit: 5,
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
           isActive: true,
           q: 'john',
         };
@@ -177,7 +177,7 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
         const createUserDto: CreateUserDto = createMockCreateUserDto({
           name: 'John Doe',
           email: 'john@example.com',
-          role: UserRole.TEACHER,
+          role: UserRole.MANAGER,
         });
         const createdUser = createMockUser({
           name: createUserDto.name,
@@ -303,7 +303,7 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
         page: 2,
         limit: 15,
         q: 'test search',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
         sortBy: 'name',
         sortOrder: 'DESC',
@@ -327,7 +327,7 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
           page: 2,
           limit: 15,
           q: 'test search',
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
           isActive: true,
           sortBy: 'name',
           sortOrder: 'DESC',

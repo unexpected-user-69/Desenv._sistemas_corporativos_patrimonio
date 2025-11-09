@@ -204,7 +204,7 @@ describe('UsersService - Advanced Unit Tests (PDF 086)', () => {
         const query: QueryUsersDto = {
           page: 2,
           limit: 5,
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
           isActive: true,
         };
         const mockUsers = [createMockUser(), createMockUser()];
@@ -329,15 +329,15 @@ describe('UsersService - Advanced Unit Tests (PDF 086)', () => {
         page: 1,
         limit: 10,
         q: 'john',
-        role: UserRole.TEACHER,
+        role: UserRole.MANAGER,
         isActive: true,
         sortBy: 'name',
         sortOrder: 'ASC',
       };
 
       const mockUsers = [
-        createMockUser({ name: 'John Doe', role: UserRole.TEACHER }),
-        createMockUser({ name: 'Johnny Smith', role: UserRole.TEACHER }),
+        createMockUser({ name: 'John Doe', role: UserRole.MANAGER }),
+        createMockUser({ name: 'Johnny Smith', role: UserRole.MANAGER }),
       ];
 
       userRepository.findAndCount.mockResolvedValue([mockUsers, 2]);
@@ -349,7 +349,7 @@ describe('UsersService - Advanced Unit Tests (PDF 086)', () => {
       expect(userRepository.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.arrayContaining([
-            { role: UserRole.TEACHER },
+            { role: UserRole.MANAGER },
             { isActive: true },
             expect.arrayContaining([
               { name: expect.any(Object) }, // ILike

@@ -23,6 +23,8 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
 import { LogoutResponseDto } from './dto/logout-response.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
+import { UsersService } from '../users/users.service';
+import { UserRole } from '../users/enums/user-role.enum';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -32,6 +34,7 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly jwt: JwtService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Post('login')
@@ -108,6 +111,79 @@ export class AuthController {
   })
   async logout(@Body() dto: LogoutDto) {
     return this.auth.logout(dto.refreshToken);
+  }
+
+  @Post('dev-token')
+  @ApiOperation({ 
+    summary: 'Obter token de desenvolvimento (apenas em desenvolvimento)',
+    description: 'Endpoint de desenvolvimento que cria ou retorna um token para um usuário admin padrão. Disponível apenas quando NODE_ENV !== "production". Útil para testes no Swagger. O usuário é criado automaticamente se não existir, ou a senha é atualizada se o usuário já existir.',
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Token de desenvolvimento gerado com sucesso',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Endpoint disponível apenas em desenvolvimento' 
+  })
+  async getDevToken(@Ip() ip: string, @Req() req: Request) {
+    // Apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'production') {
+      throw new UnauthorizedException('Endpoint disponível apenas em desenvolvimento');
+    }
+
+    const ua = req.get('user-agent') ?? undefined;
+    
+    // Email e senha padrão para desenvolvimento
+    const devEmail = process.env.SWAGGER_DEV_EMAIL || 'admin@dev.local';
+    const devPassword = process.env.SWAGGER_DEV_PASSWORD || 'AdminPassword123!';
+    const devName = process.env.SWAGGER_DEV_NAME || 'Admin Dev';
+
+    try {
+      // Tenta fazer login com as credenciais padrão
+      return await this.auth.login(devEmail, devPassword, ip, ua);
+    } catch (error) {
+      // Se falhar, verifica se o usuário existe e tenta criar/atualizar
+      try {
+        let existingUser;
+        try {
+          existingUser = await this.usersService.findByEmail(devEmail);
+        } catch {
+          // Usuário não existe, vai criar
+          existingUser = null;
+        }
+        
+        if (existingUser) {
+          // Usuário existe, atualiza a senha para a senha padrão
+          await this.usersService.update(existingUser.id, {
+            password: devPassword,
+            isActive: true,
+            role: UserRole.ADMIN,
+          });
+          
+          // Tenta fazer login novamente após atualizar a senha
+          return await this.auth.login(devEmail, devPassword, ip, ua);
+        } else {
+          // Usuário não existe, cria novo usuário
+          await this.usersService.create({
+            email: devEmail,
+            password: devPassword,
+            name: devName,
+            role: UserRole.ADMIN,
+            isActive: true,
+          });
+          
+          // Após criar, tenta fazer login
+          return await this.auth.login(devEmail, devPassword, ip, ua);
+        }
+      } catch (createError) {
+        // Se ainda falhar, retorna erro informativo
+        throw new UnauthorizedException(
+          `Não foi possível criar ou autenticar usuário de desenvolvimento. Erro: ${createError instanceof Error ? createError.message : 'Unknown error'}`
+        );
+      }
+    }
   }
 
   @Get('me')

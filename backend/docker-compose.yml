@@ -23,6 +23,24 @@ services:
     networks:
       - patrimonio_network
 
+  # Serviço Redis para filas (BullMQ) e cache
+  redis:
+    image: redis:7-alpine
+    container_name: patrimonio_inventario_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - patrimonio_network
+
   # Serviço da aplicação NestJS (apenas para desenvolvimento local)
   # Para produção, use o docker-compose.yml da raiz do projeto
   app:
@@ -31,6 +49,8 @@ services:
     restart: unless-stopped
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     env_file:
       - .env
@@ -42,6 +62,11 @@ services:
       DB_NAME: ${DB_NAME:-patrimonio_inventario}
       NODE_ENV: ${NODE_ENV:-development}
       PORT: ${PORT:-3101}
+      # Redis Configuration
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       # JWT Configuration
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_in_production}
@@ -62,7 +87,8 @@ networks:
   patrimonio_network:
     driver: bridge
 
-# Volume persistente para dados do PostgreSQL
+# Volumes persistentes para dados
 volumes:
   db_data:
+  redis_data:
 

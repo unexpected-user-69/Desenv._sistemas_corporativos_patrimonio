@@ -86,7 +86,7 @@ describe('UsersService', () => {
       name: 'John',
       email: 'john@example.com',
       password: 'secret12',
-      role: UserRole.STUDENT,
+      role: UserRole.OPERATOR,
     });
     expect(created.id).toBeDefined();
     expect(created.name).toBe('John');

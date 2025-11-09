@@ -1,5 +1,3 @@
-// Habilitar auto-auth para testes ANTES de importar módulos
-process.env.DEV_AUTO_AUTH = 'true';
 process.env.NODE_ENV = 'test';
 
 import { Test, TestingModule } from '@nestjs/testing';

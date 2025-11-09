@@ -8,7 +8,7 @@ export class FilterUsersDto extends PaginationDto {
   @ApiPropertyOptional({
     description: 'Filtrar por role do usuário',
     enum: UserRole,
-    example: UserRole.STUDENT,
+    example: UserRole.OPERATOR,
   })
   @IsOptional()
   @IsEnum(UserRole)

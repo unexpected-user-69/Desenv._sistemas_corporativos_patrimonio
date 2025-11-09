@@ -36,7 +36,7 @@ export class User {
     name: 'role',
     type: 'varchar',
     length: 32,
-    default: UserRole.STUDENT,
+    default: UserRole.OPERATOR,
   })
   role!: UserRole;
 

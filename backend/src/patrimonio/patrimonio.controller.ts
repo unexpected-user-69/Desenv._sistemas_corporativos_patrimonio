@@ -49,7 +49,7 @@ import { PaginatedPatrimoniosResponseDto } from './dto/paginated-patrimonios-res
 import { PatrimonioStatus } from './entities/patrimonio.entity';
 import { UpdateStatusPatrimonioDto } from './dto/update-status-patrimonio.dto';
 import { TransferirResponsavelDto } from './dto/transferir-responsavel.dto';
-import { DashboardResponseDto } from './dto/dashboard-response.dto';
+import { PatrimonioDashboardResponseDto } from './dto/dashboard-response.dto';
 import { DescartePatrimonioDto } from './dto/descarte-patrimonio.dto';
 import { UpdateLocalizacaoPatrimonioDto } from './dto/update-localizacao-patrimonio.dto';
 import { LocalizacoesStatsResponseDto } from './dto/localizacoes-stats-response.dto';
@@ -91,11 +91,11 @@ export class PatrimonioController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Throttle({ default: { limit: 20, ttl: 60000 } }) // 20 requisições por minuto
   @ApiOperation({ summary: 'Criar um novo patrimônio' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
   @ApiBody({ type: CreatePatrimonioDto })
   @ApiCreatedResponse({
     description: 'Patrimônio criado com sucesso',
@@ -396,9 +396,9 @@ export class PatrimonioController {
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiOkResponse({
     description: 'Métricas do dashboard retornadas com sucesso',
-    type: DashboardResponseDto,
+    type: PatrimonioDashboardResponseDto,
   })
-  async getDashboard(): Promise<DashboardResponseDto> {
+  async getDashboard(): Promise<PatrimonioDashboardResponseDto> {
     return this.patrimonioService.getDashboard();
   }
 
@@ -421,6 +421,307 @@ export class PatrimonioController {
     return this.patrimonioService.findByLocalizacao(localizacao);
   }
 
+  // ==================== ROTAS ESPECÍFICAS DE :id (devem vir ANTES das rotas genéricas) ====================
+  // IMPORTANTE: Rotas POST específicas devem vir ANTES de rotas PATCH/GET específicas para garantir ordem correta
+  
+  @Post(':id/transferir-responsavel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Transferir patrimônio para outro responsável' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiBody({ type: TransferirResponsavelDto })
+  @ApiOkResponse({
+    description: 'Responsabilidade transferida com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio ou usuário não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos ou mesmo responsável',
+  })
+  async transferResponsavel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: TransferirResponsavelDto,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.transferResponsavel(id, dto);
+  }
+
+  @Post(':id/descarte')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Marcar patrimônio para descarte' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiBody({ type: DescartePatrimonioDto })
+  @ApiOkResponse({
+    description: 'Patrimônio marcado para descarte com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos',
+  })
+  async descartar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DescartePatrimonioDto,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.marcarDescarte(id, dto);
+  }
+
+  @Post(':id/foto')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Fazer upload de foto do patrimônio' })
+  @ApiConsumes('multipart/form-data')
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Foto enviada com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'Arquivo inválido ou muito grande',
+  })
+  async uploadFoto(
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.uploadFoto(id, file);
+  }
+
+  @Delete(':id/foto')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Remover foto do patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Foto removida com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  async removeFoto(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.removeFoto(id);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Alterar status de um patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiBody({ type: UpdateStatusPatrimonioDto })
+  @ApiOkResponse({
+    description: 'Status do patrimônio atualizado com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos ou status já é o atual',
+  })
+  async updateStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateStatusPatrimonioDto,
+  ): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.updateStatus(id, dto);
+  }
+
+  @Patch(':id/ativar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Ativar patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Patrimônio ativado com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'O patrimônio já está ativo',
+  })
+  async ativar(@Param('id', ParseUUIDPipe) id: string): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.ativar(id);
+  }
+
+  @Patch(':id/desativar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Desativar patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Patrimônio desativado com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'O patrimônio já está inativo',
+  })
+  async desativar(@Param('id', ParseUUIDPipe) id: string): Promise<PatrimonioResponseDto> {
+    return this.patrimonioService.desativar(id);
+  }
+
+  @Get(':id/disponibilidade')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Verificar disponibilidade de um patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Disponibilidade verificada',
+    type: DisponibilidadeResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  async verificarDisponibilidade(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<DisponibilidadeResponseDto> {
+    return this.patrimonioService.verificarDisponibilidade(id);
+  }
+
+  @Get(':id/historico')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter histórico de alterações de um patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Histórico de alterações',
+    type: HistoricoAlteracaoResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  async getHistorico(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HistoricoAlteracaoResponseDto> {
+    return this.patrimonioService.getHistorico(id);
+  }
+
+  @Get(':id/historico/responsaveis')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter histórico de responsáveis de um patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiOkResponse({
+    description: 'Histórico de responsáveis',
+    type: HistoricoResponsaveisResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  async getHistoricoResponsaveis(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HistoricoResponsaveisResponseDto> {
+    return this.patrimonioService.getHistoricoResponsaveis(id);
+  }
+
+  @Get(':id/historico/localizacoes')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obter histórico de localizações do patrimônio' })
+  @ApiParam({ name: 'id', description: 'ID do patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiOkResponse({
+    description: 'Histórico de localizações',
+    type: HistoricoLocalizacoesResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  async getHistoricoLocalizacoes(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<HistoricoLocalizacoesResponseDto> {
+    return this.patrimonioService.getHistoricoLocalizacoes(id);
+  }
+
+  // ==================== ROTAS GENÉRICAS DE :id (devem vir DEPOIS das rotas específicas) ====================
+  
   @Get(':id')
   @ApiOperation({ summary: 'Buscar patrimônio por ID' })
   @ApiParam({
@@ -446,10 +747,10 @@ export class PatrimonioController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Atualizar patrimônio' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
   @ApiParam({
     name: 'id',
     description: 'ID único do patrimônio',
@@ -478,66 +779,6 @@ export class PatrimonioController {
     return this.patrimonioService.update(id, updatePatrimonioDto, userId);
   }
 
-  @Patch(':id/status')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
-  @ApiOperation({ summary: 'Alterar status de um patrimônio' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID único do patrimônio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-  })
-  @ApiBody({ type: UpdateStatusPatrimonioDto })
-  @ApiOkResponse({
-    description: 'Status do patrimônio atualizado com sucesso',
-    type: PatrimonioResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Patrimônio não encontrado',
-  })
-  @ApiBadRequestResponse({
-    description: 'Dados de entrada inválidos ou status já é o atual',
-  })
-  async updateStatus(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateStatusPatrimonioDto,
-  ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.updateStatus(id, dto);
-  }
-
-  @Post(':id/transferir-responsavel')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
-  @ApiOperation({ summary: 'Transferir patrimônio para outro responsável' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID único do patrimônio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-  })
-  @ApiBody({ type: TransferirResponsavelDto })
-  @ApiOkResponse({
-    description: 'Responsabilidade transferida com sucesso',
-    type: PatrimonioResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Patrimônio ou usuário não encontrado',
-  })
-  @ApiBadRequestResponse({
-    description: 'Dados de entrada inválidos ou mesmo responsável',
-  })
-  async transferResponsavel(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: TransferirResponsavelDto,
-  ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.transferResponsavel(id, dto);
-  }
-
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -563,126 +804,10 @@ export class PatrimonioController {
   }
 
   // ==================== FASE 2: GESTÃO DE STATUS ====================
-
-  @Patch(':id/ativar')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
-  @ApiOperation({ summary: 'Ativar patrimônio' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID único do patrimônio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-  })
-  @ApiOkResponse({
-    description: 'Patrimônio ativado com sucesso',
-    type: PatrimonioResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Patrimônio não encontrado',
-  })
-  @ApiBadRequestResponse({
-    description: 'O patrimônio já está ativo',
-  })
-  async ativar(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.ativar(id);
-  }
-
-  @Patch(':id/desativar')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
-  @ApiOperation({ summary: 'Desativar patrimônio' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID único do patrimônio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-  })
-  @ApiOkResponse({
-    description: 'Patrimônio desativado com sucesso',
-    type: PatrimonioResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Patrimônio não encontrado',
-  })
-  @ApiBadRequestResponse({
-    description: 'O patrimônio já está inativo',
-  })
-  async desativar(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.desativar(id);
-  }
-
-  @Post(':id/descarte')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Marcar patrimônio para descarte' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID único do patrimônio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-  })
-  @ApiBody({ type: DescartePatrimonioDto })
-  @ApiOkResponse({
-    description: 'Patrimônio marcado para descarte com sucesso',
-    type: PatrimonioResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Patrimônio não encontrado',
-  })
-  @ApiBadRequestResponse({
-    description: 'Dados de entrada inválidos',
-  })
-  async marcarDescarte(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: DescartePatrimonioDto,
-  ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.marcarDescarte(id, dto);
-  }
+  // Rotas movidas para o topo (antes das rotas genéricas :id) para garantir ordem correta
 
   // ==================== FASE 2: GESTÃO DE LOCALIZAÇÃO ====================
-
-  @Patch(':id/localizacao')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
-  @ApiOperation({ summary: 'Atualizar localização do patrimônio' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID único do patrimônio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-  })
-  @ApiBody({ type: UpdateLocalizacaoPatrimonioDto })
-  @ApiOkResponse({
-    description: 'Localização atualizada com sucesso',
-    type: PatrimonioResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Patrimônio não encontrado',
-  })
-  @ApiBadRequestResponse({
-    description: 'Dados de entrada inválidos',
-  })
-  async updateLocalizacao(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateLocalizacaoPatrimonioDto,
-    @Request() req: any,
-  ): Promise<PatrimonioResponseDto> {
-    const userId = req.user?.sub;
-    return this.patrimonioService.updateLocalizacao(id, dto, userId);
-  }
+  // Rota movida para o topo (antes das rotas genéricas :id) para garantir ordem correta
 
   @Get('stats/localizacoes')
   @UseGuards(JwtAuthGuard)
@@ -822,10 +947,10 @@ export class PatrimonioController {
 
   @Get('relatorio/inventario')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Gerar relatório de inventário' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
   @ApiQuery({ name: 'dataReferencia', required: false, type: String })
   @ApiQuery({ name: 'formato', required: false, enum: ['pdf', 'csv', 'excel'] })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -979,10 +1104,10 @@ export class PatrimonioController {
 
   @Post('bulk')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Criar múltiplos patrimônios em lote' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
   @ApiBody({ type: CreateBulkPatrimonioDto })
   @ApiCreatedResponse({
     description: 'Patrimônios criados em lote',
@@ -999,10 +1124,10 @@ export class PatrimonioController {
 
   @Patch('bulk')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Atualizar múltiplos patrimônios em lote' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
   @ApiBody({ type: UpdateBulkPatrimonioDto })
   @ApiOkResponse({
     description: 'Patrimônios atualizados com sucesso',
@@ -1024,10 +1149,10 @@ export class PatrimonioController {
 
   @Post('bulk/transferir-responsavel')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Transferir múltiplos patrimônios para o mesmo responsável' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
   @ApiBody({ type: TransferirResponsavelBulkDto })
   @ApiOkResponse({
     description: 'Patrimônios transferidos com sucesso',
@@ -1070,10 +1195,10 @@ export class PatrimonioController {
 
   @Post('verificar-duplicidade')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Verificar duplicidade de patrimônios' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
   @ApiBody({ type: VerificarDuplicidadeDto })
   @ApiOkResponse({
     description: 'Lista de possíveis duplicatas',
@@ -1083,29 +1208,6 @@ export class PatrimonioController {
     @Body() dto: VerificarDuplicidadeDto,
   ): Promise<DuplicataResponseDto> {
     return this.patrimonioService.verificarDuplicidade(dto);
-  }
-
-  @Get(':id/disponibilidade')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Verificar disponibilidade de um patrimônio' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID do patrimônio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-  })
-  @ApiOkResponse({
-    description: 'Disponibilidade verificada',
-    type: DisponibilidadeResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Patrimônio não encontrado',
-  })
-  async verificarDisponibilidade(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<DisponibilidadeResponseDto> {
-    return this.patrimonioService.verificarDisponibilidade(id);
   }
 
   // ==================== FASE 3: ALERTAS ====================
@@ -1175,10 +1277,10 @@ export class PatrimonioController {
 
   @Get('sem-responsavel')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Buscar patrimônios sem responsável' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
   @ApiOkResponse({
     description: 'Lista de patrimônios sem responsável',
     type: [PatrimonioResponseDto],
@@ -1188,52 +1290,7 @@ export class PatrimonioController {
   }
 
   // ==================== FASE 3: HISTÓRICO ====================
-
-  @Get(':id/historico')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Obter histórico de alterações de um patrimônio' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID do patrimônio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-  })
-  @ApiOkResponse({
-    description: 'Histórico de alterações',
-    type: HistoricoAlteracaoResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Patrimônio não encontrado',
-  })
-  async getHistorico(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<HistoricoAlteracaoResponseDto> {
-    return this.patrimonioService.getHistorico(id);
-  }
-
-  @Get(':id/historico/responsaveis')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Obter histórico de responsáveis de um patrimônio' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID do patrimônio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
-  })
-  @ApiOkResponse({
-    description: 'Histórico de responsáveis',
-    type: HistoricoResponsaveisResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Patrimônio não encontrado',
-  })
-  async getHistoricoResponsaveis(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<HistoricoResponsaveisResponseDto> {
-    return this.patrimonioService.getHistoricoResponsaveis(id);
-  }
+  // Rotas movidas para o topo (antes das rotas genéricas :id) para garantir ordem correta
 
   @Get('responsavel/:id/historico')
   @UseGuards(JwtAuthGuard)
@@ -1259,60 +1316,7 @@ export class PatrimonioController {
   }
 
   // ==================== FASE 1: GESTÃO DE FOTOS ====================
-
-  @Post(':id/foto')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
-  @UseInterceptors(FileInterceptor('file'))
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Fazer upload de foto do patrimônio' })
-  @ApiConsumes('multipart/form-data')
-  @ApiParam({ name: 'id', description: 'ID do patrimônio' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-          description: 'Arquivo de imagem (JPG, PNG, WEBP)',
-        },
-      },
-    },
-  })
-  @ApiOkResponse({
-    description: 'Foto uploadada com sucesso',
-    type: PatrimonioResponseDto,
-  })
-  @ApiBadRequestResponse({ description: 'Arquivo inválido ou muito grande' })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
-  @ApiNotFoundResponse({ description: 'Patrimônio não encontrado' })
-  async uploadFoto(
-    @Param('id', ParseUUIDPipe) id: string,
-    @UploadedFile() file: Express.Multer.File,
-  ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.uploadFoto(id, file);
-  }
-
-  @Delete(':id/foto')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Remover foto do patrimônio' })
-  @ApiParam({ name: 'id', description: 'ID do patrimônio' })
-  @ApiOkResponse({
-    description: 'Foto removida com sucesso',
-    type: PatrimonioResponseDto,
-  })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou TEACHER' })
-  @ApiNotFoundResponse({ description: 'Patrimônio não encontrado' })
-  async removeFoto(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<PatrimonioResponseDto> {
-    return this.patrimonioService.removeFoto(id);
-  }
+  // Rotas movidas para o topo (antes das rotas genéricas :id) para garantir ordem correta
 
   @Get('com-foto')
   @UseGuards(JwtAuthGuard)
@@ -1401,22 +1405,7 @@ export class PatrimonioController {
   }
 
   // ==================== FASE 3: HISTÓRICO DE LOCALIZAÇÕES ====================
-
-  @Get(':id/historico/localizacoes')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Obter histórico de localizações do patrimônio' })
-  @ApiParam({ name: 'id', description: 'ID do patrimônio' })
-  @ApiOkResponse({
-    description: 'Histórico de localizações',
-    type: HistoricoLocalizacoesResponseDto,
-  })
-  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiNotFoundResponse({ description: 'Patrimônio não encontrado' })
-  async getHistoricoLocalizacoes(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<HistoricoLocalizacoesResponseDto> {
-    return this.patrimonioService.getHistoricoLocalizacoes(id);
-  }
+  // Rota movida para o topo (antes das rotas genéricas :id) para garantir ordem correta
 
   // ==================== FASE 4: OPERAÇÕES EM LOTE ====================
 

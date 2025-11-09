@@ -42,14 +42,14 @@ export class CategoriasController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Criar nova categoria',
-    description: 'Cria uma nova categoria de patrimônio. Requer permissão de TEACHER ou ADMIN.',
+    description: 'Cria uma nova categoria de patrimônio. Requer permissão de MANAGER ou ADMIN.',
   })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiResponse({
     status: 201,
     description: 'Categoria criada com sucesso',
@@ -133,14 +133,14 @@ export class CategoriasController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Atualizar categoria',
-    description: 'Atualiza todos os campos de uma categoria. Requer permissão de TEACHER ou ADMIN.',
+    description: 'Atualiza todos os campos de uma categoria. Requer permissão de MANAGER ou ADMIN.',
   })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiParam({
     name: 'id',
     description: 'ID da categoria (exemplo: categoria EQUIPAMENTO)',
@@ -172,15 +172,15 @@ export class CategoriasController {
 
   @Patch(':id/desativar')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Desativar categoria',
-    description: 'Marca a categoria como inativa. Requer permissão de TEACHER ou ADMIN.',
+    description: 'Marca a categoria como inativa. Requer permissão de MANAGER ou ADMIN.',
   })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiParam({
     name: 'id',
     description: 'ID da categoria (exemplo: categoria EQUIPAMENTO)',
@@ -204,15 +204,15 @@ export class CategoriasController {
 
   @Patch(':id/ativar')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Ativar categoria',
-    description: 'Marca a categoria como ativa. Requer permissão de TEACHER ou ADMIN.',
+    description: 'Marca a categoria como ativa. Requer permissão de MANAGER ou ADMIN.',
   })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiForbiddenResponse({ description: 'Acesso negado - apenas TEACHER ou ADMIN' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
   @ApiParam({
     name: 'id',
     description: 'ID da categoria (exemplo: categoria EQUIPAMENTO)',

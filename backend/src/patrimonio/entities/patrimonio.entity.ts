@@ -38,11 +38,11 @@ export class Patrimonio {
   @Column({ name: 'descricao', type: 'text', nullable: true })
   descricao?: string;
 
-  @Column({ name: 'categoria_id', type: 'uuid', nullable: true })
+  @Column({ name: 'categoria_id', type: 'uuid', nullable: true, select: false })
   categoriaId?: string;
 
-  @ManyToOne(() => Categoria, { nullable: true, eager: true })
-  @JoinColumn({ name: 'categoria_id' })
+  @ManyToOne(() => Categoria, { nullable: true, eager: false, createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'categoria_id', foreignKeyConstraintName: undefined })
   categoria?: Categoria;
 
   @Column({

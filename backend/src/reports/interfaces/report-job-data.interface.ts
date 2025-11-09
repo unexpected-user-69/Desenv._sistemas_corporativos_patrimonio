@@ -21,6 +21,8 @@ export interface ReportJobResult {
   requestId: string;
   artifactId?: string;
   error?: string;
+  skipped?: boolean;
+  reason?: string;
 }
 
 

@@ -22,6 +22,10 @@ export class RefreshToken {
   @Column({ name: 'user_id', type: 'uuid' }) // Adaptado para UUID conforme padrão do Patrimônio
   userId!: string;
 
+  @Index()
+  @Column({ name: 'lookup_key', type: 'varchar', length: 64, nullable: true })
+  lookupKey!: string | null; // Hash rápido (SHA256) para lookup eficiente, depois verifica com Argon2
+
   @Column({ name: 'token_hash', type: 'varchar', length: 255 })
   tokenHash!: string; // nunca armazenar o token em claro (Argon2 hash)
 

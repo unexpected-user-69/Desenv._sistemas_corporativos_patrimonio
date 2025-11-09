@@ -2,9 +2,16 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike, FindManyOptions, FindOptionsWhere } from 'typeorm';
+import {
+  Repository,
+  ILike,
+  FindManyOptions,
+  FindOptionsWhere,
+  QueryFailedError,
+} from 'typeorm';
 import { Categoria } from './entities/categoria.entity';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
@@ -16,6 +23,8 @@ import {
 
 @Injectable()
 export class CategoriasService {
+  private readonly logger = new Logger(CategoriasService.name);
+
   constructor(
     @InjectRepository(Categoria)
     private readonly categoriaRepository: Repository<Categoria>,
@@ -27,7 +36,7 @@ export class CategoriasService {
   async create(
     createCategoriaDto: CreateCategoriaDto,
   ): Promise<CategoriaResponseDto> {
-    // Verificar se já existe categoria com mesmo código
+    // Verificar se já existe categoria com mesmo código (apenas ativas)
     const existente = await this.categoriaRepository.findOne({
       where: { codigo: createCategoriaDto.codigo },
     });
@@ -38,10 +47,41 @@ export class CategoriasService {
       );
     }
 
-    const categoria = this.categoriaRepository.create(createCategoriaDto);
-    const saved = await this.categoriaRepository.save(categoria);
-
-    return this.serializeCategoria(saved);
+    try {
+      const categoria = this.categoriaRepository.create(createCategoriaDto);
+      const saved = await this.categoriaRepository.save(categoria);
+      return this.serializeCategoria(saved);
+    } catch (error: unknown) {
+      // Tratamento de erro de conflito do banco (código '23505' = PostgreSQL unique constraint violation)
+      // Isso cobre casos de race condition ou soft-deleted com constraint única ainda ativa
+      const errorCode = (error as any)?.code;
+      const errorName = (error as any)?.name;
+      
+      if (
+        error instanceof QueryFailedError ||
+        errorCode === '23505' ||
+        (errorCode && errorCode.toString().startsWith('23')) ||
+        errorName === 'QueryFailedError'
+      ) {
+        this.logger.warn(
+          `Tentativa de criar categoria com código duplicado: ${createCategoriaDto.codigo}`,
+        );
+        throw new ConflictException(
+          `Categoria com código '${createCategoriaDto.codigo}' já existe`,
+        );
+      }
+      
+      // Log de outros erros para debug
+      this.logger.error('Erro ao criar categoria', {
+        errorType: error?.constructor?.name,
+        message: (error as any)?.message,
+        code: errorCode,
+        name: errorName,
+        stack: (error as any)?.stack,
+      });
+      
+      throw error;
+    }
   }
 
   /**
@@ -166,17 +206,47 @@ export class CategoriasService {
         where: { codigo: updateCategoriaDto.codigo },
       });
 
-      if (existente) {
+      if (existente && existente.id !== id) {
         throw new ConflictException(
           `Categoria com código '${updateCategoriaDto.codigo}' já existe`,
         );
       }
     }
 
-    Object.assign(categoria, updateCategoriaDto);
-    const updated = await this.categoriaRepository.save(categoria);
-
-    return this.serializeCategoria(updated);
+    try {
+      Object.assign(categoria, updateCategoriaDto);
+      const updated = await this.categoriaRepository.save(categoria);
+      return this.serializeCategoria(updated);
+    } catch (error: unknown) {
+      // Tratamento de erro de conflito do banco (código '23505' = PostgreSQL unique constraint violation)
+      const errorCode = (error as any)?.code;
+      const errorName = (error as any)?.name;
+      
+      if (
+        error instanceof QueryFailedError ||
+        errorCode === '23505' ||
+        (errorCode && errorCode.toString().startsWith('23')) ||
+        errorName === 'QueryFailedError'
+      ) {
+        this.logger.warn(
+          `Tentativa de atualizar categoria com código duplicado: ${updateCategoriaDto.codigo || categoria.codigo}`,
+        );
+        throw new ConflictException(
+          `Categoria com código '${updateCategoriaDto.codigo || categoria.codigo}' já existe`,
+        );
+      }
+      
+      // Log de outros erros para debug
+      this.logger.error('Erro ao atualizar categoria', {
+        errorType: error?.constructor?.name,
+        message: (error as any)?.message,
+        code: errorCode,
+        name: errorName,
+        stack: (error as any)?.stack,
+      });
+      
+      throw error;
+    }
   }
 
   /**

@@ -20,22 +20,59 @@ export class PatrimonioPdfExportService {
   async generatePdf(query: QueryPatrimonioDto): Promise<Buffer> {
     this.logger.log('Gerando PDF de patrimônios');
 
-    // Buscar patrimônios com os mesmos filtros do findAll
-    const patrimonios = await this.findPatrimonios(query);
-
-    // Gerar HTML
-    const html = this.generateHtml(patrimonios, query);
-
-    // Gerar PDF usando Puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-
+    let browser;
     try {
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      // Buscar patrimônios com os mesmos filtros do findAll
+      const patrimonios = await this.findPatrimonios(query);
+      this.logger.log(`Encontrados ${patrimonios.length} patrimônios para exportar`);
 
+      // Gerar HTML
+      const html = this.generateHtml(patrimonios, query);
+
+      // Gerar PDF usando Puppeteer
+      this.logger.log('Iniciando Puppeteer...');
+      
+      // Configurações do Puppeteer para Windows
+      const launchOptions: any = {
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-software-rasterizer',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+        ],
+        timeout: 60000, // 60 segundos timeout
+      };
+
+      // Se estiver no Windows, pode precisar de configurações adicionais
+      if (process.platform === 'win32') {
+        // O Puppeteer deve encontrar o Chrome automaticamente
+        // Mas podemos especificar o executável se necessário
+        this.logger.log('Sistema operacional: Windows');
+      }
+
+      browser = await puppeteer.launch(launchOptions);
+
+      this.logger.log('Puppeteer iniciado, criando página...');
+      const page = await browser.newPage();
+      
+      // Configurar timeout para carregamento da página (60 segundos)
+      page.setDefaultTimeout(60000);
+      
+      this.logger.log('Carregando HTML na página...');
+      await page.setContent(html, { 
+        waitUntil: 'domcontentloaded', // Mudado de networkidle0 para domcontentloaded (mais rápido)
+        timeout: 60000,
+      });
+
+      this.logger.log('Gerando PDF...');
       const pdf = await page.pdf({
         format: 'A4',
         printBackground: true,
@@ -45,11 +82,37 @@ export class PatrimonioPdfExportService {
           bottom: '20mm',
           left: '15mm',
         },
+        timeout: 60000,
       });
 
+      this.logger.log(`PDF gerado com sucesso: ${pdf.length} bytes`);
       return Buffer.from(pdf);
+    } catch (error) {
+      this.logger.error('Erro ao gerar PDF:', error);
+      
+      // Se for erro do Puppeteer, fornecer mensagem mais útil
+      if (error instanceof Error) {
+        if (error.message.includes('Browser closed') || error.message.includes('Target closed')) {
+          throw new Error('Erro ao iniciar o navegador. Verifique se o Puppeteer está instalado corretamente.');
+        }
+        if (error.message.includes('timeout')) {
+          throw new Error('Timeout ao gerar PDF. Tente novamente ou reduza a quantidade de patrimônios.');
+        }
+        if (error.message.includes('Protocol error') || error.message.includes('Navigation failed')) {
+          throw new Error('Erro de comunicação com o navegador. Verifique a instalação do Puppeteer.');
+        }
+      }
+      
+      throw error;
     } finally {
-      await browser.close();
+      if (browser) {
+        try {
+          await browser.close();
+          this.logger.log('Navegador fechado');
+        } catch (closeError) {
+          this.logger.warn('Erro ao fechar navegador:', closeError);
+        }
+      }
     }
   }
 

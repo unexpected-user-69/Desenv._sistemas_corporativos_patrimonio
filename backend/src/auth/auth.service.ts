@@ -107,9 +107,13 @@ export class AuthService {
     userAgent?: string,
   ): Promise<{ raw: string; entity: RefreshToken }> {
     const raw = crypto.randomBytes(48).toString('base64url'); // ~64+ chars
+    // Hash rápido (SHA256) para lookup eficiente
+    const lookupKey = crypto.createHash('sha256').update(raw).digest('hex');
+    // Hash seguro (Argon2) para verificação final
     const tokenHash = await argon2.hash(raw);
     const entity = this.refreshRepo.create({
       userId,
+      lookupKey,
       tokenHash,
       issuedAt: nowUtc(),
       expiresAt: addDays(Number(process.env.REFRESH_EXPIRES_DAYS ?? '7')),
@@ -142,7 +146,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, role: user.roles[0] },
     };
   }
 
@@ -151,19 +155,74 @@ export class AuthService {
     if (!refreshTokenRaw)
       throw new BadRequestException('Missing refresh token');
 
-    // Busca candidatos não revogados e não expirados (ordem decrescente)
+    // Validação: detecta se está tentando usar um JWT (access token) como refresh token
+    // JWTs contêm pontos (.), refresh tokens são base64url sem pontos
+    if (refreshTokenRaw.includes('.')) {
+      throw new BadRequestException(
+        'Token inválido: parece ser um access token (JWT). Use o refreshToken retornado no login, não o accessToken! O refreshToken é um token base64url sem pontos, não um JWT.',
+      );
+    }
+
+    // Calcula lookupKey (hash rápido) para pré-filtrar tokens
+    const lookupKey = crypto.createHash('sha256').update(refreshTokenRaw).digest('hex');
+    const now = nowUtc();
+
+    // Busca apenas tokens com o lookupKey correspondente, não revogados e não expirados
+    // Isso reduz drasticamente o número de tokens a verificar
     const candidates = await this.refreshRepo.find({
-      where: { revokedAt: IsNull(), expiresAt: MoreThan(nowUtc()) },
+      where: {
+        lookupKey,
+        revokedAt: IsNull(),
+        expiresAt: MoreThan(now),
+      },
       order: { id: 'DESC' },
+      take: 10, // Limite adicional de segurança (normalmente deve haver apenas 1)
     });
 
+    // Verifica o hash Argon2 apenas nos candidatos pré-filtrados
     let current: RefreshToken | undefined;
     for (const t of candidates) {
-      if (await argon2.verify(t.tokenHash, refreshTokenRaw)) {
-        current = t;
-        break;
+      try {
+        if (await argon2.verify(t.tokenHash, refreshTokenRaw)) {
+          current = t;
+          break;
+        }
+      } catch (error) {
+        // Se houver erro na verificação (token inválido), continua procurando
+        continue;
       }
     }
+
+    // Se não encontrou, também verifica tokens antigos sem lookupKey (backward compatibility)
+    if (!current) {
+      // Busca tokens mais recentes sem lookupKey (para compatibilidade com tokens antigos)
+      const fallbackCandidates = await this.refreshRepo.find({
+        where: {
+          lookupKey: IsNull(),
+          revokedAt: IsNull(),
+          expiresAt: MoreThan(now),
+        },
+        order: { id: 'DESC' },
+        take: 50, // Limite para evitar timeout
+      });
+
+      for (const t of fallbackCandidates) {
+        try {
+          if (await argon2.verify(t.tokenHash, refreshTokenRaw)) {
+            current = t;
+            // Atualiza o token antigo com lookupKey para futuras buscas serem mais rápidas
+            if (!t.lookupKey) {
+              t.lookupKey = lookupKey;
+              await this.refreshRepo.save(t);
+            }
+            break;
+          }
+        } catch (error) {
+          continue;
+        }
+      }
+    }
+
     if (!current)
       throw new UnauthorizedException('Invalid or expired refresh token');
 
@@ -184,7 +243,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken: newRaw,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, role: user.roles[0] },
     };
   }
 
@@ -192,21 +251,64 @@ export class AuthService {
   async logout(refreshTokenRaw: string) {
     if (!refreshTokenRaw) return { revoked: 0 };
 
+    // Calcula lookupKey (hash rápido) para pré-filtrar tokens
+    const lookupKey = crypto.createHash('sha256').update(refreshTokenRaw).digest('hex');
+    const now = nowUtc();
+
+    // Busca apenas tokens com o lookupKey correspondente
     const candidates = await this.refreshRepo.find({
-      where: { revokedAt: IsNull(), expiresAt: MoreThan(nowUtc()) },
+      where: {
+        lookupKey,
+        revokedAt: IsNull(),
+        expiresAt: MoreThan(now),
+      },
       order: { id: 'DESC' },
+      take: 10,
     });
 
     let current: RefreshToken | undefined;
     for (const t of candidates) {
-      if (await argon2.verify(t.tokenHash, refreshTokenRaw)) {
-        current = t;
-        break;
+      try {
+        if (await argon2.verify(t.tokenHash, refreshTokenRaw)) {
+          current = t;
+          break;
+        }
+      } catch (error) {
+        continue;
       }
     }
+
+    // Fallback para tokens antigos sem lookupKey
+    if (!current) {
+      const fallbackCandidates = await this.refreshRepo.find({
+        where: {
+          lookupKey: IsNull(),
+          revokedAt: IsNull(),
+          expiresAt: MoreThan(now),
+        },
+        order: { id: 'DESC' },
+        take: 50,
+      });
+
+      for (const t of fallbackCandidates) {
+        try {
+          if (await argon2.verify(t.tokenHash, refreshTokenRaw)) {
+            current = t;
+            if (!t.lookupKey) {
+              t.lookupKey = lookupKey;
+              await this.refreshRepo.save(t);
+            }
+            break;
+          }
+        } catch (error) {
+          continue;
+        }
+      }
+    }
+
     if (!current) return { revoked: 0 };
 
-    current.revokedAt = nowUtc();
+    current.revokedAt = now;
     await this.refreshRepo.save(current);
     return { revoked: 1 };
   }

@@ -15,6 +15,7 @@ import {
   HttpCode,
   HttpStatus,
   Request,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -84,6 +85,8 @@ import { PatrimonioPdfExportService } from './services/patrimonio-pdf-export.ser
 @ApiBearerAuth()
 @Controller('patrimonio')
 export class PatrimonioController {
+  private readonly logger = new Logger(PatrimonioController.name);
+
   constructor(
     private readonly patrimonioService: PatrimonioService,
     private readonly pdfExportService: PatrimonioPdfExportService,
@@ -1545,10 +1548,12 @@ export class PatrimonioController {
 
       res.send(pdfBuffer);
     } catch (error) {
+      this.logger.error('Erro ao gerar PDF:', error);
       res.status(500).json({
         statusCode: 500,
         message: 'Erro ao gerar PDF',
-        error: 'Internal Server Error',
+        error: error instanceof Error ? error.message : 'Internal Server Error',
+        details: process.env.NODE_ENV === 'development' ? error?.stack : undefined,
       });
     }
   }

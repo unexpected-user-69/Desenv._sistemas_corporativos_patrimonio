@@ -346,13 +346,87 @@ export class UsersController {
   @ApiOperation({ summary: 'Atualizar usuário por ID' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiForbiddenResponse({ description: 'Acesso negado - apenas o próprio usuário ou ADMIN' })
-  @ApiBody({ type: UpdateUserDto })
+  @ApiBody({
+    type: UpdateUserDto,
+    description: 'Dados do usuário a ser atualizado (todos os campos são opcionais)',
+    examples: {
+      updateName: {
+        summary: 'Atualizar apenas o nome',
+        value: {
+          name: 'João Silva Atualizado',
+        },
+      },
+      updateEmail: {
+        summary: 'Atualizar apenas o email',
+        value: {
+          email: 'novo.email@example.com',
+        },
+      },
+      updatePassword: {
+        summary: 'Atualizar apenas a senha',
+        value: {
+          password: 'NovaSenha123!',
+        },
+      },
+      updateRole: {
+        summary: 'Atualizar role (apenas ADMIN)',
+        value: {
+          role: 'MANAGER',
+        },
+      },
+      updateStatus: {
+        summary: 'Atualizar status ativo',
+        value: {
+          isActive: false,
+        },
+      },
+      updateAvatar: {
+        summary: 'Atualizar avatar URL',
+        value: {
+          avatarUrl: 'https://example.com/avatar.jpg',
+        },
+      },
+      updateMultiple: {
+        summary: 'Atualizar múltiplos campos',
+        value: {
+          name: 'João Silva',
+          email: 'joao.silva@example.com',
+          isActive: true,
+          avatarUrl: 'https://example.com/avatar.jpg',
+        },
+      },
+    },
+  })
   @ApiOkResponse({
-    description: 'Atualiza um usuário pelo ID',
+    description: 'Usuário atualizado com sucesso',
     type: UserResponseDto,
+    schema: {
+      example: {
+        id: '09dcf742-dabb-4fc6-abfa-cd77ccaca109',
+        name: 'João Silva Atualizado',
+        email: 'joao.silva@example.com',
+        role: 'OPERATOR',
+        isActive: true,
+        avatarUrl: 'https://example.com/avatar.jpg',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      },
+    },
   })
   @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
   @ApiBadRequestResponse({ description: 'ID inválido ou dados inválidos' })
+  @ApiConflictResponse({
+    description: 'Email já existe no sistema (se estiver atualizando o email)',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 409 },
+        message: { type: 'string', example: 'Email already exists' },
+        error: { type: 'string', example: 'Conflict' },
+      },
+    },
+  })
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUserDto,

@@ -68,7 +68,7 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requisições por minuto
   @ApiOperation({ 
     summary: 'Renovar access token usando refresh token',
-    description: 'Valida o refresh token e retorna um novo par de tokens (access + refresh). O refresh token antigo é revogado automaticamente.',
+    description: 'Valida o refresh token e retorna um novo par de tokens (access + refresh). O refresh token antigo é revogado automaticamente. IMPORTANTE: Use o refreshToken retornado no login (não o accessToken!). O refreshToken é um token aleatório base64url, não um JWT. Se você receber "Invalid or expired refresh token", verifique se está usando o refreshToken correto do último login.',
   })
   @ApiBody({ type: RefreshDto })
   @ApiResponse({ 

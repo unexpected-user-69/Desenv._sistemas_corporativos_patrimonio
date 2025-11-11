@@ -157,3 +157,4 @@ Accept: application/json
 GET {{apiBase}}/patrimonio/codigo/PAT-999
 Accept: application/json
 
+

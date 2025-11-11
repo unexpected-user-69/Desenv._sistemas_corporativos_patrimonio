@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, IsNull } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshToken } from './entities/refresh-token.entity';
-import { UsersService } from '../users/users.service';
+import { UsersHttpClient, UserIdentity } from './users-http-client';
 import { HashService } from '../common/services/hash.service';
 import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
@@ -21,74 +21,39 @@ function addDays(days: number): Date {
   return d;
 }
 
-/**
- * Interface para identidade do usuário.
- * Adaptado para UUID (string) conforme padrão do Patrimônio.
- */
-export interface UserIdentity {
-  id: string; // UUID
-  email: string;
-  name: string;
-  roles: string[];
-}
-
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(RefreshToken)
     private readonly refreshRepo: Repository<RefreshToken>,
     private readonly jwt: JwtService,
-    private readonly usersService: UsersService,
+    private readonly usersHttpClient: UsersHttpClient,
     private readonly hashService: HashService,
   ) {}
 
   /**
-   * Valida credenciais do usuário usando UsersService.
+   * Valida credenciais do usuário usando UsersHttpClient.
    * 
-   * ✅ Agente 03 implementou método validateCredentials no UsersService.
+   * ✅ Implementado conforme requisito da atividade: comunicação HTTP
+   * com o Users Service via UsersHttpClient.
    */
   private async validateCredentials(
     email: string,
     password: string,
   ): Promise<UserIdentity | null> {
-    try {
-      // Usa o método validateCredentials do UsersService
-      const user = await this.usersService.validateCredentials(email, password);
-
-      if (!user) {
-        return null;
-      }
-
-      // Converte User entity para UserIdentity
-      // user.role é string (UserRole enum), convertemos para array
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        roles: [user.role as string],
-      };
-    } catch {
-      return null;
-    }
+    // Usa o UsersHttpClient para validar credenciais via HTTP
+    return await this.usersHttpClient.validateCredentials(email, password);
   }
 
   /**
-   * Busca usuário por ID.
+   * Busca usuário por ID usando UsersHttpClient.
    * 
-   * ⚠️ TEMPORÁRIO: Este método será melhorado pelo Agente 03.
+   * ✅ Implementado conforme requisito da atividade: comunicação HTTP
+   * com o Users Service via UsersHttpClient.
    */
   private async getUserById(userId: string): Promise<UserIdentity | null> {
-    try {
-      const user = await this.usersService.findOne(userId);
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        roles: [user.role],
-      };
-    } catch {
-      return null;
-    }
+    // Usa o UsersHttpClient para buscar usuário via HTTP
+    return await this.usersHttpClient.getUserById(userId);
   }
 
   // Assina access token curto e stateless

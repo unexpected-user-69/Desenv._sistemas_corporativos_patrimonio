@@ -73,14 +73,27 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
         // Arrange
         const userId = 'test-user-id';
         const mockUser = createMockUser({ id: userId });
+        const mockAuthUser = {
+          sub: userId,
+          email: 'test@example.com',
+          roles: ['OPERATOR'],
+        };
+        const mockRequest = {
+          user: mockAuthUser,
+        } as any;
+
         usersService.findOne.mockResolvedValue(mockUser);
 
         // Act
-        const result = await controller.findOne(userId);
+        const result = await controller.findOne(userId, mockRequest);
 
         // Assert
         expect(result).toEqual(mockUser);
-        expect(usersService.findOne).toHaveBeenCalledWith(userId);
+        expect(usersService.findOne).toHaveBeenCalledWith(
+          userId,
+          userId,
+          ['OPERATOR'],
+        );
       });
     });
 
@@ -106,9 +119,13 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
         const updateDto: UpdateUserDto = { name: 'Updated Name' };
         const updatedUser = createMockUser({ id: userId, ...updateDto });
         usersService.update.mockResolvedValue(updatedUser);
+        // Mock do OwnerId decorator - o decorator injeta o userId do request.user
+        const mockRequest = {
+          user: { sub: userId },
+        } as any;
 
         // Act
-        const result = await controller.update(userId, updateDto);
+        const result = await controller.update(userId, updateDto, mockRequest);
 
         // Assert
         expect(usersService.update).toHaveBeenCalledWith(userId, updateDto);
@@ -229,14 +246,26 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
     it('should handle service errors gracefully', async () => {
       // Arrange
       const userId = 'non-existent-id';
+      const mockAuthUser = {
+        sub: userId,
+        email: 'test@example.com',
+        roles: ['OPERATOR'],
+      };
+      const mockRequest = {
+        user: mockAuthUser,
+      } as any;
       const notFoundError = new NotFoundException('User not found');
       usersService.findOne.mockRejectedValue(notFoundError);
 
       // Act & Assert
-      await expect(controller.findOne(userId)).rejects.toThrow(
+      await expect(controller.findOne(userId, mockRequest)).rejects.toThrow(
         NotFoundException,
       );
-      expect(usersService.findOne).toHaveBeenCalledWith(userId);
+      expect(usersService.findOne).toHaveBeenCalledWith(
+        userId,
+        userId,
+        ['OPERATOR'],
+      );
     });
 
     it('should handle empty query parameters', async () => {
@@ -341,9 +370,13 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
       const partialUpdate: UpdateUserDto = { name: 'New Name' };
       const updatedUser = createMockUser({ id: userId, name: 'New Name' });
       usersService.update.mockResolvedValue(updatedUser);
+      // Mock do OwnerId decorator
+      const mockRequest = {
+        user: { sub: userId },
+      } as any;
 
       // Act
-      const result = await controller.update(userId, partialUpdate);
+      const result = await controller.update(userId, partialUpdate, mockRequest);
 
       // Assert
       expect(usersService.update).toHaveBeenCalledWith(userId, partialUpdate);
@@ -385,15 +418,25 @@ describe('UsersController - Advanced Unit Tests (PDF 086)', () => {
 
     it('should return user without sensitive data', async () => {
       // Arrange
+      const userId = 'test-id';
       const userWithSensitiveData = createMockUser({
         passwordHash: 'sensitive_hash_data',
       });
       // Remover passwordHash para simular serialização
       const { passwordHash, ...userWithoutPassword } = userWithSensitiveData;
+      const mockAuthUser = {
+        sub: userId,
+        email: 'test@example.com',
+        roles: ['OPERATOR'],
+      };
+      const mockRequest = {
+        user: mockAuthUser,
+      } as any;
+
       usersService.findOne.mockResolvedValue(userWithoutPassword);
 
       // Act
-      const result = await controller.findOne('test-id');
+      const result = await controller.findOne(userId, mockRequest);
 
       // Assert
       expect(result).not.toHaveProperty('passwordHash');

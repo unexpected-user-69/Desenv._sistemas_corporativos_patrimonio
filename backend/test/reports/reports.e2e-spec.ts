@@ -36,28 +36,23 @@ describe('Reports (e2e)', () => {
   let testRequestId: string;
 
   beforeAll(async () => {
-    try {
-      const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModule],
-      }).compile();
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
 
-      app = moduleFixture.createNestApplication();
-      app.setGlobalPrefix('v1');
-      await app.init();
+    app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('v1');
+    await app.init();
 
-      httpServer = app.getHttpServer() as http.Server;
-      dataSource = app.get(DataSource);
-      hashService = app.get(HashService);
+    httpServer = app.getHttpServer() as http.Server;
+    dataSource = app.get(DataSource);
+    hashService = app.get(HashService);
 
-      // Criar tabelas se não existirem
-      await setupDatabaseTables(dataSource);
+    // Criar tabelas se não existirem
+    await setupDatabaseTables(dataSource);
 
-      // Configurar usuários de teste e obter tokens
-      tokens = await setupTestUsers(httpServer, dataSource, hashService, 'reports-test');
-    } catch (error) {
-      console.error('Erro ao inicializar app nos testes:', error);
-      throw error;
-    }
+    // Configurar usuários de teste e obter tokens
+    tokens = await setupTestUsers(httpServer, dataSource, hashService, 'reports-test');
   });
 
   afterAll(async () => {
@@ -81,14 +76,14 @@ describe('Reports (e2e)', () => {
              WHERE email LIKE '%reports-test%@example.com'
            )`,
         );
-      } catch (error) {
+      } catch {
         // Ignorar erros de limpeza
       }
       if (app) {
         await app.close();
       }
-    } catch (error) {
-      console.warn('Erro ao limpar após testes:', error);
+    } catch {
+      // Erro ao limpar após testes - ignorar
     }
   });
 
@@ -319,7 +314,7 @@ describe('Reports (e2e)', () => {
 
       // Aceitar 200, 400 ou 500 se não houver dados ou se o processamento falhar
       if (response.status === 500 || response.status === 400) {
-        console.log('Erro ao gerar CSV (pode ser falta de dados ou processamento falhou):', response.body?.message);
+        // Erro ao gerar CSV (pode ser falta de dados ou processamento falhou)
         // Se não houver dados ou processamento falhar, o teste passa (é esperado em ambiente de teste)
         expect([200, 400, 500]).toContain(response.status);
         return;
@@ -361,7 +356,7 @@ describe('Reports (e2e)', () => {
 
       // Se retornar erro, verificar se é por falta de dados ou problema no Puppeteer
       if (response.status !== 200) {
-        console.log('Erro ao gerar PDF:', response.body?.message);
+        // Erro ao gerar PDF
         // Se for erro 400 ou 500, pode ser que não há dados ou Puppeteer falhou
         // Por enquanto, vamos aceitar que pode falhar se não houver dados
         if (response.status === 500 || response.status === 400) {

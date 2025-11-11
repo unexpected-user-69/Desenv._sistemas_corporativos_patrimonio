@@ -39,6 +39,15 @@ describe('Users (e2e)', () => {
   let tokens: TestUserTokens;
 
   beforeAll(async () => {
+    // Configurar USERS_API_URL ANTES de compilar o módulo
+    // Usar uma porta padrão que será atualizada após a inicialização
+    const originalUsersApiUrl = process.env.USERS_API_URL;
+    
+    // Configurar para usar localhost com porta padrão (será atualizado depois)
+    // O getter baseUrl do UsersHttpClient lê do process.env como fallback,
+    // então podemos atualizar após a inicialização
+    process.env.USERS_API_URL = process.env.USERS_API_URL || 'http://localhost:3000/v1';
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -51,11 +60,27 @@ describe('Users (e2e)', () => {
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 
+    // Atualizar USERS_API_URL com a porta real do servidor
+    // O getter baseUrl do UsersHttpClient lê do process.env como fallback,
+    // então esta atualização será refletida nas próximas chamadas
+    const address = httpServer.address();
+    if (address && typeof address === 'object') {
+      const port = address.port;
+      const baseUrl = `http://localhost:${port}/v1`;
+      process.env.USERS_API_URL = baseUrl;
+    } else {
+      // Fallback: usar localhost com porta padrão
+      process.env.USERS_API_URL = process.env.USERS_API_URL || 'http://localhost:3000/v1';
+    }
+
     // Criar tabelas se não existirem
     await setupDatabaseTables(dataSource);
 
     // Criar usuários de teste usando auth-helper
     tokens = await setupTestUsers(httpServer, dataSource, hashService, 'users');
+    
+    // Restaurar a variável original se necessário (após os testes)
+    // Não restaurar aqui, pois pode ser necessário durante os testes
   });
 
   afterAll(async () => {

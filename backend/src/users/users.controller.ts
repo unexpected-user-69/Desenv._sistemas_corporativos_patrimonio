@@ -9,7 +9,10 @@ import {
   Delete,
   Query,
   UseGuards,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
 import { UserRole } from './enums/user-role.enum';
@@ -31,12 +34,14 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { OwnerId } from '../common/decorators/owner-id.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { QueryUsersDto } from './dto/query-users.dto';
 import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
 import { ValidateUserDto } from './dto/validate-user.dto';
+import { AuthUser } from '../auth/strategies/jwt.strategy';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -111,6 +116,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Buscar usuário por ID' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas o próprio usuário ou ADMIN' })
   @ApiOkResponse({
     description: 'Retorna um usuário pelo ID',
     type: UserResponseDto,
@@ -145,8 +151,15 @@ export class UsersController {
   })
   findOne(
     @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: Request & { user?: AuthUser },
   ): Promise<UserResponseDto> {
-    return this.usersService.findOne(id);
+    const authenticatedUser = req.user;
+    // O JwtAuthGuard garante que o usuário está autenticado, mas fazemos uma verificação de segurança
+    if (!authenticatedUser) {
+      throw new UnauthorizedException('Usuário não autenticado');
+    }
+    // Passa informações do usuário autenticado para verificação self-or-admin no service
+    return this.usersService.findOne(id, authenticatedUser.sub, authenticatedUser.roles);
   }
 
   @Get('email/:email')
@@ -186,6 +199,7 @@ export class UsersController {
     return this.usersService.findByEmail(email);
   }
 
+  @Public()
   @Post('validate')
   @ApiOperation({ summary: 'Validar credenciais de usuário' })
   @ApiBody({ type: ValidateUserDto })
@@ -195,15 +209,23 @@ export class UsersController {
   })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
   async validate(@Body() dto: ValidateUserDto): Promise<UserResponseDto | null> {
-    const user = await this.usersService.validateCredentials(
-      dto.email,
-      dto.password,
-    );
-    if (!user) {
+    try {
+      const user = await this.usersService.validateCredentials(
+        dto.email,
+        dto.password,
+      );
+      if (!user) {
+        // Retorna null quando credenciais são inválidas (não é um erro HTTP)
+        return null;
+      }
+      // Retorna serializado (sem passwordHash devido ao @Exclude)
+      // Não passa autenticação pois este é um endpoint público de validação
+      return await this.usersService.findOne(user.id, undefined, undefined);
+    } catch (error: any) {
+      // Em caso de erro, retorna null (não lança exceção para não expor detalhes)
+      console.error(`[UsersController.validate] Erro ao validar credenciais: ${error.message}`);
       return null;
     }
-    // Retorna serializado (sem passwordHash devido ao @Exclude)
-    return this.usersService.findOne(user.id);
   }
 
   @Post()

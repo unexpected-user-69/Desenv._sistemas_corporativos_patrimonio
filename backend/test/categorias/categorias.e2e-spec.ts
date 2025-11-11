@@ -57,6 +57,18 @@ describe('Categorias (e2e)', () => {
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 
+    // Configurar USERS_API_URL para apontar para o próprio servidor de teste
+    // Isso permite que o AuthService use o UsersHttpClient para chamar o endpoint local
+    const address = httpServer.address();
+    if (address && typeof address === 'object') {
+      const port = address.port;
+      const baseUrl = `http://localhost:${port}/v1`;
+      process.env.USERS_API_URL = baseUrl;
+    } else {
+      // Fallback: usar localhost com porta padrão ou variável de ambiente
+      process.env.USERS_API_URL = process.env.USERS_API_URL || 'http://localhost:3000/v1';
+    }
+
     // Criar tabelas se não existirem
     await setupDatabaseTables(dataSource);
 

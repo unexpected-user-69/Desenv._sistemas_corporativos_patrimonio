@@ -124,3 +124,4 @@ Estes arquivos seguem o padrão Aurora Platform descrito na atividade:
 - **Health Check**: http://localhost:3101/v1/metrics/health
 
 
+

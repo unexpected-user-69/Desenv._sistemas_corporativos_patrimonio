@@ -2,9 +2,10 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, FindManyOptions, ILike, Between, FindOptionsWhere } from 'typeorm';
+import { Repository, Like, FindManyOptions, ILike, Between, FindOptionsWhere, IsNull } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -194,7 +195,26 @@ export class UsersService {
     };
   }
 
-  async findOne(id: string): Promise<UserResponseDto> {
+  /**
+   * Busca usuário por ID com verificação de autorização self-or-admin.
+   * 
+   * Conforme padrão Aurora Platform (Fonte 112/113):
+   * - O usuário pode acessar seus próprios dados (self)
+   * - Administradores podem acessar dados de qualquer usuário (admin)
+   * - Caso contrário, lança ForbiddenException
+   * 
+   * @param id - ID do usuário a ser buscado
+   * @param authenticatedUserId - ID do usuário autenticado (opcional, para verificação self-or-admin)
+   * @param authenticatedUserRoles - Roles do usuário autenticado (opcional, para verificação de admin)
+   * @returns UserResponseDto - Dados do usuário
+   * @throws NotFoundException - Se o usuário não for encontrado
+   * @throws ForbiddenException - Se o usuário não tiver permissão (self-or-admin)
+   */
+  async findOne(
+    id: string,
+    authenticatedUserId?: string,
+    authenticatedUserRoles?: string[],
+  ): Promise<UserResponseDto> {
     // TypeORM automaticamente filtra usuários soft deleted quando usamos findOne
     const user = await this.userRepository.findOne({ 
       where: { id },
@@ -205,6 +225,21 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }
+
+    // Verificação de autorização self-or-admin
+    // Se authenticatedUserId ou authenticatedUserRoles foram fornecidos, verifica permissões
+    if (authenticatedUserId !== undefined || authenticatedUserRoles !== undefined) {
+      const isSelf = authenticatedUserId === id;
+      // Verifica se é admin (case-insensitive para maior compatibilidade)
+      const isAdmin = authenticatedUserRoles?.some(
+        (role) => role?.toUpperCase() === 'ADMIN',
+      ) ?? false;
+
+      if (!isSelf && !isAdmin) {
+        throw new ForbiddenException('self-or-admin');
+      }
+    }
+
     return this.serializeUser(user);
   }
 
@@ -492,8 +527,12 @@ export class UsersService {
     const normalizedEmail = this.normalizeEmail(email);
 
     // Busca o usuário incluindo o passwordHash (que normalmente não vem no select)
+    // Verifica também que não está soft-deleted (deletedAt IS NULL)
     const user = await this.userRepository.findOne({
-      where: { email: normalizedEmail },
+      where: { 
+        email: normalizedEmail,
+        deletedAt: IsNull(), // Garantir que o usuário não está soft-deleted usando IsNull do TypeORM
+      },
       select: ['id', 'email', 'name', 'role', 'isActive', 'passwordHash', 'avatarUrl', 'createdAt', 'updatedAt', 'deletedAt', 'version'],
     });
 

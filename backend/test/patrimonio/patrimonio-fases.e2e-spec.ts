@@ -29,6 +29,13 @@ describe('PatrimonioController - Fases 1, 2 e 3 (e2e)', () => {
   let createdPatrimonioCodigo: string;
 
   beforeAll(async () => {
+    // Configurar USERS_API_URL ANTES de compilar o módulo
+    // Isso garante que o ConfigService use o valor correto desde o início
+    // Usar uma porta padrão que será atualizada após a inicialização
+    if (!process.env.USERS_API_URL) {
+      process.env.USERS_API_URL = 'http://localhost:3101/v1';
+    }
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -41,7 +48,16 @@ describe('PatrimonioController - Fases 1, 2 e 3 (e2e)', () => {
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 
+    // Atualizar USERS_API_URL com a porta real do servidor (se disponível)
+    // O UsersHttpClient lê dinamicamente de process.env como fallback
+    const address = httpServer.address();
+    if (address && typeof address === 'object') {
+      const port = address.port;
+      process.env.USERS_API_URL = `http://localhost:${port}/v1`;
+    }
+
     // Configurar usuários de teste
+    // A função setupTestUsers também atualiza USERS_API_URL com a porta correta
     tokens = await setupTestUsers(httpServer, dataSource, hashService, 'patrimonio-fases');
   });
 

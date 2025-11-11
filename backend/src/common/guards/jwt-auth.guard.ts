@@ -1,21 +1,36 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
  * Guard de autenticação JWT baseado no padrão Aurora.
  * 
  * Utiliza Passport JWT Strategy quando configurada.
+ * Respeita o decorator @Public() para rotas públicas.
  * Em desenvolvimento, pode auto-injetar usuário fake se DEV_AUTO_AUTH=true.
  * 
  * Adaptado para UUID (sub será string em vez de number).
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
-  // Preserve o comportamento de desenvolvimento: quando NODE_ENV !== 'production',
-  // injeta um usuário fake se DEV_AUTO_AUTH estiver habilitado.
-  // Em produção, delega para o AuthGuard('jwt') do Passport.
+  constructor(private reflector: Reflector) {
+    super();
+  }
+
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
+    // Verifica se a rota é pública usando o decorator @Public()
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // Se a rota é pública, permite acesso sem autenticação
+    if (isPublic) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest<
       Request & {
         user?: { sub: string; isAdmin: boolean; roles?: string[] };

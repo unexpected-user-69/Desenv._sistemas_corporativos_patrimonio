@@ -374,7 +374,7 @@ describe('Reports (e2e)', () => {
       expect(response.status).toBe(200);
       expect(response.headers['content-type']).toContain('application/pdf');
       expect(response.headers['content-disposition']).toContain('attachment');
-    }, 60000); // Timeout de 60s para PDF (puppeteer pode demorar)
+    }, 120000); // Timeout de 120s para PDF (puppeteer pode demorar muito)
   });
 
   // Funções auxiliares

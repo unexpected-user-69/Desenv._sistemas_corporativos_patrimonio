@@ -1,0 +1,175 @@
+### Arquivo de Testes HTTP para Usuários
+### Baseado no padrão Aurora Platform
+###
+### Este arquivo contém exemplos de requisições HTTP para testar os endpoints de usuários.
+### Use com REST Client (VSCode) ou similar.
+###
+### Variáveis de ambiente (configure no início do arquivo ou no seu cliente HTTP)
+@host = http://localhost:3101
+@apiBase = {{host}}/v1
+@token = 
+@refreshToken = 
+@userId = 
+
+### ============================================
+### CENÁRIO 1: Listar Usuários (Rota Pública ou Protegida)
+### ============================================
+
+### GET /users - Listar todos os usuários (200)
+GET {{apiBase}}/users
+Accept: application/json
+
+### GET /users - Listar usuários com autenticação (200)
+GET {{apiBase}}/users
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### ============================================
+### CENÁRIO 2: Buscar Usuário por ID (Rota Pública - mas pode ter verificação self-or-admin)
+### ============================================
+
+### GET /users/:id - Buscar usuário por ID (200)
+GET {{apiBase}}/users/{{userId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### GET /users/:id - Tentar buscar sem autenticação (pode ser 200 ou 401 dependendo da configuração)
+GET {{apiBase}}/users/{{userId}}
+Accept: application/json
+
+### GET /users/:id - Tentar buscar usuário inexistente (404)
+GET {{apiBase}}/users/00000000-0000-0000-0000-000000000000
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### ============================================
+### CENÁRIO 3: Criar Usuário (Rota Protegida - Requer ADMIN)
+### ============================================
+
+### POST /users - Criar usuário como ADMIN (201)
+POST {{apiBase}}/users
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Novo Usuário",
+  "email": "novo.usuario@example.com",
+  "password": "StrongP@ssw0rd123",
+  "role": "OPERATOR",
+  "isActive": true
+}
+
+### POST /users - Tentar criar usuário sem autenticação (401)
+POST {{apiBase}}/users
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Novo Usuário",
+  "email": "novo.usuario@example.com",
+  "password": "StrongP@ssw0rd123",
+  "role": "OPERATOR"
+}
+
+### POST /users - Tentar criar usuário como OPERATOR (403 - sem permissão)
+POST {{apiBase}}/users
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Novo Usuário",
+  "email": "novo.usuario2@example.com",
+  "password": "StrongP@ssw0rd123",
+  "role": "OPERATOR"
+}
+
+### POST /users - Criar usuário com dados inválidos (400)
+POST {{apiBase}}/users
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "",
+  "email": "invalid-email",
+  "password": "123"
+}
+
+### ============================================
+### CENÁRIO 4: Atualizar Usuário (Rota Protegida - Requer self-or-admin)
+### ============================================
+
+### PUT /users/:id - Atualizar próprio usuário (200)
+PUT {{apiBase}}/users/{{userId}}
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Nome Atualizado",
+  "email": "email.atualizado@example.com"
+}
+
+### PUT /users/:id - Tentar atualizar sem autenticação (401)
+PUT {{apiBase}}/users/{{userId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Nome Atualizado"
+}
+
+### PUT /users/:id - Tentar atualizar outro usuário como OPERATOR (403)
+PUT {{apiBase}}/users/00000000-0000-0000-0000-000000000002
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Nome Atualizado"
+}
+
+### ============================================
+### CENÁRIO 5: Deletar Usuário (Rota Protegida - Requer ADMIN)
+### ============================================
+
+### DELETE /users/:id - Deletar usuário como ADMIN (200)
+DELETE {{apiBase}}/users/{{userId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### DELETE /users/:id - Tentar deletar sem autenticação (401)
+DELETE {{apiBase}}/users/{{userId}}
+Accept: application/json
+
+### DELETE /users/:id - Tentar deletar como OPERATOR (403)
+DELETE {{apiBase}}/users/{{userId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### ============================================
+### CENÁRIO 6: Validar Credenciais (Rota Pública)
+### ============================================
+
+### POST /users/validate - Validar credenciais válidas (200)
+POST {{apiBase}}/users/validate
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "Admin@123"
+}
+
+### POST /users/validate - Validar credenciais inválidas (200 - retorna null)
+POST {{apiBase}}/users/validate
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "invalid@example.com",
+  "password": "wrongpassword"
+}
+

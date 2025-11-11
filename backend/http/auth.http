@@ -1,0 +1,117 @@
+### Arquivo de Testes HTTP para Autenticação
+### Baseado no padrão Aurora Platform
+### 
+### Este arquivo contém exemplos de requisições HTTP para testar os endpoints de autenticação.
+### Use com REST Client (VSCode) ou similar.
+###
+### Variáveis de ambiente (configure no início do arquivo ou no seu cliente HTTP)
+@host = http://localhost:3101
+@apiBase = {{host}}/v1
+@token = 
+@refreshToken = 
+
+### ============================================
+### CENÁRIO 1: Login (Rota Pública)
+### ============================================
+
+### POST /auth/login - Login com credenciais válidas (200)
+POST {{apiBase}}/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "Admin@123"
+}
+
+### POST /auth/login - Login com credenciais inválidas (401)
+POST {{apiBase}}/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "invalid@example.com",
+  "password": "wrongpassword"
+}
+
+### POST /auth/login - Login sem dados (400)
+POST {{apiBase}}/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### ============================================
+### CENÁRIO 2: Obter Token de Desenvolvimento (Rota Pública)
+### ============================================
+
+### POST /auth/dev-token - Obter token de desenvolvimento (200)
+POST {{apiBase}}/auth/dev-token
+Content-Type: application/json
+Accept: application/json
+
+### ============================================
+### CENÁRIO 3: Refresh Token (Rota Pública)
+### ============================================
+
+### POST /auth/refresh - Renovar tokens com refresh token válido (200)
+POST {{apiBase}}/auth/refresh
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### POST /auth/refresh - Renovar tokens com refresh token inválido (401)
+POST {{apiBase}}/auth/refresh
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "invalid-refresh-token"
+}
+
+### POST /auth/refresh - Renovar tokens sem refresh token (400)
+POST {{apiBase}}/auth/refresh
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### ============================================
+### CENÁRIO 4: Logout (Rota Pública)
+### ============================================
+
+### POST /auth/logout - Revogar refresh token (200)
+POST {{apiBase}}/auth/logout
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### ============================================
+### CENÁRIO 5: Me (Rota Protegida - Requer Autenticação)
+### ============================================
+
+### GET /auth/me - Obter informações do usuário autenticado (200)
+GET {{apiBase}}/auth/me
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### GET /auth/me - Tentar acessar sem token (401)
+GET {{apiBase}}/auth/me
+Accept: application/json
+
+### GET /auth/me - Tentar acessar com token inválido (401)
+GET {{apiBase}}/auth/me
+Accept: application/json
+Authorization: Bearer invalid-token
+
+### GET /auth/me - Tentar acessar com token expirado (401)
+GET {{apiBase}}/auth/me
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyMzkwMjJ9.invalid
+

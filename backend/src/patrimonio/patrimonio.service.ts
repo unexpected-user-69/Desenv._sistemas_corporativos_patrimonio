@@ -1157,9 +1157,20 @@ export class PatrimonioService {
       patrimonio.observacoes || '',
     ]);
 
-    const csvData = stringify([headers, ...rows], {
-      header: true,
-    });
+    // Quando passamos arrays, não podemos usar header: true sem especificar colunas
+    // Como já incluímos o header manualmente, apenas passamos os dados
+    // Sempre incluir headers, mesmo se não houver dados
+    // Passar opções explícitas para evitar detecção automática de headers
+    let csvData: string;
+    if (rows.length > 0) {
+      csvData = stringify([headers, ...rows], { header: false });
+    } else {
+      // Quando não há dados, gerar CSV manualmente apenas com headers
+      // Isso evita problemas com csv-stringify quando não há dados
+      const bom = '\ufeff';
+      const headerLine = headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',');
+      csvData = bom + headerLine + '\n';
+    }
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader(

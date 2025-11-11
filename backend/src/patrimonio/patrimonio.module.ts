@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
 import { PatrimonioService } from './patrimonio.service';
 import { PatrimonioController } from './patrimonio.controller';
 import { Patrimonio } from './entities/patrimonio.entity';
@@ -13,7 +12,7 @@ import { PatrimonioPdfExportService } from './services/patrimonio-pdf-export.ser
   imports: [
     TypeOrmModule.forFeature([Patrimonio, PatrimonioLocalizacaoHistorico]),
     UsersModule,
-    ConfigModule,
+    // ConfigModule removido - agora está global no AppModule
   ],
   controllers: [PatrimonioController],
   providers: [PatrimonioService, StorageService, PatrimonioPdfExportService],

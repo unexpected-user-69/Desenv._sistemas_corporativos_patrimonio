@@ -81,16 +81,28 @@ describe('JwtStrategy (unit)', () => {
     expect(result.roles).toEqual([]);
   });
 
-  it('should use default secret when ConfigService is not available', () => {
-    // This test verifies that the strategy can be instantiated without ConfigService
-    // by using the default secret from environment
+  it('should use environment variable when ConfigService returns undefined', async () => {
+    // This test verifies that the strategy falls back to process.env
+    // when ConfigService returns undefined
     process.env.JWT_ACCESS_SECRET = 'default-secret';
 
-    const mod = Test.createTestingModule({
-      providers: [JwtStrategy],
-    });
+    const configService = {
+      get: jest.fn((key: string) => {
+        // ConfigService returns undefined, so it should fallback to process.env
+        return undefined;
+      }),
+    };
 
-    expect(mod).toBeDefined();
+    const mod = await Test.createTestingModule({
+      providers: [
+        JwtStrategy,
+        { provide: ConfigService, useValue: configService },
+      ],
+    }).compile();
+
+    const strategy = mod.get(JwtStrategy);
+    expect(strategy).toBeDefined();
+    expect(configService.get).toHaveBeenCalledWith('JWT_ACCESS_SECRET');
   });
 
   it('should use secret from ConfigService when available', async () => {

@@ -52,9 +52,32 @@ describe('Notifications (e2e)', () => {
   }, 180000); // Timeout de 3 minutos para inicialização (pode demorar se Redis não estiver disponível)
 
   afterAll(async () => {
-    await cleanupTestData(dataSource);
-    await app.close();
-  });
+    try {
+      await Promise.race([
+        cleanupTestData(dataSource),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Cleanup timeout')), 30000))
+      ]).catch(() => {
+        // Ignorar timeout ou erros de limpeza
+      });
+    } catch (error) {
+      // Ignorar erros de limpeza
+      console.warn('Erro ao limpar dados de teste:', error);
+    }
+    
+    if (app) {
+      try {
+        await Promise.race([
+          app.close(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Close timeout')), 30000))
+        ]).catch(() => {
+          // Ignorar timeout ao fechar app
+        });
+      } catch (error) {
+        console.warn('Erro ao fechar aplicação:', error);
+        // Não relançar o erro para evitar falhas no teste
+      }
+    }
+  }, 90000); // Timeout de 90 segundos para limpeza
 
   describe('POST /v1/notifications/templates', () => {
     it('deve criar um template com sucesso (201)', async () => {

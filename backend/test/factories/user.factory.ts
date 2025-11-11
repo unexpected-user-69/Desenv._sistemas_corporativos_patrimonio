@@ -12,7 +12,7 @@ export function makeCreateUserDto(
     name: `User ${userSeq}`,
     email: `user${userSeq}@example.com`,
     password: 'StrongP@ssw0rd!',
-    role: UserRole.STUDENT,
+    role: UserRole.OPERATOR,
   } as CreateUserDto;
   userSeq++;
   return { ...base, ...(overrides ?? {}) } as CreateUserDto;
@@ -25,7 +25,7 @@ export function makeUserEntity(overrides?: Partial<User>): Partial<User> {
     name: dto.name,
     email: dto.email,
     passwordHash: 'hashed-password',
-    role: dto.role ?? UserRole.STUDENT,
+    role: dto.role ?? UserRole.OPERATOR,
     isActive: true,
     avatarUrl: undefined,
     createdAt: new Date(),

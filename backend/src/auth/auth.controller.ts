@@ -17,6 +17,7 @@ import { LogoutDto } from './dto/logout.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { Public } from '../common/decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse, ApiBody, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -37,6 +38,7 @@ export class AuthController {
     private readonly usersService: UsersService,
   ) {}
 
+  @Public()
   @Post('login')
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requisições por minuto
   @ApiOperation({ 
@@ -64,6 +66,7 @@ export class AuthController {
     return this.auth.login(dto.email, dto.password, ip, ua);
   }
 
+  @Public()
   @Post('refresh')
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requisições por minuto
   @ApiOperation({ 
@@ -94,6 +97,7 @@ export class AuthController {
     return this.auth.refresh(dto.refreshToken, ip, ua);
   }
 
+  @Public()
   @Post('logout')
   @ApiOperation({ 
     summary: 'Revogar refresh token (logout)',
@@ -113,6 +117,7 @@ export class AuthController {
     return this.auth.logout(dto.refreshToken);
   }
 
+  @Public()
   @Post('dev-token')
   @ApiOperation({ 
     summary: 'Obter token de desenvolvimento (apenas em desenvolvimento)',

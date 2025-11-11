@@ -30,6 +30,17 @@ export class ReportSchedulerService {
     this.logger.log('Iniciando processamento de solicitações pendentes...');
 
     try {
+      // Verificar se Redis está disponível antes de processar
+      const isRedisAvailable = await this.reportQueue.isRedisAvailable();
+      
+      if (!isRedisAvailable) {
+        this.logger.warn(
+          'Redis não está disponível. Pulando processamento de solicitações pendentes. ' +
+          'Para iniciar o Redis, execute: docker-compose up redis -d ou npm run redis:start',
+        );
+        return;
+      }
+
       // Buscar solicitações PENDING criadas há mais de 1 minuto
       const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
       const pendingRequests = await this.requestRepository.find({
@@ -48,6 +59,9 @@ export class ReportSchedulerService {
       this.logger.log(`Encontradas ${pendingRequests.length} solicitações pendentes`);
 
       // Enfileirar cada solicitação
+      let successCount = 0;
+      let errorCount = 0;
+
       for (const request of pendingRequests) {
         try {
           await this.reportQueue.enqueueReport(
@@ -59,15 +73,59 @@ export class ReportSchedulerService {
             'medium',
           );
           this.logger.log(`Solicitação ${request.id} enfileirada com sucesso`);
+          successCount++;
         } catch (error: any) {
+          errorCount++;
+          
+          // Verificar se é um erro de Redis
+          const isRedisError = 
+            error.message?.includes('Redis não está disponível') ||
+            error.message?.includes('ECONNREFUSED') ||
+            error.message?.includes('max retries');
+          
+          if (isRedisError) {
+            // Se Redis ficou indisponível durante o processamento, parar
+            this.logger.warn(
+              `Redis ficou indisponível durante o processamento. ` +
+              `${successCount} solicitações enfileiradas, ${errorCount} falhas. ` +
+              `Para iniciar o Redis, execute: docker-compose up redis -d ou npm run redis:start`,
+            );
+            break; // Parar o loop se Redis ficar indisponível
+          }
+          
           this.logger.error(
             `Erro ao enfileirar solicitação ${request.id}:`,
             error.message,
           );
         }
       }
+
+      if (successCount > 0) {
+        this.logger.log(
+          `Processamento concluído: ${successCount} solicitações enfileiradas com sucesso`,
+        );
+      }
+      
+      if (errorCount > 0 && successCount === 0) {
+        this.logger.warn(
+          `Nenhuma solicitação foi enfileirada. ${errorCount} erros ocorreram.`,
+        );
+      }
     } catch (error: any) {
-      this.logger.error('Erro ao processar solicitações pendentes:', error);
+      // Verificar se é um erro de Redis
+      const isRedisError = 
+        error.message?.includes('Redis') ||
+        error.message?.includes('ECONNREFUSED') ||
+        error.message?.includes('max retries');
+      
+      if (isRedisError) {
+        this.logger.warn(
+          'Erro de conexão com Redis ao processar solicitações pendentes. ' +
+          'Para iniciar o Redis, execute: docker-compose up redis -d ou npm run redis:start',
+        );
+      } else {
+        this.logger.error('Erro ao processar solicitações pendentes:', error);
+      }
     }
   }
 

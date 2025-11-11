@@ -78,22 +78,33 @@ export class CreateAuthRefreshTokens1759100000000 implements MigrationInterface 
       true,
     );
 
-    // Criar índices
-    await queryRunner.createIndex(
-      'auth_refresh_tokens',
-      new TableIndex({
-        name: 'idx_auth_refresh_tokens_user_id',
-        columnNames: ['user_id'],
-      }),
-    );
+    // Criar índices (se não existirem)
+    const indices = await queryRunner.query(`
+      SELECT indexname FROM pg_indexes 
+      WHERE tablename = 'auth_refresh_tokens' AND indexname IN ('idx_auth_refresh_tokens_user_id', 'idx_auth_refresh_tokens_expires_at')
+    `);
+    
+    const existingIndexNames = indices.map((idx: any) => idx.indexname);
+    
+    if (!existingIndexNames.includes('idx_auth_refresh_tokens_user_id')) {
+      await queryRunner.createIndex(
+        'auth_refresh_tokens',
+        new TableIndex({
+          name: 'idx_auth_refresh_tokens_user_id',
+          columnNames: ['user_id'],
+        }),
+      );
+    }
 
-    await queryRunner.createIndex(
-      'auth_refresh_tokens',
-      new TableIndex({
-        name: 'idx_auth_refresh_tokens_expires_at',
-        columnNames: ['expires_at'],
-      }),
-    );
+    if (!existingIndexNames.includes('idx_auth_refresh_tokens_expires_at')) {
+      await queryRunner.createIndex(
+        'auth_refresh_tokens',
+        new TableIndex({
+          name: 'idx_auth_refresh_tokens_expires_at',
+          columnNames: ['expires_at'],
+        }),
+      );
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

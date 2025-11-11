@@ -34,8 +34,24 @@ describe('AppController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
-  });
+    if (app) {
+      try {
+        // Aguardar um pouco para permitir que conexões Redis sejam fechadas adequadamente
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await Promise.race([
+          app.close(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Close timeout')), 10000)
+          )
+        ]).catch(() => {
+          // Ignorar timeout ao fechar
+        });
+      } catch (error) {
+        // Ignorar erros ao fechar (pode ser conexão Redis já fechada)
+        console.warn('Erro ao fechar aplicação:', error);
+      }
+    }
+  }, 15000); // Timeout de 15 segundos
 
   it('/ (GET)', () => {
     return request(httpServer).get('/').expect(200).expect('Hello World!');

@@ -6,35 +6,54 @@ export class AddLookupKeyToRefreshTokens1762727000000
   name = 'AddLookupKeyToRefreshTokens1762727000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Adicionar coluna lookup_key
-    await queryRunner.addColumn(
-      'auth_refresh_tokens',
-      new TableColumn({
-        name: 'lookup_key',
-        type: 'varchar',
-        length: '64',
-        isNullable: true,
-        comment: 'Hash rápido (SHA256) para lookup eficiente de tokens',
-      }),
+    // Verificar se a coluna já existe
+    const table = await queryRunner.getTable('auth_refresh_tokens');
+    const lookupKeyColumn = table?.findColumnByName('lookup_key');
+
+    // Adicionar coluna lookup_key apenas se não existir
+    if (!lookupKeyColumn) {
+      await queryRunner.addColumn(
+        'auth_refresh_tokens',
+        new TableColumn({
+          name: 'lookup_key',
+          type: 'varchar',
+          length: '64',
+          isNullable: true,
+          comment: 'Hash rápido (SHA256) para lookup eficiente de tokens',
+        }),
+      );
+    }
+
+    // Verificar se os índices já existem antes de criá-los
+    const indices = table?.indices || [];
+    const hasLookupKeyIndex = indices.some(
+      (idx) => idx.name === 'IDX_refresh_lookup_key',
+    );
+    const hasLookupRevokedExpiresIndex = indices.some(
+      (idx) => idx.name === 'IDX_refresh_lookup_revoked_expires',
     );
 
     // Criar índice para lookup_key para melhorar performance
-    await queryRunner.createIndex(
-      'auth_refresh_tokens',
-      new TableIndex({
-        name: 'IDX_refresh_lookup_key',
-        columnNames: ['lookup_key'],
-      }),
-    );
+    if (!hasLookupKeyIndex) {
+      await queryRunner.createIndex(
+        'auth_refresh_tokens',
+        new TableIndex({
+          name: 'IDX_refresh_lookup_key',
+          columnNames: ['lookup_key'],
+        }),
+      );
+    }
 
     // Criar índice composto para melhorar queries de refresh
-    await queryRunner.createIndex(
-      'auth_refresh_tokens',
-      new TableIndex({
-        name: 'IDX_refresh_lookup_revoked_expires',
-        columnNames: ['lookup_key', 'revoked_at', 'expires_at'],
-      }),
-    );
+    if (!hasLookupRevokedExpiresIndex) {
+      await queryRunner.createIndex(
+        'auth_refresh_tokens',
+        new TableIndex({
+          name: 'IDX_refresh_lookup_revoked_expires',
+          columnNames: ['lookup_key', 'revoked_at', 'expires_at'],
+        }),
+      );
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

@@ -1,7 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
-import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from '../common/logger/logger.module';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
@@ -27,7 +26,7 @@ import { NotificationTracingService } from './observability/notification-tracing
       Webhook,
       NotificationLog,
     ]),
-    ConfigModule,
+    // ConfigModule removido - agora está global no AppModule
     LoggerModule,
     // BullModule.forRoot deve estar configurado no AppModule ou em um módulo compartilhado
     // Aqui apenas registramos a fila específica

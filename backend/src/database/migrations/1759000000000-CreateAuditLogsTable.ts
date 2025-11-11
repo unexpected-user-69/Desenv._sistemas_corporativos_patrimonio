@@ -94,30 +94,43 @@ export class CreateAuditLogsTable1759000000000 implements MigrationInterface {
       true,
     );
 
-    // Criar índices
-    await queryRunner.createIndex(
-      'audit_logs',
-      new TableIndex({
-        name: 'idx_audit_logs_user_timestamp',
-        columnNames: ['user_id', 'timestamp'],
-      }),
-    );
+    // Criar índices (se não existirem)
+    const indices = await queryRunner.query(`
+      SELECT indexname FROM pg_indexes 
+      WHERE tablename = 'audit_logs' AND indexname IN ('idx_audit_logs_user_timestamp', 'idx_audit_logs_entity', 'idx_audit_logs_action_timestamp')
+    `);
+    
+    const existingIndexNames = indices.map((idx: any) => idx.indexname);
+    
+    if (!existingIndexNames.includes('idx_audit_logs_user_timestamp')) {
+      await queryRunner.createIndex(
+        'audit_logs',
+        new TableIndex({
+          name: 'idx_audit_logs_user_timestamp',
+          columnNames: ['user_id', 'timestamp'],
+        }),
+      );
+    }
 
-    await queryRunner.createIndex(
-      'audit_logs',
-      new TableIndex({
-        name: 'idx_audit_logs_entity',
-        columnNames: ['entity_type', 'entity_id'],
-      }),
-    );
+    if (!existingIndexNames.includes('idx_audit_logs_entity')) {
+      await queryRunner.createIndex(
+        'audit_logs',
+        new TableIndex({
+          name: 'idx_audit_logs_entity',
+          columnNames: ['entity_type', 'entity_id'],
+        }),
+      );
+    }
 
-    await queryRunner.createIndex(
-      'audit_logs',
-      new TableIndex({
-        name: 'idx_audit_logs_action_timestamp',
-        columnNames: ['action', 'timestamp'],
-      }),
-    );
+    if (!existingIndexNames.includes('idx_audit_logs_action_timestamp')) {
+      await queryRunner.createIndex(
+        'audit_logs',
+        new TableIndex({
+          name: 'idx_audit_logs_action_timestamp',
+          columnNames: ['action', 'timestamp'],
+        }),
+      );
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

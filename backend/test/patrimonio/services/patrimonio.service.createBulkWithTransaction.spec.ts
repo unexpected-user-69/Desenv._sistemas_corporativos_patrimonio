@@ -3,16 +3,20 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { UsersService } from '../../../src/users/users.service';
+import { StorageService } from '../../../src/patrimonio/services/storage.service';
 import { CreateBulkPatrimonioDto } from '../../../src/patrimonio/dto/create-bulk-patrimonio.dto';
 import { makeCreatePatrimonioDto } from '../../factories/patrimonio.factory';
 
 describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
+  let historicoRepository: MockType<Repository<PatrimonioLocalizacaoHistorico>>;
   let usersService: Partial<UsersService>;
+  let storageService: Partial<StorageService>;
   let dataSource: DataSource;
   let queryRunner: Partial<QueryRunner>;
 
@@ -21,17 +25,21 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
       findOne: jest.fn(),
     };
 
+    storageService = {};
+
+    const managerMock = {
+      findOne: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
+    };
+
     queryRunner = {
       connect: jest.fn().mockResolvedValue(undefined),
       startTransaction: jest.fn().mockResolvedValue(undefined),
       commitTransaction: jest.fn().mockResolvedValue(undefined),
       rollbackTransaction: jest.fn().mockResolvedValue(undefined),
       release: jest.fn().mockResolvedValue(undefined),
-      manager: {
-        findOne: jest.fn(),
-        create: jest.fn(),
-        save: jest.fn(),
-      } as any,
+      manager: managerMock as any,
     };
 
     const mockDataSource = {
@@ -46,8 +54,16 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
+          useFactory: repositoryMockFactory,
+        },
+        {
           provide: UsersService,
           useValue: usersService,
+        },
+        {
+          provide: StorageService,
+          useValue: storageService,
         },
         {
           provide: DataSource,
@@ -58,6 +74,7 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
 
     service = module.get(PatrimonioService);
     repository = module.get(getRepositoryToken(Patrimonio));
+    historicoRepository = module.get(getRepositoryToken(PatrimonioLocalizacaoHistorico));
     dataSource = module.get(DataSource);
   });
 
@@ -72,9 +89,9 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
     const created1 = makePatrimonioEntity({ codigo: 'PAT-001' });
     const created2 = makePatrimonioEntity({ codigo: 'PAT-002' });
 
-    queryRunner.manager!.findOne!.mockResolvedValue(null); // Códigos não existem
-    queryRunner.manager!.create!.mockImplementation((entity, data) => data);
-    queryRunner.manager!.save!
+    (queryRunner.manager!.findOne as jest.Mock).mockResolvedValue(null); // Códigos não existem
+    (queryRunner.manager!.create as jest.Mock).mockImplementation((_entity: any, data: any) => data);
+    (queryRunner.manager!.save as jest.Mock)
       .mockResolvedValueOnce(created1 as Patrimonio)
       .mockResolvedValueOnce(created2 as Patrimonio);
 
@@ -101,12 +118,12 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
     const created1 = makePatrimonioEntity({ codigo: 'PAT-001' });
     const existing = makePatrimonioEntity({ codigo: 'PAT-EXISTENTE' });
 
-    queryRunner.manager!.findOne!
+    (queryRunner.manager!.findOne as jest.Mock)
       .mockResolvedValueOnce(null) // PAT-001 não existe
       .mockResolvedValueOnce(existing as Patrimonio); // PAT-EXISTENTE existe
 
-    queryRunner.manager!.create!.mockImplementation((entity, data) => data);
-    queryRunner.manager!.save!.mockResolvedValueOnce(created1 as Patrimonio);
+    (queryRunner.manager!.create as jest.Mock).mockImplementation((_entity: any, data: any) => data);
+    (queryRunner.manager!.save as jest.Mock).mockResolvedValueOnce(created1 as Patrimonio);
 
     const result = await service.createBulkWithTransaction(dto);
 

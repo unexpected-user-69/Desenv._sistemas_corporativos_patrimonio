@@ -48,7 +48,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
           name: 'John Doe',
           email: 'john@example.com',
           password: 'password123',
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
           isActive: true,
         };
 
@@ -77,7 +77,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
           name: 'John Doe',
           email: 'john@example.com',
           password: 'password123',
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
         };
 
         // Act - Criar primeiro usuário
@@ -99,7 +99,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
             name: 'Alice Smith',
             email: 'alice@example.com',
             passwordHash: 'hashed_password1',
-            role: UserRole.STUDENT,
+            role: UserRole.OPERATOR,
             isActive: true,
             createdAt: new Date('2023-01-01T10:00:00Z'),
             updatedAt: new Date('2023-01-01T10:00:00Z'),
@@ -125,7 +125,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
             name: 'Charlie Brown',
             email: 'charlie@example.com',
             passwordHash: 'hashed_password3',
-            role: UserRole.STUDENT,
+            role: UserRole.OPERATOR,
             isActive: false,
             createdAt: new Date('2023-01-03T10:00:00Z'),
             updatedAt: new Date('2023-01-03T10:00:00Z'),
@@ -146,7 +146,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
             id: '1',
             name: 'Alice Smith',
             email: 'alice@example.com',
-            role: UserRole.STUDENT,
+            role: UserRole.OPERATOR,
           }),
         );
         expect(result.passwordHash).toBeUndefined();
@@ -172,7 +172,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
       it('should filter users by role', async () => {
         // Act
         const result = await service.findAllWithAdvancedFilters({
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
         });
 
         // Assert
@@ -210,7 +210,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
       it('should combine multiple filters', async () => {
         // Act
         const result = await service.findAllWithAdvancedFilters({
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
           isActive: true,
         });
 
@@ -228,7 +228,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
           name: 'John Doe',
           email: 'john@example.com',
           password: 'password123',
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
         };
         await service.create(createUserDto);
       });
@@ -281,7 +281,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
           name: 'John Doe',
           email: 'john@example.com',
           password: 'password123',
-          role: UserRole.STUDENT,
+          role: UserRole.OPERATOR,
         };
         await service.create(createUserDto);
       });
@@ -316,7 +316,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
             name: 'Alice Johnson',
             email: 'alice.johnson@example.com',
             passwordHash: 'hashed_password1',
-            role: UserRole.STUDENT,
+            role: UserRole.OPERATOR,
             isActive: true,
             createdAt: new Date('2023-01-01T10:00:00Z'),
             updatedAt: new Date('2023-01-01T10:00:00Z'),

@@ -1,23 +1,28 @@
 import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
-import { DashboardResponseDto } from '../../../src/patrimonio/dto/dashboard-response.dto';
+import { PatrimonioPdfExportService } from '../../../src/patrimonio/services/patrimonio-pdf-export.service';
+import { PatrimonioDashboardResponseDto } from '../../../src/patrimonio/dto/dashboard-response.dto';
 
 describe('PatrimonioController – getDashboard', () => {
   let controller: PatrimonioController;
   const service = { getDashboard: jest.fn() };
+  const pdfExportService = {};
 
   beforeEach(async () => {
     const mod = await Test.createTestingModule({
       controllers: [PatrimonioController],
-      providers: [{ provide: PatrimonioService, useValue: service }],
+      providers: [
+        { provide: PatrimonioService, useValue: service },
+        { provide: PatrimonioPdfExportService, useValue: pdfExportService },
+      ],
     }).compile();
     controller = mod.get(PatrimonioController);
     jest.clearAllMocks();
   });
 
   it('GET /patrimonio/dashboard → delega ao service.getDashboard', async () => {
-    const mockDashboard: DashboardResponseDto = {
+    const mockDashboard: PatrimonioDashboardResponseDto = {
       total: 1000,
       valorTotal: 5000000,
       porStatus: {
@@ -43,7 +48,7 @@ describe('PatrimonioController – getDashboard', () => {
   });
 
   it('should return empty metrics when no data exists', async () => {
-    const mockDashboard: DashboardResponseDto = {
+    const mockDashboard: PatrimonioDashboardResponseDto = {
       total: 0,
       valorTotal: 0,
       porStatus: {},

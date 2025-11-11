@@ -44,19 +44,11 @@ export class CsvGeneratorService {
     // Gerar CSV
     // Se não houver dados, retornar apenas os headers
     if (data.length === 0) {
-      // Criar um objeto vazio com todas as propriedades dos headers
-      const emptyObject: Record<string, string> = {};
-      headers.forEach((header) => {
-        emptyObject[header] = '';
-      });
-      const csvData = stringify([emptyObject], {
-        header: true,
-        bom: true,
-      });
-      // Remover a linha de dados vazios, deixando apenas o header
-      const lines = csvData.split('\n');
-      const headerLine = lines[0];
-      return Buffer.from(headerLine + '\n', 'utf-8');
+      // Quando não há dados, gerar CSV manualmente apenas com headers
+      // Usar delimitador padrão (vírgula) e garantir UTF-8 BOM
+      const bom = '\ufeff';
+      const headerLine = headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(',');
+      return Buffer.from(bom + headerLine + '\n', 'utf-8');
     }
 
     // Converter arrays de dados para objetos para usar com csv-stringify

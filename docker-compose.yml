@@ -63,13 +63,18 @@ services:
       DB_USER: ${DB_USER:-postgres}
       DB_PASS: ${DB_PASS:-postgres}
       DB_NAME: ${DB_NAME:-patrimonio_inventario}
-      NODE_ENV: production
+      NODE_ENV: ${NODE_ENV:-development}
       PORT: 3101
       # Redis Configuration
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_DB: ${REDIS_DB:-0}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      # JWT Configuration
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_in_production}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      REFRESH_EXPIRES_DAYS: ${REFRESH_EXPIRES_DAYS:-7}
     ports:
       - "${BACKEND_PORT:-3101}:3101"
     networks:

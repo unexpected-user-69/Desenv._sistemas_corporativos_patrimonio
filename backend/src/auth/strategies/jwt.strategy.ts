@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -22,13 +22,16 @@ export type AccessTokenPayload = AuthUser & {
  * Estratégia JWT do Passport.
  * 
  * Baseada no padrão do Aurora Platform, adaptada para UUID.
+ * 
+ * Agora usa ConfigService diretamente (sem @Optional) pois ConfigModule está global.
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(@Optional() private readonly config?: ConfigService) {
-    // Resolve secret explicitamente para poder lançar erro em produção se faltar.
+  constructor(private readonly configService: ConfigService) {
+    // Resolve secret usando ConfigService (agora disponível globalmente)
+    // Fallback para process.env em caso de testes ou configuração manual
     const resolvedSecret =
-      config?.get<string>('JWT_ACCESS_SECRET') ?? process.env.JWT_ACCESS_SECRET;
+      configService.get<string>('JWT_ACCESS_SECRET') ?? process.env.JWT_ACCESS_SECRET;
 
     if (!resolvedSecret) {
       if (process.env.NODE_ENV === 'production') {
@@ -44,8 +47,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: resolvedSecret ?? 'dev_access_secret',
       ignoreExpiration: false,
       // Se você usa issuer/audience, descomente e configure no .env:
-      // issuer: config.get<string>('JWT_ISSUER'),
-      // audience: config.get<string>('JWT_AUDIENCE'),
+      // issuer: configService.get<string>('JWT_ISSUER'),
+      // audience: configService.get<string>('JWT_AUDIENCE'),
     });
   }
 

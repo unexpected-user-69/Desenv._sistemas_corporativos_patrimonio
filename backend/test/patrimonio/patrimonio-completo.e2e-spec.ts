@@ -125,14 +125,26 @@ describe('Patrimonio - Completo (e2e)', () => {
   });
 
   afterAll(async () => {
-    // Limpeza de dados de teste (opcional)
+    // Limpeza de dados de teste (executada em background, não bloqueia)
+    // Não esperamos a limpeza para não bloquear o fechamento da aplicação
+    cleanupTestData(dataSource).catch(() => {
+      // Ignorar erros de limpeza silenciosamente
+    });
+    
+    // Fechar aplicação com timeout
     try {
-      await cleanupTestData(dataSource);
+      await Promise.race([
+        app.close(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Close timeout')), 30000)
+        )
+      ]).catch(() => {
+        // Ignorar timeout ao fechar
+      });
     } catch (error) {
-      // Ignorar erros de limpeza
+      console.warn('Erro ao fechar aplicação:', error);
     }
-    await app.close();
-  });
+  }, 60000); // Timeout de 60 segundos para afterAll
 
   // ==================== GRUPO 1: CRUD BÁSICO ====================
   
@@ -2278,45 +2290,57 @@ async function createTestCategoria(dataSource: DataSource): Promise<string> {
 }
 
 async function cleanupTestData(dataSource: DataSource): Promise<void> {
-  try {
-    // Limpar histórico de localização
-    await dataSource.query(
-      `DELETE FROM patrimonio_localizacao_historico
-       WHERE patrimonio_id IN (
-         SELECT id FROM patrimonios
-         WHERE codigo LIKE 'PAT-TEST-%' 
-            OR codigo LIKE 'PAT-DELETE-%'
-            OR codigo LIKE 'PAT-BULK-%'
-            OR codigo LIKE 'PAT-FOTO-%'
-            OR codigo LIKE 'PAT-SEM-RESP-%'
-            OR codigo LIKE 'PAT-VALID-%'
-       )`,
-    );
+  // Executar limpeza com timeout total de 8 segundos
+  const cleanupPromise = (async () => {
+    try {
+      // Executar todas as limpezas em paralelo para ser mais rápido
+      await Promise.allSettled([
+        // Limpar histórico de localização
+        dataSource.query(
+          `DELETE FROM patrimonio_localizacao_historico
+           WHERE patrimonio_id IN (
+             SELECT id FROM patrimonios
+             WHERE codigo LIKE 'PAT-TEST-%' 
+                OR codigo LIKE 'PAT-DELETE-%'
+                OR codigo LIKE 'PAT-BULK-%'
+                OR codigo LIKE 'PAT-FOTO-%'
+                OR codigo LIKE 'PAT-SEM-RESP-%'
+                OR codigo LIKE 'PAT-VALID-%'
+           )`,
+        ).catch(() => {}),
+        
+        // Limpar patrimônios de teste
+        dataSource.query(
+          `DELETE FROM patrimonios
+           WHERE codigo LIKE 'PAT-TEST-%' 
+              OR codigo LIKE 'PAT-DELETE-%'
+              OR codigo LIKE 'PAT-BULK-%'
+              OR codigo LIKE 'PAT-FOTO-%'
+              OR codigo LIKE 'PAT-SEM-RESP-%'
+              OR codigo LIKE 'PAT-VALID-%'`,
+        ).catch(() => {}),
+        
+        // Limpar categorias de teste
+        dataSource.query(
+          `DELETE FROM categorias
+           WHERE codigo LIKE 'CAT-TEST-%'`,
+        ).catch(() => {}),
+        
+        // Limpar usuários de teste
+        dataSource.query(
+          `DELETE FROM users
+           WHERE email LIKE '%patrimonio-completo-test%@example.com'`,
+        ).catch(() => {}),
+      ]);
+    } catch (error) {
+      // Ignorar todos os erros silenciosamente
+    }
+  })();
 
-    // Limpar patrimônios de teste
-    await dataSource.query(
-      `DELETE FROM patrimonios
-       WHERE codigo LIKE 'PAT-TEST-%' 
-          OR codigo LIKE 'PAT-DELETE-%'
-          OR codigo LIKE 'PAT-BULK-%'
-          OR codigo LIKE 'PAT-FOTO-%'
-          OR codigo LIKE 'PAT-SEM-RESP-%'
-          OR codigo LIKE 'PAT-VALID-%'`,
-    );
-
-    // Limpar categorias de teste
-    await dataSource.query(
-      `DELETE FROM categorias
-       WHERE codigo LIKE 'CAT-TEST-%'`,
-    );
-
-    // Limpar usuários de teste
-    await dataSource.query(
-      `DELETE FROM users
-       WHERE email LIKE '%patrimonio-completo-test%@example.com'`,
-    );
-  } catch (error) {
-    console.warn('Erro ao limpar dados de teste:', error);
-  }
+  // Aplicar timeout total de 8 segundos
+  await Promise.race([
+    cleanupPromise,
+    new Promise<void>((resolve) => setTimeout(() => resolve(), 8000)),
+  ]);
 }
 

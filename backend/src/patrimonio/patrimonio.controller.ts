@@ -636,6 +636,38 @@ export class PatrimonioController {
     return this.patrimonioService.desativar(id);
   }
 
+  @Patch(':id/localizacao')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: 'Atualizar localização de um patrimônio' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado' })
+  @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN ou MANAGER' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do patrimônio',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  @ApiBody({ type: UpdateLocalizacaoPatrimonioDto })
+  @ApiOkResponse({
+    description: 'Localização do patrimônio atualizada com sucesso',
+    type: PatrimonioResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Patrimônio não encontrado',
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos',
+  })
+  async updateLocalizacao(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateLocalizacaoPatrimonioDto,
+    @Request() req: any,
+  ): Promise<PatrimonioResponseDto> {
+    const userId = req.user?.sub;
+    return this.patrimonioService.updateLocalizacao(id, dto, userId);
+  }
+
   @Get(':id/disponibilidade')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Verificar disponibilidade de um patrimônio' })

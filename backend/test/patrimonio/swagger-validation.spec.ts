@@ -17,13 +17,47 @@ describe('Swagger Documentation Validation', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    // Configurar o prefixo global como no main.ts
+    app.setGlobalPrefix('v1');
     await app.init();
 
-    // Obter documento Swagger
+    // Obter documento Swagger - usar a mesma configuração do main.ts
     const config = new DocumentBuilder()
       .setTitle('Patrimonio & Inventario API')
+      .setDescription(
+        'API RESTful completa para gestão de patrimônio e inventário. ' +
+        'Inclui autenticação JWT, autorização baseada em roles, CRUD completo de usuários e patrimônio, ' +
+        'sistema de auditoria e validação de dados.',
+      )
       .setVersion('1.0.0')
-      .addBearerAuth()
+      .setContact('Equipe de Desenvolvimento', '', 'dev@example.com')
+      .addTag('root', 'Endpoints raiz da API')
+      .addTag('auth', 'Autenticação e autorização')
+      .addTag('users', 'Gerenciamento de usuários')
+      .addTag('patrimonio', 'Gestão de patrimônio')
+      .addTag('categorias', 'Categorias de patrimônio')
+      .addTag('events', 'Eventos relacionados a patrimônio')
+      .addTag('audit', 'Sistema de auditoria')
+      .addTag('maintenance', 'Gestão de manutenção e ordens de serviço')
+      .addTag('reports', 'Geração e gerenciamento de relatórios')
+      .addTag('reports-metrics', 'Métricas e estatísticas de relatórios')
+      .addTag('reports-catalog', 'Catálogo de relatórios e permissões')
+      .addTag('notifications', 'Sistema de notificações e templates')
+      .addTag('integrations-erp', 'Integrações com sistemas ERP')
+      .addTag('inventory-mobile', 'Inventário móvel e campanhas')
+      .addTag('cache', 'Gerenciamento de cache')
+      .addTag('metrics', 'Métricas e monitoramento do sistema')
+      .addTag('enums', 'Enumeradores e constantes do sistema')
+      .addTag('common', 'Utilitários compartilhados')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'Digite o token JWT obtido no endpoint /auth/login',
+        },
+        'bearer',
+      )
       .build();
     swaggerDocument = SwaggerModule.createDocument(app, config);
   });
@@ -55,7 +89,8 @@ describe('Swagger Documentation Validation', () => {
     endpointsFase1.forEach((endpoint) => {
       it(`deve ter documentação para ${endpoint.method.toUpperCase()} ${endpoint.path}`, () => {
         const paths = swaggerDocument.paths || {};
-        const pathKey = endpoint.path.replace('/v1', '');
+        // O Swagger gera paths COM o prefixo /v1 quando createDocument é chamado após setGlobalPrefix
+        const pathKey = endpoint.path;
         const pathDoc = paths[pathKey];
 
         expect(pathDoc).toBeDefined();
@@ -89,7 +124,8 @@ describe('Swagger Documentation Validation', () => {
     endpointsFase2Status.forEach((endpoint) => {
       it(`deve ter documentação para ${endpoint.method.toUpperCase()} ${endpoint.path}`, () => {
         const paths = swaggerDocument.paths || {};
-        const pathKey = endpoint.path.replace('/v1', '');
+        // O Swagger gera paths COM o prefixo /v1
+        const pathKey = endpoint.path;
         const pathDoc = paths[pathKey];
 
         expect(pathDoc).toBeDefined();
@@ -120,7 +156,8 @@ describe('Swagger Documentation Validation', () => {
     endpointsFase2Localizacao.forEach((endpoint) => {
       it(`deve ter documentação para ${endpoint.method.toUpperCase()} ${endpoint.path}`, () => {
         const paths = swaggerDocument.paths || {};
-        const pathKey = endpoint.path.replace('/v1', '');
+        // O Swagger gera paths COM o prefixo /v1
+        const pathKey = endpoint.path;
         const pathDoc = paths[pathKey];
 
         expect(pathDoc).toBeDefined();
@@ -151,7 +188,8 @@ describe('Swagger Documentation Validation', () => {
     endpointsFase2Stats.forEach((endpoint) => {
       it(`deve ter documentação para ${endpoint.method.toUpperCase()} ${endpoint.path}`, () => {
         const paths = swaggerDocument.paths || {};
-        const pathKey = endpoint.path.replace('/v1', '');
+        // O Swagger gera paths COM o prefixo /v1
+        const pathKey = endpoint.path;
         const pathDoc = paths[pathKey];
 
         expect(pathDoc).toBeDefined();
@@ -192,7 +230,8 @@ describe('Swagger Documentation Validation', () => {
     endpointsFase3Buscas.forEach((endpoint) => {
       it(`deve ter documentação para ${endpoint.method.toUpperCase()} ${endpoint.path}`, () => {
         const paths = swaggerDocument.paths || {};
-        const pathKey = endpoint.path.replace('/v1', '');
+        // O Swagger gera paths COM o prefixo /v1
+        const pathKey = endpoint.path;
         const pathDoc = paths[pathKey];
 
         expect(pathDoc).toBeDefined();
@@ -223,7 +262,8 @@ describe('Swagger Documentation Validation', () => {
     endpointsFase3Bulk.forEach((endpoint) => {
       it(`deve ter documentação para ${endpoint.method.toUpperCase()} ${endpoint.path}`, () => {
         const paths = swaggerDocument.paths || {};
-        const pathKey = endpoint.path.replace('/v1', '');
+        // O Swagger gera paths COM o prefixo /v1
+        const pathKey = endpoint.path;
         const pathDoc = paths[pathKey];
 
         expect(pathDoc).toBeDefined();
@@ -254,7 +294,8 @@ describe('Swagger Documentation Validation', () => {
     endpointsFase3Validacoes.forEach((endpoint) => {
       it(`deve ter documentação para ${endpoint.method.toUpperCase()} ${endpoint.path}`, () => {
         const paths = swaggerDocument.paths || {};
-        const pathKey = endpoint.path.replace('/v1', '');
+        // O Swagger gera paths COM o prefixo /v1
+        const pathKey = endpoint.path;
         const pathDoc = paths[pathKey];
 
         expect(pathDoc).toBeDefined();
@@ -290,7 +331,8 @@ describe('Swagger Documentation Validation', () => {
     endpointsFase3Alertas.forEach((endpoint) => {
       it(`deve ter documentação para ${endpoint.method.toUpperCase()} ${endpoint.path}`, () => {
         const paths = swaggerDocument.paths || {};
-        const pathKey = endpoint.path.replace('/v1', '');
+        // O Swagger gera paths COM o prefixo /v1
+        const pathKey = endpoint.path;
         const pathDoc = paths[pathKey];
 
         expect(pathDoc).toBeDefined();
@@ -321,7 +363,8 @@ describe('Swagger Documentation Validation', () => {
     endpointsFase3Historico.forEach((endpoint) => {
       it(`deve ter documentação para ${endpoint.method.toUpperCase()} ${endpoint.path}`, () => {
         const paths = swaggerDocument.paths || {};
-        const pathKey = endpoint.path.replace('/v1', '');
+        // O Swagger gera paths COM o prefixo /v1
+        const pathKey = endpoint.path;
         const pathDoc = paths[pathKey];
 
         expect(pathDoc).toBeDefined();
@@ -352,9 +395,11 @@ describe('Swagger Documentation Validation', () => {
 
     it('deve ter pelo menos 32 endpoints de patrimônio documentados', () => {
       const paths = swaggerDocument.paths || {};
+      // Os paths no Swagger incluem o prefixo /v1
       const patrimonioPaths = Object.keys(paths).filter((path) =>
-        path.startsWith('/patrimonio'),
+        path.includes('/patrimonio'),
       );
+      
       expect(patrimonioPaths.length).toBeGreaterThanOrEqual(32);
     });
   });

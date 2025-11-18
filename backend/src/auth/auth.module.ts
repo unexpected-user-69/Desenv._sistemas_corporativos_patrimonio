@@ -20,7 +20,9 @@ import { UsersHttpClient } from './users-http-client';
       imports: [ConfigModule],
       // @ts-ignore - JWT aceita string como expiresIn em runtime (ex: '15m'), mas TypeScript não reconhece o tipo StringValue
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_ACCESS_SECRET') ?? 'dev_access_secret',
+        // Prioriza process.env diretamente para garantir consistência com JwtStrategy
+        // O ConfigService pode não ter carregado variáveis definidas em runtime (testes)
+        secret: process.env.JWT_ACCESS_SECRET ?? configService.get<string>('JWT_ACCESS_SECRET') ?? 'dev_access_secret',
         signOptions: { 
           expiresIn: configService.get<string>('JWT_ACCESS_EXPIRES_IN') ?? '15m',
         },

@@ -150,8 +150,13 @@ export class ReportQueueService {
    * Retorna opções de job baseadas na prioridade
    */
   private getJobOptions(priority: 'high' | 'medium' | 'low', requestId: string) {
+    // Timeout de 120 segundos (2 minutos) para processamento de PDFs
+    // PDFs podem demorar mais devido ao Puppeteer
+    const jobTimeout = 120000; // 120 segundos em milissegundos
+    
     const baseOptions = {
       jobId: requestId, // Usar requestId como jobId para idempotência
+      timeout: jobTimeout, // Timeout para o job não ficar travado
       removeOnComplete: {
         age: 7 * 24 * 3600, // 7 dias
         count: 1000,

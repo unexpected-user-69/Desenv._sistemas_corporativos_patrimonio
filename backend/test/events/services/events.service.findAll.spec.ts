@@ -19,6 +19,7 @@ describe('EventsService.findAll (unit)', () => {
 
   beforeEach(async () => {
     mockQueryBuilder = {
+      leftJoin: jest.fn().mockReturnThis(),
       leftJoinAndSelect: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),

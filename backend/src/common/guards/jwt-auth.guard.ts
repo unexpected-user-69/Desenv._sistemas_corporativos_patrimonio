@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
@@ -58,5 +58,34 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
     }
     // AuthGuard retorna boolean | Promise<boolean> | Observable<boolean>
     return super.canActivate(context) as boolean | Promise<boolean>;
+  }
+
+  /**
+   * Trata erros de autenticação do Passport.
+   * Converte erros do Passport em UnauthorizedException do NestJS.
+   */
+  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+    // Se houver um erro, lança a exceção
+    if (err) {
+      // Log do erro para debug (apenas em desenvolvimento/testes)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('[JwtAuthGuard] Erro na validação do token:', err.message || err);
+      }
+      throw err;
+    }
+    
+    // Se o usuário não foi encontrado, verifica o motivo
+    if (!user) {
+      // info pode conter informações sobre o erro de validação do token
+      const errorMessage = info?.message || info?.name || 'Invalid or expired token';
+      // Log do erro para debug (apenas em desenvolvimento/testes)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('[JwtAuthGuard] Token inválido:', errorMessage, info);
+        console.error('[JwtAuthGuard] JWT_ACCESS_SECRET atual:', process.env.JWT_ACCESS_SECRET?.substring(0, 10) + '...');
+      }
+      throw new UnauthorizedException(errorMessage);
+    }
+    
+    return user;
   }
 }

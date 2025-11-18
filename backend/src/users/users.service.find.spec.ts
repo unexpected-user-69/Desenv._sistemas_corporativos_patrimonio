@@ -199,9 +199,10 @@ describe('UsersService - Find Methods', () => {
       // Assert
       expect(result.data).toHaveLength(1);
       expect(result.data[0].role).toBe(UserRole.OPERATOR);
+      // Quando não há 'q', o where é um objeto único, não um array
       expect(userRepository.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: [{ role: UserRole.OPERATOR }],
+          where: { role: UserRole.OPERATOR },
         }),
       );
     });
@@ -218,9 +219,10 @@ describe('UsersService - Find Methods', () => {
       // Assert
       expect(result.data).toHaveLength(2);
       expect(result.data.every((user) => user.isActive === true)).toBe(true);
+      // Quando não há 'q', o where é um objeto único, não um array
       expect(userRepository.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: [{ isActive: true }],
+          where: { isActive: true },
         }),
       );
     });

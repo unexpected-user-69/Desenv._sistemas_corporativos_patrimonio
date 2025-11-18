@@ -26,13 +26,36 @@ export class PdfGeneratorService {
     // Gerar PDF usando Puppeteer
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+      ],
+      timeout: 90000, // 90 segundos timeout para iniciar o browser
     });
 
     try {
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      
+      // Configurar timeouts (90 segundos para navegação e operações)
+      page.setDefaultNavigationTimeout(90000);
+      page.setDefaultTimeout(90000);
+      
+      this.logger.log('Carregando HTML na página...');
+      await page.setContent(html, { 
+        waitUntil: 'domcontentloaded', // Mais rápido que networkidle0
+        timeout: 90000,
+      });
 
+      this.logger.log('Gerando PDF...');
       const pdf = await page.pdf({
         format: 'A4',
         printBackground: true,
@@ -42,11 +65,37 @@ export class PdfGeneratorService {
           bottom: '20mm',
           left: '15mm',
         },
+        timeout: 90000, // 90 segundos timeout para gerar PDF
       });
 
+      this.logger.log(`PDF gerado com sucesso: ${pdf.length} bytes`);
       return Buffer.from(pdf);
+    } catch (error: any) {
+      this.logger.error('Erro ao gerar PDF:', error);
+      
+      // Se for erro do Puppeteer, fornecer mensagem mais útil
+      if (error instanceof Error) {
+        if (error.message.includes('Browser closed') || error.message.includes('Target closed')) {
+          throw new Error('Erro ao iniciar o navegador. Verifique se o Puppeteer está instalado corretamente.');
+        }
+        if (error.message.includes('timeout')) {
+          throw new Error('Timeout ao gerar PDF. Tente novamente ou reduza a quantidade de dados.');
+        }
+        if (error.message.includes('Protocol error') || error.message.includes('Navigation failed')) {
+          throw new Error('Erro de comunicação com o navegador. Verifique a instalação do Puppeteer.');
+        }
+      }
+      
+      throw error;
     } finally {
-      await browser.close();
+      if (browser) {
+        try {
+          await browser.close();
+          this.logger.log('Navegador fechado');
+        } catch (closeError) {
+          this.logger.warn('Erro ao fechar navegador:', closeError);
+        }
+      }
     }
   }
 

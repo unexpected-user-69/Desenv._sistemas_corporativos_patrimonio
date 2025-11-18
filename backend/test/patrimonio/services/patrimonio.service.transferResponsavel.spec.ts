@@ -9,16 +9,26 @@ import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
 import { TransferirResponsavelDto } from '../../../src/patrimonio/dto/transferir-responsavel.dto';
 import { UsersService } from '../../../src/users/users.service';
+import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { StorageService } from '../../../src/patrimonio/services/storage.service';
 import { UserResponseDto } from '../../../src/users/dto/user-response.dto';
 
 describe('PatrimonioService.transferResponsavel (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
   let usersService: Partial<UsersService>;
+  let storageService: Partial<StorageService>;
 
   beforeEach(async () => {
     usersService = {
       findOne: jest.fn(),
+    };
+
+    storageService = {
+      saveFile: jest.fn(),
+      deleteFile: jest.fn(),
+      validateFile: jest.fn(),
+      fileExists: jest.fn(),
     };
 
     const module = await Test.createTestingModule({
@@ -26,6 +36,10 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
         PatrimonioService,
         {
           provide: getRepositoryToken(Patrimonio),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
           useFactory: repositoryMockFactory,
         },
         {
@@ -38,6 +52,10 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
             transaction: jest.fn(),
             createQueryRunner: jest.fn(),
           },
+        },
+        {
+          provide: StorageService,
+          useValue: storageService,
         },
       ],
     }).compile();

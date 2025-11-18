@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 
 import { AuthService } from '../../../src/auth/auth.service';
 import { RefreshToken } from '../../../src/auth/entities/refresh-token.entity';
-import { UsersService } from '../../../src/users/users.service';
+import { UsersHttpClient } from '../../../src/auth/users-http-client';
 import { HashService } from '../../../src/common/services/hash.service';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { makeUserEntity } from '../../factories/user.factory';
@@ -14,7 +14,7 @@ import { makeUserEntity } from '../../factories/user.factory';
 describe('AuthService.me (unit)', () => {
   let service: AuthService;
   let refreshRepo: MockType<Repository<RefreshToken>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
   let hashService: Partial<HashService>;
   let jwt: Partial<JwtService>;
 
@@ -24,8 +24,9 @@ describe('AuthService.me (unit)', () => {
       compare: jest.fn(),
       hash: jest.fn(),
     };
-    usersService = {
-      findOne: jest.fn(),
+    usersHttpClient = {
+      getUserById: jest.fn(),
+      validateCredentials: jest.fn(),
     };
     jwt = {};
 
@@ -33,7 +34,7 @@ describe('AuthService.me (unit)', () => {
       providers: [
         AuthService,
         { provide: getRepositoryToken(RefreshToken), useValue: refreshRepo },
-        { provide: UsersService, useValue: usersService },
+        { provide: UsersHttpClient, useValue: usersHttpClient },
         { provide: HashService, useValue: hashService },
         { provide: JwtService, useValue: jwt },
       ],
@@ -44,7 +45,12 @@ describe('AuthService.me (unit)', () => {
 
   it('should return user information for valid userId', async () => {
     const mockUser = makeUserEntity();
-    usersService.findOne = jest.fn().mockResolvedValue(mockUser);
+    usersHttpClient.getUserById = jest.fn().mockResolvedValue({
+      id: mockUser.id,
+      email: mockUser.email,
+      name: mockUser.name,
+      roles: mockUser.role ? [mockUser.role] : [],
+    });
 
     const res = await service.me(mockUser.id as string);
 
@@ -53,13 +59,11 @@ describe('AuthService.me (unit)', () => {
     expect(res).toHaveProperty('name', mockUser.name);
     expect(res).toHaveProperty('roles');
     expect(Array.isArray(res.roles)).toBe(true);
-    expect(usersService.findOne).toHaveBeenCalledWith(mockUser.id);
+    expect(usersHttpClient.getUserById).toHaveBeenCalledWith(mockUser.id);
   });
 
   it('should throw UnauthorizedException if user not found', async () => {
-    usersService.findOne = jest
-      .fn()
-      .mockRejectedValue(new Error('User not found'));
+    usersHttpClient.getUserById = jest.fn().mockResolvedValue(null);
 
     await expect(service.me('non-existent-id')).rejects.toThrow(
       UnauthorizedException,

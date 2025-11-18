@@ -25,7 +25,12 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
       findOne: jest.fn(),
     };
 
-    storageService = {};
+    storageService = {
+      saveFile: jest.fn(),
+      deleteFile: jest.fn(),
+      fileExists: jest.fn(),
+      validateFile: jest.fn(),
+    };
 
     const managerMock = {
       findOne: jest.fn(),

@@ -18,7 +18,7 @@ jest.mock('argon2', () => ({
 
 import { AuthService } from '../../../src/auth/auth.service';
 import { RefreshToken } from '../../../src/auth/entities/refresh-token.entity';
-import { UsersService } from '../../../src/users/users.service';
+import { UsersHttpClient } from '../../../src/auth/users-http-client';
 import { HashService } from '../../../src/common/services/hash.service';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { makeRefreshTokenEntity } from '../../factories/refresh-token.factory';
@@ -27,7 +27,7 @@ import { makeUserEntity } from '../../factories/user.factory';
 describe('AuthService.refresh (unit)', () => {
   let service: AuthService;
   let refreshRepo: MockType<Repository<RefreshToken>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
   let hashService: Partial<HashService>;
   let jwt: Partial<JwtService>;
 
@@ -37,8 +37,9 @@ describe('AuthService.refresh (unit)', () => {
       compare: jest.fn(),
       hash: jest.fn().mockResolvedValue('hashed-token'),
     };
-    usersService = {
-      findOne: jest.fn(),
+    usersHttpClient = {
+      validateCredentials: jest.fn(),
+      getUserById: jest.fn(),
     };
     jwt = {
       sign: jest.fn().mockReturnValue('new-access-token'),
@@ -48,7 +49,7 @@ describe('AuthService.refresh (unit)', () => {
       providers: [
         AuthService,
         { provide: getRepositoryToken(RefreshToken), useValue: refreshRepo },
-        { provide: UsersService, useValue: usersService },
+        { provide: UsersHttpClient, useValue: usersHttpClient },
         { provide: HashService, useValue: hashService },
         { provide: JwtService, useValue: jwt },
       ],
@@ -115,7 +116,11 @@ describe('AuthService.refresh (unit)', () => {
     );
 
     const mockUser = makeUserEntity();
-    usersService.findOne = jest.fn().mockResolvedValue(mockUser);
+    usersHttpClient.getUserById = jest.fn().mockResolvedValue({
+      id: mockUser.id,
+      email: mockUser.email,
+      roles: mockUser.role ? [mockUser.role] : [],
+    });
 
     const res = await service.refresh(
       refreshTokenRaw,
@@ -158,7 +163,7 @@ describe('AuthService.refresh (unit)', () => {
     );
 
     // Mock getUserById to return null (user not found)
-    usersService.findOne = jest.fn().mockRejectedValue(new Error('Not found'));
+    usersHttpClient.getUserById = jest.fn().mockResolvedValue(null);
 
     await expect(service.refresh(refreshTokenRaw)).rejects.toThrow(
       UnauthorizedException,

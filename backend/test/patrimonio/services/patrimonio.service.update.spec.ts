@@ -1,13 +1,16 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
 import { UpdatePatrimonioDto } from '../../../src/patrimonio/dto/update-patrimonio.dto';
+import { UsersService } from '../../../src/users/users.service';
+import { StorageService } from '../../../src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.update (unit)', () => {
   let service: PatrimonioService;
@@ -20,6 +23,32 @@ describe('PatrimonioService.update (unit)', () => {
         {
           provide: getRepositoryToken(Patrimonio),
           useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: UsersService,
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: DataSource,
+          useValue: {
+            transaction: jest.fn(),
+            createQueryRunner: jest.fn(),
+          },
+        },
+        {
+          provide: StorageService,
+          useValue: {
+            saveFile: jest.fn(),
+            deleteFile: jest.fn(),
+      validateFile: jest.fn(),
+            fileExists: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -39,13 +68,17 @@ describe('PatrimonioService.update (unit)', () => {
       nome: 'Updated Name',
     });
 
-    repository.preload.mockResolvedValue(existingPatrimonio as Patrimonio);
+    repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);
+    repository.preload.mockResolvedValue(updatedPatrimonio as Patrimonio);
     repository.save.mockResolvedValue(updatedPatrimonio as Patrimonio);
 
     const result = await service.update(patrimonioId, updateDto);
 
+    expect(repository.findOne).toHaveBeenCalledWith({
+      where: { id: patrimonioId },
+    });
     expect(repository.preload).toHaveBeenCalledWith(
-      expect.objectContaining({ id: patrimonioId }),
+      expect.objectContaining({ id: patrimonioId, nome: 'Updated Name' }),
     );
     expect(repository.save).toHaveBeenCalled();
     expect(result).toMatchObject({
@@ -58,7 +91,7 @@ describe('PatrimonioService.update (unit)', () => {
     const patrimonioId = randomUUID();
     const updateDto: UpdatePatrimonioDto = { nome: 'Updated Name' };
 
-    repository.preload.mockResolvedValue(null);
+    repository.findOne.mockResolvedValue(null);
 
     await expect(service.update(patrimonioId, updateDto)).rejects.toThrow(
       NotFoundException,

@@ -7,7 +7,7 @@ import { PatrimonioDashboardResponseDto } from '../../../src/patrimonio/dto/dash
 describe('PatrimonioController – getDashboard', () => {
   let controller: PatrimonioController;
   const service = { getDashboard: jest.fn() };
-  const pdfExportService = {};
+  const pdfExportService = { generatePdf: jest.fn() };
 
   beforeEach(async () => {
     const mod = await Test.createTestingModule({

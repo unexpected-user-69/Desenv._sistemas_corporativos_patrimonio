@@ -10,7 +10,7 @@ import { UpdateLocalizacaoPatrimonioDto } from '../../../src/patrimonio/dto/upda
 describe('PatrimonioController – updateLocalizacao', () => {
   let controller: PatrimonioController;
   const service = { updateLocalizacao: jest.fn() };
-  const pdfExportService = {};
+  const pdfExportService = { generatePdf: jest.fn() };
 
   beforeEach(async () => {
     const mod = await Test.createTestingModule({

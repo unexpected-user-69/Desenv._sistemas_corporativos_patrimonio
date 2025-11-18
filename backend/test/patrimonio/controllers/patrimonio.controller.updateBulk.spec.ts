@@ -1,16 +1,21 @@
 import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { PatrimonioPdfExportService } from '../../../src/patrimonio/services/patrimonio-pdf-export.service';
 import { UpdateBulkPatrimonioDto } from '../../../src/patrimonio/dto/update-bulk-patrimonio.dto';
 
 describe('PatrimonioController – updateBulk', () => {
   let controller: PatrimonioController;
   const service = { updateBulk: jest.fn() };
+  const pdfExportService = { generatePdf: jest.fn() };
 
   beforeEach(async () => {
     const mod = await Test.createTestingModule({
       controllers: [PatrimonioController],
-      providers: [{ provide: PatrimonioService, useValue: service }],
+      providers: [
+        { provide: PatrimonioService, useValue: service },
+        { provide: PatrimonioPdfExportService, useValue: pdfExportService },
+      ],
     }).compile();
     controller = mod.get(PatrimonioController);
     jest.clearAllMocks();

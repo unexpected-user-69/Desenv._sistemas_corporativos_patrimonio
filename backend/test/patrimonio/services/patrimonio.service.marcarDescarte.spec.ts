@@ -4,20 +4,30 @@ import { Repository, DataSource } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { Patrimonio, PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
 import { DescartePatrimonioDto } from '../../../src/patrimonio/dto/descarte-patrimonio.dto';
 import { UsersService } from '../../../src/users/users.service';
+import { StorageService } from '../../../src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.marcarDescarte (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
   let usersService: Partial<UsersService>;
+  let storageService: Partial<StorageService>;
 
   beforeEach(async () => {
     usersService = {
       findOne: jest.fn(),
+    };
+
+    storageService = {
+      saveFile: jest.fn(),
+      deleteFile: jest.fn(),
+      fileExists: jest.fn(),
+      validateFile: jest.fn(),
     };
 
     const module = await Test.createTestingModule({
@@ -25,6 +35,10 @@ describe('PatrimonioService.marcarDescarte (unit)', () => {
         PatrimonioService,
         {
           provide: getRepositoryToken(Patrimonio),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
           useFactory: repositoryMockFactory,
         },
         {
@@ -37,6 +51,10 @@ describe('PatrimonioService.marcarDescarte (unit)', () => {
             transaction: jest.fn(),
             createQueryRunner: jest.fn(),
           },
+        },
+        {
+          provide: StorageService,
+          useValue: storageService,
         },
       ],
     }).compile();
@@ -58,29 +76,53 @@ describe('PatrimonioService.marcarDescarte (unit)', () => {
       destinoDescarte: 'Leilão público',
     };
 
-    const disposedPatrimonio = {
-      ...existingPatrimonio,
-      status: PatrimonioStatus.DESCARTADO,
-      observacoes: expect.stringContaining('[Descarte'),
-    };
-
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);
-    repository.save.mockResolvedValue(disposedPatrimonio as Patrimonio);
+    // O serviço modifica o objeto diretamente (patrimonio.status e patrimonio.observacoes)
+    // e depois chama save. O mock deve retornar o objeto modificado completo
+    repository.save.mockImplementation((patrimonio: any) => {
+      // Garantir que todos os campos obrigatórios estão presentes
+      // O serviço modifica status e observacoes, então preservamos essas mudanças
+      const saved: Patrimonio = {
+        ...existingPatrimonio,
+        ...patrimonio,
+        // Garantir campos obrigatórios
+        id: patrimonio.id || existingPatrimonio.id || patrimonioId,
+        codigo: patrimonio.codigo || existingPatrimonio.codigo || 'PAT-001',
+        nome: patrimonio.nome || existingPatrimonio.nome || 'Test',
+        status: patrimonio.status || PatrimonioStatus.DESCARTADO,
+        // Observacoes foi modificado pelo serviço
+        observacoes: patrimonio.observacoes,
+        createdAt: patrimonio.createdAt || existingPatrimonio.createdAt || new Date(),
+        updatedAt: patrimonio.updatedAt || new Date(),
+        version: patrimonio.version ?? existingPatrimonio.version ?? 1,
+      } as Patrimonio;
+      return Promise.resolve(saved);
+    });
 
     const result = await service.marcarDescarte(patrimonioId, dto);
 
     expect(repository.findOne).toHaveBeenCalledWith({
       where: { id: patrimonioId },
     });
-    expect(repository.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: PatrimonioStatus.DESCARTADO,
-      }),
-    );
+    expect(repository.save).toHaveBeenCalled();
+    
+    // Verificar que as observações foram atualizadas corretamente
+    const saveCall = repository.save.mock.calls[0][0];
+    expect(saveCall.status).toBe(PatrimonioStatus.DESCARTADO);
+    expect(String(saveCall.observacoes || '')).toContain('[Descarte');
+    expect(String(saveCall.observacoes || '')).toContain('Observações anteriores');
+    expect(String(saveCall.observacoes || '')).toContain('Equipamento obsoleto');
+    expect(String(saveCall.observacoes || '')).toContain('Leilão público');
+    
     expect(result).toMatchObject({
       id: patrimonioId,
       status: PatrimonioStatus.DESCARTADO,
     });
+    expect(result.observacoes).toBeDefined();
+    if (result.observacoes) {
+      expect(result.observacoes).toContain('[Descarte');
+      expect(result.observacoes).toContain('Observações anteriores');
+    }
   });
 
   it('should throw NotFoundException when patrimonio not found', async () => {
@@ -109,17 +151,31 @@ describe('PatrimonioService.marcarDescarte (unit)', () => {
       motivoDescarte: 'Equipamento obsoleto',
     };
 
-    const disposedPatrimonio = {
-      ...existingPatrimonio,
-      status: PatrimonioStatus.DESCARTADO,
-    };
-
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);
-    repository.save.mockResolvedValue(disposedPatrimonio as Patrimonio);
+    repository.save.mockImplementation((patrimonio: any) => {
+      const saved: Patrimonio = {
+        ...existingPatrimonio,
+        ...patrimonio,
+        id: patrimonio.id || existingPatrimonio.id || patrimonioId,
+        codigo: patrimonio.codigo || existingPatrimonio.codigo || 'PAT-001',
+        nome: patrimonio.nome || existingPatrimonio.nome || 'Test',
+        status: patrimonio.status || PatrimonioStatus.DESCARTADO,
+        observacoes: patrimonio.observacoes,
+        createdAt: patrimonio.createdAt || existingPatrimonio.createdAt || new Date(),
+        updatedAt: patrimonio.updatedAt || new Date(),
+        version: patrimonio.version ?? existingPatrimonio.version ?? 1,
+      } as Patrimonio;
+      return Promise.resolve(saved);
+    });
 
     const result = await service.marcarDescarte(patrimonioId, dto);
 
     expect(result.status).toBe(PatrimonioStatus.DESCARTADO);
+    expect(result.observacoes).toBeDefined();
+    if (result.observacoes) {
+      expect(result.observacoes).toContain('[Descarte');
+      expect(result.observacoes).toContain('Equipamento obsoleto');
+    }
   });
 
   it('should preserve existing observacoes when marking for disposal', async () => {
@@ -135,14 +191,27 @@ describe('PatrimonioService.marcarDescarte (unit)', () => {
     };
 
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);
-    repository.save.mockImplementation((patrimonio) => Promise.resolve(patrimonio as Patrimonio));
+    repository.save.mockImplementation((patrimonio: any) => {
+      const saved: Patrimonio = {
+        ...existingPatrimonio,
+        ...patrimonio,
+        id: patrimonio.id || existingPatrimonio.id || patrimonioId,
+        codigo: patrimonio.codigo || existingPatrimonio.codigo || 'PAT-001',
+        nome: patrimonio.nome || existingPatrimonio.nome || 'Test',
+        status: patrimonio.status || PatrimonioStatus.DESCARTADO,
+        observacoes: patrimonio.observacoes,
+        createdAt: patrimonio.createdAt || existingPatrimonio.createdAt || new Date(),
+        updatedAt: patrimonio.updatedAt || new Date(),
+        version: patrimonio.version ?? existingPatrimonio.version ?? 1,
+      } as Patrimonio;
+      return Promise.resolve(saved);
+    });
 
     await service.marcarDescarte(patrimonioId, dto);
 
-    expect(repository.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        observacoes: expect.stringContaining('Observações anteriores importantes'),
-      }),
-    );
+    expect(repository.save).toHaveBeenCalled();
+    const saveCall = repository.save.mock.calls[0][0];
+    expect(saveCall.observacoes).toBeDefined();
+    expect(String(saveCall.observacoes || '')).toContain('Observações anteriores importantes');
   });
 });

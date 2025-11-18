@@ -8,17 +8,27 @@ import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { QueryPatrimonioDto } from '../../../src/patrimonio/dto/query-patrimonio.dto';
 import { UsersService } from '../../../src/users/users.service';
+import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { StorageService } from '../../../src/patrimonio/services/storage.service';
 import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
 
 describe('PatrimonioService.exportToExcel (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
   let usersService: Partial<UsersService>;
+  let storageService: Partial<StorageService>;
   let mockResponse: Partial<Response>;
 
   beforeEach(async () => {
     usersService = {
       findOne: jest.fn(),
+    };
+
+    storageService = {
+      saveFile: jest.fn(),
+      deleteFile: jest.fn(),
+      validateFile: jest.fn(),
+      fileExists: jest.fn(),
     };
 
     mockResponse = {
@@ -34,6 +44,10 @@ describe('PatrimonioService.exportToExcel (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
+          useFactory: repositoryMockFactory,
+        },
+        {
           provide: UsersService,
           useValue: usersService,
         },
@@ -43,6 +57,10 @@ describe('PatrimonioService.exportToExcel (unit)', () => {
             transaction: jest.fn(),
             createQueryRunner: jest.fn(),
           },
+        },
+        {
+          provide: StorageService,
+          useValue: storageService,
         },
       ],
     }).compile();

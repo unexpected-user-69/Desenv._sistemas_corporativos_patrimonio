@@ -33,12 +33,18 @@ describe('EventsController – findOne', () => {
     const idOrSlug = randomUUID();
     const userId = randomUUID();
     const mockEvent = makeEventEntity({ id: idOrSlug });
+    // Criar um mock mais completo do Request que satisfaz o tipo
     const mockReq = {
       user: {
         sub: userId,
         roles: ['student'],
       },
-    };
+      // Adicionar propriedades mínimas necessárias para o tipo Request
+      get: jest.fn(),
+      header: jest.fn(),
+      accepts: jest.fn(),
+      acceptsCharsets: jest.fn(),
+    } as any; // Usar 'as any' para evitar erros de tipo no teste
 
     service.findOneByIdOrSlug.mockResolvedValue(mockEvent);
 

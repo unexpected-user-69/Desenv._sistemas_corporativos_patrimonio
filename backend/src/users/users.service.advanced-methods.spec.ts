@@ -12,6 +12,8 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
   let service: UsersService;
   let userRepository: jest.Mocked<any>;
   let filterService: jest.Mocked<FilterService>;
+  let hashService: jest.Mocked<HashService>;
+  let module: TestingModule;
 
   const mockUser: User = {
     id: 'user-1',
@@ -26,7 +28,14 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
   } as User;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const hashServiceMock = {
+      hash: jest.fn().mockResolvedValue('hashed-password-123'),
+      compare: jest.fn(),
+      generateSalt: jest.fn(),
+      isValidHash: jest.fn(),
+    };
+
+    module = await Test.createTestingModule({
       providers: [
         UsersService,
         {
@@ -43,12 +52,7 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
         },
         {
           provide: HashService,
-          useValue: {
-            hash: jest.fn().mockResolvedValue('hashed-password-123'),
-            compare: jest.fn(),
-            generateSalt: jest.fn(),
-            isValidHash: jest.fn(),
-          },
+          useValue: hashServiceMock,
         },
         {
           provide: NormalizationService,
@@ -76,6 +80,7 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
     service = module.get<UsersService>(UsersService);
     userRepository = module.get(getRepositoryToken(User));
     filterService = module.get(FilterService);
+    hashService = module.get(HashService);
   });
 
   afterEach(() => {
@@ -397,13 +402,28 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
       const result = await service.update(id, updateDto);
 
       // Assert
-      expect(userRepository.preload).toHaveBeenCalledWith({
-        id,
-        ...updateDto,
-        email: updateDto.email?.toLowerCase(),
-      });
+      // O preload recebe id, ...dto, e depois normaliza email e name se existirem
+      expect(userRepository.preload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id,
+          name: updateDto.name,
+          email: updateDto.email?.toLowerCase(),
+        }),
+      );
       expect(userRepository.save).toHaveBeenCalledWith(updatedUser);
-      expect(result).toEqual(updatedUser);
+      // O método update retorna serializeUser(saved), que é um UserResponseDto
+      // UserResponseDto não inclui passwordHash (marcado com @Exclude)
+      expect(result).toMatchObject({
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        isActive: updatedUser.isActive,
+        createdAt: updatedUser.createdAt,
+        updatedAt: updatedUser.updatedAt,
+        version: updatedUser.version,
+      });
+      expect(result).not.toHaveProperty('passwordHash');
     });
 
     it('should hash password when provided', async () => {
@@ -413,7 +433,8 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
         password: 'newpassword123',
       };
 
-      const updatedUser = { ...mockUser, passwordHash: 'hashed-new-password' };
+      const updatedUser = { ...mockUser, passwordHash: 'hashed-password-123' };
+      // O preload recebe o dto com passwordHash já calculado pelo serviço
       userRepository.preload.mockResolvedValue(updatedUser);
       userRepository.save.mockResolvedValue(updatedUser);
 
@@ -421,11 +442,17 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
       await service.update(id, updateDto);
 
       // Assert
-      expect(userRepository.preload).toHaveBeenCalledWith({
-        id,
-        ...updateDto,
-        passwordHash: 'hashed-password-123',
-      });
+      // Verificar que o hash foi chamado para gerar o passwordHash
+      expect(hashService.hash).toHaveBeenCalledWith('newpassword123');
+      // Verificar que preload foi chamado com id e passwordHash calculado
+      // O preload recebe ...dto (que inclui password) e depois adiciona passwordHash
+      expect(userRepository.preload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id,
+          password: 'newpassword123',
+          passwordHash: 'hashed-password-123',
+        }),
+      );
     });
 
     it('should throw NotFoundException when user not found', async () => {
@@ -433,6 +460,7 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
       const id = 'non-existent';
       const updateDto = { name: 'Updated Name' };
 
+      // O método update primeiro chama preload, e se retornar null, lança NotFoundException
       userRepository.preload.mockResolvedValue(null);
 
       // Act & Assert
@@ -453,8 +481,10 @@ describe('UsersService - Advanced Methods (Trabalho Integrado)', () => {
       await service.remove(id);
 
       // Assert
+      // O método remove chama findOne(id) que inclui withDeleted: false
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id },
+        withDeleted: false,
       });
       expect(userRepository.softDelete).toHaveBeenCalledWith(id);
     });

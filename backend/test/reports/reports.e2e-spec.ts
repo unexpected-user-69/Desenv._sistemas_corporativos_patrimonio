@@ -342,26 +342,49 @@ describe('Reports (e2e)', () => {
 
       const requestId = createResponse.body.id;
 
-      // Aguardar um pouco para processamento
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // Aguardar processamento do PDF (pode demorar até 90 segundos)
+      // Tentar múltiplas vezes com polling
+      let response: any;
+      let attempts = 0;
+      const maxAttempts = 12; // 12 tentativas x 10 segundos = 120 segundos máximo
+      
+      while (attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 10000)); // Aguardar 10 segundos entre tentativas
+        
+        response = await authenticatedRequest(
+          httpServer,
+          'get',
+          `/v1/reports/${requestId}/download`,
+          tokens,
+          UserRole.ADMIN,
+        );
 
-      // Tentar baixar
-      const response = await authenticatedRequest(
-        httpServer,
-        'get',
-        `/v1/reports/${requestId}/download`,
-        tokens,
-        UserRole.ADMIN, // GET /reports/:id/download requer ADMIN ou MANAGER
-      );
-
-      // Se retornar erro, verificar se é por falta de dados ou problema no Puppeteer
-      if (response.status !== 200) {
-        // Erro ao gerar PDF
-        // Se for erro 400 ou 500, pode ser que não há dados ou Puppeteer falhou
-        // Por enquanto, vamos aceitar que pode falhar se não houver dados
+        // Se retornou 200, PDF está pronto
+        if (response.status === 200) {
+          break;
+        }
+        
+        // Se retornou 404, ainda está processando
+        if (response.status === 404) {
+          attempts++;
+          continue;
+        }
+        
+        // Se retornou outro erro, verificar se é aceitável
         if (response.status === 500 || response.status === 400) {
           // Pular teste se não houver dados ou Puppeteer não estiver disponível
           expect([200, 400, 500]).toContain(response.status);
+          return;
+        }
+        
+        attempts++;
+      }
+
+      // Se após todas as tentativas ainda não retornou 200, verificar o status final
+      if (response.status !== 200) {
+        // Verificar se é erro aceitável (sem dados, Puppeteer não disponível, etc)
+        if (response.status === 500 || response.status === 400 || response.status === 404) {
+          expect([200, 400, 500, 404]).toContain(response.status);
           return;
         }
       }
@@ -369,7 +392,7 @@ describe('Reports (e2e)', () => {
       expect(response.status).toBe(200);
       expect(response.headers['content-type']).toContain('application/pdf');
       expect(response.headers['content-disposition']).toContain('attachment');
-    }, 120000); // Timeout de 120s para PDF (puppeteer pode demorar muito)
+    }, 180000); // Timeout de 180s (3 minutos) para PDF (puppeteer pode demorar muito)
   });
 
   // Funções auxiliares

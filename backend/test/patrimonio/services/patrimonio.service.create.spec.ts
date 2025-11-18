@@ -1,11 +1,14 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { ConflictException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
 import { makeCreatePatrimonioDto, makePatrimonioEntity } from '../../factories/patrimonio.factory';
+import { UsersService } from '../../../src/users/users.service';
+import { StorageService } from '../../../src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.create (unit)', () => {
   let service: PatrimonioService;
@@ -18,6 +21,32 @@ describe('PatrimonioService.create (unit)', () => {
         {
           provide: getRepositoryToken(Patrimonio),
           useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: UsersService,
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: DataSource,
+          useValue: {
+            transaction: jest.fn(),
+            createQueryRunner: jest.fn(),
+          },
+        },
+        {
+          provide: StorageService,
+          useValue: {
+            saveFile: jest.fn(),
+            deleteFile: jest.fn(),
+      validateFile: jest.fn(),
+            fileExists: jest.fn(),
+          },
         },
       ],
     }).compile();

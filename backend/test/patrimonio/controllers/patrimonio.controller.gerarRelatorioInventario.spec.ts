@@ -2,12 +2,14 @@ import { Test } from '@nestjs/testing';
 import { Response } from 'express';
 import { PatrimonioController } from '../../../src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { PatrimonioPdfExportService } from '../../../src/patrimonio/services/patrimonio-pdf-export.service';
 import { QueryPatrimonioDto } from '../../../src/patrimonio/dto/query-patrimonio.dto';
 import { InventarioRelatorioDto } from '../../../src/patrimonio/dto/inventario-relatorio.dto';
 
 describe('PatrimonioController – gerarRelatorioInventario', () => {
   let controller: PatrimonioController;
   const service = { gerarRelatorioInventario: jest.fn() };
+  const pdfExportService = { generatePdf: jest.fn() };
   let mockResponse: Partial<Response>;
 
   beforeEach(async () => {
@@ -18,7 +20,8 @@ describe('PatrimonioController – gerarRelatorioInventario', () => {
 
     const mod = await Test.createTestingModule({
       controllers: [PatrimonioController],
-      providers: [{ provide: PatrimonioService, useValue: service }],
+      providers: [{ provide: PatrimonioService, useValue: service },
+        { provide: PatrimonioPdfExportService, useValue: pdfExportService }],
     }).compile();
     controller = mod.get(PatrimonioController);
     jest.clearAllMocks();

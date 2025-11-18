@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PatrimonioController } from '../../../src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { PatrimonioPdfExportService } from '../../../src/patrimonio/services/patrimonio-pdf-export.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
 import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
@@ -9,11 +10,13 @@ import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.en
 describe('PatrimonioController – desativar', () => {
   let controller: PatrimonioController;
   const service = { desativar: jest.fn() };
+  const pdfExportService = { generatePdf: jest.fn() };
 
   beforeEach(async () => {
     const mod = await Test.createTestingModule({
       controllers: [PatrimonioController],
-      providers: [{ provide: PatrimonioService, useValue: service }],
+      providers: [{ provide: PatrimonioService, useValue: service },
+        { provide: PatrimonioPdfExportService, useValue: pdfExportService }],
     }).compile();
     controller = mod.get(PatrimonioController);
     jest.clearAllMocks();

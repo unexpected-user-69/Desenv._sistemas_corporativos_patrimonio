@@ -10,7 +10,7 @@ import { randomUUID } from 'crypto';
 describe('PatrimonioController – update', () => {
   let controller: PatrimonioController;
   const service = { update: jest.fn() };
-  const pdfExportService = {};
+  const pdfExportService = { generatePdf: jest.fn() };
 
   beforeEach(async () => {
     const mod = await Test.createTestingModule({

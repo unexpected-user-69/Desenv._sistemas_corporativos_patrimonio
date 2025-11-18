@@ -11,7 +11,7 @@ import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.en
 describe('PatrimonioController – descartar', () => {
   let controller: PatrimonioController;
   const service = { marcarDescarte: jest.fn() };
-  const pdfExportService = {};
+  const pdfExportService = { generatePdf: jest.fn() };;
 
   beforeEach(async () => {
     const mod = await Test.createTestingModule({

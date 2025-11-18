@@ -207,43 +207,14 @@ export class AuthController {
     description: 'Token inválido ou não fornecido' 
   })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  async me(@Headers('authorization') authz?: string) {
-    if (!authz?.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing bearer token');
-    }
-    const token = authz.slice('Bearer '.length);
-
-    // Verifica assinatura e extrai payload (sub = userId)
-    let payload: unknown;
-    try {
-      payload = this.jwt.verify(token, {
-        secret: process.env.JWT_ACCESS_SECRET ?? 'dev_access_secret',
-      });
-    } catch {
-      throw new UnauthorizedException('Invalid token');
+  async me(@Req() req: Request & { user?: { sub: string; email: string; roles: string[] } }) {
+    // O JwtAuthGuard já validou o token e injetou o usuário em request.user
+    // através do JwtStrategy.validate()
+    if (!req.user || !req.user.sub) {
+      throw new UnauthorizedException('User not authenticated');
     }
 
-    // payload deve ser um objeto com `sub` (string UUID)
-    if (
-      typeof payload !== 'object' ||
-      payload === null ||
-      !('sub' in payload)
-    ) {
-      throw new UnauthorizedException('Invalid token payload');
-    }
-
-    const sub = (payload as { sub?: unknown }).sub;
-    if (typeof sub !== 'string') {
-      throw new UnauthorizedException('Invalid token payload');
-    }
-
-    // Valida UUID básico
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(sub)) {
-      throw new UnauthorizedException('Invalid token payload');
-    }
-
-    return this.auth.me(sub);
+    return this.auth.me(req.user.sub);
   }
 }
 

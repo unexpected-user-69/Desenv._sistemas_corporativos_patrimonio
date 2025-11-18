@@ -4,9 +4,11 @@ import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { UsersService } from '../../../src/users/users.service';
+import { StorageService } from '../../../src/patrimonio/services/storage.service';
 import { TransferirResponsavelBulkDto } from '../../../src/patrimonio/dto/transferir-responsavel-bulk.dto';
 import { randomUUID } from 'crypto';
 
@@ -14,12 +16,20 @@ describe('PatrimonioService.transferResponsavelBulk (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
   let usersService: Partial<UsersService>;
+  let storageService: Partial<StorageService>;
   let dataSource: DataSource;
   let queryRunner: Partial<QueryRunner>;
 
   beforeEach(async () => {
     usersService = {
       findOne: jest.fn(),
+    };
+
+    storageService = {
+      saveFile: jest.fn(),
+      deleteFile: jest.fn(),
+      fileExists: jest.fn(),
+      validateFile: jest.fn(),
     };
 
     queryRunner = {
@@ -45,12 +55,20 @@ describe('PatrimonioService.transferResponsavelBulk (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
+          useFactory: repositoryMockFactory,
+        },
+        {
           provide: UsersService,
           useValue: usersService,
         },
         {
           provide: DataSource,
           useValue: mockDataSource,
+        },
+        {
+          provide: StorageService,
+          useValue: storageService,
         },
       ],
     }).compile();

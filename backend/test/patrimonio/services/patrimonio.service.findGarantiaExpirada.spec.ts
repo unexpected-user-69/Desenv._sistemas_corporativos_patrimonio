@@ -6,15 +6,25 @@ import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { UsersService } from '../../../src/users/users.service';
+import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { StorageService } from '../../../src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.findGarantiaExpirada (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
   let usersService: Partial<UsersService>;
+  let storageService: Partial<StorageService>;
 
   beforeEach(async () => {
     usersService = {
       findOne: jest.fn(),
+    };
+
+    storageService = {
+      saveFile: jest.fn(),
+      deleteFile: jest.fn(),
+      validateFile: jest.fn(),
+      fileExists: jest.fn(),
     };
 
     const module = await Test.createTestingModule({
@@ -22,6 +32,10 @@ describe('PatrimonioService.findGarantiaExpirada (unit)', () => {
         PatrimonioService,
         {
           provide: getRepositoryToken(Patrimonio),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
           useFactory: repositoryMockFactory,
         },
         {
@@ -34,6 +48,10 @@ describe('PatrimonioService.findGarantiaExpirada (unit)', () => {
             transaction: jest.fn(),
             createQueryRunner: jest.fn(),
           },
+        },
+        {
+          provide: StorageService,
+          useValue: storageService,
         },
       ],
     }).compile();

@@ -2,11 +2,13 @@ import { Test } from '@nestjs/testing';
 import { Response } from 'express';
 import { PatrimonioController } from '../../../src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { PatrimonioPdfExportService } from '../../../src/patrimonio/services/patrimonio-pdf-export.service';
 import { QueryPatrimonioDto } from '../../../src/patrimonio/dto/query-patrimonio.dto';
 
 describe('PatrimonioController – exportToExcel', () => {
   let controller: PatrimonioController;
   const service = { exportToExcel: jest.fn() };
+  const pdfExportService = { generatePdf: jest.fn() };
   let mockResponse: Partial<Response>;
 
   beforeEach(async () => {
@@ -17,7 +19,8 @@ describe('PatrimonioController – exportToExcel', () => {
 
     const mod = await Test.createTestingModule({
       controllers: [PatrimonioController],
-      providers: [{ provide: PatrimonioService, useValue: service }],
+      providers: [{ provide: PatrimonioService, useValue: service },
+        { provide: PatrimonioPdfExportService, useValue: pdfExportService }],
     }).compile();
     controller = mod.get(PatrimonioController);
     jest.clearAllMocks();

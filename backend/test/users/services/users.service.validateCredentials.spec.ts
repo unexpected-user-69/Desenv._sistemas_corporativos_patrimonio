@@ -63,7 +63,10 @@ describe('UsersService.validateCredentials (unit)', () => {
 
     expect(normalizationService.normalizeEmail).toHaveBeenCalledWith(email);
     expect(repository.findOne).toHaveBeenCalledWith({
-      where: { email: email.toLowerCase() },
+      where: expect.objectContaining({
+        email: email.toLowerCase(),
+        deletedAt: expect.anything(), // IsNull() operator
+      }),
       select: expect.arrayContaining([
         'id',
         'email',

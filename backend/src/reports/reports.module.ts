@@ -40,6 +40,7 @@ import { User } from '../users/entities/user.entity';
       name: 'report-queue',
       defaultJobOptions: {
         attempts: 3,
+        timeout: 120000, // 120 segundos (2 minutos) timeout padrão para jobs
         backoff: {
           type: 'exponential',
           delay: 5000,

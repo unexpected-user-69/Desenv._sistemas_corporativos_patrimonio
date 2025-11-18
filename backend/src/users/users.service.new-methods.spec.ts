@@ -9,10 +9,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { HashService } from '../common/services/hash.service';
 import { NormalizationService } from '../common/services/normalization.service';
 import { createRepositoryMock } from '../../test/mocks/repository.mock';
+import { FilterService } from '../common/services/filter.service';
 
 describe('UsersService - New Methods', () => {
   let service: UsersService;
-  let userRepository: jest.Mocked<Repository<User>>;
+  let userRepository: any; // Usar 'any' para evitar problemas de tipo com o mock
   let hashService: jest.Mocked<HashService>;
   let normalizationService: jest.Mocked<NormalizationService>;
 
@@ -70,7 +71,7 @@ describe('UsersService - New Methods', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    userRepository = module.get(getRepositoryToken(User));
+    userRepository = module.get(getRepositoryToken(User)) as any;
     hashService = module.get(HashService);
     normalizationService = module.get(NormalizationService);
   });

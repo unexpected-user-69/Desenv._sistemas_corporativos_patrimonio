@@ -1,4 +1,8 @@
+// IMPORTANTE: Definir variáveis de ambiente ANTES de qualquer importação
+// Isso garante que o ConfigService e JwtModule usem os valores corretos desde o início
 process.env.NODE_ENV = 'test';
+process.env.JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'test-jwt-access-secret-for-e2e-tests';
+process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test-jwt-refresh-secret-for-e2e-tests';
 // Desabilitar rate limiting para testes
 process.env.THROTTLE_TTL = '1';
 process.env.THROTTLE_LIMIT = '1000';
@@ -44,6 +48,12 @@ describe('Auth (e2e)', () => {
   let testUserPassword: string;
 
   beforeAll(async () => {
+    // Garantir que as variáveis de ambiente estejam definidas (já definidas no topo do arquivo)
+    // Mas garantir que USERS_API_URL esteja definido
+    if (!process.env.USERS_API_URL) {
+      process.env.USERS_API_URL = 'http://localhost:3101/v1';
+    }
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -55,6 +65,13 @@ describe('Auth (e2e)', () => {
     httpServer = app.getHttpServer() as http.Server;
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
+
+    // Atualizar USERS_API_URL com a porta real do servidor (se disponível)
+    const address = httpServer.address();
+    if (address && typeof address === 'object') {
+      const port = address.port;
+      process.env.USERS_API_URL = `http://localhost:${port}/v1`;
+    }
 
     // Criar tabelas se não existirem
     await setupDatabaseTables(dataSource);
@@ -220,14 +237,31 @@ describe('Auth (e2e)', () => {
 
   describe('GET /v1/auth/me', () => {
     it('deve retornar informações do usuário autenticado (200)', async () => {
-      // Usar o token do setupTestUsers
-      const response = await authenticatedRequest(
-        httpServer,
-        'get',
-        '/v1/auth/me',
-        tokens,
-        UserRole.ADMIN,
-      ).expect(200);
+      // Primeiro, fazer um novo login para garantir que temos um token válido
+      const loginResponse = await request(httpServer)
+        .post('/v1/auth/login')
+        .send({
+          email: testUserEmail,
+          password: testUserPassword,
+        })
+        .expect((res) => {
+          if (res.status !== 200 && res.status !== 201) {
+            throw new Error(`Expected 200 or 201, got ${res.status}. Body: ${JSON.stringify(res.body)}`);
+          }
+        });
+
+      const accessToken = loginResponse.body.accessToken;
+      
+      // Verificar se o token foi retornado
+      if (!accessToken) {
+        throw new Error('Access token não foi retornado no login');
+      }
+
+      // Usar o token do login para acessar /v1/auth/me
+      const response = await request(httpServer)
+        .get('/v1/auth/me')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200);
 
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('email', testUserEmail);

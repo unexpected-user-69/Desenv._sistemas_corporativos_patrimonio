@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 
 import { AuthService } from '../../../src/auth/auth.service';
 import { RefreshToken } from '../../../src/auth/entities/refresh-token.entity';
-import { UsersService } from '../../../src/users/users.service';
+import { UsersHttpClient } from '../../../src/auth/users-http-client';
 import { HashService } from '../../../src/common/services/hash.service';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { makeUserEntity } from '../../factories/user.factory';
@@ -14,7 +14,7 @@ import { makeUserEntity } from '../../factories/user.factory';
 describe('AuthService.login (unit)', () => {
   let service: AuthService;
   let refreshRepo: MockType<Repository<RefreshToken>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
   let hashService: Partial<HashService>;
   let jwt: Partial<JwtService>;
 
@@ -27,13 +27,18 @@ describe('AuthService.login (unit)', () => {
       hash: jest.fn().mockResolvedValue('hashed-password'),
     };
 
-    // Mock UsersService
+    // Mock UsersHttpClient
     const mockUser = makeUserEntity({
       email: 'test@example.com',
       isActive: true,
     });
-    usersService = {
-      validateCredentials: jest.fn().mockResolvedValue(mockUser),
+    usersHttpClient = {
+      validateCredentials: jest.fn().mockResolvedValue({
+        id: mockUser.id,
+        email: mockUser.email,
+        roles: mockUser.role ? [mockUser.role] : [],
+      }),
+      getUserById: jest.fn(),
     };
 
     // Mock JwtService
@@ -45,7 +50,7 @@ describe('AuthService.login (unit)', () => {
       providers: [
         AuthService,
         { provide: getRepositoryToken(RefreshToken), useValue: refreshRepo },
-        { provide: UsersService, useValue: usersService },
+        { provide: UsersHttpClient, useValue: usersHttpClient },
         { provide: HashService, useValue: hashService },
         { provide: JwtService, useValue: jwt },
       ],
@@ -78,7 +83,7 @@ describe('AuthService.login (unit)', () => {
     expect(res.user).toHaveProperty('id');
     expect(res.user).toHaveProperty('name');
 
-    expect(usersService.validateCredentials).toHaveBeenCalledWith(
+    expect(usersHttpClient.validateCredentials).toHaveBeenCalledWith(
       'test@example.com',
       'StrongP@ssw0rd!',
     );
@@ -88,13 +93,13 @@ describe('AuthService.login (unit)', () => {
   });
 
   it('should throw UnauthorizedException for invalid credentials', async () => {
-    usersService.validateCredentials = jest.fn().mockResolvedValue(null);
+    usersHttpClient.validateCredentials = jest.fn().mockResolvedValue(null);
 
     await expect(
       service.login('invalid@example.com', 'wrong-password'),
     ).rejects.toThrow(UnauthorizedException);
 
-    expect(usersService.validateCredentials).toHaveBeenCalledWith(
+    expect(usersHttpClient.validateCredentials).toHaveBeenCalledWith(
       'invalid@example.com',
       'wrong-password',
     );

@@ -29,9 +29,10 @@ export type AccessTokenPayload = AuthUser & {
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
     // Resolve secret usando ConfigService (agora disponível globalmente)
-    // Fallback para process.env em caso de testes ou configuração manual
+    // Prioriza process.env diretamente para garantir consistência com JwtModule
+    // O ConfigService pode não ter carregado variáveis definidas em runtime (testes)
     const resolvedSecret =
-      configService.get<string>('JWT_ACCESS_SECRET') ?? process.env.JWT_ACCESS_SECRET;
+      process.env.JWT_ACCESS_SECRET ?? configService.get<string>('JWT_ACCESS_SECRET');
 
     if (!resolvedSecret) {
       if (process.env.NODE_ENV === 'production') {

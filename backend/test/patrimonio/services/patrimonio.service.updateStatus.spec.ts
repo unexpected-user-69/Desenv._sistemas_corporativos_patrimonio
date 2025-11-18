@@ -4,20 +4,30 @@ import { Repository, DataSource } from 'typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { Patrimonio, PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
 import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
 import { UpdateStatusPatrimonioDto } from '../../../src/patrimonio/dto/update-status-patrimonio.dto';
 import { UsersService } from '../../../src/users/users.service';
+import { StorageService } from '../../../src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.updateStatus (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
   let usersService: Partial<UsersService>;
+  let storageService: Partial<StorageService>;
 
   beforeEach(async () => {
     usersService = {
       findOne: jest.fn(),
+    };
+
+    storageService = {
+      saveFile: jest.fn(),
+      deleteFile: jest.fn(),
+      validateFile: jest.fn(),
+      fileExists: jest.fn(),
     };
 
     const module = await Test.createTestingModule({
@@ -25,6 +35,10 @@ describe('PatrimonioService.updateStatus (unit)', () => {
         PatrimonioService,
         {
           provide: getRepositoryToken(Patrimonio),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
           useFactory: repositoryMockFactory,
         },
         {
@@ -37,6 +51,10 @@ describe('PatrimonioService.updateStatus (unit)', () => {
             transaction: jest.fn(),
             createQueryRunner: jest.fn(),
           },
+        },
+        {
+          provide: StorageService,
+          useValue: storageService,
         },
       ],
     }).compile();

@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { ReportsList } from '../../components/reports/ReportsList';
 import { ReportForm } from '../../components/reports/ReportForm';
+import { ReportTemplates } from '../../components/reports/ReportTemplates';
+import { ReportsDashboard } from '../../components/reports/ReportsDashboard';
 import { useReportsStore } from '../../stores/reportsStore';
 import {
   Report,
@@ -198,154 +200,51 @@ export const ReportsPage: React.FC = () => {
         )}
 
         {activeTab === 'dashboard' && (
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-blue-100 rounded-lg">
-                    <FileText className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">
-                      Total de Relatórios
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {pagination.total}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-green-100 rounded-lg">
-                    <CheckCircle className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">
-                      Concluídos
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {
-                        reports.filter(
-                          (r) => r.status === ReportStatus.COMPLETED,
-                        ).length
-                      }
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-purple-100 rounded-lg">
-                    <Calendar className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">
-                      Agendados
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {reports.filter((r) => r.config.isScheduled).length}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-orange-100 rounded-lg">
-                    <Download className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">
-                      Em Processamento
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {
-                        reports.filter(
-                          (r) => r.status === ReportStatus.GENERATING,
-                        ).length
-                      }
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Reports */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Relatórios Recentes
-                </h3>
-              </div>
-              <div className="divide-y divide-gray-200">
-                {reports.slice(0, 5).map((report) => (
-                  <div key={report.id} className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <FileText className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-900">
-                            {report.config.name}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            {report.config.description}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() =>
-                            void handleGenerateReport(report, ReportFormat.PDF)
-                          }
-                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
-                          title="Gerar PDF"
-                        >
-                          <Download className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => {}}
-                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
-                          title="Visualizar"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <ReportsDashboard reports={reports} total={pagination.total} />
         )}
 
         {activeTab === 'templates' && (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Templates de Relatórios
-            </h3>
-            <p className="text-gray-600">
-              A funcionalidade de templates será implementada em breve.
-            </p>
-          </div>
+          <ReportTemplates
+            onUseTemplate={(template) => {
+              // Criar relatório a partir do template
+              const config: ReportConfig = {
+                ...template.config,
+                name: template.name,
+                description: template.description,
+              };
+              setShowCreateModal(true);
+              // TODO: Preencher o formulário com os dados do template
+            }}
+            onCreateFromTemplate={(template) => {
+              // Criar relatório usando o template
+              void createReport({
+                ...template.config,
+                name: `${template.name} (Novo)`,
+                description: template.description,
+              });
+              setActiveTab('list');
+              void fetchReports();
+            }}
+          />
         )}
 
         {/* Modals */}
         {showCreateModal && (
           <ReportForm
-            onSave={() => {
-              // Implementar salvamento
-              console.log('Salvando novo relatório');
-            }}
-            onCancel={() => {
+            isOpen={showCreateModal}
+            onClose={() => {
               setShowCreateModal(false);
               setFormError(null);
+            }}
+            onSubmit={async (config: ReportConfig) => {
+              try {
+                setFormError(null);
+                await createReport(config);
+                setShowCreateModal(false);
+                await fetchReports();
+              } catch (err: any) {
+                setFormError(err.message || 'Erro ao criar relatório');
+              }
             }}
             isLoading={isLoading}
             error={formError}
@@ -355,13 +254,21 @@ export const ReportsPage: React.FC = () => {
         {editingReport && (
           <ReportForm
             report={editingReport}
-            onSave={() => {
-              // Implementar salvamento
-              console.log('Salvando relatório editado');
-            }}
-            onCancel={() => {
+            isOpen={!!editingReport}
+            onClose={() => {
               setEditingReport(null);
               setFormError(null);
+            }}
+            onSubmit={async (config: ReportConfig) => {
+              try {
+                setFormError(null);
+                // TODO: Implementar updateReport quando disponível no store
+                console.log('Atualizando relatório:', config);
+                setEditingReport(null);
+                await fetchReports();
+              } catch (err: any) {
+                setFormError(err.message || 'Erro ao atualizar relatório');
+              }
             }}
             isLoading={isLoading}
             error={formError}

@@ -9,7 +9,7 @@ import {
   Index,
 } from 'typeorm';
 import { Categoria } from '../../categorias/entities/categoria.entity';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../shared/entities/user.entity';
 
 export enum Periodicidade {
   DIARIA = 'diaria',

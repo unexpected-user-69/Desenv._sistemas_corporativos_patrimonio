@@ -8,7 +8,7 @@ import {
   Index,
 } from 'typeorm';
 import { Patrimonio } from './patrimonio.entity';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../shared/entities/user.entity';
 
 @Entity({ name: 'patrimonio_localizacao_historico' })
 @Index('idx_patrimonio_localizacao_historico_patrimonio_id', ['patrimonioId'])

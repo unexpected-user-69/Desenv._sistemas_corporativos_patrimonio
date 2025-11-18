@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EventsService } from '../events/events.service';
+import { EventsHttpClient } from '../http-clients/events-http-client';
 import { Campaign, CampaignStatus } from './entities/campaign.entity';
 import { Assignment, AssignmentStatus } from './entities/assignment.entity';
 import { Reconciliation, ReconciliationStatus } from './entities/reconciliation.entity';
-import { EventType } from '../events/enums/event-type.enum';
+import { EventType } from '../shared/enums/event-type.enum';
 
 @Injectable()
 export class NotificationsService {
@@ -18,7 +18,7 @@ export class NotificationsService {
     private readonly assignmentRepository: Repository<Assignment>,
     @InjectRepository(Reconciliation)
     private readonly reconciliationRepository: Repository<Reconciliation>,
-    private readonly eventsService: EventsService,
+    private readonly eventsHttpClient: EventsHttpClient,
   ) {}
 
   /**
@@ -35,7 +35,7 @@ export class NotificationsService {
       }
 
       // Criar evento de inventário
-      await this.eventsService.create(
+      await this.eventsHttpClient.create(
         {
           title: `Nova Campanha de Inventário: ${campaign.nome}`,
           description: `Campanha de inventário criada em ${campaign.local}`,
@@ -75,7 +75,7 @@ export class NotificationsService {
         newStatus === CampaignStatus.COMPLETED ||
         newStatus === CampaignStatus.CANCELED
       ) {
-        await this.eventsService.create(
+        await this.eventsHttpClient.create(
           {
             title: `Campanha ${campaign.nome}: ${newStatus}`,
             description: `Status da campanha alterado de ${oldStatus} para ${newStatus}`,
@@ -121,7 +121,7 @@ export class NotificationsService {
         });
 
         if (campaign) {
-          await this.eventsService.create(
+          await this.eventsHttpClient.create(
             {
               title: `Reconciliação concluída: ${divergenceCount} divergências encontradas`,
               description: `A reconciliação da campanha ${campaign.nome} encontrou ${divergenceCount} divergências que requerem atenção.`,
@@ -162,7 +162,7 @@ export class NotificationsService {
       });
 
       if (campaign) {
-        await this.eventsService.create(
+        await this.eventsHttpClient.create(
           {
             title: `Assignment completado na campanha ${campaign.nome}`,
             description: `O coletor ${assignment.coletorId} completou seu assignment.`,

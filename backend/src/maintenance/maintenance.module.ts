@@ -16,14 +16,14 @@ import { MaintenancePlan } from './entities/maintenance-plan.entity';
 import { Part } from './entities/part.entity';
 import { PatrimonioModule } from '../patrimonio/patrimonio.module';
 import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
-import { EventsModule } from '../events/events.module';
+import { HttpClientsModule } from '../http-clients/http-clients.module';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     TypeOrmModule.forFeature([WorkOrder, WorkLog, MaintenancePlan, Part, Patrimonio]),
     forwardRef(() => PatrimonioModule),
-    EventsModule,
+    HttpClientsModule,
   ],
   controllers: [MaintenanceController],
   providers: [

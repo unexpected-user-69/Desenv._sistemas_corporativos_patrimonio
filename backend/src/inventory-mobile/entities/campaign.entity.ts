@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../shared/entities/user.entity';
 import { Assignment } from './assignment.entity';
 import { Reconciliation } from './reconciliation.entity';
 

@@ -7,10 +7,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { RefreshToken } from './entities/refresh-token.entity';
-import { UsersModule } from '../users/users.module';
 import { CommonModule } from '../common/common.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersHttpClient } from './users-http-client';
+import { HttpClientsModule } from '../http-clients/http-clients.module';
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { UsersHttpClient } from './users-http-client';
       inject: [ConfigService],
     }),
     HttpModule,
-    UsersModule,
+    HttpClientsModule,
     CommonModule,
   ],
   controllers: [AuthController],

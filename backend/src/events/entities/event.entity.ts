@@ -12,7 +12,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../shared/entities/user.entity';
 import { Patrimonio } from '../../patrimonio/entities/patrimonio.entity';
 import { EventType } from '../enums/event-type.enum';
 import { EventVisibility } from '../enums/event-visibility.enum';

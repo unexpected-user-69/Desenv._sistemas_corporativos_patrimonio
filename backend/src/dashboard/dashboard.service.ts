@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UsersService } from '../users/users.service';
+import { UsersHttpClient } from '../http-clients/users-http-client';
 import { PatrimonioService } from '../patrimonio/patrimonio.service';
-import { User } from '../users/entities/user.entity';
+import { User } from '../shared/entities/user.entity';
 import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class DashboardService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Patrimonio)
     private readonly patrimonioRepository: Repository<Patrimonio>,
-    private readonly usersService: UsersService,
+    private readonly usersHttpClient: UsersHttpClient,
     private readonly patrimonioService: PatrimonioService,
   ) {}
 
@@ -25,9 +25,9 @@ export class DashboardService {
   async getDashboardStats() {
     try {
       // Obter estatísticas de usuários
-      const userStats = await this.usersService.getUserStatsByRole();
+      const userStats = await this.usersHttpClient.getUserStatsByRole();
       const totalUsers = Object.values(userStats).reduce((a, b) => a + b, 0);
-      const activeUsers = await this.usersService.findRecentActiveUsers(30, 1000);
+      const activeUsers = await this.usersHttpClient.findRecentActiveUsers(30, 1000);
       const activeUsersCount = activeUsers.length;
 
       // Obter estatísticas de patrimônios

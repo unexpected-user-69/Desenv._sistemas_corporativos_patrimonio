@@ -8,7 +8,7 @@ import {
   Index,
 } from 'typeorm';
 import { ReportCatalog } from './report-catalog.entity';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../shared/entities/user.entity';
 
 /**
  * Entity para versionamento de relatórios no catálogo

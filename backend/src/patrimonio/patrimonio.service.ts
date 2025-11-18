@@ -24,7 +24,7 @@ import { LocalizacoesStatsResponseDto, LocalizacaoStatsItemDto } from './dto/loc
 import { FaixaValorStatsResponseDto, FaixaValorStatsItemDto } from './dto/faixa-valor-stats-response.dto';
 import { AquisicaoStatsResponseDto, AquisicaoStatsItemDto } from './dto/aquisicao-stats-response.dto';
 import { EvolucaoStatsResponseDto, EvolucaoStatsItemDto } from './dto/evolucao-stats-response.dto';
-import { UsersService } from '../users/users.service';
+import { UsersHttpClient } from '../http-clients/users-http-client';
 import { stringify } from 'csv-stringify/sync';
 import * as ExcelJS from 'exceljs';
 import { Response } from 'express';
@@ -62,7 +62,7 @@ export class PatrimonioService {
     private readonly patrimonioRepository: Repository<Patrimonio>,
     @InjectRepository(PatrimonioLocalizacaoHistorico)
     private readonly historicoRepository: Repository<PatrimonioLocalizacaoHistorico>,
-    private readonly usersService: UsersService,
+    private readonly usersHttpClient: UsersHttpClient,
     private readonly dataSource: DataSource,
     private readonly storageService: StorageService,
   ) {}
@@ -610,7 +610,10 @@ export class PatrimonioService {
 
     // Validar se o novo responsável existe
     try {
-      await this.usersService.findOne(dto.novoResponsavelId);
+      const user = await this.usersHttpClient.findOne(dto.novoResponsavelId);
+      if (!user) {
+        throw new NotFoundException(`Usuário com ID "${dto.novoResponsavelId}" não encontrado`);
+      }
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -1547,7 +1550,10 @@ export class PatrimonioService {
 
     // Verificar se novo responsável existe
     try {
-      await this.usersService.findOne(dto.novoResponsavelId);
+      const user = await this.usersHttpClient.findOne(dto.novoResponsavelId);
+      if (!user) {
+        throw new NotFoundException(`Usuário com ID "${dto.novoResponsavelId}" não encontrado`);
+      }
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(
@@ -1857,7 +1863,10 @@ export class PatrimonioService {
   ): Promise<PatrimonioResponseDto[]> {
     // Verificar se responsável existe
     try {
-      await this.usersService.findOne(responsavelId);
+      const user = await this.usersHttpClient.findOne(responsavelId);
+      if (!user) {
+        throw new NotFoundException(`Responsável com ID "${responsavelId}" não encontrado`);
+      }
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(
@@ -2067,7 +2076,10 @@ export class PatrimonioService {
   async getStatsByResponsavel(responsavelId: string): Promise<ResponsavelStatsResponseDto> {
     // Verificar se responsável existe
     try {
-      await this.usersService.findOne(responsavelId);
+      const user = await this.usersHttpClient.findOne(responsavelId);
+      if (!user) {
+        throw new NotFoundException(`Responsável com ID "${responsavelId}" não encontrado`);
+      }
     } catch (error) {
       throw new NotFoundException(`Responsável com ID "${responsavelId}" não encontrado`);
     }

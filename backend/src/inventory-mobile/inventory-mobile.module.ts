@@ -13,14 +13,14 @@ import { Reconciliation } from './entities/reconciliation.entity';
 import { PatrimonioModule } from '../patrimonio/patrimonio.module';
 import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
 import { AppCacheModule } from '../common/cache/cache.module';
-import { EventsModule } from '../events/events.module';
+import { HttpClientsModule } from '../http-clients/http-clients.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Campaign, Assignment, CollectedItem, Reconciliation, Patrimonio]),
     forwardRef(() => PatrimonioModule),
     AppCacheModule,
-    EventsModule,
+    HttpClientsModule,
   ],
   controllers: [InventoryMobileController],
   providers: [

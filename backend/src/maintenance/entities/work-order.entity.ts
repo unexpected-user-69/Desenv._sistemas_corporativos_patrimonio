@@ -10,7 +10,7 @@ import {
   Index,
 } from 'typeorm';
 import { Patrimonio } from '../../patrimonio/entities/patrimonio.entity';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../shared/entities/user.entity';
 import { WorkLog } from './work-log.entity';
 import { Part } from './part.entity';
 

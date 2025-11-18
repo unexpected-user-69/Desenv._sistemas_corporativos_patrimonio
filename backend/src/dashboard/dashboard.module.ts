@@ -2,15 +2,15 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
-import { UsersModule } from '../users/users.module';
+import { HttpClientsModule } from '../http-clients/http-clients.module';
 import { PatrimonioModule } from '../patrimonio/patrimonio.module';
-import { User } from '../users/entities/user.entity';
+import { User } from '../shared/entities/user.entity';
 import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Patrimonio]),
-    UsersModule,
+    HttpClientsModule,
     PatrimonioModule,
   ],
   controllers: [DashboardController],

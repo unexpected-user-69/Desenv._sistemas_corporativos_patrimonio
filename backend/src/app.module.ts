@@ -9,14 +9,12 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppDataSource } from './database/data-source';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { PatrimonioModule } from './patrimonio/patrimonio.module';
 import { AuditModule } from './audit/audit.module';
 import { CategoriasModule } from './categorias/categorias.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { CommonModule } from './common/common.module';
-import { AuthModule } from './auth/auth.module';
-import { EventsModule } from './events/events.module';
+import { HttpClientsModule } from './http-clients/http-clients.module';
 import { IntegrationsErpModule } from './integrations-erp/integrations-erp.module';
 import { InventoryMobileModule } from './inventory-mobile/inventory-mobile.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
@@ -71,14 +69,12 @@ import { SwaggerController } from './swagger/swagger.controller';
       },
     }),
     TypeOrmModule.forRoot(AppDataSource.options),
-    UsersModule,
+    HttpClientsModule,
     PatrimonioModule,
     CategoriasModule,
     AuditModule,
     LoggerModule,
     CommonModule,
-    AuthModule,
-    EventsModule,
     IntegrationsErpModule,
     InventoryMobileModule,
     MaintenanceModule,

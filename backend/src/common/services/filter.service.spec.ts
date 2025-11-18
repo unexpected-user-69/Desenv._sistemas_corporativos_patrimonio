@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FilterService, AdvancedFilterOptions } from './filter.service';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../shared/entities/user.entity';
 import { UserRole } from '../../users/enums/user-role.enum';
 
 describe('FilterService', () => {

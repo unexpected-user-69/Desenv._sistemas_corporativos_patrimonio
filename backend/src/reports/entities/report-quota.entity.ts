@@ -8,7 +8,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../shared/entities/user.entity';
 
 /**
  * Entity para quotas de relatórios por usuário

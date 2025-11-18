@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { EventsService } from '../../events/events.service';
-import { EventType } from '../../events/enums/event-type.enum';
+import { EventsHttpClient } from '../../http-clients/events-http-client';
+import { EventType } from '../../shared/enums/event-type.enum';
 import { WorkOrder, WorkOrderStatus } from '../entities/work-order.entity';
 import { MaintenancePlan } from '../entities/maintenance-plan.entity';
 
@@ -11,14 +11,14 @@ import { MaintenancePlan } from '../entities/maintenance-plan.entity';
 export class MaintenanceNotificationsService {
   private readonly logger = new Logger(MaintenanceNotificationsService.name);
 
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(private readonly eventsHttpClient: EventsHttpClient) {}
 
   /**
    * Notifica quando uma OS é criada
    */
   async notifyWorkOrderCreated(workOrder: WorkOrder): Promise<void> {
     try {
-      await this.eventsService.create(
+      await this.eventsHttpClient.create(
         {
           title: `Nova OS: ${workOrder.titulo}`,
           description: `Ordem de serviço ${workOrder.id} criada para patrimônio ${workOrder.patrimonioId}`,
@@ -56,7 +56,7 @@ export class MaintenanceNotificationsService {
         [WorkOrderStatus.CANCELADA]: 'OS cancelada',
       };
 
-      await this.eventsService.create(
+      await this.eventsHttpClient.create(
         {
           title: `OS ${workOrder.titulo} - Status alterado`,
           description: `Status alterado de ${statusMessages[oldStatus]} para ${statusMessages[workOrder.status]}`,
@@ -86,7 +86,7 @@ export class MaintenanceNotificationsService {
    */
   async notifyMaintenancePlanCreated(plan: MaintenancePlan): Promise<void> {
     try {
-      await this.eventsService.create(
+      await this.eventsHttpClient.create(
         {
           title: `Novo Plano Preventivo`,
           description: `Plano de manutenção preventiva criado. Próxima execução: ${plan.proximaExecucao.toISOString()}`,
@@ -107,7 +107,7 @@ export class MaintenanceNotificationsService {
    */
   async notifyMaintenancePlanExecuted(plan: MaintenancePlan, osCount: number): Promise<void> {
     try {
-      await this.eventsService.create(
+      await this.eventsHttpClient.create(
         {
           title: `Plano Preventivo Executado`,
           description: `Plano ${plan.id} executado. ${osCount} ordem(ns) de serviço criada(s)`,

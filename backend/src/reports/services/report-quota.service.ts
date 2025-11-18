@@ -9,7 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { ReportQuota } from '../entities/report-quota.entity';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../shared/entities/user.entity';
 
 @Injectable()
 export class ReportQuotaService {

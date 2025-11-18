@@ -23,9 +23,8 @@ import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse, ApiBody, ApiUnauthor
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
 import { LogoutResponseDto } from './dto/logout-response.dto';
-import { UserResponseDto } from '../users/dto/user-response.dto';
-import { UsersService } from '../users/users.service';
-import { UserRole } from '../users/enums/user-role.enum';
+import { UserResponseDto } from '../shared/dto/user-response.dto';
+import { UserRole } from '../shared/enums/user-role.enum';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -35,7 +34,6 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly jwt: JwtService,
-    private readonly usersService: UsersService,
   ) {}
 
   @Public()
@@ -145,49 +143,14 @@ export class AuthController {
     const devPassword = process.env.SWAGGER_DEV_PASSWORD || 'AdminPassword123!';
     const devName = process.env.SWAGGER_DEV_NAME || 'Admin Dev';
 
+    // Tenta fazer login com as credenciais padrão
+    // Nota: O usuário deve ser criado manualmente no users-service para desenvolvimento
     try {
-      // Tenta fazer login com as credenciais padrão
       return await this.auth.login(devEmail, devPassword, ip, ua);
     } catch (error) {
-      // Se falhar, verifica se o usuário existe e tenta criar/atualizar
-      try {
-        let existingUser;
-        try {
-          existingUser = await this.usersService.findByEmail(devEmail);
-        } catch {
-          // Usuário não existe, vai criar
-          existingUser = null;
-        }
-        
-        if (existingUser) {
-          // Usuário existe, atualiza a senha para a senha padrão
-          await this.usersService.update(existingUser.id, {
-            password: devPassword,
-            isActive: true,
-            role: UserRole.ADMIN,
-          });
-          
-          // Tenta fazer login novamente após atualizar a senha
-          return await this.auth.login(devEmail, devPassword, ip, ua);
-        } else {
-          // Usuário não existe, cria novo usuário
-          await this.usersService.create({
-            email: devEmail,
-            password: devPassword,
-            name: devName,
-            role: UserRole.ADMIN,
-            isActive: true,
-          });
-          
-          // Após criar, tenta fazer login
-          return await this.auth.login(devEmail, devPassword, ip, ua);
-        }
-      } catch (createError) {
-        // Se ainda falhar, retorna erro informativo
-        throw new UnauthorizedException(
-          `Não foi possível criar ou autenticar usuário de desenvolvimento. Erro: ${createError instanceof Error ? createError.message : 'Unknown error'}`
-        );
-      }
+      throw new UnauthorizedException(
+        `Não foi possível autenticar usuário de desenvolvimento. Certifique-se de que o usuário ${devEmail} existe no users-service. Erro: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 

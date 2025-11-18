@@ -1,0 +1,513 @@
+openapi: 3.1.0
+info:
+  title: Events Service API
+  version: 1.0.0
+  description: |
+    Serviço de gestão de eventos relacionados a patrimônio.
+    Fornece endpoints para CRUD completo de eventos, busca avançada e publicação.
+
+servers:
+  - url: http://localhost:3003
+    description: Servidor de desenvolvimento local
+  - url: http://events-service:3003
+    description: Servidor Docker interno
+
+paths:
+  /events:
+    get:
+      summary: Listar eventos com filtros e paginação
+      description: |
+        Lista eventos com filtros avançados e paginação.
+        Requer autenticação.
+      operationId: listEvents
+      tags: [events]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Busca textual (título e descrição)
+        - name: eventType
+          in: query
+          schema:
+            type: string
+            enum: [MANUTENCAO, TRANSFERENCIA, AUDITORIA, INVENTARIO, OUTROS]
+        - name: state
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, PUBLISHED, CANCELLED, COMPLETED]
+        - name: visibility
+          in: query
+          schema:
+            type: string
+            enum: [PUBLIC, PRIVATE, RESTRICTED]
+        - name: patrimonioId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Lista de eventos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventsResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Criar novo evento
+      description: |
+        Cria um novo evento relacionado a patrimônio.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: createEvent
+      tags: [events]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEvent'
+      responses:
+        '201':
+          description: Evento criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /events/{idOrSlug}:
+    get:
+      summary: Buscar evento por ID ou slug
+      description: |
+        Busca um evento específico por ID (UUID) ou slug.
+        Requer autenticação.
+      operationId: getEventByIdOrSlug
+      tags: [events]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: idOrSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evento encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Evento não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /events/{id}:
+    patch:
+      summary: Atualizar evento
+      description: |
+        Atualiza um evento existente.
+        Apenas o criador do evento ou ADMIN podem atualizar.
+      operationId: updateEvent
+      tags: [events]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEvent'
+      responses:
+        '200':
+          description: Evento atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Evento não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /events/{id}/publish:
+    post:
+      summary: Publicar evento
+      description: |
+        Publica um evento (muda o estado de DRAFT para PUBLISHED).
+        Apenas o criador do evento ou ADMIN podem publicar.
+      operationId: publishEvent
+      tags: [events]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Evento publicado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Evento não está em rascunho
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Evento não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      summary: Health check do serviço
+      description: |
+        Retorna o status de saúde do serviço, incluindo timestamp e uptime.
+      operationId: health
+      tags: [health]
+      responses:
+        '200':
+          description: Serviço está funcionando
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Serviço indisponível
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateEvent:
+      type: object
+      required:
+        - title
+        - startDate
+        - eventType
+      properties:
+        title:
+          type: string
+          example: Manutenção Preventiva - Janeiro 2025
+          minLength: 3
+          maxLength: 200
+        description:
+          type: string
+          example: Manutenção preventiva dos equipamentos de informática
+          maxLength: 2000
+        startDate:
+          type: string
+          format: date-time
+          example: 2025-02-01T08:00:00Z
+        endDate:
+          type: string
+          format: date-time
+          example: 2025-02-01T17:00:00Z
+        eventType:
+          type: string
+          enum: [MANUTENCAO, TRANSFERENCIA, AUDITORIA, INVENTARIO, OUTROS]
+          example: MANUTENCAO
+        patrimonioIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: ['123e4567-e89b-12d3-a456-426614174000']
+        visibility:
+          type: string
+          enum: [PUBLIC, PRIVATE, RESTRICTED]
+          default: PUBLIC
+          example: PUBLIC
+        state:
+          type: string
+          enum: [DRAFT, PUBLISHED, CANCELLED, COMPLETED]
+          default: DRAFT
+          example: DRAFT
+
+    UpdateEvent:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+          enum: [MANUTENCAO, TRANSFERENCIA, AUDITORIA, INVENTARIO, OUTROS]
+        patrimonioIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        visibility:
+          type: string
+          enum: [PUBLIC, PRIVATE, RESTRICTED]
+        state:
+          type: string
+          enum: [DRAFT, PUBLISHED, CANCELLED, COMPLETED]
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        title:
+          type: string
+          example: Manutenção Preventiva - Janeiro 2025
+        description:
+          type: string
+          nullable: true
+        slug:
+          type: string
+          example: manutencao-preventiva-janeiro-2025
+        startDate:
+          type: string
+          format: date-time
+          example: 2025-02-01T08:00:00Z
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2025-02-01T17:00:00Z
+        eventType:
+          type: string
+          enum: [MANUTENCAO, TRANSFERENCIA, AUDITORIA, INVENTARIO, OUTROS]
+          example: MANUTENCAO
+        visibility:
+          type: string
+          enum: [PUBLIC, PRIVATE, RESTRICTED]
+          example: PUBLIC
+        state:
+          type: string
+          enum: [DRAFT, PUBLISHED, CANCELLED, COMPLETED]
+          example: DRAFT
+        createdBy:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        patrimonios:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-01-27T12:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-01-27T12:00:00Z
+        version:
+          type: integer
+          example: 1
+
+    PaginatedEventsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        total:
+          type: integer
+          example: 100
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        totalPages:
+          type: integer
+          example: 5
+        hasNextPage:
+          type: boolean
+          example: true
+        hasPreviousPage:
+          type: boolean
+          example: false
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+          enum: [ok, error]
+        timestamp:
+          type: string
+          format: date-time
+          example: 2025-01-27T12:00:00Z
+        uptime:
+          type: number
+          example: 1234.56
+        service:
+          type: string
+          example: events-service
+        version:
+          type: string
+          example: 1.0.0
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Validation failed
+        error:
+          type: string
+          example: Bad Request
+        code:
+          type: string
+          example: VALIDATION_ERROR
+          nullable: true
+        details:
+          type: array
+          items:
+            type: string
+          nullable: true
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtido no endpoint /auth/login do Auth Service
+

@@ -24,7 +24,7 @@ export interface LogEntry {
   timestamp: string;
   level: 'error' | 'warn' | 'info' | 'debug';
   message: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   userId?: string;
   requestId?: string;
 }
@@ -52,7 +52,7 @@ export interface WidgetConfig {
   type: 'chart' | 'metric' | 'table' | 'alert';
   title: string;
   position: { x: number; y: number; w: number; h: number };
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface PerformanceMetrics {

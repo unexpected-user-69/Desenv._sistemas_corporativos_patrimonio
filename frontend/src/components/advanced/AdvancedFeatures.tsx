@@ -522,20 +522,25 @@ export const AdvancedFeatures: React.FC = () => {
             </p>
           </div>
           <div className="divide-y divide-gray-200">
-            {searchResults.data.map((item: any, index: number) => (
+            {searchResults.data.map((item: unknown, index: number) => (
               <div key={index} className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-medium text-gray-900">
-                      {item.name || item.email}
+                      {String((item as Record<string, unknown>).name ||
+                        (item as Record<string, unknown>).email || 'N/A')}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      {item.email || item.role}
+                      {String((item as Record<string, unknown>).email ||
+                        (item as Record<string, unknown>).role || 'N/A')}
                     </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    {item.createdAt &&
-                      new Date(item.createdAt as string).toLocaleDateString()}
+                    {(item as Record<string, unknown>).createdAt
+                      ? new Date(
+                          (item as Record<string, unknown>).createdAt as string,
+                        ).toLocaleDateString()
+                      : 'N/A'}
                   </div>
                 </div>
               </div>

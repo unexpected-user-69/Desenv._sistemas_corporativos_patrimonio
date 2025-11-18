@@ -32,7 +32,7 @@ export interface CompressionConfig {
   enabled: boolean;
   level: number; // 1-9
   threshold: number; // Tamanho mínimo em bytes
-  filter?: (req: any, res: any) => boolean;
+  filter?: (req: Request, res: Response) => boolean;
 }
 
 export interface CompressionStats {
@@ -85,9 +85,9 @@ export interface RequestLog {
   userAgent: string;
   ip: string;
   timestamp: string;
-  query?: Record<string, any>;
-  params?: Record<string, any>;
-  body?: any;
+  query?: Record<string, string | string[]>;
+  params?: Record<string, string>;
+  body?: unknown;
   responseSize: number;
   rateLimitStatus?: RateLimitStatus;
   compressionApplied?: boolean;
@@ -158,7 +158,7 @@ export interface ProductionAlert {
   description: string;
   timestamp: string;
   resolved: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProductionConfig {

@@ -349,17 +349,17 @@ export class AuthService {
   }
 
   /**
-   * Verifica se o usuário é teacher
+   * Verifica se o usuário é manager
    */
-  static isTeacher(): boolean {
-    return this.hasRole('TEACHER');
+  static isManager(): boolean {
+    return this.hasRole('MANAGER');
   }
 
   /**
-   * Verifica se o usuário é student
+   * Verifica se o usuário é operator
    */
-  static isStudent(): boolean {
-    return this.hasRole('STUDENT');
+  static isOperator(): boolean {
+    return this.hasRole('OPERATOR');
   }
 }
 

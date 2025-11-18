@@ -5,8 +5,9 @@ import { UserView } from '../../components/users/UserView';
 import { UserDeleteConfirm } from '../../components/users/UserDeleteConfirm';
 import { BulkOperations } from '../../components/users/BulkOperations';
 import { User } from '../../types/user';
+import { ManagerRoute } from '../../components/auth/ProtectedRoute';
 
-export const UsersPage: React.FC = () => {
+const UsersPageContent: React.FC = () => {
   const [showUserForm, setShowUserForm] = useState(false);
   const [showUserView, setShowUserView] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -103,6 +104,14 @@ export const UsersPage: React.FC = () => {
         />
       </div>
     </div>
+  );
+};
+
+export const UsersPage: React.FC = () => {
+  return (
+    <ManagerRoute>
+      <UsersPageContent />
+    </ManagerRoute>
   );
 };
 

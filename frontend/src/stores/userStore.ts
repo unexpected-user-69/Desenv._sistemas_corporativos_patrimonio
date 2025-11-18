@@ -133,12 +133,17 @@ export const useUserStore = create<UserState>()(
             hasPrev: response.hasPrev,
             filters: currentFilters,
             isLoading: false,
+            error: null,
           });
         } catch (error: any) {
+          const errorMessage = error.message || 'Erro ao carregar usuários';
           set({
-            error: error.message,
+            error: errorMessage,
             isLoading: false,
           });
+          
+          // Log do erro para debug
+          console.error('Erro ao buscar usuários:', error);
         }
       },
 

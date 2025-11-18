@@ -92,9 +92,9 @@ export const UserList: React.FC<UserListProps> = ({
     switch (role) {
       case UserRole.ADMIN:
         return 'bg-red-100 text-red-800';
-      case UserRole.TEACHER:
+      case UserRole.MANAGER:
         return 'bg-blue-100 text-blue-800';
-      case UserRole.STUDENT:
+      case UserRole.OPERATOR:
         return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -105,9 +105,9 @@ export const UserList: React.FC<UserListProps> = ({
     switch (role) {
       case UserRole.ADMIN:
         return <Shield className="h-4 w-4" />;
-      case UserRole.TEACHER:
+      case UserRole.MANAGER:
         return <UserCheck className="h-4 w-4" />;
-      case UserRole.STUDENT:
+      case UserRole.OPERATOR:
         return <Users className="h-4 w-4" />;
       default:
         return <Users className="h-4 w-4" />;
@@ -123,29 +123,49 @@ export const UserList: React.FC<UserListProps> = ({
   };
 
   if (error) {
+    const isPermissionError = 
+      error.includes('permissão') || 
+      error.includes('Acesso negado') || 
+      error.includes('OPERATOR') ||
+      error.includes('MANAGER') ||
+      error.includes('ADMIN');
+    
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="text-red-600">
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+      <div className={`${isPermissionError ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200'} border rounded-lg p-6`}>
+        <div className="flex items-start">
+          <div className={`${isPermissionError ? 'text-yellow-600' : 'text-red-600'} flex-shrink-0`}>
+            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+              {isPermissionError ? (
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              ) : (
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
                   clipRule="evenodd"
                 />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                Erro ao carregar usuários
-              </h3>
-              <p className="text-sm text-red-700 mt-1">{error}</p>
-            </div>
+              )}
+            </svg>
+          </div>
+          <div className="ml-3 flex-1">
+            <h3 className={`text-sm font-medium ${isPermissionError ? 'text-yellow-800' : 'text-red-800'}`}>
+              {isPermissionError ? 'Acesso Negado' : 'Erro ao carregar usuários'}
+            </h3>
+            <p className={`text-sm ${isPermissionError ? 'text-yellow-700' : 'text-red-700'} mt-2`}>
+              {error}
+            </p>
+            {isPermissionError && (
+              <p className={`text-sm ${isPermissionError ? 'text-yellow-600' : 'text-red-600'} mt-2`}>
+                Esta funcionalidade requer permissões de MANAGER ou ADMIN. Entre em contato com o administrador do sistema se você acredita que deveria ter acesso.
+              </p>
+            )}
           </div>
           <button
             onClick={clearError}
-            className="text-red-600 hover:text-red-800"
+            className={`${isPermissionError ? 'text-yellow-600 hover:text-yellow-800' : 'text-red-600 hover:text-red-800'} ml-4 flex-shrink-0`}
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
               <path
@@ -246,8 +266,8 @@ export const UserList: React.FC<UserListProps> = ({
                 >
                   <option value="">Todas as funções</option>
                   <option value={UserRole.ADMIN}>Administrador</option>
-                  <option value={UserRole.TEACHER}>Professor</option>
-                  <option value={UserRole.STUDENT}>Estudante</option>
+                  <option value={UserRole.MANAGER}>Gerente</option>
+                  <option value={UserRole.OPERATOR}>Operador</option>
                 </select>
               </div>
 
@@ -359,9 +379,9 @@ export const UserList: React.FC<UserListProps> = ({
                         <span className="ml-1">
                           {user.role === UserRole.ADMIN
                             ? 'Administrador'
-                            : user.role === UserRole.TEACHER
-                              ? 'Professor'
-                              : 'Estudante'}
+                            : user.role === UserRole.MANAGER
+                              ? 'Gerente'
+                              : 'Operador'}
                         </span>
                       </span>
                     </td>

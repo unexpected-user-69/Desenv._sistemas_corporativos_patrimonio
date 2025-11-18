@@ -37,7 +37,7 @@ export const UserForm: React.FC<UserFormProps> = ({
     name: '',
     email: '',
     password: '',
-    role: UserRole.STUDENT,
+    role: UserRole.OPERATOR,
     isActive: true,
   });
 
@@ -60,7 +60,7 @@ export const UserForm: React.FC<UserFormProps> = ({
         name: '',
         email: '',
         password: '',
-        role: UserRole.STUDENT,
+        role: UserRole.OPERATOR,
         isActive: true,
       });
     }
@@ -145,9 +145,9 @@ export const UserForm: React.FC<UserFormProps> = ({
     switch (role) {
       case UserRole.ADMIN:
         return <Shield className="h-4 w-4" />;
-      case UserRole.TEACHER:
+      case UserRole.MANAGER:
         return <UserCheck className="h-4 w-4" />;
-      case UserRole.STUDENT:
+      case UserRole.OPERATOR:
         return <UserIcon className="h-4 w-4" />;
       default:
         return <UserIcon className="h-4 w-4" />;
@@ -158,12 +158,12 @@ export const UserForm: React.FC<UserFormProps> = ({
     switch (role) {
       case UserRole.ADMIN:
         return 'Administrador';
-      case UserRole.TEACHER:
-        return 'Professor';
-      case UserRole.STUDENT:
-        return 'Estudante';
+      case UserRole.MANAGER:
+        return 'Gerente';
+      case UserRole.OPERATOR:
+        return 'Operador';
       default:
-        return 'Estudante';
+        return 'Operador';
     }
   };
 
@@ -300,8 +300,8 @@ export const UserForm: React.FC<UserFormProps> = ({
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value={UserRole.STUDENT}>Estudante</option>
-                <option value={UserRole.TEACHER}>Professor</option>
+                <option value={UserRole.OPERATOR}>Operador</option>
+                <option value={UserRole.MANAGER}>Gerente</option>
                 <option value={UserRole.ADMIN}>Administrador</option>
               </select>
             </div>

@@ -33,7 +33,7 @@ const mockUsers: User[] = [
     id: '2',
     name: 'Maria Santos',
     email: 'maria@email.com',
-    role: UserRole.TEACHER,
+    role: UserRole.MANAGER,
     isActive: true,
     avatarUrl: undefined,
     createdAt: '2024-01-02T00:00:00Z',
@@ -43,7 +43,7 @@ const mockUsers: User[] = [
     id: '3',
     name: 'Pedro Costa',
     email: 'pedro@email.com',
-    role: UserRole.STUDENT,
+    role: UserRole.OPERATOR,
     isActive: true,
     avatarUrl: undefined,
     createdAt: '2024-01-03T00:00:00Z',
@@ -53,7 +53,7 @@ const mockUsers: User[] = [
     id: '4',
     name: 'Ana Oliveira',
     email: 'ana@email.com',
-    role: UserRole.STUDENT,
+    role: UserRole.OPERATOR,
     isActive: false,
     avatarUrl: undefined,
     createdAt: '2024-01-04T00:00:00Z',
@@ -63,7 +63,7 @@ const mockUsers: User[] = [
     id: '5',
     name: 'Carlos Ferreira',
     email: 'carlos@email.com',
-    role: UserRole.TEACHER,
+    role: UserRole.MANAGER,
     isActive: true,
     avatarUrl: undefined,
     createdAt: '2024-01-05T00:00:00Z',
@@ -194,7 +194,7 @@ export class MockUserService {
       id: this.nextId.toString(),
       name: userData.name,
       email: userData.email,
-      role: userData.role || UserRole.STUDENT,
+      role: userData.role || UserRole.OPERATOR,
       isActive: userData.isActive !== undefined ? userData.isActive : true,
       avatarUrl: undefined,
       createdAt: new Date().toISOString(),
@@ -243,7 +243,7 @@ export class MockUserService {
           id: this.nextId.toString(),
           name: userData.name,
           email: userData.email,
-          role: userData.role || UserRole.STUDENT,
+          role: userData.role || UserRole.OPERATOR,
           isActive: userData.isActive !== undefined ? userData.isActive : true,
           avatarUrl: undefined,
           createdAt: new Date().toISOString(),
@@ -567,11 +567,11 @@ export class MockUserService {
       [UserRole.ADMIN]: this.users.filter(
         (user) => user.role === UserRole.ADMIN,
       ).length,
-      [UserRole.TEACHER]: this.users.filter(
-        (user) => user.role === UserRole.TEACHER,
+      [UserRole.MANAGER]: this.users.filter(
+        (user) => user.role === UserRole.MANAGER,
       ).length,
-      [UserRole.STUDENT]: this.users.filter(
-        (user) => user.role === UserRole.STUDENT,
+      [UserRole.OPERATOR]: this.users.filter(
+        (user) => user.role === UserRole.OPERATOR,
       ).length,
     };
 

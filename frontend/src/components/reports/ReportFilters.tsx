@@ -251,8 +251,8 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
                   disabled={isLoading}
                 >
                   <option value="ADMIN">Administrador</option>
-                  <option value="TEACHER">Professor</option>
-                  <option value="STUDENT">Estudante</option>
+                  <option value="MANAGER">Gerente</option>
+                  <option value="OPERATOR">Operador</option>
                 </select>
               </div>
 

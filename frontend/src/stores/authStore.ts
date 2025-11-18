@@ -16,8 +16,8 @@ interface AuthStore extends AuthState {
 
   // Computed getters
   isAdmin: () => boolean;
-  isTeacher: () => boolean;
-  isStudent: () => boolean;
+  isManager: () => boolean;
+  isOperator: () => boolean;
   hasRole: (role: UserRole) => boolean;
   hasAnyRole: (roles: UserRole[]) => boolean;
 }
@@ -148,14 +148,14 @@ export const useAuthStore = create<AuthStore>()(
         return user?.role === UserRole.ADMIN;
       },
 
-      isTeacher: () => {
+      isManager: () => {
         const user = get().user;
-        return user?.role === UserRole.TEACHER;
+        return user?.role === UserRole.MANAGER;
       },
 
-      isStudent: () => {
+      isOperator: () => {
         const user = get().user;
-        return user?.role === UserRole.STUDENT;
+        return user?.role === UserRole.OPERATOR;
       },
 
       hasRole: (role: UserRole) => {

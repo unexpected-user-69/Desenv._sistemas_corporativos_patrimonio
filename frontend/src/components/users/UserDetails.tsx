@@ -33,9 +33,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     switch (role) {
       case UserRole.ADMIN:
         return 'bg-red-100 text-red-800 border-red-200';
-      case UserRole.TEACHER:
+      case UserRole.MANAGER:
         return 'bg-blue-100 text-blue-800 border-blue-200';
-      case UserRole.STUDENT:
+      case UserRole.OPERATOR:
         return 'bg-green-100 text-green-800 border-green-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -46,9 +46,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     switch (role) {
       case UserRole.ADMIN:
         return <Shield className="h-5 w-5" />;
-      case UserRole.TEACHER:
+      case UserRole.MANAGER:
         return <UserCheck className="h-5 w-5" />;
-      case UserRole.STUDENT:
+      case UserRole.OPERATOR:
         return <Users className="h-5 w-5" />;
       default:
         return <Users className="h-5 w-5" />;
@@ -59,12 +59,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     switch (role) {
       case UserRole.ADMIN:
         return 'Administrador';
-      case UserRole.TEACHER:
-        return 'Professor';
-      case UserRole.STUDENT:
-        return 'Estudante';
+      case UserRole.MANAGER:
+        return 'Gerente';
+      case UserRole.OPERATOR:
+        return 'Operador';
       default:
-        return 'Estudante';
+        return 'Operador';
     }
   };
 
@@ -72,10 +72,10 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     switch (role) {
       case UserRole.ADMIN:
         return 'Acesso total ao sistema, incluindo gerenciamento de usuários e configurações';
-      case UserRole.TEACHER:
-        return 'Acesso a funcionalidades de ensino e gerenciamento de turmas';
-      case UserRole.STUDENT:
-        return 'Acesso básico ao sistema para visualização de conteúdo';
+      case UserRole.MANAGER:
+        return 'Acesso a funcionalidades de gerenciamento e relatórios';
+      case UserRole.OPERATOR:
+        return 'Acesso básico ao sistema para operações do dia a dia';
       default:
         return 'Acesso básico ao sistema';
     }

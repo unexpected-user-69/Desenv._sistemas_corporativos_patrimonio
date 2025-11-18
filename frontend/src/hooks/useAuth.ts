@@ -20,8 +20,8 @@ export const useAuth = () => {
 
     // Role checks
     isAdmin: store.isAdmin,
-    isTeacher: store.isTeacher,
-    isStudent: store.isStudent,
+    isManager: store.isManager,
+    isOperator: store.isOperator,
     hasRole: store.hasRole,
     hasAnyRole: store.hasAnyRole,
 
@@ -32,15 +32,15 @@ export const useAuth = () => {
     },
 
     canManageUsers: () => {
-      return store.hasAnyRole([UserRole.ADMIN, UserRole.TEACHER]);
+      return store.hasAnyRole([UserRole.ADMIN, UserRole.MANAGER]);
     },
 
     canManagePatrimonios: () => {
-      return store.hasAnyRole([UserRole.ADMIN, UserRole.TEACHER]);
+      return store.hasAnyRole([UserRole.ADMIN, UserRole.MANAGER]);
     },
 
     canViewReports: () => {
-      return store.hasAnyRole([UserRole.ADMIN, UserRole.TEACHER]);
+      return store.hasAnyRole([UserRole.ADMIN, UserRole.MANAGER]);
     },
 
     canAccessAdmin: () => {

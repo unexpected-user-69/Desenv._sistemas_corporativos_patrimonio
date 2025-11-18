@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   subtitle = 'Sistema Avançado - Monitoramento, Performance & Cache',
 }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { user, logout, isAdmin, isTeacher, isStudent } = useAuthStore();
+  const { user, logout, isAdmin, isManager, isOperator } = useAuthStore();
 
   const handleLogout = async () => {
     try {
@@ -33,15 +33,15 @@ export const Header: React.FC<HeaderProps> = ({
 
   const getUserRoleLabel = () => {
     if (isAdmin()) return 'Administrador';
-    if (isTeacher()) return 'Professor';
-    if (isStudent()) return 'Estudante';
+    if (isManager()) return 'Gerente';
+    if (isOperator()) return 'Operador';
     return 'Usuário';
   };
 
   const getUserRoleColor = () => {
     if (isAdmin()) return 'text-red-600 bg-red-100';
-    if (isTeacher()) return 'text-blue-600 bg-blue-100';
-    if (isStudent()) return 'text-green-600 bg-green-100';
+    if (isManager()) return 'text-blue-600 bg-blue-100';
+    if (isOperator()) return 'text-green-600 bg-green-100';
     return 'text-gray-600 bg-gray-100';
   };
 

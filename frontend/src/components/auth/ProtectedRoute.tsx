@@ -74,13 +74,13 @@ export const AdminRoute: React.FC<
   );
 };
 
-// Componente específico para rotas de teacher
-export const TeacherRoute: React.FC<
+// Componente específico para rotas de manager
+export const ManagerRoute: React.FC<
   Omit<ProtectedRouteProps, 'requiredRoles'>
 > = ({ children, fallback }) => {
   return (
     <ProtectedRoute
-      requiredRoles={[UserRole.TEACHER, UserRole.ADMIN]}
+      requiredRoles={[UserRole.MANAGER, UserRole.ADMIN]}
       fallback={fallback}
     >
       {children}
@@ -88,13 +88,13 @@ export const TeacherRoute: React.FC<
   );
 };
 
-// Componente específico para rotas de student
-export const StudentRoute: React.FC<
+// Componente específico para rotas de operator
+export const OperatorRoute: React.FC<
   Omit<ProtectedRouteProps, 'requiredRoles'>
 > = ({ children, fallback }) => {
   return (
     <ProtectedRoute
-      requiredRoles={[UserRole.STUDENT, UserRole.TEACHER, UserRole.ADMIN]}
+      requiredRoles={[UserRole.OPERATOR, UserRole.MANAGER, UserRole.ADMIN]}
       fallback={fallback}
     >
       {children}

@@ -83,10 +83,31 @@ export const DashboardPage: React.FC = () => {
     setFilters(newFilters);
   };
 
-  const formatLastUpdate = (timestamp: string | null) => {
+  const formatLastUpdate = (timestamp: string | null | Date | any) => {
     if (!timestamp) return 'Nunca';
 
-    const date = new Date(timestamp);
+    // Se for um objeto Date, converter para string
+    let date: Date;
+    if (timestamp instanceof Date) {
+      date = timestamp;
+    } else if (typeof timestamp === 'string') {
+      date = new Date(timestamp);
+    } else if (timestamp && typeof timestamp === 'object' && timestamp.toString) {
+      // Se for um objeto, tentar converter
+      try {
+        date = new Date(timestamp.toString());
+      } catch {
+        return 'Data inválida';
+      }
+    } else {
+      return 'Data inválida';
+    }
+
+    // Verificar se a data é válida
+    if (isNaN(date.getTime())) {
+      return 'Data inválida';
+    }
+
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -115,7 +136,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               {lastUpdate && (
                 <div className="text-sm text-gray-500">
-                  Última atualização: {formatLastUpdate(lastUpdate)}
+                  Última atualização: {String(formatLastUpdate(lastUpdate))}
                 </div>
               )}
             </div>
@@ -140,7 +161,7 @@ export const DashboardPage: React.FC = () => {
 
               {/* Refresh interval */}
               <select
-                value={refreshInterval}
+                value={String(refreshInterval || 30)}
                 onChange={(e) => setRefreshInterval(Number(e.target.value))}
                 className="text-sm border border-gray-300 rounded-md px-2 py-1"
                 disabled={!autoRefresh}

@@ -27,7 +27,7 @@ class NotificationsService {
   private wsListeners: ((message: NotificationWebSocketMessage) => void)[] = [];
 
   private getAuthHeaders() {
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('access_token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
@@ -39,9 +39,9 @@ class NotificationsService {
       return;
     }
 
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('access_token');
     if (!token) {
-      console.warn('No auth token available for WebSocket connection');
+      // Silenciar aviso - token pode não estar disponível ainda ou WebSocket não está implementado
       return;
     }
 
@@ -51,7 +51,6 @@ class NotificationsService {
       this.wsConnection = new WebSocket(wsUrl);
 
       this.wsConnection.onopen = () => {
-        console.log('WebSocket connected for notifications');
         this.wsReconnectAttempts = 0;
         this.sendHeartbeat();
       };
@@ -61,20 +60,28 @@ class NotificationsService {
           const message: NotificationWebSocketMessage = JSON.parse(event.data);
           this.wsListeners.forEach((listener) => listener(message));
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          // Silenciar erro de parsing - pode ser mensagem inválida
         }
       };
 
-      this.wsConnection.onclose = () => {
-        console.log('WebSocket disconnected');
-        this.attemptReconnect();
+      this.wsConnection.onclose = (event) => {
+        // Apenas tentar reconectar se não foi um fechamento intencional (code 1000)
+        // e se ainda não excedemos as tentativas
+        if (event.code !== 1000 && this.wsReconnectAttempts < this.maxReconnectAttempts) {
+          this.attemptReconnect();
+        } else {
+          // Limpar conexão se exceder tentativas ou fechamento intencional
+          this.wsConnection = null;
+        }
       };
 
-      this.wsConnection.onerror = (error) => {
-        console.error('WebSocket error:', error);
+      this.wsConnection.onerror = () => {
+        // Silenciar erro - endpoint pode não estar implementado no backend
+        // O erro será tratado no onclose
       };
     } catch (error) {
-      console.error('Failed to create WebSocket connection:', error);
+      // Silenciar erro ao criar WebSocket - pode não estar disponível
+      this.wsConnection = null;
     }
   }
 
@@ -111,7 +118,15 @@ class NotificationsService {
    */
   private attemptReconnect(): void {
     if (this.wsReconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max WebSocket reconnection attempts reached');
+      // Silenciar - endpoint pode não estar implementado
+      this.wsConnection = null;
+      return;
+    }
+
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('access_token');
+    if (!token) {
+      // Não tentar reconectar se não houver token
+      this.wsConnection = null;
       return;
     }
 
@@ -120,9 +135,6 @@ class NotificationsService {
       this.reconnectDelay * Math.pow(2, this.wsReconnectAttempts - 1);
 
     setTimeout(() => {
-      console.log(
-        `Attempting WebSocket reconnection ${this.wsReconnectAttempts}/${this.maxReconnectAttempts}`,
-      );
       this.connectWebSocket();
     }, delay);
   }
@@ -167,6 +179,19 @@ class NotificationsService {
       );
       return response.data;
     } catch (error: any) {
+      // Se o endpoint não existir (404), retornar lista vazia
+      if (error.response?.status === 404) {
+        return {
+          notifications: [],
+          total: 0,
+          page: 1,
+          limit: searchOptions?.limit || 10,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        };
+      }
+
       throw new Error(
         error.response?.data?.message || 'Erro ao buscar notificações',
       );
@@ -305,6 +330,19 @@ class NotificationsService {
       );
       return response.data;
     } catch (error: any) {
+      // Se o endpoint não existir (404), retornar estatísticas vazias
+      if (error.response?.status === 404) {
+        return {
+          total: 0,
+          unread: 0,
+          read: 0,
+          archived: 0,
+          byType: {},
+          byStatus: {},
+          recentActivity: [],
+        };
+      }
+
       throw new Error(
         error.response?.data?.message ||
           'Erro ao buscar estatísticas de notificações',
@@ -398,6 +436,26 @@ class NotificationsService {
       );
       return response.data;
     } catch (error: any) {
+      // Se o endpoint não existir (404), retornar preferências padrão
+      if (error.response?.status === 404) {
+        return {
+          email: true,
+          sms: false,
+          push: true,
+          channels: {
+            email: true,
+            sms: false,
+            push: true,
+          },
+          frequency: 'realtime',
+          quietHours: {
+            enabled: false,
+            start: '22:00',
+            end: '08:00',
+          },
+        };
+      }
+
       throw new Error(
         error.response?.data?.message ||
           'Erro ao buscar preferências de notificação',

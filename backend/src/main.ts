@@ -89,6 +89,7 @@ async function bootstrap() {
     .addTag('inventory-mobile', 'Inventário móvel e campanhas')
     .addTag('cache', 'Gerenciamento de cache')
     .addTag('metrics', 'Métricas e monitoramento do sistema')
+    .addTag('dashboard', 'Dashboard e estatísticas gerais')
     .addTag('enums', 'Enumeradores e constantes do sistema')
     .addTag('common', 'Utilitários compartilhados')
     .addBearerAuth(

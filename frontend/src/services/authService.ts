@@ -66,7 +66,7 @@ authApi.interceptors.response.use(
 
 export class AuthService {
   // Flag para usar mock quando backend não estiver disponível
-  private static useMock = true; // Mude para false quando backend estiver pronto
+  private static useMock = false; // Backend está pronto
 
   /**
    * Realiza login do usuário
@@ -77,15 +77,32 @@ export class AuthService {
     }
 
     try {
-      const response: AxiosResponse<LoginResponse> = await authApi.post(
+      const response: AxiosResponse<any> = await authApi.post(
         '/auth/login',
         credentials,
       );
 
-      const { user, token, refreshToken, expiresIn } = response.data;
+      // O backend retorna: { accessToken, refreshToken, user: { id, email, name, role } }
+      // Precisamos converter para o formato esperado pelo frontend
+      const { accessToken, refreshToken, user: backendUser } = response.data;
+      
+      // Converter o user do backend para o formato do frontend
+      const user: User = {
+        id: backendUser.id,
+        email: backendUser.email,
+        name: backendUser.name,
+        role: backendUser.role as any, // Converter role string para UserRole
+        isActive: true, // Assumir ativo se o login foi bem-sucedido
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // JWT tokens geralmente expiram em 15 minutos (900 segundos)
+      // Mas vamos usar um valor padrão seguro
+      const expiresIn = 15 * 60; // 15 minutos em segundos
 
       // Armazenar tokens e dados do usuário
-      localStorage.setItem('auth_token', token);
+      localStorage.setItem('auth_token', accessToken);
       localStorage.setItem('refresh_token', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem(
@@ -93,11 +110,25 @@ export class AuthService {
         (Date.now() + expiresIn * 1000).toString(),
       );
 
-      return response.data;
+      return {
+        user,
+        token: accessToken,
+        refreshToken,
+        expiresIn,
+      };
     } catch (error: any) {
-      // Se falhar, tentar com mock
-      console.warn('Backend não disponível, usando mock:', error.message);
-      return this.loginWithMock(credentials);
+      // Se falhar, mostrar erro real do backend
+      let errorMessage = 'Erro ao realizar login';
+      
+      if (error.response?.data) {
+        // Backend retorna: { message: "Invalid credentials", error: "Unauthorized", statusCode: 401 }
+        errorMessage = error.response.data.message || error.response.data.error || errorMessage;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      console.error('Erro no login:', errorMessage, error.response?.data);
+      throw new Error(errorMessage);
     }
   }
 
@@ -159,20 +190,29 @@ export class AuthService {
         throw new Error('Refresh token não encontrado');
       }
 
-      const response: AxiosResponse<LoginResponse> = await authApi.post(
+      const response: AxiosResponse<any> = await authApi.post(
         '/auth/refresh',
         { refreshToken },
       );
 
-      const {
-        user,
-        token,
-        refreshToken: newRefreshToken,
-        expiresIn,
-      } = response.data;
+      // O backend retorna: { accessToken, refreshToken, user: { id, email, name, role } }
+      const { accessToken, refreshToken: newRefreshToken, user: backendUser } = response.data;
+      
+      // Converter o user do backend para o formato do frontend
+      const user: User = {
+        id: backendUser.id,
+        email: backendUser.email,
+        name: backendUser.name,
+        role: backendUser.role as any,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const expiresIn = 15 * 60; // 15 minutos em segundos
 
       // Atualizar tokens
-      localStorage.setItem('auth_token', token);
+      localStorage.setItem('auth_token', accessToken);
       localStorage.setItem('refresh_token', newRefreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem(
@@ -180,14 +220,17 @@ export class AuthService {
         (Date.now() + expiresIn * 1000).toString(),
       );
 
-      return response.data;
+      return {
+        user,
+        token: accessToken,
+        refreshToken: newRefreshToken,
+        expiresIn,
+      };
     } catch (error: any) {
-      // Se falhar, tentar com mock
-      console.warn(
-        'Backend não disponível para refresh, usando mock:',
-        error.message,
-      );
-      return this.refreshTokenWithMock();
+      // Se falhar, mostrar erro real
+      const errorMessage = error.response?.data?.message || error.message || 'Erro ao renovar token';
+      console.error('Erro no refresh token:', errorMessage);
+      throw new Error(errorMessage);
     }
   }
 

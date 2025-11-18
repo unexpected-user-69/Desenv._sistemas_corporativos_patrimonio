@@ -30,6 +30,7 @@ interface BulkCreateResult {
 }
 
 export const BulkOperations: React.FC<BulkOperationsProps> = ({
+  isOpen,
   onClose,
   onSuccess,
 }) => {
@@ -93,18 +94,18 @@ export const BulkOperations: React.FC<BulkOperationsProps> = ({
       }
 
       // Validar role
-      let role = UserRole.STUDENT;
+      let role = UserRole.OPERATOR;
       if (roleStr) {
         const roleUpper = roleStr.toUpperCase();
         if (
           roleUpper === 'ADMIN' ||
-          roleUpper === 'TEACHER' ||
-          roleUpper === 'STUDENT'
+          roleUpper === 'MANAGER' ||
+          roleUpper === 'OPERATOR'
         ) {
           role = roleUpper as UserRole;
         } else {
           throw new Error(
-            `Linha ${i + 2}: Role inválido: ${roleStr}. Use: ADMIN, TEACHER ou STUDENT`,
+            `Linha ${i + 2}: Role inválido: ${roleStr}. Use: ADMIN, MANAGER ou OPERATOR`,
           );
         }
       }
@@ -188,7 +189,7 @@ export const BulkOperations: React.FC<BulkOperationsProps> = ({
 
   const downloadTemplate = () => {
     const template =
-      'Nome,Email,Senha,Role,Ativo\nJoão Silva,joao@email.com,123456,STUDENT,true\nMaria Santos,maria@email.com,123456,TEACHER,true\nPedro Costa,pedro@email.com,123456,ADMIN,false';
+      'Nome,Email,Senha,Role,Ativo\nJoão Silva,joao@email.com,123456,OPERATOR,true\nMaria Santos,maria@email.com,123456,MANAGER,true\nPedro Costa,pedro@email.com,123456,ADMIN,false';
     const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -207,8 +208,22 @@ export const BulkOperations: React.FC<BulkOperationsProps> = ({
     clearError();
   };
 
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
+    >
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -216,8 +231,9 @@ export const BulkOperations: React.FC<BulkOperationsProps> = ({
             Operações em Lote
           </h2>
           <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            onClick={handleClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            title="Fechar"
           >
             <X className="h-6 w-6" />
           </button>
@@ -405,7 +421,7 @@ export const BulkOperations: React.FC<BulkOperationsProps> = ({
               Limpar
             </button>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
             >
               Fechar

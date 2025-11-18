@@ -24,6 +24,11 @@ import {
 class DashboardService {
   private baseURL = config.api.baseUrl;
 
+  private getAuthHeaders() {
+    const token = localStorage.getItem('auth_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   /**
    * Obtém estatísticas gerais do dashboard
    */
@@ -31,6 +36,7 @@ class DashboardService {
     try {
       const response: AxiosResponse<DashboardStats> = await axios.get(
         `${this.baseURL}/v1/dashboard/stats`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -49,6 +55,7 @@ class DashboardService {
     try {
       const response: AxiosResponse<UserGrowthData[]> = await axios.get(
         `${this.baseURL}/v1/dashboard/users/growth?period=${period}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -69,6 +76,7 @@ class DashboardService {
     try {
       const response: AxiosResponse<PatrimonioGrowthData[]> = await axios.get(
         `${this.baseURL}/v1/dashboard/patrimonios/growth?period=${period}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -87,6 +95,7 @@ class DashboardService {
     try {
       const response: AxiosResponse<SystemMetricsData[]> = await axios.get(
         `${this.baseURL}/v1/dashboard/system/metrics?period=${period}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -104,6 +113,7 @@ class DashboardService {
     try {
       const response: AxiosResponse<CacheMetricsData[]> = await axios.get(
         `${this.baseURL}/v1/dashboard/cache/metrics?period=${period}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -121,6 +131,7 @@ class DashboardService {
     try {
       const response: AxiosResponse<RecentActivity[]> = await axios.get(
         `${this.baseURL}/v1/dashboard/activity/recent?limit=${limit}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -138,6 +149,7 @@ class DashboardService {
     try {
       const response: AxiosResponse<RealtimeMetrics> = await axios.get(
         `${this.baseURL}/v1/dashboard/metrics/realtime`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -156,6 +168,7 @@ class DashboardService {
     try {
       const response: AxiosResponse<PerformanceMetrics> = await axios.get(
         `${this.baseURL}/v1/dashboard/performance/metrics`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -176,6 +189,7 @@ class DashboardService {
     try {
       const response: AxiosResponse<UserActivityMetrics> = await axios.get(
         `${this.baseURL}/v1/dashboard/users/activity?period=${period}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;

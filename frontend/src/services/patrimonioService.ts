@@ -14,6 +14,14 @@ class PatrimonioService {
   private baseURL = config.api.baseUrl;
 
   /**
+   * Helper para obter headers de autenticação
+   */
+  private getAuthHeaders(): Record<string, string> {
+    const token = localStorage.getItem('auth_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  /**
    * Lista patrimônios com paginação e filtros
    */
   async getPatrimonios(
@@ -44,7 +52,9 @@ class PatrimonioService {
         params.append('valorMaximo', filters.valorMaximo.toString());
 
       const response: AxiosResponse<PaginatedPatrimoniosResponse> =
-        await axios.get(`${this.baseURL}/patrimonio?${params.toString()}`);
+        await axios.get(`${this.baseURL}/v1/patrimonio?${params.toString()}`, {
+          headers: this.getAuthHeaders(),
+        });
 
       return response.data;
     } catch (error) {
@@ -59,7 +69,8 @@ class PatrimonioService {
   async getPatrimonioById(id: string): Promise<Patrimonio> {
     try {
       const response: AxiosResponse<Patrimonio> = await axios.get(
-        `${this.baseURL}/patrimonio/${id}`,
+        `${this.baseURL}/v1/patrimonio/${id}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -75,7 +86,8 @@ class PatrimonioService {
   async getPatrimonioByCodigo(codigo: string): Promise<Patrimonio> {
     try {
       const response: AxiosResponse<Patrimonio> = await axios.get(
-        `${this.baseURL}/patrimonio/codigo/${codigo}`,
+        `${this.baseURL}/v1/patrimonio/codigo/${codigo}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -93,7 +105,9 @@ class PatrimonioService {
   ): Promise<PaginatedPatrimoniosResponse> {
     try {
       const response: AxiosResponse<PaginatedPatrimoniosResponse> =
-        await axios.get(`${this.baseURL}/patrimonio/categoria/${categoria}`);
+        await axios.get(`${this.baseURL}/v1/patrimonio/categoria/${categoria}`, {
+          headers: this.getAuthHeaders(),
+        });
 
       return response.data;
     } catch (error) {
@@ -110,7 +124,9 @@ class PatrimonioService {
   ): Promise<PaginatedPatrimoniosResponse> {
     try {
       const response: AxiosResponse<PaginatedPatrimoniosResponse> =
-        await axios.get(`${this.baseURL}/patrimonio/status/${status}`);
+        await axios.get(`${this.baseURL}/v1/patrimonio/status/${status}`, {
+          headers: this.getAuthHeaders(),
+        });
 
       return response.data;
     } catch (error) {
@@ -128,7 +144,8 @@ class PatrimonioService {
     try {
       const response: AxiosResponse<PaginatedPatrimoniosResponse> =
         await axios.get(
-          `${this.baseURL}/patrimonio/responsavel/${responsavelId}`,
+          `${this.baseURL}/v1/patrimonio/responsavel/${responsavelId}`,
+          { headers: this.getAuthHeaders() },
         );
 
       return response.data;
@@ -144,8 +161,9 @@ class PatrimonioService {
   async createPatrimonio(data: CreatePatrimonioRequest): Promise<Patrimonio> {
     try {
       const response: AxiosResponse<Patrimonio> = await axios.post(
-        `${this.baseURL}/patrimonio`,
+        `${this.baseURL}/v1/patrimonio`,
         data,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -164,8 +182,9 @@ class PatrimonioService {
   ): Promise<Patrimonio> {
     try {
       const response: AxiosResponse<Patrimonio> = await axios.patch(
-        `${this.baseURL}/patrimonio/${id}`,
+        `${this.baseURL}/v1/patrimonio/${id}`,
         data,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -180,7 +199,9 @@ class PatrimonioService {
    */
   async deletePatrimonio(id: string): Promise<void> {
     try {
-      await axios.delete(`${this.baseURL}/patrimonio/${id}`);
+      await axios.delete(`${this.baseURL}/v1/patrimonio/${id}`, {
+        headers: this.getAuthHeaders(),
+      });
     } catch (error) {
       console.error('Erro ao deletar patrimônio:', error);
       throw error;
@@ -193,7 +214,8 @@ class PatrimonioService {
   async getPatrimonioStats(): Promise<PatrimonioStats> {
     try {
       const response: AxiosResponse<PatrimonioStats> = await axios.get(
-        `${this.baseURL}/patrimonio/stats/categoria`,
+        `${this.baseURL}/v1/patrimonio/stats/categoria`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -209,7 +231,8 @@ class PatrimonioService {
   async getPatrimonioStatsByStatus(): Promise<Record<string, number>> {
     try {
       const response: AxiosResponse<Record<string, number>> = await axios.get(
-        `${this.baseURL}/patrimonio/stats/status`,
+        `${this.baseURL}/v1/patrimonio/stats/status`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -225,7 +248,8 @@ class PatrimonioService {
   async getValorTotal(): Promise<{ valorTotal: number }> {
     try {
       const response: AxiosResponse<{ valorTotal: number }> = await axios.get(
-        `${this.baseURL}/patrimonio/stats/valor-total`,
+        `${this.baseURL}/v1/patrimonio/stats/valor-total`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -241,7 +265,8 @@ class PatrimonioService {
   async getPatrimoniosVencimentoGarantia(): Promise<Patrimonio[]> {
     try {
       const response: AxiosResponse<Patrimonio[]> = await axios.get(
-        `${this.baseURL}/patrimonio/vencimento-garantia`,
+        `${this.baseURL}/v1/patrimonio/vencimento-garantia`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -279,7 +304,8 @@ class PatrimonioService {
       if (filters.limit) params.append('limit', filters.limit.toString());
 
       const response: AxiosResponse<PatrimonioSearchResult> = await axios.get(
-        `${this.baseURL}/patrimonio/search?${params.toString()}`,
+        `${this.baseURL}/v1/patrimonio/search?${params.toString()}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -318,8 +344,11 @@ class PatrimonioService {
       params.append('format', format);
 
       const response = await axios.get(
-        `${this.baseURL}/patrimonio/export?${params.toString()}`,
-        { responseType: 'blob' },
+        `${this.baseURL}/v1/patrimonio/export?${params.toString()}`,
+        { 
+          responseType: 'blob',
+          headers: this.getAuthHeaders(),
+        },
       );
 
       return response.data;

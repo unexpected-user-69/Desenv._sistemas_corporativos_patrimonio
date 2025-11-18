@@ -57,9 +57,9 @@ export const PatrimonioPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <PatrimonioList
-          onEdit={() => void handleEdit({} as Patrimonio)}
-          onDelete={() => void handleDelete('')}
-          onView={() => void handleView({} as Patrimonio)}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
         />
       </div>
     </div>

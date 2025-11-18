@@ -26,6 +26,7 @@ import {
   CompactRecentActivity,
 } from '../../components/dashboard/RecentActivity';
 import { DashboardFilters } from '../../types/dashboard';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 export const DashboardPage: React.FC = () => {
   const {
@@ -45,6 +46,7 @@ export const DashboardPage: React.FC = () => {
     clearError,
   } = useDashboardStore();
 
+  const { navigateTo } = useNavigation();
   const [showFilters, setShowFilters] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -274,7 +276,10 @@ export const DashboardPage: React.FC = () => {
             Ações Rápidas
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-left">
+            <button
+              onClick={() => navigateTo('users')}
+              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-left cursor-pointer"
+            >
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <Users className="h-5 w-5 text-blue-600" />
@@ -290,7 +295,10 @@ export const DashboardPage: React.FC = () => {
               </div>
             </button>
 
-            <button className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-left">
+            <button
+              onClick={() => navigateTo('patrimonio')}
+              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-left cursor-pointer"
+            >
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-purple-100 rounded-lg">
                   <Building2 className="h-5 w-5 text-purple-600" />
@@ -302,7 +310,10 @@ export const DashboardPage: React.FC = () => {
               </div>
             </button>
 
-            <button className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-left">
+            <button
+              onClick={() => navigateTo('cache')}
+              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-left cursor-pointer"
+            >
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-green-100 rounded-lg">
                   <Database className="h-5 w-5 text-green-600" />
@@ -314,7 +325,10 @@ export const DashboardPage: React.FC = () => {
               </div>
             </button>
 
-            <button className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-left">
+            <button
+              onClick={() => navigateTo('monitoring')}
+              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-left cursor-pointer"
+            >
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-orange-100 rounded-lg">
                   <Activity className="h-5 w-5 text-orange-600" />

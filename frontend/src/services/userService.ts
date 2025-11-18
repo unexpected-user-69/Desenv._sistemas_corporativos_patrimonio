@@ -21,7 +21,15 @@ import { mockUserService } from './mockUserService';
 
 class UserService {
   private baseURL = config.api.baseUrl;
-  private useMock = true; // Mude para false quando backend estiver pronto
+  private useMock = false; // Backend está pronto
+
+  /**
+   * Helper para obter headers de autenticação
+   */
+  private getAuthHeaders(): Record<string, string> {
+    const token = localStorage.getItem('auth_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
 
   /**
    * Lista usuários com paginação e filtros
@@ -43,11 +51,21 @@ class UserService {
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
 
-      const response: AxiosResponse<PaginatedUsersResponse> = await axios.get(
+      const response: AxiosResponse<any> = await axios.get(
         `${this.baseURL}/v1/users?${params.toString()}`,
+        { headers: this.getAuthHeaders() },
       );
 
-      return response.data;
+      // Mapear resposta do backend para o formato esperado pelo frontend
+      const backendData = response.data;
+      return {
+        data: backendData.data || [],
+        total: backendData.total || 0,
+        page: backendData.page || 1,
+        limit: backendData.limit || 10,
+        hasNext: backendData.hasNextPage || false,
+        hasPrev: backendData.hasPreviousPage || false,
+      };
     } catch (error: any) {
       // Se falhar, tentar com mock
       console.warn('Backend não disponível, usando mock:', error.message);
@@ -66,6 +84,7 @@ class UserService {
     try {
       const response: AxiosResponse<User> = await axios.get(
         `${this.baseURL}/v1/users/${id}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -82,6 +101,7 @@ class UserService {
     try {
       const response: AxiosResponse<User> = await axios.get(
         `${this.baseURL}/v1/users/email/${email}`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -104,6 +124,7 @@ class UserService {
       const response: AxiosResponse<User> = await axios.post(
         `${this.baseURL}/v1/users`,
         userData,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -123,6 +144,7 @@ class UserService {
       const response: AxiosResponse<BulkCreateUserResponse> = await axios.post(
         `${this.baseURL}/v1/users/bulk`,
         bulkData,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -145,6 +167,7 @@ class UserService {
       const response: AxiosResponse<User> = await axios.put(
         `${this.baseURL}/v1/users/${id}`,
         userData,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -163,7 +186,9 @@ class UserService {
     }
 
     try {
-      await axios.delete(`${this.baseURL}/v1/users/${id}`);
+      await axios.delete(`${this.baseURL}/v1/users/${id}`, {
+        headers: this.getAuthHeaders(),
+      });
     } catch (error: any) {
       console.warn('Backend não disponível, usando mock:', error.message);
       return mockUserService.deleteUser(id);
@@ -180,6 +205,7 @@ class UserService {
       const response: AxiosResponse<PaginatedUsersResponse> = await axios.post(
         `${this.baseURL}/v1/users/advanced/search`,
         searchRequest,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -200,6 +226,7 @@ class UserService {
       const response: AxiosResponse<CursorSearchResponse> = await axios.post(
         `${this.baseURL}/v1/users/cursor/search`,
         searchRequest,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -218,6 +245,7 @@ class UserService {
       const response: AxiosResponse<User[]> = await axios.post(
         `${this.baseURL}/v1/users/fuzzy/search`,
         searchRequest,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -234,6 +262,7 @@ class UserService {
       const response: AxiosResponse<User[]> = await axios.post(
         `${this.baseURL}/v1/users/date-range`,
         dateRange,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -251,6 +280,7 @@ class UserService {
     try {
       const response: AxiosResponse<UserRoleStats[]> = await axios.get(
         `${this.baseURL}/v1/users/stats/roles`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;
@@ -271,6 +301,7 @@ class UserService {
       const response: AxiosResponse<RecentActiveUsersResponse> =
         await axios.get(
           `${this.baseURL}/v1/users/recent/active?period=${period}`,
+          { headers: this.getAuthHeaders() },
         );
 
       return response.data;
@@ -289,6 +320,7 @@ class UserService {
     try {
       const response: AxiosResponse<UserStats> = await axios.get(
         `${this.baseURL}/v1/users/stats`,
+        { headers: this.getAuthHeaders() },
       );
 
       return response.data;

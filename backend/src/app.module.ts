@@ -22,6 +22,7 @@ import { InventoryMobileModule } from './inventory-mobile/inventory-mobile.modul
 import { MaintenanceModule } from './maintenance/maintenance.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { MetricsController } from './common/controllers/metrics.controller';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -83,6 +84,7 @@ import { SwaggerController } from './swagger/swagger.controller';
     MaintenanceModule,
     NotificationsModule,
     ReportsModule,
+    DashboardModule,
   ],
   controllers: [AppController, MetricsController, SwaggerController],
   providers: [

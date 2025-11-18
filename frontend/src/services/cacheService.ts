@@ -20,7 +20,7 @@ class CacheService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = 'http://localhost:3000'; // Hardcoded for now, was import.meta.env.VITE_API_BASE_URL
+    this.baseURL = 'http://localhost:3001'; // Hardcoded for now, was import.meta.env.VITE_API_BASE_URL
     this.api = axios.create({
       baseURL: this.baseURL,
       timeout: 10000,

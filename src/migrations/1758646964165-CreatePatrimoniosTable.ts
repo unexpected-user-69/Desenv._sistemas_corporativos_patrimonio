@@ -130,34 +130,34 @@ export class CreatePatrimoniosTable1758646964165 implements MigrationInterface {
 
     // Criar índices
     await queryRunner.query(
-      `CREATE UNIQUE INDEX "uq_patrimonios_codigo" ON "patrimonios" ("codigo")`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS "uq_patrimonios_codigo" ON "patrimonios" ("codigo")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_patrimonios_categoria" ON "patrimonios" ("categoria")`,
+      `CREATE INDEX IF NOT EXISTS "idx_patrimonios_categoria" ON "patrimonios" ("categoria")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_patrimonios_status" ON "patrimonios" ("status")`,
+      `CREATE INDEX IF NOT EXISTS "idx_patrimonios_status" ON "patrimonios" ("status")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_patrimonios_responsavel" ON "patrimonios" ("responsavel_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_patrimonios_responsavel" ON "patrimonios" ("responsavel_id")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_patrimonios_nome" ON "patrimonios" ("nome")`,
+      `CREATE INDEX IF NOT EXISTS "idx_patrimonios_nome" ON "patrimonios" ("nome")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_patrimonios_marca" ON "patrimonios" ("marca")`,
+      `CREATE INDEX IF NOT EXISTS "idx_patrimonios_marca" ON "patrimonios" ("marca")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_patrimonios_modelo" ON "patrimonios" ("modelo")`,
+      `CREATE INDEX IF NOT EXISTS "idx_patrimonios_modelo" ON "patrimonios" ("modelo")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_patrimonios_localizacao" ON "patrimonios" ("localizacao")`,
+      `CREATE INDEX IF NOT EXISTS "idx_patrimonios_localizacao" ON "patrimonios" ("localizacao")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_patrimonios_data_aquisicao" ON "patrimonios" ("data_aquisicao")`,
+      `CREATE INDEX IF NOT EXISTS "idx_patrimonios_data_aquisicao" ON "patrimonios" ("data_aquisicao")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_patrimonios_valor_aquisicao" ON "patrimonios" ("valor_aquisicao")`,
+      `CREATE INDEX IF NOT EXISTS "idx_patrimonios_valor_aquisicao" ON "patrimonios" ("valor_aquisicao")`,
     );
 
     // Criar foreign key para responsável
@@ -172,23 +172,44 @@ export class CreatePatrimoniosTable1758646964165 implements MigrationInterface {
 
     // Adicionar constraint para categoria
     await queryRunner.query(`
-      ALTER TABLE "patrimonios" 
-      ADD CONSTRAINT "chk_patrimonios_categoria" 
-      CHECK (categoria IN ('EQUIPAMENTO', 'MOBILIARIO', 'VEICULO', 'IMOVEL', 'OUTROS'))
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'chk_patrimonios_categoria'
+        ) THEN
+          ALTER TABLE "patrimonios"
+          ADD CONSTRAINT "chk_patrimonios_categoria"
+          CHECK (categoria IN ('EQUIPAMENTO', 'MOBILIARIO', 'VEICULO', 'IMOVEL', 'OUTROS'));
+        END IF;
+      END$$;
     `);
 
     // Adicionar constraint para status
     await queryRunner.query(`
-      ALTER TABLE "patrimonios" 
-      ADD CONSTRAINT "chk_patrimonios_status" 
-      CHECK (status IN ('ATIVO', 'INATIVO', 'MANUTENCAO', 'DESCARTADO'))
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'chk_patrimonios_status'
+        ) THEN
+          ALTER TABLE "patrimonios"
+          ADD CONSTRAINT "chk_patrimonios_status"
+          CHECK (status IN ('ATIVO', 'INATIVO', 'MANUTENCAO', 'DESCARTADO'));
+        END IF;
+      END$$;
     `);
 
     // Adicionar constraint para valor de aquisição
     await queryRunner.query(`
-      ALTER TABLE "patrimonios" 
-      ADD CONSTRAINT "chk_patrimonios_valor_aquisicao" 
-      CHECK (valor_aquisicao IS NULL OR valor_aquisicao >= 0)
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'chk_patrimonios_valor_aquisicao'
+        ) THEN
+          ALTER TABLE "patrimonios"
+          ADD CONSTRAINT "chk_patrimonios_valor_aquisicao"
+          CHECK (valor_aquisicao IS NULL OR valor_aquisicao >= 0);
+        END IF;
+      END$$;
     `);
 
     console.log('✅ Tabela patrimonios criada com sucesso');

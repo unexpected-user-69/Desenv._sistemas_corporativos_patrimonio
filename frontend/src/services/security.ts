@@ -39,7 +39,7 @@ const generateMockCORSStats = (): CORSStats => ({
   preflightRequests: Math.floor(Math.random() * 500) + 100,
   blockedRequests: Math.floor(Math.random() * 50) + 5,
   allowedOrigins: [
-    'http://localhost:3000',
+    'http://localhost:3001',
     'https://app.example.com',
     'https://admin.example.com',
   ],
@@ -258,7 +258,7 @@ class SecurityService {
 
       // Mock data para demonstração
       const config: CORSConfig = {
-        origin: ['http://localhost:3000', 'https://app.example.com'],
+        origin: ['http://localhost:3001', 'https://app.example.com'],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
         exposedHeaders: ['X-Total-Count', 'X-Page-Count'],

@@ -16,7 +16,7 @@ class FilterService {
   constructor() {
     this.baseURL =
       (import.meta.env as Record<string, string>).VITE_API_BASE_URL ||
-      'http://localhost:3000';
+      'http://localhost:3001';
     this.api = axios.create({
       baseURL: this.baseURL,
       timeout: 10000,

@@ -1,4 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Spinner } from './components/ui/Spinner';
+import { Toast, ToastItem } from './components/ui/Toast';
+import Splash from './components/ui/Splash';
+// framer-motion removed to avoid install/runtime issues; using CSS transitions instead
+import CacheIcon from './components/icons/CacheIcon';
+import FilterIcon from './components/icons/FilterIcon';
+import AnalyticsIcon from './components/icons/AnalyticsIcon';
+import MonitoringIcon from './components/icons/MonitoringIcon';
+import PerformanceIcon from './components/icons/PerformanceIcon';
+import AdvancedIcon from './components/icons/AdvancedIcon';
+import ProductionIcon from './components/icons/ProductionIcon';
+import TestingIcon from './components/icons/TestingIcon';
+import api from './utils/api';
 import {
   Database,
   Filter,
@@ -28,6 +41,11 @@ type TabType =
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
+  const [showSplash, setShowSplash] = useState(true);
 
   const tabs = [
     { id: 'home', name: 'Início', icon: Home },
@@ -55,79 +73,148 @@ export const App: React.FC = () => {
                   Frontend com funcionalidades avançadas de Cache Redis e
                   Filtros
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="card text-center">
-                    <Database className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Cache Redis
-                    </h3>
-                    <p className="text-gray-600">
-                      Gerenciamento e monitoramento do cache Redis com métricas
-                      em tempo real
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Filter className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Filtros Avançados
-                    </h3>
-                    <p className="text-gray-600">
-                      Busca avançada com filtros por intervalo de datas e mais
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <BarChart3 className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Analytics
-                    </h3>
-                    <p className="text-gray-600">
-                      Análise de performance e uso dos filtros
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Activity className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Monitoramento
-                    </h3>
-                    <p className="text-gray-600">
-                      Dashboard de métricas em tempo real e logs estruturados
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Zap className="h-12 w-12 text-orange-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Performance
-                    </h3>
-                    <p className="text-gray-600">
-                      Testes de carga e stress para avaliação de performance
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Settings className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Avançado
-                    </h3>
-                    <p className="text-gray-600">
-                      Funcionalidades avançadas e configurações do sistema
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Produção
-                    </h3>
-                    <p className="text-gray-600">
-                      Configurações de produção, segurança e monitoramento
-                    </p>
-                  </div>
-                  <div className="card text-center">
-                    <TestTube className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Testes
-                    </h3>
-                    <p className="text-gray-600">
-                      Utilitários de teste, mocks e qualidade de código
-                    </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {[
+                    {
+                      id: 'cache',
+                      title: 'Cache Redis',
+                      icon: CacheIcon,
+                      description:
+                        'Gerenciamento e monitoramento do cache Redis com métricas em tempo real',
+                    },
+                    {
+                      id: 'filters',
+                      title: 'Filtros Avançados',
+                      icon: FilterIcon,
+                      description: 'Busca avançada com filtros por intervalo de datas e mais',
+                    },
+                    {
+                      id: 'analytics',
+                      title: 'Analytics',
+                      icon: AnalyticsIcon,
+                      description: 'Análise de performance e uso dos filtros',
+                    },
+                    {
+                      id: 'monitoring',
+                      title: 'Monitoramento',
+                      icon: MonitoringIcon,
+                      description: 'Dashboard de métricas em tempo real e logs estruturados',
+                    },
+                    {
+                      id: 'performance',
+                      title: 'Performance',
+                      icon: PerformanceIcon,
+                      description: 'Testes de carga e stress para avaliação de performance',
+                    },
+                    {
+                      id: 'advanced',
+                      title: 'Avançado',
+                      icon: AdvancedIcon,
+                      description: 'Funcionalidades avançadas e configurações do sistema',
+                    },
+                    {
+                      id: 'production',
+                      title: 'Produção',
+                      icon: ProductionIcon,
+                      description: 'Configurações de produção, segurança e monitoramento',
+                    },
+                    {
+                      id: 'testing',
+                      title: 'Testes',
+                      icon: TestingIcon,
+                      description: 'Utilitários de teste, mocks e qualidade de código',
+                    },
+                    ].map((c) => {
+                    const Icon = c.icon as any;
+                    return (
+                      <div
+                        key={c.id}
+                        className="bg-white/90 backdrop-blur-md rounded-lg shadow p-6 flex flex-col justify-between animate-fade-in hover:scale-[1.02] hover:shadow-lg transition-transform duration-200"
+                      >
+                        <div>
+                          <Icon className="h-10 w-10 mb-4" />
+                          <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                            {c.title}
+                          </h3>
+                          <p className="text-slate-600 mb-4">{c.description}</p>
+                        </div>
+                        <div className="flex gap-3 justify-end">
+                          <button
+                            onClick={() => setActiveTab(c.id as TabType)}
+                            className="px-3 py-1 bg-primary text-white rounded hover:bg-primary-600 text-sm"
+                          >
+                            Abrir
+                          </button>
+                          {c.id === 'cache' && (
+                            <button
+                              onClick={async () => {
+                                setStatusMessage(null);
+                                setActionLoading((s) => ({ ...s, [c.id]: true }));
+                                try {
+                                  const res = await api.safeFetch('/v1/cache/stats');
+                                  const msg = `Cache stats: ${res.status} - ${res.text.slice(0,200)}`;
+                                  setStatusMessage(msg);
+                                  addToast('Stats carregados', 'success');
+                                } catch (err: any) {
+                                  const msg = `Erro ao buscar stats: ${err.message || err}`;
+                                  setStatusMessage(msg);
+                                  addToast('Erro ao buscar stats', 'error');
+                                } finally {
+                                  setActionLoading((s) => ({ ...s, [c.id]: false }));
+                                }
+                              }}
+                              className="px-3 py-1 bg-white border text-slate-800 rounded hover:bg-slate-50 text-sm flex items-center gap-2"
+                            >
+                              {actionLoading[c.id] ? <Spinner className="h-4 w-4" /> : 'Ver stats'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-6">
+                  <div className="max-w-xl mx-auto">
+                        <div className="flex items-center justify-between p-4 bg-white rounded shadow">
+                      <div>
+                        <p className="text-sm text-gray-600">Status</p>
+                        <p className="text-sm text-gray-800">
+                          {loading ? 'Carregando...' : statusMessage || 'Pronto'}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={async () => {
+                            setStatusMessage(null);
+                            setActionLoading((s) => ({ ...s, health: true }));
+                            try {
+                              const res = await api.safeFetch('/v1/health');
+                              const msg = `Health: ${res.status} - ${res.text.slice(0,200)}`;
+                              setStatusMessage(msg);
+                              addToast('Health verificado', 'success');
+                            } catch (e: any) {
+                              const msg = `Erro health: ${e.message || e}`;
+                              setStatusMessage(msg);
+                              addToast('Erro health', 'error');
+                            } finally {
+                              setActionLoading((s) => ({ ...s, health: false }));
+                            }
+                          }}
+                          className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center gap-2"
+                        >
+                          {actionLoading.health ? <Spinner className="h-4 w-4" /> : 'Ver Health'}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setToasts([]);
+                            setStatusMessage(null);
+                          }}
+                          className="px-3 py-1 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-sm"
+                        >
+                          Limpar
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -245,8 +332,20 @@ export const App: React.FC = () => {
     }
   };
 
+  const addToast = (message: string, type: 'info' | 'success' | 'error' = 'info') => {
+    const id = String(Date.now()) + Math.random().toString(36).slice(2, 7);
+    const item: ToastItem = { id, message, type };
+    setToasts((s) => [item, ...s]);
+    setTimeout(() => removeToast(id), 5000);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((s) => s.filter((t) => t.id !== id));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {showSplash && <Splash onFinish={() => setShowSplash(false)} />}
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -306,6 +405,7 @@ export const App: React.FC = () => {
           </div>
         </div>
       </footer>
+      <Toast items={toasts} onRemove={removeToast} />
     </div>
   );
 };

@@ -12,7 +12,7 @@ import type {
   CoverageSummary,
 } from '../types/testing';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://localhost:3001';
 
 export class TestingService {
   private baseUrl: string;
@@ -506,7 +506,7 @@ export class TestingService {
         name: 'Unit Tests',
         type: 'unit',
         config: {
-          baseUrl: 'http://localhost:3000',
+          baseUrl: 'http://localhost:3001',
           timeout: 5000,
           retries: 3,
           parallel: true,

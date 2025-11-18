@@ -10,14 +10,27 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
   
+  :root {
+    --primary: #0ea5e9; /* sky-500 */
+    --primary-600: #0284c7;
+    --accent: #7c3aed; /* violet-600 */
+    --muted: #64748b; /* slate-500 */
+    --surface: #ffffff;
+    --bg-grad-1: #f8fafc; /* gray-50 */
+    --bg-grad-2: #eef2ff; /* violet-50 */
+  }
+
   body {
-    @apply text-gray-900 bg-gray-50;
+    @apply text-gray-900;
+    background: linear-gradient(180deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 100%);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[color:var(--primary)] hover:bg-[color:var(--primary-600)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .btn-secondary {
@@ -25,7 +38,7 @@
   }
   
   .card {
-    @apply bg-white rounded-lg shadow p-6;
+    @apply bg-white/90 backdrop-blur-md rounded-lg shadow p-6 transition-transform transform hover:scale-[1.02] hover:shadow-lg animate-fade-in;
   }
   
   .input {
@@ -57,6 +70,31 @@
 
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* Splash screen */
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(124,58,237,0.06));
+  z-index: 60;
+}
+
+.splash-card {
+  @apply bg-white/80 backdrop-blur rounded-xl p-8 flex flex-col items-center gap-4 shadow-2xl;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(8px); opacity: 0; }
+  60% { transform: translateY(-6px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.splash-float {
+  animation: floatUp 900ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 /* Scrollbar customizada */

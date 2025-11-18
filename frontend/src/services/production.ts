@@ -142,7 +142,7 @@ const mockAlerts: ProductionAlert[] = [
     resolved: false,
     metadata: {
       origin: 'https://malicious-site.com',
-      allowedOrigins: ['http://localhost:3000'],
+      allowedOrigins: ['http://localhost:3001'],
     },
   },
   {
@@ -171,7 +171,7 @@ class ProductionService {
   // private _baseUrl: string;
 
   constructor() {
-    // this._baseUrl = 'http://localhost:3000';
+    // this._baseUrl = 'http://localhost:3001';
   }
 
   async getProductionDashboard(): Promise<ProductionDashboard> {
@@ -184,7 +184,7 @@ class ProductionService {
       const dashboard: ProductionDashboard = {
         environment: {
           name: 'production',
-          apiUrl: 'http://localhost:3000',
+          apiUrl: 'http://localhost:3001',
           corsOrigins: ['http://localhost:3000', 'http://localhost:3001'],
           rateLimitConfig: {
             ttl: 60000,

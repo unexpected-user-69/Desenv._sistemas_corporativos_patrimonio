@@ -70,12 +70,6 @@ const AppContent: React.FC = () => {
       icon: Home,
       roles: [UserRole.OPERATOR, UserRole.MANAGER, UserRole.ADMIN],
     },
-    {
-      id: 'dashboard',
-      name: 'Dashboard',
-      icon: BarChart3,
-      roles: [UserRole.MANAGER, UserRole.ADMIN],
-    },
     { id: 'users', name: 'Usuários', icon: Users, roles: [UserRole.MANAGER, UserRole.ADMIN] },
     {
       id: 'patrimonio',

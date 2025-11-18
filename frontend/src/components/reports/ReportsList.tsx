@@ -18,6 +18,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Download,
 } from 'lucide-react';
 import { useReportsStore } from '../../stores/reportsStore';
 import {
@@ -35,6 +36,7 @@ interface ReportsListProps {
   onDuplicateReport: (report: Report) => void;
   onShareReport: (report: Report) => void;
   onScheduleReport: (report: Report) => void;
+  onDownloadReport?: (report: Report) => void;
 }
 
 export const ReportsList: React.FC<ReportsListProps> = ({
@@ -45,6 +47,7 @@ export const ReportsList: React.FC<ReportsListProps> = ({
   onDuplicateReport,
   onShareReport,
   onScheduleReport,
+  onDownloadReport,
 }) => {
   const {
     reports,
@@ -418,6 +421,15 @@ export const ReportsList: React.FC<ReportsListProps> = ({
 
                     {/* Ações */}
                     <div className="flex items-center space-x-2">
+                      {report.status === ReportStatus.COMPLETED && onDownloadReport && (
+                        <button
+                          onClick={() => onDownloadReport(report)}
+                          className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                          title="Baixar relatório"
+                        >
+                          <Download className="h-4 w-4" />
+                        </button>
+                      )}
                       <button
                         onClick={() => onViewReport(report)}
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"

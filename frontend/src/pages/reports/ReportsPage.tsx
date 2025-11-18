@@ -16,6 +16,7 @@ import { ReportForm } from '../../components/reports/ReportForm';
 import { ReportTemplates } from '../../components/reports/ReportTemplates';
 import { ReportsDashboard } from '../../components/reports/ReportsDashboard';
 import { useReportsStore } from '../../stores/reportsStore';
+import { config } from '../../config/environment';
 import {
   Report,
   ReportConfig,
@@ -80,6 +81,44 @@ export const ReportsPage: React.FC = () => {
       await exportReport(report.id, format);
     } catch (err: any) {
       setFormError(err.message || 'Erro ao gerar relatório');
+    }
+  };
+
+  const handleDownloadReport = async (report: Report) => {
+    setFormError(null);
+    try {
+      if (report.status !== ReportStatus.COMPLETED) {
+        setFormError('Relatório ainda não está concluído. Aguarde a conclusão para fazer o download.');
+        return;
+      }
+
+      if (!report.fileUrl && !report.fileName) {
+        // Se não tem URL direta, tentar baixar via endpoint
+        await exportReport(report.id, report.config.format);
+      } else {
+        // Se tem URL direta, baixar diretamente
+        const response = await fetch(`${config.api.baseUrl}/v1/reports/${report.id}/download`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token') || localStorage.getItem('access_token') || ''}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Erro ao baixar relatório');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = report.fileName || `relatorio-${report.id}.${report.config.format}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (err: any) {
+      setFormError(err.message || 'Erro ao baixar relatório');
     }
   };
 
@@ -196,6 +235,7 @@ export const ReportsPage: React.FC = () => {
             onDuplicateReport={(report) => void handleDuplicateReport(report)}
             onShareReport={handleShareReport}
             onScheduleReport={handleScheduleReport}
+            onDownloadReport={handleDownloadReport}
           />
         )}
 

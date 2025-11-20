@@ -8,6 +8,7 @@ import { EventsModule } from './events/events.module';
 import { HealthController } from './health/health.controller';
 import { Event } from './events/entities/event.entity';
 import { EventPatrimonio } from './events/entities/event-patrimonio.entity';
+import { Patrimonio } from './events/entities/patrimonio.entity';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor';
@@ -32,7 +33,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
               type: 'postgres',
               url: process.env.DATABASE_URL,
               ssl: sslOptions,
-              entities: [Event, EventPatrimonio],
+              entities: [Event, EventPatrimonio, Patrimonio],
               synchronize: false,
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
@@ -46,7 +47,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
               password: process.env.DB_PASS ?? 'postgres',
               database: process.env.DB_NAME ?? 'patrimonio',
               ssl: sslOptions,
-              entities: [Event, EventPatrimonio],
+              entities: [Event, EventPatrimonio, Patrimonio],
               synchronize: false,
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
@@ -90,7 +91,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: TimeoutInterceptor,
+      useFactory: () => new TimeoutInterceptor(),
     },
     {
       provide: APP_FILTER,

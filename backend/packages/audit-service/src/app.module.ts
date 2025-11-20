@@ -8,8 +8,6 @@ import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { HealthController } from './health/health.controller';
 import { AuditLog } from './audit/entities/audit-log.entity';
-import { SystemLog } from './audit/entities/system-log.entity';
-import { Metric } from './audit/entities/metric.entity';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor';
@@ -21,6 +19,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
     }),
+    AuthModule,
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         const sslOptions =
@@ -34,7 +33,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
               type: 'postgres',
               url: process.env.DATABASE_URL,
               ssl: sslOptions,
-              entities: [AuditLog, SystemLog, Metric],
+              entities: [AuditLog],
               synchronize: false,
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
@@ -48,7 +47,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
               password: process.env.DB_PASS ?? 'postgres',
               database: process.env.DB_NAME ?? 'patrimonio',
               ssl: sslOptions,
-              entities: [AuditLog, SystemLog, Metric],
+              entities: [AuditLog],
               synchronize: false,
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
@@ -62,7 +61,6 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
         limit: 100,
       }],
     }),
-    AuthModule,
     AuditModule,
   ],
   controllers: [HealthController],
@@ -93,7 +91,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: TimeoutInterceptor,
+      useFactory: () => new TimeoutInterceptor(10000), // 10 segundos
     },
     {
       provide: APP_FILTER,
@@ -102,4 +100,3 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
   ],
 })
 export class AppModule {}
-

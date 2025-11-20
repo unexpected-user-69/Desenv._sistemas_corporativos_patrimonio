@@ -1,0 +1,653 @@
+openapi: 3.1.0
+info:
+  title: Categorias Service API
+  version: 1.0.0
+  description: |
+    Serviço de gerenciamento de categorias para o sistema de patrimônio.
+    Fornece endpoints para criar, listar, atualizar e gerenciar categorias de patrimônio.
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:3004
+    description: Servidor de desenvolvimento local
+  - url: http://categorias-service:3004
+    description: Servidor Docker interno
+
+paths:
+  /categorias:
+    post:
+      summary: Criar nova categoria
+      description: Cria uma nova categoria de patrimônio. Requer permissão de MANAGER ou ADMIN.
+      operationId: createCategoria
+      tags:
+        - categorias
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoriaDto'
+      responses:
+        '201':
+          description: Categoria criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriaResponseDto'
+        '400':
+          description: Dados de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas MANAGER ou ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Categoria com este código já existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Muitas requisições (rate limit)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: Listar categorias
+      description: Lista todas as categorias com filtros e paginação
+      operationId: findAllCategorias
+      tags:
+        - categorias
+      parameters:
+        - name: page
+          in: query
+          description: Número da página
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Quantidade de itens por página
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: q
+          in: query
+          description: Busca textual (nome, código ou descrição)
+          required: false
+          schema:
+            type: string
+        - name: codigo
+          in: query
+          description: Filtrar por código exato
+          required: false
+          schema:
+            type: string
+        - name: ativo
+          in: query
+          description: Filtrar por status ativo/inativo
+          required: false
+          schema:
+            type: boolean
+        - name: sortBy
+          in: query
+          description: Campo para ordenação
+          required: false
+          schema:
+            type: string
+            enum: [nome, codigo, createdAt, updatedAt]
+            default: nome
+        - name: sortOrder
+          in: query
+          description: Direção da ordenação
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: ASC
+      responses:
+        '200':
+          description: Lista de categorias retornada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoriaResponseDto'
+        '400':
+          description: Parâmetros de query inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categorias/{id}:
+    get:
+      summary: Buscar categoria por ID
+      description: Retorna uma categoria específica pelo ID
+      operationId: findOneCategoria
+      tags:
+        - categorias
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da categoria (UUID)
+          schema:
+            type: string
+            format: uuid
+            example: '7c0a1973-422c-47a1-8d27-caab79ffd612'
+      responses:
+        '200':
+          description: Categoria encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriaResponseDto'
+        '400':
+          description: ID inválido (UUID inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Categoria não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Atualizar categoria
+      description: Atualiza todos os campos de uma categoria. Requer permissão de MANAGER ou ADMIN.
+      operationId: updateCategoria
+      tags:
+        - categorias
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da categoria (UUID)
+          schema:
+            type: string
+            format: uuid
+            example: '7c0a1973-422c-47a1-8d27-caab79ffd612'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoriaDto'
+      responses:
+        '200':
+          description: Categoria atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriaResponseDto'
+        '400':
+          description: ID inválido (UUID inválido) ou dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas MANAGER ou ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Categoria não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Código da categoria já existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Deletar categoria
+      description: Remove uma categoria (soft delete). Requer permissão de ADMIN.
+      operationId: removeCategoria
+      tags:
+        - categorias
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da categoria (UUID)
+          schema:
+            type: string
+            format: uuid
+            example: '7c0a1973-422c-47a1-8d27-caab79ffd612'
+      responses:
+        '204':
+          description: Categoria deletada com sucesso
+        '400':
+          description: Categoria não pode ser deletada (patrimônios associados) ou ID inválido (UUID inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Categoria não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categorias/codigo/{codigo}:
+    get:
+      summary: Buscar categoria por código
+      description: Retorna uma categoria específica pelo código
+      operationId: findByCodigoCategoria
+      tags:
+        - categorias
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          description: Código da categoria
+          schema:
+            type: string
+            example: 'EQUIPAMENTO'
+      responses:
+        '200':
+          description: Categoria encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriaResponseDto'
+        '404':
+          description: Categoria não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categorias/{id}/desativar:
+    patch:
+      summary: Desativar categoria
+      description: Marca a categoria como inativa. Requer permissão de MANAGER ou ADMIN.
+      operationId: deactivateCategoria
+      tags:
+        - categorias
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da categoria (UUID)
+          schema:
+            type: string
+            format: uuid
+            example: '7c0a1973-422c-47a1-8d27-caab79ffd612'
+      responses:
+        '204':
+          description: Categoria desativada com sucesso
+        '400':
+          description: ID inválido (UUID inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas MANAGER ou ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Categoria não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categorias/{id}/ativar:
+    patch:
+      summary: Ativar categoria
+      description: Marca a categoria como ativa. Requer permissão de MANAGER ou ADMIN.
+      operationId: activateCategoria
+      tags:
+        - categorias
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da categoria (UUID)
+          schema:
+            type: string
+            format: uuid
+            example: '7c0a1973-422c-47a1-8d27-caab79ffd612'
+      responses:
+        '204':
+          description: Categoria ativada com sucesso
+        '400':
+          description: ID inválido (UUID inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas MANAGER ou ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Categoria não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      summary: Health check do serviço
+      description: Retorna o status de saúde do serviço, incluindo timestamp e uptime.
+      operationId: health
+      tags:
+        - health
+      responses:
+        '200':
+          description: Serviço está funcionando
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtido através do auth-service
+
+  schemas:
+    CreateCategoriaDto:
+      type: object
+      required:
+        - codigo
+        - nome
+      properties:
+        codigo:
+          type: string
+          minLength: 2
+          maxLength: 50
+          pattern: '^[A-Z0-9_]+$'
+          description: Código único da categoria (uppercase, sem espaços)
+          example: 'EQUIPAMENTO'
+        nome:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nome da categoria
+          example: 'Equipamento'
+        descricao:
+          type: string
+          description: Descrição detalhada da categoria
+          example: 'Equipamentos eletrônicos, computadores e periféricos'
+        icone:
+          type: string
+          maxLength: 50
+          description: Ícone da categoria (nome do ícone)
+          example: 'laptop'
+        cor:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          description: Cor da categoria em hexadecimal
+          example: '#3B82F6'
+        ativo:
+          type: boolean
+          default: true
+          description: Se a categoria está ativa
+
+    UpdateCategoriaDto:
+      type: object
+      properties:
+        codigo:
+          type: string
+          minLength: 2
+          maxLength: 50
+          pattern: '^[A-Z0-9_]+$'
+          description: Código único da categoria (uppercase, sem espaços)
+          example: 'EQUIPAMENTO'
+        nome:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nome da categoria
+          example: 'Equipamento'
+        descricao:
+          type: string
+          description: Descrição detalhada da categoria
+          example: 'Equipamentos eletrônicos, computadores e periféricos'
+        icone:
+          type: string
+          maxLength: 50
+          description: Ícone da categoria (nome do ícone)
+          example: 'laptop'
+        cor:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          description: Cor da categoria em hexadecimal
+          example: '#3B82F6'
+        ativo:
+          type: boolean
+          description: Se a categoria está ativa
+
+    CategoriaResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        codigo:
+          type: string
+          example: 'EQUIPAMENTO'
+        nome:
+          type: string
+          example: 'Equipamento'
+        descricao:
+          type: string
+          nullable: true
+          example: 'Equipamentos eletrônicos, computadores e periféricos'
+        icone:
+          type: string
+          nullable: true
+          example: 'laptop'
+        cor:
+          type: string
+          nullable: true
+          example: '#3B82F6'
+        ativo:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-10-22T18:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-10-22T18:00:00.000Z'
+
+    PaginatedCategoriaResponseDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoriaResponseDto'
+        total:
+          type: integer
+          example: 50
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 5
+        hasNextPage:
+          type: boolean
+          example: true
+        hasPreviousPage:
+          type: boolean
+          example: false
+
+    ErrorResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: false
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          oneOf:
+            - type: string
+            - type: object
+          example: 'Erro na validação dos dados'
+        timestamp:
+          type: string
+          format: date-time
+          example: '2025-01-27T10:00:00.000Z'
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: 'ok'
+        timestamp:
+          type: string
+          format: date-time
+          example: '2025-01-27T10:00:00.000Z'
+        uptime:
+          type: number
+          example: 1234.56
+        service:
+          type: string
+          example: 'categorias-service'
+        version:
+          type: string
+          example: '1.0.0'
+
+

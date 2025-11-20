@@ -91,7 +91,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: TimeoutInterceptor,
+      useFactory: () => new TimeoutInterceptor(10000), // 10 segundos
     },
     {
       provide: APP_FILTER,

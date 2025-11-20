@@ -1,0 +1,535 @@
+openapi: 3.1.0
+info:
+  title: Patrimonio Service API
+  version: 1.0.0
+  description: |
+    Serviço de gerenciamento de patrimônios para o sistema corporativo.
+    Fornece endpoints para criar, listar, atualizar e gerenciar patrimônios.
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:3006
+    description: Servidor de desenvolvimento local
+  - url: http://patrimonio-service:3006
+    description: Servidor Docker interno
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Verifica o status do serviço
+      operationId: healthCheck
+      tags:
+        - health
+      responses:
+        '200':
+          description: Serviço está funcionando
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: patrimonio-service
+
+  /patrimonio:
+    post:
+      summary: Criar novo patrimônio
+      description: Cria um novo patrimônio. Requer permissão de MANAGER ou ADMIN.
+      operationId: createPatrimonio
+      tags:
+        - patrimonio
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePatrimonioDto'
+      responses:
+        '201':
+          description: Patrimônio criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatrimonioResponseDto'
+        '400':
+          description: Dados de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+        '409':
+          description: Código do patrimônio já existe
+
+    get:
+      summary: Listar patrimônios com filtros e paginação
+      description: Lista patrimônios com filtros avançados e paginação
+      operationId: findAllPatrimonios
+      tags:
+        - patrimonio
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            maximum: 100
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Busca textual genérica
+        - name: categoriaId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/PatrimonioStatus'
+      responses:
+        '200':
+          description: Lista de patrimônios retornada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPatrimonioResponseDto'
+        '401':
+          description: Não autenticado
+
+  /patrimonio/{id}:
+    get:
+      summary: Buscar patrimônio por ID
+      description: Retorna um patrimônio específico pelo ID
+      operationId: findOnePatrimonio
+      tags:
+        - patrimonio
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Patrimônio encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatrimonioResponseDto'
+        '404':
+          description: Patrimônio não encontrado
+        '401':
+          description: Não autenticado
+
+    patch:
+      summary: Atualizar patrimônio
+      description: Atualiza um patrimônio existente
+      operationId: updatePatrimonio
+      tags:
+        - patrimonio
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePatrimonioDto'
+      responses:
+        '200':
+          description: Patrimônio atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatrimonioResponseDto'
+        '404':
+          description: Patrimônio não encontrado
+        '401':
+          description: Não autenticado
+
+    delete:
+      summary: Deletar patrimônio
+      description: Remove um patrimônio (soft delete)
+      operationId: removePatrimonio
+      tags:
+        - patrimonio
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Patrimônio deletado com sucesso
+        '404':
+          description: Patrimônio não encontrado
+        '401':
+          description: Não autenticado
+
+  /patrimonio/codigo/{codigo}:
+    get:
+      summary: Buscar patrimônio por código
+      description: Retorna um patrimônio pelo código único
+      operationId: findByCodigo
+      tags:
+        - patrimonio
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Patrimônio encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatrimonioResponseDto'
+        '404':
+          description: Patrimônio não encontrado
+
+  /patrimonio/dashboard:
+    get:
+      summary: Obter dashboard de patrimônios
+      description: Retorna estatísticas gerais dos patrimônios
+      operationId: getDashboard
+      tags:
+        - patrimonio
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard retornado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatrimonioDashboardResponseDto'
+
+  /patrimonio/bulk:
+    post:
+      summary: Criar múltiplos patrimônios
+      description: Cria múltiplos patrimônios em lote
+      operationId: createBulkPatrimonios
+      tags:
+        - patrimonio
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBulkPatrimonioDto'
+      responses:
+        '201':
+          description: Patrimônios criados com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatrimonioResponseDto'
+
+  /patrimonio/{id}/upload:
+    post:
+      summary: Upload de foto do patrimônio
+      description: Faz upload de uma foto para o patrimônio
+      operationId: uploadFoto
+      tags:
+        - patrimonio
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Foto uploadada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatrimonioResponseDto'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    PatrimonioStatus:
+      type: string
+      enum:
+        - ATIVO
+        - INATIVO
+        - MANUTENCAO
+        - DESCARTADO
+
+    CreatePatrimonioDto:
+      type: object
+      required:
+        - codigo
+        - nome
+      properties:
+        codigo:
+          type: string
+          example: PAT-2024-001
+        nome:
+          type: string
+          example: Notebook Dell Inspiron 15
+        descricao:
+          type: string
+          example: Notebook para uso administrativo
+        categoriaId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/PatrimonioStatus'
+        valorAquisicao:
+          type: number
+          example: 2500.00
+        dataAquisicao:
+          type: string
+          format: date
+        dataGarantia:
+          type: string
+          format: date
+        numeroSerie:
+          type: string
+          example: DL123456
+        modelo:
+          type: string
+          example: Inspiron 15
+        marca:
+          type: string
+          example: Dell
+        localizacao:
+          type: string
+          example: Sala 101
+        responsavelId:
+          type: string
+          format: uuid
+        observacoes:
+          type: string
+
+    UpdatePatrimonioDto:
+      type: object
+      properties:
+        codigo:
+          type: string
+        nome:
+          type: string
+        descricao:
+          type: string
+        categoriaId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/PatrimonioStatus'
+        valorAquisicao:
+          type: number
+        dataAquisicao:
+          type: string
+          format: date
+        dataGarantia:
+          type: string
+          format: date
+        numeroSerie:
+          type: string
+        modelo:
+          type: string
+        marca:
+          type: string
+        localizacao:
+          type: string
+        responsavelId:
+          type: string
+          format: uuid
+        observacoes:
+          type: string
+
+    PatrimonioResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+        nome:
+          type: string
+        descricao:
+          type: string
+        categoriaId:
+          type: string
+          format: uuid
+        categoria:
+          $ref: '#/components/schemas/CategoriaResponseDto'
+        status:
+          $ref: '#/components/schemas/PatrimonioStatus'
+        valorAquisicao:
+          type: number
+        dataAquisicao:
+          type: string
+          format: date
+        dataGarantia:
+          type: string
+          format: date
+        numeroSerie:
+          type: string
+        modelo:
+          type: string
+        marca:
+          type: string
+        localizacao:
+          type: string
+        responsavelId:
+          type: string
+          format: uuid
+        responsavel:
+          $ref: '#/components/schemas/UserResponseDto'
+        fotoUrl:
+          type: string
+        observacoes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+
+    PaginatedPatrimonioResponseDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatrimonioResponseDto'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+        hasNextPage:
+          type: boolean
+        hasPreviousPage:
+          type: boolean
+
+    PatrimonioDashboardResponseDto:
+      type: object
+      properties:
+        total:
+          type: integer
+        valorTotal:
+          type: number
+        porStatus:
+          type: object
+        porCategoria:
+          type: object
+        garantiasVencendo:
+          type: integer
+        emManutencao:
+          type: integer
+        novosUltimoMes:
+          type: integer
+
+    CreateBulkPatrimonioDto:
+      type: object
+      properties:
+        patrimonios:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatePatrimonioDto'
+
+    CategoriaResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+        nome:
+          type: string
+
+    UserResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string
+
+

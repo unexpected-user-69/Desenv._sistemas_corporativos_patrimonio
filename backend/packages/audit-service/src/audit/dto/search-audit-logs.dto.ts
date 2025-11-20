@@ -43,5 +43,3 @@ export class SearchAuditLogsDto {
   endDate?: string;
 }
 
-
-

@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: |
     Serviço de auditoria e logs para o sistema de patrimônio.
-    Fornece endpoints para criar e buscar logs de auditoria, estatísticas e métricas.
+    Fornece endpoints para criar, buscar e gerenciar logs de auditoria.
   contact:
     name: API Support
     email: support@example.com
@@ -19,10 +19,7 @@ paths:
   /audit/logs:
     post:
       summary: Criar log de auditoria
-      description: |
-        Cria um novo log de auditoria. Campos obrigatórios: action e entityType.
-        Campos userId, entityId e sessionId devem ser UUIDs válidos se fornecidos.
-        Não inclua comentários no JSON.
+      description: 'Cria um novo log de auditoria. Campos obrigatórios: action e entityType. Campos userId, entityId e sessionId devem ser UUIDs válidos se fornecidos.'
       operationId: createAuditLog
       tags:
         - audit
@@ -38,7 +35,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuditLog'
+                $ref: '#/components/schemas/AuditLogResponseDto'
         '400':
           description: Dados inválidos - verifique se os UUIDs estão no formato correto
           content:
@@ -54,9 +51,7 @@ paths:
 
     get:
       summary: Buscar logs de auditoria
-      description: |
-        Busca logs de auditoria com filtros opcionais.
-        Requer autenticação e role MANAGER ou ADMIN.
+      description: Lista logs de auditoria com filtros e paginação. Requer permissão de MANAGER ou ADMIN.
       operationId: searchAuditLogs
       tags:
         - audit
@@ -69,19 +64,20 @@ paths:
           required: false
           schema:
             type: integer
-            default: 1
             minimum: 1
+            default: 1
         - name: limit
           in: query
-          description: Limite de resultados por página
+          description: Quantidade de itens por página
           required: false
           schema:
             type: integer
-            default: 10
             minimum: 1
+            maximum: 100
+            default: 10
         - name: userId
           in: query
-          description: ID do usuário
+          description: ID do usuário (UUID)
           required: false
           schema:
             type: string
@@ -100,36 +96,31 @@ paths:
             type: string
         - name: startDate
           in: query
-          description: Data de início
+          description: Data de início (ISO 8601)
           required: false
           schema:
             type: string
             format: date-time
         - name: endDate
           in: query
-          description: Data de fim
+          description: Data de fim (ISO 8601)
           required: false
           schema:
             type: string
             format: date-time
       responses:
         '200':
-          description: Lista de logs de auditoria
+          description: Lista de logs de auditoria retornada com sucesso
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/AuditLog'
-                  total:
-                    type: integer
-                  page:
-                    type: integer
-                  limit:
-                    type: integer
+                $ref: '#/components/schemas/PaginatedAuditLogResponseDto'
+        '400':
+          description: Parâmetros de query inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Não autenticado
           content:
@@ -142,14 +133,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /audit/logs/{id}:
     get:
       summary: Buscar log de auditoria por ID
-      description: |
-        Busca um log de auditoria específico por ID.
-        Requer autenticação e role MANAGER ou ADMIN.
-      operationId: findOne
+      description: Retorna um log de auditoria específico pelo ID. Requer permissão de MANAGER ou ADMIN.
+      operationId: findOneAuditLog
       tags:
         - audit
       security:
@@ -157,21 +152,21 @@ paths:
       parameters:
         - name: id
           in: path
-          description: ID do log de auditoria
           required: true
+          description: ID do log de auditoria (UUID)
           schema:
             type: string
             format: uuid
-            example: b4e78c33-a198-452d-932d-a05d0794fad0
+            example: 'b4e78c33-a198-452d-932d-a05d0794fad0'
       responses:
         '200':
           description: Log de auditoria encontrado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuditLog'
+                $ref: '#/components/schemas/AuditLogResponseDto'
         '400':
-          description: ID inválido
+          description: ID inválido (UUID inválido)
           content:
             application/json:
               schema:
@@ -194,14 +189,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /audit/logs/entity/{entityType}/{entityId}:
     get:
       summary: Buscar logs por entidade
-      description: |
-        Busca logs de auditoria relacionados a uma entidade específica.
-        Requer autenticação e role MANAGER ou ADMIN.
-      operationId: findByEntity
+      description: Retorna todos os logs de auditoria de uma entidade específica. Requer permissão de MANAGER ou ADMIN.
+      operationId: findByEntityAuditLogs
       tags:
         - audit
       security:
@@ -209,19 +208,19 @@ paths:
       parameters:
         - name: entityType
           in: path
-          description: Tipo da entidade
           required: true
+          description: Tipo da entidade
           schema:
             type: string
-            example: Patrimonio
+            example: 'Patrimonio'
         - name: entityId
           in: path
-          description: ID da entidade
           required: true
+          description: ID da entidade (UUID)
           schema:
             type: string
             format: uuid
-            example: b4e78c33-a198-452d-932d-a05d0794fad0
+            example: 'b4e78c33-a198-452d-932d-a05d0794fad0'
       responses:
         '200':
           description: Logs da entidade encontrados
@@ -230,9 +229,9 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AuditLog'
+                  $ref: '#/components/schemas/AuditLogResponseDto'
         '400':
-          description: ID da entidade inválido
+          description: ID da entidade inválido (UUID inválido)
           content:
             application/json:
               schema:
@@ -245,6 +244,12 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Acesso negado - apenas MANAGER ou ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
           content:
             application/json:
               schema:
@@ -253,10 +258,8 @@ paths:
   /audit/logs/user/{userId}:
     get:
       summary: Buscar logs por usuário
-      description: |
-        Busca logs de auditoria relacionados a um usuário específico.
-        Requer autenticação e role MANAGER ou ADMIN.
-      operationId: findByUser
+      description: Retorna todos os logs de auditoria de um usuário específico. Requer permissão de MANAGER ou ADMIN.
+      operationId: findByUserAuditLogs
       tags:
         - audit
       security:
@@ -264,12 +267,12 @@ paths:
       parameters:
         - name: userId
           in: path
-          description: ID do usuário
           required: true
+          description: ID do usuário (UUID)
           schema:
             type: string
             format: uuid
-            example: 143b7f80-daca-4d0f-aa52-752f678e748e
+            example: '143b7f80-daca-4d0f-aa52-752f678e748e'
       responses:
         '200':
           description: Logs do usuário encontrados
@@ -278,9 +281,9 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AuditLog'
+                  $ref: '#/components/schemas/AuditLogResponseDto'
         '400':
-          description: ID do usuário inválido
+          description: ID do usuário inválido (UUID inválido)
           content:
             application/json:
               schema:
@@ -297,13 +300,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /audit/stats:
     get:
       summary: Obter estatísticas de auditoria
-      description: |
-        Retorna estatísticas agregadas de auditoria.
-        Requer autenticação e role ADMIN.
+      description: Retorna estatísticas gerais de auditoria. Requer permissão de ADMIN.
       operationId: getAuditStats
       tags:
         - audit
@@ -315,22 +322,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  totalLogs:
-                    type: integer
-                  actionsCount:
-                    type: object
-                    additionalProperties:
-                      type: integer
-                  entityTypesCount:
-                    type: object
-                    additionalProperties:
-                      type: integer
-                  recentActivity:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/AuditLog'
+                $ref: '#/components/schemas/AuditStatsResponseDto'
         '401':
           description: Não autenticado
           content:
@@ -339,6 +331,12 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Acesso negado - apenas ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
           content:
             application/json:
               schema:
@@ -365,6 +363,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Token JWT obtido através do auth-service
 
   schemas:
     CreateAuditLogDto:
@@ -378,129 +377,172 @@ components:
           format: uuid
           nullable: true
           description: ID do usuário que realizou a ação
-          example: 143b7f80-daca-4d0f-aa52-752f678e748e
+          example: '143b7f80-daca-4d0f-aa52-752f678e748e'
         action:
           type: string
           description: Ação realizada
-          example: CREATE
+          example: 'CREATE'
         entityType:
           type: string
           description: Tipo da entidade
-          example: Patrimonio
+          example: 'Patrimonio'
         entityId:
           type: string
           format: uuid
           nullable: true
           description: ID da entidade
-          example: b4e78c33-a198-452d-932d-a05d0794fad0
+          example: 'b4e78c33-a198-452d-932d-a05d0794fad0'
         oldValues:
           type: object
           nullable: true
-          description: Valores anteriores
+          description: Valores anteriores (JSONB)
           additionalProperties: true
         newValues:
           type: object
           nullable: true
-          description: Novos valores
+          description: Novos valores (JSONB)
           additionalProperties: true
         ipAddress:
           type: string
           nullable: true
           description: Endereço IP
-          example: 192.168.1.1
+          example: '192.168.1.1'
         userAgent:
           type: string
           nullable: true
           description: User Agent
-          example: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+          example: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         sessionId:
           type: string
           format: uuid
           nullable: true
           description: ID da sessão
-          example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+          example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
         service:
           type: string
           nullable: true
           description: Serviço que gerou o log
-          example: patrimonio-backend
+          example: 'patrimonio-backend'
         endpoint:
           type: string
           nullable: true
           description: Endpoint acessado
-          example: /v1/patrimonio
+          example: '/v1/patrimonio'
         description:
           type: string
           nullable: true
           description: Descrição da ação
-          example: Criação de novo patrimônio
+          example: 'Criação de novo patrimônio'
 
-    AuditLog:
+    AuditLogResponseDto:
       type: object
       properties:
         id:
           type: string
           format: uuid
-          description: ID do log de auditoria
+          example: 'b4e78c33-a198-452d-932d-a05d0794fad0'
         userId:
           type: string
           format: uuid
           nullable: true
-          description: ID do usuário
+          example: '143b7f80-daca-4d0f-aa52-752f678e748e'
         action:
           type: string
-          description: Ação realizada
+          example: 'CREATE'
         entityType:
           type: string
-          description: Tipo da entidade
+          example: 'Patrimonio'
         entityId:
           type: string
           format: uuid
           nullable: true
-          description: ID da entidade
+          example: 'b4e78c33-a198-452d-932d-a05d0794fad0'
         oldValues:
           type: object
           nullable: true
-          description: Valores anteriores
           additionalProperties: true
         newValues:
           type: object
           nullable: true
-          description: Novos valores
           additionalProperties: true
         ipAddress:
           type: string
           nullable: true
-          description: Endereço IP
+          example: '192.168.1.1'
         userAgent:
           type: string
           nullable: true
-          description: User Agent
+          example: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         sessionId:
           type: string
           format: uuid
           nullable: true
-          description: ID da sessão
+          example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
         service:
           type: string
           nullable: true
-          description: Serviço que gerou o log
+          example: 'patrimonio-backend'
         endpoint:
           type: string
           nullable: true
-          description: Endpoint acessado
+          example: '/v1/patrimonio'
         description:
           type: string
           nullable: true
-          description: Descrição da ação
+          example: 'Criação de novo patrimônio'
         timestamp:
           type: string
           format: date-time
-          description: Data e hora do log
+          example: '2025-01-27T10:00:00.000Z'
         updatedAt:
           type: string
           format: date-time
-          description: Data e hora da última atualização
+          example: '2025-01-27T10:00:00.000Z'
+
+    PaginatedAuditLogResponseDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogResponseDto'
+        total:
+          type: integer
+          example: 50
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+
+    AuditStatsResponseDto:
+      type: object
+      properties:
+        totalLogs:
+          type: integer
+          example: 1000
+        actionsCount:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            CREATE: 300
+            UPDATE: 400
+            DELETE: 200
+            READ: 100
+        entityTypesCount:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            Patrimonio: 500
+            Categoria: 300
+            User: 200
+        recentActivity:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogResponseDto'
 
     ErrorResponse:
       type: object
@@ -515,31 +557,28 @@ components:
           oneOf:
             - type: string
             - type: object
-          description: Mensagem de erro
+          example: 'Erro na validação dos dados'
         timestamp:
           type: string
           format: date-time
-          description: Timestamp do erro
+          example: '2025-01-27T10:00:00.000Z'
 
     HealthResponse:
       type: object
       properties:
         status:
           type: string
-          example: ok
+          example: 'ok'
         timestamp:
           type: string
           format: date-time
-          example: 2025-01-27T10:00:00.000Z
+          example: '2025-01-27T10:00:00.000Z'
         uptime:
           type: number
           example: 1234.56
         service:
           type: string
-          example: audit-service
+          example: 'audit-service'
         version:
           type: string
-          example: 1.0.0
-
-
-
+          example: '1.0.0'

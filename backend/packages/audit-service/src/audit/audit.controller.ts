@@ -21,7 +21,7 @@ import { TransformAndValidatePipe } from './pipes/transform-and-validate.pipe';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../users/enums/user-role.enum';
+import { UserRole } from '../shared/enums/user-role.enum';
 
 @ApiTags('audit')
 @ApiBearerAuth()
@@ -210,6 +210,3 @@ export class AuditController {
     return await this.auditService.getAuditStats();
   }
 }
-
-
-

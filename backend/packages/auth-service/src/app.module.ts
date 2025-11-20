@@ -89,7 +89,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: TimeoutInterceptor,
+      useFactory: () => new TimeoutInterceptor(),
     },
     {
       provide: APP_FILTER,

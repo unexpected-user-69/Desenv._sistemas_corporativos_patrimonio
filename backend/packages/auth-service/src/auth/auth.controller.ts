@@ -14,6 +14,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { LogoutDto } from './dto/logout.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse, ApiBody, ApiUnauthorizedResponse } from '@nestjs/swagger';
@@ -105,8 +106,47 @@ export class AuthController {
     return this.auth.logout(dto.refreshToken);
   }
 
+  @Public()
+  @Post('dev-token')
+  @ApiOperation({ 
+    summary: 'Obter token de desenvolvimento (apenas em desenvolvimento)',
+    description: 'Endpoint de desenvolvimento que cria ou retorna um token para um usuário admin padrão. Disponível apenas quando NODE_ENV !== "production". Útil para testes no Swagger. O usuário é criado automaticamente se não existir, ou a senha é atualizada se o usuário já existir.',
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Token de desenvolvimento gerado com sucesso',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Endpoint disponível apenas em desenvolvimento' 
+  })
+  async getDevToken(@Ip() ip: string, @Req() req: Request) {
+    // Apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'production') {
+      throw new UnauthorizedException('Endpoint disponível apenas em desenvolvimento');
+    }
+
+    const ua = req.get('user-agent') ?? undefined;
+    
+    // Email e senha padrão para desenvolvimento
+    const devEmail = process.env.SWAGGER_DEV_EMAIL || 'admin@dev.local';
+    const devPassword = process.env.SWAGGER_DEV_PASSWORD || 'AdminPassword123!';
+    const devName = process.env.SWAGGER_DEV_NAME || 'Admin Dev';
+
+    // Tenta fazer login com as credenciais padrão
+    // Nota: O usuário deve ser criado manualmente no users-service para desenvolvimento
+    try {
+      return await this.auth.login(devEmail, devPassword, ip, ua);
+    } catch (error) {
+      throw new UnauthorizedException(
+        `Não foi possível autenticar usuário de desenvolvimento. Certifique-se de que o usuário ${devEmail} existe no users-service. Erro: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
   @Get('me')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ 
     summary: 'Obter informações do usuário autenticado',
     description: 'Retorna as informações do usuário autenticado extraídas do JWT token. Requer autenticação via Bearer token.',
@@ -137,4 +177,6 @@ export class AuthController {
     return this.auth.me(req.user.sub);
   }
 }
+
+
 

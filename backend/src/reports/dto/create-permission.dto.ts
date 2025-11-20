@@ -1,6 +1,6 @@
 import { IsUUID, IsEnum, IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { UserRole } from '../../users/enums/user-role.enum';
+import { UserRole } from '../../shared/enums/user-role.enum';
 
 export class CreatePermissionDto {
   @ApiProperty({

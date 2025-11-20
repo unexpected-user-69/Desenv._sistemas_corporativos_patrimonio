@@ -22,7 +22,7 @@ import { ReportMetricsService } from './services/report-metrics.service';
 import { ReportStructuredLoggerService } from './services/report-structured-logger.service';
 import { ReportProcessor } from './processors/report.processor';
 import { ReportQuota } from './entities/report-quota.entity';
-import { User } from '../../shared/entities/user.entity';
+import { User } from '../shared/entities/user.entity';
 
 @Module({
   imports: [

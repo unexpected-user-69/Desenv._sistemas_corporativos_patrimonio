@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { User } from '../../shared/entities/user.entity';
 import { ReportCatalog } from './report-catalog.entity';
-import { UserRole } from '../../users/enums/user-role.enum';
+import { UserRole } from '../../shared/enums/user-role.enum';
 
 /**
  * Entity para permissões granulares de relatórios

@@ -154,3 +154,7 @@ export class CreateEventsTables1759300000000 implements MigrationInterface {
   }
 }
 
+
+
+
+

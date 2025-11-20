@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as fs from 'fs';
@@ -17,14 +16,8 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix('');
 
-  // Validation pipe global
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  // ValidationPipe, Interceptors e Filters estão configurados no AppModule
+  // via APP_PIPE, APP_INTERCEPTOR e APP_FILTER
 
   // Swagger
   const config = new DocumentBuilder()
@@ -56,4 +49,6 @@ async function bootstrap() {
 }
 
 bootstrap();
+
+
 

@@ -93,3 +93,7 @@ Veja `.env.example` para todas as variáveis de ambiente disponíveis.
 
 UNLICENSED
 
+
+
+
+

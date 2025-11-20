@@ -11,7 +11,7 @@ import { ReportPermission } from '../entities/report-permission.entity';
 import { ReportCatalog } from '../entities/report-catalog.entity';
 import { CreatePermissionDto } from '../dto/create-permission.dto';
 import { PermissionResponseDto } from '../dto/permission-response.dto';
-import { UserRole } from '../../users/enums/user-role.enum';
+import { UserRole } from '../../shared/enums/user-role.enum';
 
 @Injectable()
 export class ReportPermissionService {

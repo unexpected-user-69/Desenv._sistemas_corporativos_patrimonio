@@ -376,3 +376,7 @@ components:
       bearerFormat: JWT
       description: JWT token obtido no endpoint /auth/login
 
+
+
+
+

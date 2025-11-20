@@ -1,0 +1,545 @@
+openapi: 3.1.0
+info:
+  title: Audit Service API
+  version: 1.0.0
+  description: |
+    Serviço de auditoria e logs para o sistema de patrimônio.
+    Fornece endpoints para criar e buscar logs de auditoria, estatísticas e métricas.
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:3005
+    description: Servidor de desenvolvimento local
+  - url: http://audit-service:3005
+    description: Servidor Docker interno
+
+paths:
+  /audit/logs:
+    post:
+      summary: Criar log de auditoria
+      description: |
+        Cria um novo log de auditoria. Campos obrigatórios: action e entityType.
+        Campos userId, entityId e sessionId devem ser UUIDs válidos se fornecidos.
+        Não inclua comentários no JSON.
+      operationId: createAuditLog
+      tags:
+        - audit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuditLogDto'
+      responses:
+        '201':
+          description: Log de auditoria criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLog'
+        '400':
+          description: Dados inválidos - verifique se os UUIDs estão no formato correto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: Buscar logs de auditoria
+      description: |
+        Busca logs de auditoria com filtros opcionais.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: searchAuditLogs
+      tags:
+        - audit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Número da página
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          description: Limite de resultados por página
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: userId
+          in: query
+          description: ID do usuário
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          description: Ação realizada
+          required: false
+          schema:
+            type: string
+        - name: entityType
+          in: query
+          description: Tipo da entidade
+          required: false
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          description: Data de início
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          description: Data de fim
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Lista de logs de auditoria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLog'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas MANAGER ou ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /audit/logs/{id}:
+    get:
+      summary: Buscar log de auditoria por ID
+      description: |
+        Busca um log de auditoria específico por ID.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: findOne
+      tags:
+        - audit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID do log de auditoria
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: b4e78c33-a198-452d-932d-a05d0794fad0
+      responses:
+        '200':
+          description: Log de auditoria encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLog'
+        '400':
+          description: ID inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas MANAGER ou ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Log de auditoria não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /audit/logs/entity/{entityType}/{entityId}:
+    get:
+      summary: Buscar logs por entidade
+      description: |
+        Busca logs de auditoria relacionados a uma entidade específica.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: findByEntity
+      tags:
+        - audit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: entityType
+          in: path
+          description: Tipo da entidade
+          required: true
+          schema:
+            type: string
+            example: Patrimonio
+        - name: entityId
+          in: path
+          description: ID da entidade
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: b4e78c33-a198-452d-932d-a05d0794fad0
+      responses:
+        '200':
+          description: Logs da entidade encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+        '400':
+          description: ID da entidade inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas MANAGER ou ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /audit/logs/user/{userId}:
+    get:
+      summary: Buscar logs por usuário
+      description: |
+        Busca logs de auditoria relacionados a um usuário específico.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: findByUser
+      tags:
+        - audit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          description: ID do usuário
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 143b7f80-daca-4d0f-aa52-752f678e748e
+      responses:
+        '200':
+          description: Logs do usuário encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+        '400':
+          description: ID do usuário inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas MANAGER ou ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /audit/stats:
+    get:
+      summary: Obter estatísticas de auditoria
+      description: |
+        Retorna estatísticas agregadas de auditoria.
+        Requer autenticação e role ADMIN.
+      operationId: getAuditStats
+      tags:
+        - audit
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Estatísticas de auditoria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalLogs:
+                    type: integer
+                  actionsCount:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  entityTypesCount:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  recentActivity:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLog'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado - apenas ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      summary: Health check do serviço
+      description: Retorna o status de saúde do serviço, incluindo timestamp e uptime.
+      operationId: health
+      tags:
+        - health
+      responses:
+        '200':
+          description: Serviço está funcionando
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreateAuditLogDto:
+      type: object
+      required:
+        - action
+        - entityType
+      properties:
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID do usuário que realizou a ação
+          example: 143b7f80-daca-4d0f-aa52-752f678e748e
+        action:
+          type: string
+          description: Ação realizada
+          example: CREATE
+        entityType:
+          type: string
+          description: Tipo da entidade
+          example: Patrimonio
+        entityId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID da entidade
+          example: b4e78c33-a198-452d-932d-a05d0794fad0
+        oldValues:
+          type: object
+          nullable: true
+          description: Valores anteriores
+          additionalProperties: true
+        newValues:
+          type: object
+          nullable: true
+          description: Novos valores
+          additionalProperties: true
+        ipAddress:
+          type: string
+          nullable: true
+          description: Endereço IP
+          example: 192.168.1.1
+        userAgent:
+          type: string
+          nullable: true
+          description: User Agent
+          example: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+        sessionId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID da sessão
+          example: f47ac10b-58cc-4372-a567-0e02b2c3d479
+        service:
+          type: string
+          nullable: true
+          description: Serviço que gerou o log
+          example: patrimonio-backend
+        endpoint:
+          type: string
+          nullable: true
+          description: Endpoint acessado
+          example: /v1/patrimonio
+        description:
+          type: string
+          nullable: true
+          description: Descrição da ação
+          example: Criação de novo patrimônio
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID do log de auditoria
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID do usuário
+        action:
+          type: string
+          description: Ação realizada
+        entityType:
+          type: string
+          description: Tipo da entidade
+        entityId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID da entidade
+        oldValues:
+          type: object
+          nullable: true
+          description: Valores anteriores
+          additionalProperties: true
+        newValues:
+          type: object
+          nullable: true
+          description: Novos valores
+          additionalProperties: true
+        ipAddress:
+          type: string
+          nullable: true
+          description: Endereço IP
+        userAgent:
+          type: string
+          nullable: true
+          description: User Agent
+        sessionId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID da sessão
+        service:
+          type: string
+          nullable: true
+          description: Serviço que gerou o log
+        endpoint:
+          type: string
+          nullable: true
+          description: Endpoint acessado
+        description:
+          type: string
+          nullable: true
+          description: Descrição da ação
+        timestamp:
+          type: string
+          format: date-time
+          description: Data e hora do log
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data e hora da última atualização
+
+    ErrorResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: false
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          oneOf:
+            - type: string
+            - type: object
+          description: Mensagem de erro
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp do erro
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+          example: 2025-01-27T10:00:00.000Z
+        uptime:
+          type: number
+          example: 1234.56
+        service:
+          type: string
+          example: audit-service
+        version:
+          type: string
+          example: 1.0.0
+
+
+

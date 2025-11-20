@@ -31,6 +31,18 @@
     "src/migrations/**/*",
     "src/patrimonio/**/*",
     "src/users/**/*",
+    "src/shared/**/*",
+    "src/reports/**/*",
+    "src/auth/**/*",
+    "src/audit/**/*",
+    "src/categorias/**/*",
+    "src/dashboard/**/*",
+    "src/http-clients/**/*",
+    "src/integrations-erp/**/*",
+    "src/inventory-mobile/**/*",
+    "src/maintenance/**/*",
+    "src/notifications/**/*",
+    "src/events/**/*",
     "test/**/*"
   ],
   "exclude": ["node_modules", "dist", "frontend", "frontend-new"]

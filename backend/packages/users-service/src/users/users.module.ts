@@ -19,6 +19,7 @@ import { AuthHttpClient } from '../auth/auth-http-client';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
+      // @ts-ignore - JWT aceita string como expiresIn em runtime (ex: '15m'), mas TypeScript não reconhece o tipo StringValue
       useFactory: (configService: ConfigService) => ({
         secret: process.env.JWT_ACCESS_SECRET ?? configService.get<string>('JWT_ACCESS_SECRET') ?? 'dev_access_secret',
         signOptions: {
@@ -42,4 +43,5 @@ import { AuthHttpClient } from '../auth/auth-http-client';
   exports: [UsersService],
 })
 export class UsersModule {}
+
 

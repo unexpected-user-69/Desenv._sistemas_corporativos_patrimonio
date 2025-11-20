@@ -5,10 +5,10 @@ import { EventVisibility } from '../enums/event-visibility.enum';
 import { EventState } from '../enums/event-state.enum';
 // PatrimonioResponseDto - simplificado por enquanto
 // No futuro, quando Patrimonio Service for criado, usar HTTP client
-interface PatrimonioResponseDto {
-  id: string;
-  codigo: string;
-  nome: string;
+export class PatrimonioResponseDto {
+  id!: string;
+  codigo!: string;
+  nome!: string;
 }
 
 export class EventResponseDto {

@@ -2,9 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersHttpClient } from '../http-clients/users-http-client';
-import { PatrimonioService } from '../patrimonio/patrimonio.service';
+import { PatrimonioHttpClient } from '../http-clients/patrimonio-http-client';
 import { User } from '../shared/entities/user.entity';
-import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
 
 @Injectable()
 export class DashboardService {
@@ -13,11 +12,9 @@ export class DashboardService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Patrimonio)
-    private readonly patrimonioRepository: Repository<Patrimonio>,
     private readonly usersHttpClient: UsersHttpClient,
-    private readonly patrimonioService: PatrimonioService,
-  ) {}
+    private readonly patrimonioService: PatrimonioHttpClient,
+  ) { }
 
   /**
    * Obtém estatísticas gerais do dashboard
@@ -71,7 +68,7 @@ export class DashboardService {
    */
   async getUserGrowthData(period: string) {
     try {
-    const days = this.parsePeriod(period);
+      const days = this.parsePeriod(period);
       const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
@@ -119,45 +116,11 @@ export class DashboardService {
    */
   async getPatrimonioGrowthData(period: string) {
     try {
-    const days = this.parsePeriod(period);
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - days);
-
-      // Buscar patrimônios criados no período
-      const patrimonios = await this.patrimonioRepository
-        .createQueryBuilder('patrimonio')
-        .select("DATE_TRUNC('day', patrimonio.createdAt)", 'date')
-        .addSelect('COUNT(*)', 'count')
-        .where('patrimonio.createdAt >= :startDate', { startDate })
-        .andWhere('patrimonio.createdAt <= :endDate', { endDate })
-        .groupBy("DATE_TRUNC('day', patrimonio.createdAt)")
-        .orderBy("DATE_TRUNC('day', patrimonio.createdAt)", 'ASC')
-        .getRawMany();
-
-      // Criar mapa de datas para preencher lacunas
-      const dateMap = new Map<string, number>();
-      for (let i = 0; i < days; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
-        dateMap.set(dateStr, 0);
-      }
-
-      // Preencher com dados reais
-      patrimonios.forEach((item) => {
-        const dateStr = new Date(item.date).toISOString().split('T')[0];
-        dateMap.set(dateStr, parseInt(item.count, 10));
-      });
-
-      // Converter para array
-      return Array.from(dateMap.entries()).map(([date, count]) => ({
-        date,
-        count,
-      }));
+      // TODO: Implementar endpoint no microserviço para obter dados de crescimento
+      // Por enquanto retorna dados vazios para não quebrar o dashboard
+      return [];
     } catch (error) {
       this.logger.error('Erro ao obter dados de crescimento de patrimônios', error);
-      // Retornar dados vazios em caso de erro
       return [];
     }
   }
@@ -168,10 +131,10 @@ export class DashboardService {
   async getSystemMetrics(period: string) {
     try {
       const memUsage = process.memoryUsage();
-      
+
       // Calcular uso de memória em MB
       const memoryUsageMB = Math.round(memUsage.heapUsed / 1024 / 1024);
-      
+
       // Node.js não fornece CPU usage diretamente de forma confiável
       // Para uma implementação real, seria necessário usar biblioteca como 'systeminformation'
       // Por enquanto, usamos uma estimativa baseada no uso de memória
@@ -191,16 +154,16 @@ export class DashboardService {
       ];
     } catch (error) {
       this.logger.error('Erro ao obter métricas do sistema', error);
-    return [
-      {
-        timestamp: new Date().toISOString(),
+      return [
+        {
+          timestamp: new Date().toISOString(),
           cpu: 0,
-        cpuUsage: 0,
+          cpuUsage: 0,
           memory: 0,
-        memoryUsage: 0,
-        diskUsage: 0,
-      },
-    ];
+          memoryUsage: 0,
+          diskUsage: 0,
+        },
+      ];
     }
   }
 
@@ -212,12 +175,12 @@ export class DashboardService {
       // Em produção, isso seria obtido do Redis ou do cache manager
       // Por enquanto, retornamos métricas simuladas baseadas em estatísticas
       // que podem ser obtidas do CacheController
-      
+
       // Nota: Para métricas reais, seria necessário:
       // 1. Injetar CacheService ou Redis client
       // 2. Obter estatísticas do Redis (INFO stats)
       // 3. Calcular hit rate baseado em hits/misses
-      
+
       return [
         {
           timestamp: new Date().toISOString(),
@@ -229,15 +192,15 @@ export class DashboardService {
       ];
     } catch (error) {
       this.logger.error('Erro ao obter métricas do cache', error);
-    return [
-      {
-        timestamp: new Date().toISOString(),
-        hitRate: 0,
+      return [
+        {
+          timestamp: new Date().toISOString(),
+          hitRate: 0,
           hit_rate: 0,
-        totalKeys: 0,
+          totalKeys: 0,
           missRate: 0,
-      },
-    ];
+        },
+      ];
     }
   }
 

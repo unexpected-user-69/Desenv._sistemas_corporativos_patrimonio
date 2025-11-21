@@ -11,13 +11,13 @@ import { Assignment } from './entities/assignment.entity';
 import { CollectedItem } from './entities/collected-item.entity';
 import { Reconciliation } from './entities/reconciliation.entity';
 import { PatrimonioModule } from '../patrimonio/patrimonio.module';
-import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
+
 import { AppCacheModule } from '../common/cache/cache.module';
 import { HttpClientsModule } from '../http-clients/http-clients.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Campaign, Assignment, CollectedItem, Reconciliation, Patrimonio]),
+    TypeOrmModule.forFeature([Campaign, Assignment, CollectedItem, Reconciliation]),
     forwardRef(() => PatrimonioModule),
     AppCacheModule,
     HttpClientsModule,
@@ -38,5 +38,5 @@ import { HttpClientsModule } from '../http-clients/http-clients.module';
     NotificationsService,
   ],
 })
-export class InventoryMobileModule {}
+export class InventoryMobileModule { }
 

@@ -14,7 +14,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody, ApiUnauthorizedResponse, ApiForbiddenResponse } from '@nestjs/swagger';
-import { AuditService } from './audit.service';
+import { AuditHttpClient } from '../http-clients/audit-http-client';
 import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 import { SearchAuditLogsDto } from './dto/search-audit-logs.dto';
 import { TransformAndValidatePipe } from './pipes/transform-and-validate.pipe';
@@ -29,11 +29,11 @@ import { UserRole } from '../users/enums/user-role.enum';
 export class AuditController {
   private readonly logger = new Logger(AuditController.name);
 
-  constructor(private readonly auditService: AuditService) {}
+  constructor(private readonly auditService: AuditHttpClient) { }
 
   @Post('logs')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Criar log de auditoria',
     description: 'Cria um novo log de auditoria. Campos obrigatórios: action e entityType. Campos userId, entityId e sessionId devem ser UUIDs válidos se fornecidos. Não inclua comentários no JSON.'
   })
@@ -44,7 +44,7 @@ export class AuditController {
     try {
       // Validação simples de UUIDs se presentes
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      
+
       if (createAuditLogDto.userId && typeof createAuditLogDto.userId === 'string' && !uuidRegex.test(createAuditLogDto.userId)) {
         throw new BadRequestException('userId must be a valid UUID');
       }
@@ -62,7 +62,7 @@ export class AuditController {
       if (error instanceof HttpException) {
         throw error;
       }
-      
+
       // Log do erro completo para debug
       this.logger.error('Erro ao criar log de auditoria', {
         errorType: error?.constructor?.name,
@@ -73,7 +73,7 @@ export class AuditController {
         detail: error?.detail,
         dto: createAuditLogDto,
       });
-      
+
       // Se for um erro de banco de dados, retornar BadRequest
       if (error?.name === 'QueryFailedError' || error?.code?.startsWith('23')) {
         throw new BadRequestException({
@@ -82,7 +82,7 @@ export class AuditController {
           detail: error?.detail,
         });
       }
-      
+
       // Para outros erros, relançar como Internal Server Error com detalhes
       throw new HttpException(
         {
@@ -112,10 +112,10 @@ export class AuditController {
   @ApiOperation({ summary: 'Buscar log de auditoria por ID' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
-  @ApiParam({ 
-    name: 'id', 
-    description: 'ID do log de auditoria', 
-    type: 'string', 
+  @ApiParam({
+    name: 'id',
+    description: 'ID do log de auditoria',
+    type: 'string',
     format: 'uuid',
     example: 'b4e78c33-a198-452d-932d-a05d0794fad0',
     required: true
@@ -143,17 +143,17 @@ export class AuditController {
   @ApiOperation({ summary: 'Buscar logs por entidade' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
-  @ApiParam({ 
-    name: 'entityType', 
-    description: 'Tipo da entidade', 
+  @ApiParam({
+    name: 'entityType',
+    description: 'Tipo da entidade',
     type: 'string',
     example: 'Patrimonio',
     required: true
   })
-  @ApiParam({ 
-    name: 'entityId', 
-    description: 'ID da entidade', 
-    type: 'string', 
+  @ApiParam({
+    name: 'entityId',
+    description: 'ID da entidade',
+    type: 'string',
     format: 'uuid',
     example: 'b4e78c33-a198-452d-932d-a05d0794fad0',
     required: true
@@ -179,10 +179,10 @@ export class AuditController {
   @ApiOperation({ summary: 'Buscar logs por usuário' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiForbiddenResponse({ description: 'Acesso negado - apenas MANAGER ou ADMIN' })
-  @ApiParam({ 
-    name: 'userId', 
-    description: 'ID do usuário', 
-    type: 'string', 
+  @ApiParam({
+    name: 'userId',
+    description: 'ID do usuário',
+    type: 'string',
     format: 'uuid',
     example: '143b7f80-daca-4d0f-aa52-752f678e748e',
     required: true

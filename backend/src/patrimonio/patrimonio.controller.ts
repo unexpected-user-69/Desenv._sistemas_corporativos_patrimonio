@@ -41,13 +41,13 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/enums/user-role.enum';
-import { PatrimonioService } from './patrimonio.service';
+import { PatrimonioHttpClient } from '../http-clients/patrimonio-http-client';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
 import { UpdatePatrimonioDto } from './dto/update-patrimonio.dto';
 import { PatrimonioResponseDto } from './dto/patrimonio-response.dto';
 import { QueryPatrimonioDto } from './dto/query-patrimonio.dto';
 import { PaginatedPatrimoniosResponseDto } from './dto/paginated-patrimonios-response.dto';
-import { PatrimonioStatus } from './entities/patrimonio.entity';
+import { PatrimonioStatus } from './enums/patrimonio-status.enum';
 import { UpdateStatusPatrimonioDto } from './dto/update-status-patrimonio.dto';
 import { TransferirResponsavelDto } from './dto/transferir-responsavel.dto';
 import { PatrimonioDashboardResponseDto } from './dto/dashboard-response.dto';
@@ -79,7 +79,6 @@ import { NovosQueryDto } from './dto/novos-query.dto';
 import { HistoricoLocalizacoesResponseDto } from './dto/historico-localizacoes-response.dto';
 import { DeleteBulkPatrimonioDto } from './dto/delete-bulk-patrimonio.dto';
 import { DeleteBulkResponseDto } from './dto/delete-bulk-response.dto';
-import { PatrimonioPdfExportService } from './services/patrimonio-pdf-export.service';
 
 @ApiTags('patrimonio')
 @ApiBearerAuth()
@@ -88,9 +87,8 @@ export class PatrimonioController {
   private readonly logger = new Logger(PatrimonioController.name);
 
   constructor(
-    private readonly patrimonioService: PatrimonioService,
-    private readonly pdfExportService: PatrimonioPdfExportService,
-  ) {}
+    private readonly patrimonioService: PatrimonioHttpClient,
+  ) { }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -426,7 +424,7 @@ export class PatrimonioController {
 
   // ==================== ROTAS ESPECÍFICAS DE :id (devem vir ANTES das rotas genéricas) ====================
   // IMPORTANTE: Rotas POST específicas devem vir ANTES de rotas PATCH/GET específicas para garantir ordem correta
-  
+
   @Post(':id/transferir-responsavel')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
@@ -756,7 +754,7 @@ export class PatrimonioController {
   }
 
   // ==================== ROTAS GENÉRICAS DE :id (devem vir DEPOIS das rotas específicas) ====================
-  
+
   @Get(':id')
   @ApiOperation({ summary: 'Buscar patrimônio por ID' })
   @ApiParam({
@@ -1559,34 +1557,7 @@ export class PatrimonioController {
     },
   })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiResponse({
-    status: 500,
-    description: 'Erro ao gerar PDF',
-  })
-  async exportPdf(
-    @Query() query: QueryPatrimonioDto,
-    @Res() res: Response,
-  ): Promise<void> {
-    try {
-      const pdfBuffer = await this.pdfExportService.generatePdf(query);
-
-      const filename = `patrimonios_${new Date().toISOString().split('T')[0]}.pdf`;
-
-      res.set({
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Length': pdfBuffer.length.toString(),
-      });
-
-      res.send(pdfBuffer);
-    } catch (error) {
-      this.logger.error('Erro ao gerar PDF:', error);
-      res.status(500).json({
-        statusCode: 500,
-        message: 'Erro ao gerar PDF',
-        error: error instanceof Error ? error.message : 'Internal Server Error',
-        details: process.env.NODE_ENV === 'development' ? error?.stack : undefined,
-      });
-    }
+  async exportPdf(@Res() res: Response, @Body() options: any) {
+    return this.patrimonioService.exportToPdf(res, options);
   }
 }

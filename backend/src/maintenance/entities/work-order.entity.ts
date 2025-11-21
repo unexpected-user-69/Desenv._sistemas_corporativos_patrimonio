@@ -40,9 +40,13 @@ export class WorkOrder {
   @Column({ name: 'patrimonio_id', type: 'uuid' })
   patrimonioId!: string;
 
-  @ManyToOne(() => Patrimonio, { nullable: false })
-  @JoinColumn({ name: 'patrimonio_id' })
-  patrimonio!: Patrimonio;
+  // Relação removida pois Patrimonio agora é um microsserviço
+  // @ManyToOne(() => Patrimonio, { nullable: false })
+  // @JoinColumn({ name: 'patrimonio_id' })
+  // patrimonio!: Patrimonio;
+
+  // Propriedade virtual para uso no código (populada manualmente via HTTP Client)
+  patrimonio?: Patrimonio;
 
   @Column({
     name: 'status',

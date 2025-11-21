@@ -4,9 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual } from 'typeorm';
 import { MaintenancePlan, Periodicidade } from '../entities/maintenance-plan.entity';
 import { WorkOrder, WorkOrderStatus, Prioridade } from '../entities/work-order.entity';
-import { Patrimonio } from '../../patrimonio/entities/patrimonio.entity';
 import { MaintenanceService } from '../maintenance.service';
 import { MaintenanceNotificationsService } from './notifications.service';
+import { PatrimonioHttpClient } from '../../http-clients/patrimonio-http-client';
 
 /**
  * Serviço responsável por executar planos preventivos automaticamente
@@ -18,11 +18,10 @@ export class SchedulerService {
   constructor(
     @InjectRepository(MaintenancePlan)
     private maintenancePlanRepository: Repository<MaintenancePlan>,
-    @InjectRepository(Patrimonio)
-    private patrimonioRepository: Repository<Patrimonio>,
     private maintenanceService: MaintenanceService,
     private notificationsService: MaintenanceNotificationsService,
-  ) {}
+    private patrimonioHttpClient: PatrimonioHttpClient,
+  ) { }
 
   /**
    * Executa diariamente às 6h da manhã para verificar planos preventivos
@@ -33,7 +32,7 @@ export class SchedulerService {
 
     try {
       const now = new Date();
-      
+
       // Buscar planos que devem ser executados hoje ou antes
       // Não carregar relação categoria para evitar problemas com categoria_id vs categoria
       const plansToExecute = await this.maintenancePlanRepository.find({
@@ -62,11 +61,14 @@ export class SchedulerService {
     try {
       this.logger.log(`Executando plano preventivo ${plan.id} para categoria ${plan.categoriaId}`);
 
-      // Buscar patrimônios da categoria
-      const patrimonios = await this.patrimonioRepository.find({
-        where: { categoriaId: plan.categoriaId },
-        withDeleted: false,
-      });
+      // Buscar patrimônios da categoria via microserviço
+      let patrimonios: any[] = [];
+      try {
+        patrimonios = await this.patrimonioHttpClient.findByCategoria(plan.categoriaId);
+      } catch (error) {
+        this.logger.warn(`Erro ao buscar patrimônios da categoria ${plan.categoriaId}: ${error.message}`);
+        return;
+      }
 
       this.logger.log(`Encontrados ${patrimonios.length} patrimônios para manutenção`);
 

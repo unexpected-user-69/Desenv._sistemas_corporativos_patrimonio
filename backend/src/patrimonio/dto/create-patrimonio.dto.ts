@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { IsTrimmed } from '../../common/validators';
-import { PatrimonioStatus } from '../entities/patrimonio.entity';
+import { PatrimonioStatus } from '../enums/patrimonio-status.enum';
 
 export class CreatePatrimonioDto {
   @ApiProperty({

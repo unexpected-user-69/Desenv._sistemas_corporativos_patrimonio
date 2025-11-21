@@ -202,6 +202,46 @@ docker-compose logs -f backend
 docker-compose down
 ```
 
+### Execução Manual (Microsserviços + Monolito)
+
+Para iniciar todo o ecossistema manualmente, abra terminais separados para cada serviço e execute os comandos na ordem abaixo:
+
+#### 1. Audit Service (Porta 3005)
+```powershell
+cd packages/audit-service; npm install; npm run start:dev
+```
+
+#### 2. Auth Service (Porta 3001)
+```powershell
+cd packages/auth-service; npm install; npm run start:dev
+```
+
+#### 3. Categorias Service (Porta 3004)
+```powershell
+cd packages/categorias-service; npm install; npm run start:dev
+```
+
+#### 4. Events Service (Porta 3002)
+```powershell
+cd packages/events-service; npm install; npm run start:dev
+```
+
+#### 5. Patrimonio Service (Porta 3006)
+```powershell
+cd packages/patrimonio-service; npm install; npm run start:dev
+```
+
+#### 6. Users Service (Porta 3003)
+```powershell
+cd packages/users-service; npm install; npm run start:dev
+```
+
+#### 7. Monolito (Backend Principal - Porta 3000)
+**Nota:** Inicie este por último para garantir que os microsserviços já estejam disponíveis.
+```powershell
+npm install; npm run start:dev
+```
+
 ## 🧪 Testes
 
 ### Executar Todos os Testes

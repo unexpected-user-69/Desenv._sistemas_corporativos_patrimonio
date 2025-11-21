@@ -22,7 +22,8 @@ import { CreatePartDto } from './dto/create-part.dto';
 import { PartResponseDto } from './dto/part-response.dto';
 import { WorkflowService } from './services/workflow.service';
 import { MaintenanceNotificationsService } from './services/notifications.service';
-import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
+import { PatrimonioHttpClient } from '../http-clients/patrimonio-http-client';
+import { CategoriasHttpClient } from '../http-clients/categorias-http-client';
 
 @Injectable()
 export class MaintenanceService {
@@ -35,13 +36,13 @@ export class MaintenanceService {
     private workLogRepository: Repository<WorkLog>,
     @InjectRepository(MaintenancePlan)
     private maintenancePlanRepository: Repository<MaintenancePlan>,
-    @InjectRepository(Patrimonio)
-    private patrimonioRepository: Repository<Patrimonio>,
     @InjectRepository(Part)
     private partRepository: Repository<Part>,
     private workflowService: WorkflowService,
     private notificationsService: MaintenanceNotificationsService,
-  ) {}
+    private patrimonioHttpClient: PatrimonioHttpClient,
+    private categoriasHttpClient: CategoriasHttpClient,
+  ) { }
 
   /**
    * Cria uma nova OS
@@ -50,20 +51,12 @@ export class MaintenanceService {
     dto: CreateWorkOrderDto,
     ownerId: string,
   ): Promise<WorkOrderResponseDto> {
-    // Verificar se o patrimônio existe usando query manager para evitar eager loading
-    const queryRunner = this.patrimonioRepository.manager.connection.createQueryRunner();
+    // Verificar se o patrimônio existe via microserviço
     try {
-      const result = await queryRunner.query(
-        `SELECT id FROM patrimonios WHERE id = $1 AND deleted_at IS NULL`,
-        [dto.patrimonioId],
-      );
-      
-      if (!result || result.length === 0) {
-        this.logger.warn(`Patrimônio ${dto.patrimonioId} não encontrado`);
-        throw new NotFoundException(`Patrimônio ${dto.patrimonioId} não encontrado`);
-      }
-    } finally {
-      await queryRunner.release();
+      await this.patrimonioHttpClient.findOne(dto.patrimonioId);
+    } catch (error) {
+      this.logger.warn(`Patrimônio ${dto.patrimonioId} não encontrado ou erro de comunicação`);
+      throw new NotFoundException(`Patrimônio ${dto.patrimonioId} não encontrado`);
     }
 
     // Criar OS
@@ -240,24 +233,15 @@ export class MaintenanceService {
     dto: CreateMaintenancePlanDto,
     ownerId: string,
   ): Promise<MaintenancePlanResponseDto> {
-    // Verificar se a categoria existe (opcional - pode não ter foreign key constraint)
+    // Verificar se a categoria existe via microserviço
     try {
-      const categoriaExists = await this.patrimonioRepository.manager
-        .createQueryBuilder()
-        .select('1')
-        .from('categorias', 'c')
-        .where('c.id = :categoriaId', { categoriaId: dto.categoriaId })
-        .getRawOne();
-      
-      if (!categoriaExists) {
+      await this.categoriasHttpClient.findOne(dto.categoriaId);
+    } catch (error: any) {
+      // Se for NotFoundException (do client), relançar
+      if (error.status === 404 || error.message?.includes('not found')) {
         throw new NotFoundException(`Categoria com ID "${dto.categoriaId}" não encontrada`);
       }
-    } catch (error: any) {
-      // Se for NotFoundException, relançar
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      // Se for outro erro (tabela não existe, etc), apenas logar e continuar
+      // Se for outro erro, apenas logar e continuar (assumindo que pode existir)
       this.logger.warn(`Não foi possível verificar categoria: ${error.message}`);
     }
 
@@ -426,4 +410,3 @@ export class MaintenanceService {
     };
   }
 }
-

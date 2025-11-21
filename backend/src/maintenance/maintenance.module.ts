@@ -15,13 +15,13 @@ import { WorkLog } from './entities/work-log.entity';
 import { MaintenancePlan } from './entities/maintenance-plan.entity';
 import { Part } from './entities/part.entity';
 import { PatrimonioModule } from '../patrimonio/patrimonio.module';
-import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
+
 import { HttpClientsModule } from '../http-clients/http-clients.module';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([WorkOrder, WorkLog, MaintenancePlan, Part, Patrimonio]),
+    TypeOrmModule.forFeature([WorkOrder, WorkLog, MaintenancePlan, Part]),
     forwardRef(() => PatrimonioModule),
     HttpClientsModule,
   ],
@@ -44,5 +44,5 @@ import { HttpClientsModule } from '../http-clients/http-clients.module';
     MaintenanceNotificationsService,
   ],
 })
-export class MaintenanceModule {}
+export class MaintenanceModule { }
 

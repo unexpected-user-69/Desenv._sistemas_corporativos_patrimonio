@@ -8,7 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { AuditService } from '../../audit/audit.service';
+import { AuditHttpClient } from '../../http-clients/audit-http-client';
 import { AUDIT_KEY, AuditOptions } from '../decorators/audit.decorator';
 
 @Injectable()
@@ -16,13 +16,13 @@ export class AuditInterceptor implements NestInterceptor {
   private readonly logger = new Logger(AuditInterceptor.name);
 
   constructor(
-    private readonly auditService: AuditService,
+    private readonly auditService: AuditHttpClient,
     private readonly reflector: Reflector,
-  ) {}
+  ) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const auditOptions = this.reflector.get<AuditOptions>(AUDIT_KEY, context.getHandler());
-    
+
     if (!auditOptions) {
       return next.handle();
     }
@@ -35,7 +35,7 @@ export class AuditInterceptor implements NestInterceptor {
       tap(async (data) => {
         try {
           const _responseTime = Date.now() - startTime;
-          
+
           await this.auditService.createAuditLog({
             userId: request.user?.id,
             action: auditOptions.action,

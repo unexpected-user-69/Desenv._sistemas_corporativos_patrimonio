@@ -24,7 +24,11 @@ export class EventPatrimonio {
   @JoinColumn({ name: 'event_id' })
   event!: Event;
 
-  @ManyToOne(() => Patrimonio, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'patrimonio_id' })
-  patrimonio!: Patrimonio;
+  // Relação removida pois Patrimonio agora é um microsserviço
+  // @ManyToOne(() => Patrimonio, { onDelete: 'CASCADE' })
+  // @JoinColumn({ name: 'patrimonio_id' })
+  // patrimonio!: Patrimonio;
+
+  // Propriedade virtual para uso no código
+  patrimonio?: Patrimonio;
 }

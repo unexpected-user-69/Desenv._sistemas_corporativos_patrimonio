@@ -22,7 +22,7 @@ import {
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
-import { CategoriasService } from './categorias.service';
+import { CategoriasHttpClient } from '../http-clients/categorias-http-client';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { QueryCategoriaDto } from './dto/query-categoria.dto';
@@ -38,7 +38,7 @@ import { UserRole } from '../users/enums/user-role.enum';
 @Controller('categorias')
 @ApiTags('categorias')
 export class CategoriasController {
-  constructor(private readonly categoriasService: CategoriasService) {}
+  constructor(private readonly categoriasService: CategoriasHttpClient) { }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

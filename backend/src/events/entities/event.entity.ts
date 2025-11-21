@@ -81,14 +81,18 @@ export class Event {
   @JoinColumn({ name: 'created_by' })
   creator!: User;
 
-  @ManyToMany(() => Patrimonio, {
-    nullable: true,
-  })
-  @JoinTable({
-    name: 'event_patrimonios',
-    joinColumn: { name: 'event_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'patrimonio_id', referencedColumnName: 'id' },
-  })
+  // Relação removida pois Patrimonio agora é um microsserviço
+  // @ManyToMany(() => Patrimonio, {
+  //   nullable: true,
+  // })
+  // @JoinTable({
+  //   name: 'event_patrimonios',
+  //   joinColumn: { name: 'event_id', referencedColumnName: 'id' },
+  //   inverseJoinColumn: { name: 'patrimonio_id', referencedColumnName: 'id' },
+  // })
+  // patrimonios?: Patrimonio[];
+
+  // Propriedade virtual para uso no código
   patrimonios?: Patrimonio[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })

@@ -5,11 +5,11 @@ import { DashboardService } from './dashboard.service';
 import { HttpClientsModule } from '../http-clients/http-clients.module';
 import { PatrimonioModule } from '../patrimonio/patrimonio.module';
 import { User } from '../shared/entities/user.entity';
-import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
+
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Patrimonio]),
+    TypeOrmModule.forFeature([User]),
     HttpClientsModule,
     PatrimonioModule,
   ],
@@ -17,5 +17,5 @@ import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
   providers: [DashboardService],
   exports: [DashboardService],
 })
-export class DashboardModule {}
+export class DashboardModule { }
 

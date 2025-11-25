@@ -17,6 +17,8 @@ services:
       - "${DB_PORT:-5432}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      # Script de inicialização automática de schemas (executa apenas na primeira inicialização)
+      - ./backend/scripts/database/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-patrimonio_inventario}"]
       interval: 5s
@@ -43,7 +45,268 @@ services:
     networks:
       - patrimonio_network
 
-  # Serviço do backend NestJS
+  # ============================================
+  # MICROSERVIÇOS - Cada um em container separado
+  # ============================================
+
+  # Microserviço de Autenticação
+  auth-service:
+    build:
+      context: ./backend/packages/auth-service
+      dockerfile: Dockerfile
+    container_name: patrimonio_auth_service
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DB_SCHEMA: auth
+      PORT: 3001
+      NODE_ENV: ${NODE_ENV:-development}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_in_production}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      REFRESH_EXPIRES_DAYS: ${REFRESH_EXPIRES_DAYS:-7}
+      AUTH_API_URL: http://auth-service:3001
+    ports:
+      - "3001:3001"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Microserviço de Usuários
+  users-service:
+    build:
+      context: ./backend/packages/users-service
+      dockerfile: Dockerfile
+    container_name: patrimonio_users_service
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DB_SCHEMA: users
+      PORT: 3002
+      NODE_ENV: ${NODE_ENV:-development}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_in_production}
+      AUTH_API_URL: http://auth-service:3001
+      AUTH_API_TIMEOUT: 5000
+    ports:
+      - "3002:3002"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Microserviço de Eventos
+  events-service:
+    build:
+      context: ./backend/packages/events-service
+      dockerfile: Dockerfile
+    container_name: patrimonio_events_service
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      users-service:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DB_SCHEMA: events
+      PORT: 3003
+      NODE_ENV: ${NODE_ENV:-development}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      AUTH_API_URL: http://auth-service:3001
+      AUTH_API_TIMEOUT: 5000
+      USERS_API_URL: http://users-service:3002
+      USERS_API_TIMEOUT: 5000
+      CORS_ORIGIN: "*"
+    ports:
+      - "3003:3003"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Microserviço de Auditoria
+  audit-service:
+    build:
+      context: ./backend/packages/audit-service
+      dockerfile: Dockerfile
+    container_name: patrimonio_audit_service
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DB_SCHEMA: audit
+      PORT: 3004
+      NODE_ENV: ${NODE_ENV:-development}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
+      AUTH_API_URL: http://auth-service:3001
+      AUTH_API_TIMEOUT: 5000
+    ports:
+      - "3004:3004"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3004/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Microserviço de Categorias
+  categorias-service:
+    build:
+      context: ./backend/packages/categorias-service
+      dockerfile: Dockerfile
+    container_name: patrimonio_categorias_service
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DB_SCHEMA: categorias
+      PORT: 3005
+      NODE_ENV: ${NODE_ENV:-development}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
+      AUTH_API_URL: http://auth-service:3001
+      AUTH_API_TIMEOUT: 5000
+    ports:
+      - "3005:3005"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3005/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Microserviço de Patrimônio
+  patrimonio-service:
+    build:
+      context: ./backend/packages/patrimonio-service
+      dockerfile: Dockerfile
+    container_name: patrimonio_patrimonio_service
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      categorias-service:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DB_SCHEMA: patrimonio
+      PORT: 3006
+      NODE_ENV: ${NODE_ENV:-development}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
+      AUTH_API_URL: http://auth-service:3001
+      AUTH_API_TIMEOUT: 5000
+      CATEGORIAS_API_URL: http://categorias-service:3005
+      CATEGORIAS_API_TIMEOUT: 5000
+    ports:
+      - "3006:3006"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3006/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Serviço do backend NestJS (monolito - manter temporariamente se necessário)
   backend:
     build: 
       context: ./backend

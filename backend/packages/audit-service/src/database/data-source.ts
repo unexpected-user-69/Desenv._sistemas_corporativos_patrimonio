@@ -16,6 +16,7 @@ const common = {
   migrationsRun: false, // rode pelos scripts
   logging: process.env.DB_LOGGING === 'true',
   applicationName: 'audit-service',
+  schema: process.env.DB_SCHEMA ?? 'audit', // Schema isolado para audit-service
 };
 
 // SSL quando necessário (ex.: Supabase/Render/Heroku)

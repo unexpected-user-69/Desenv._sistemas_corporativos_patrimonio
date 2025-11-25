@@ -43,6 +43,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
               applicationName: 'categorias-service',
+              schema: process.env.DB_SCHEMA ?? 'categorias', // Schema isolado para categorias-service
             }
           : {
               type: 'postgres',
@@ -57,6 +58,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
               applicationName: 'categorias-service',
+              schema: process.env.DB_SCHEMA ?? 'categorias', // Schema isolado para categorias-service
             };
       },
     }),

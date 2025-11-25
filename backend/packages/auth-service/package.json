@@ -12,6 +12,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main.js",
+    "kill-port": "powershell -ExecutionPolicy Bypass -File ./scripts/kill-port.ps1",
+    "kill-port:3001": "powershell -ExecutionPolicy Bypass -File ./scripts/kill-port.ps1 3001",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

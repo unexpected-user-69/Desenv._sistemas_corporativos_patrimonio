@@ -8,7 +8,7 @@
 
 import { DataSource } from 'typeorm';
 import { randomUUID } from 'crypto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 export interface TestUser {
   id: string;

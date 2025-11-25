@@ -15,6 +15,7 @@ const common = {
   migrationsRun: false,
   logging: process.env.DB_LOGGING === 'true',
   applicationName: 'events-service',
+  schema: process.env.DB_SCHEMA ?? 'events', // Schema isolado para events-service
 };
 
 const sslOptions: TlsOptions | boolean | undefined =

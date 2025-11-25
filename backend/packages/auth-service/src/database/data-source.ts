@@ -14,6 +14,7 @@ const common = {
   migrationsRun: false, // rode pelos scripts
   logging: process.env.DB_LOGGING === 'true',
   applicationName: 'auth-service',
+  schema: process.env.DB_SCHEMA ?? 'auth', // Schema isolado para auth-service
 };
 
 // SSL quando necessário (ex.: Supabase/Render/Heroku)

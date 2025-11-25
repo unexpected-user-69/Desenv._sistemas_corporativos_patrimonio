@@ -42,10 +42,47 @@ async function bootstrap() {
     console.warn('Não foi possível carregar openapi.yaml:', error);
   }
 
-  const port = process.env.PORT || 3001;
-  await app.listen(port);
-  console.log(`Auth Service está rodando em: http://localhost:${port}`);
-  console.log(`Swagger está disponível em: http://localhost:${port}/api`);
+  const port = parseInt(process.env.PORT || '3001', 10);
+  
+  // Função para verificar se a porta está livre
+  const checkPort = async (portNumber: number): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const server = require('http').createServer();
+      server.listen(portNumber, () => {
+        server.once('close', () => resolve(true));
+        server.close();
+      });
+      server.on('error', () => resolve(false));
+    });
+  };
+
+  // Verificar porta antes de tentar usar
+  const portAvailable = await checkPort(port);
+  
+  if (!portAvailable) {
+    console.error(`\n❌ Erro: Porta ${port} já está em uso!`);
+    console.error(`\nPara resolver, execute um dos comandos:`);
+    console.error(`  1. npm run kill-port:3001`);
+    console.error(`  2. Ou encontre e encerre o processo manualmente:`);
+    console.error(`     netstat -ano | findstr :${port}`);
+    console.error(`     taskkill /PID <PID> /F`);
+    console.error(`\nOu use outra porta:`);
+    console.error(`  $env:PORT=3002; npm run start:dev\n`);
+    process.exit(1);
+  }
+  
+  try {
+    await app.listen(port);
+    console.log(`✅ Auth Service está rodando em: http://localhost:${port}`);
+    console.log(`📖 Swagger está disponível em: http://localhost:${port}/api`);
+  } catch (error: any) {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`\n❌ Erro: Porta ${port} já está em uso!`);
+      console.error(`\nExecute: npm run kill-port:3001\n`);
+      process.exit(1);
+    }
+    throw error;
+  }
 }
 
 bootstrap();

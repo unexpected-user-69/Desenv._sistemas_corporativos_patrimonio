@@ -14,6 +14,7 @@ const common = {
   migrationsRun: false,
   logging: process.env.DB_LOGGING === 'true',
   applicationName: 'users-service',
+  schema: process.env.DB_SCHEMA ?? 'users', // Schema isolado para users-service
 };
 
 const sslOptions: TlsOptions | boolean | undefined =

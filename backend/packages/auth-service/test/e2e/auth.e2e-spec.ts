@@ -10,7 +10,7 @@ process.env.USERS_API_URL = process.env.USERS_API_URL || 'http://localhost:3002'
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as http from 'http';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { DataSource } from 'typeorm';
 import { createTestUser, deleteTestUser, cleanupTestUsers, TestUser } from '../helpers/users-helper';

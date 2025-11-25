@@ -46,6 +46,7 @@ import { PatrimonioLocalizacaoHistorico } from './patrimonio/entities/patrimonio
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
               applicationName: 'patrimonio-service',
+              schema: process.env.DB_SCHEMA ?? 'patrimonio', // Schema isolado para patrimonio-service
             }
           : {
               type: 'postgres',
@@ -60,6 +61,7 @@ import { PatrimonioLocalizacaoHistorico } from './patrimonio/entities/patrimonio
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
               applicationName: 'patrimonio-service',
+              schema: process.env.DB_SCHEMA ?? 'patrimonio', // Schema isolado para patrimonio-service
             };
       },
     }),

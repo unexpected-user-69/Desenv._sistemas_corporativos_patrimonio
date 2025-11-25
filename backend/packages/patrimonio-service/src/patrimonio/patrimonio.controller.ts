@@ -79,6 +79,7 @@ import { NovosQueryDto } from './dto/novos-query.dto';
 import { HistoricoLocalizacoesResponseDto } from './dto/historico-localizacoes-response.dto';
 import { DeleteBulkPatrimonioDto } from './dto/delete-bulk-patrimonio.dto';
 import { DeleteBulkResponseDto } from './dto/delete-bulk-response.dto';
+import { QueryDiasDto } from './dto/query-dias.dto';
 import { PatrimonioPdfExportService } from './services/patrimonio-pdf-export.service';
 
 @ApiTags('patrimonio')
@@ -117,6 +118,7 @@ export class PatrimonioController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Listar patrimônios com filtros e paginação' })
   @ApiOkResponse({
     description: 'Lista de patrimônios retornada com sucesso',
@@ -834,7 +836,7 @@ export class PatrimonioController {
   @ApiBadRequestResponse({
     description: 'ID inválido',
   })
-  remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<{ message: string }> {
     return this.patrimonioService.remove(id);
   }
 
@@ -1251,63 +1253,42 @@ export class PatrimonioController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Buscar patrimônios com garantia expirada' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiQuery({
-    name: 'dias',
-    required: false,
-    type: Number,
-    description: 'Dias desde a expiração (padrão: 0)',
-    example: 30,
-  })
   @ApiOkResponse({
     description: 'Lista de patrimônios com garantia expirada',
     type: [PatrimonioResponseDto],
   })
   async findGarantiaExpirada(
-    @Query('dias') dias?: number,
+    @Query() query: QueryDiasDto,
   ): Promise<PatrimonioResponseDto[]> {
-    return this.patrimonioService.findGarantiaExpirada(dias || 0);
+    return this.patrimonioService.findGarantiaExpirada(query.dias || 0);
   }
 
   @Get('alertas/garantia')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Buscar patrimônios com garantia vencendo em breve' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiQuery({
-    name: 'dias',
-    required: false,
-    type: Number,
-    description: 'Dias para considerar próximo do vencimento (padrão: 30)',
-    example: 30,
-  })
   @ApiOkResponse({
     description: 'Lista de patrimônios com garantia vencendo',
     type: [PatrimonioResponseDto],
   })
   async findGarantiaVencendo(
-    @Query('dias') dias?: number,
+    @Query() query: QueryDiasDto,
   ): Promise<PatrimonioResponseDto[]> {
-    return this.patrimonioService.findGarantiaVencendo(dias || 30);
+    return this.patrimonioService.findGarantiaVencendo(query.dias || 30);
   }
 
   @Get('manutencao-prolongada')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Buscar patrimônios em manutenção prolongada' })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
-  @ApiQuery({
-    name: 'dias',
-    required: false,
-    type: Number,
-    description: 'Dias em manutenção (padrão: 90)',
-    example: 90,
-  })
   @ApiOkResponse({
     description: 'Lista de patrimônios em manutenção prolongada',
     type: [PatrimonioResponseDto],
   })
   async findManutencaoProlongada(
-    @Query('dias') dias?: number,
+    @Query() query: QueryDiasDto,
   ): Promise<PatrimonioResponseDto[]> {
-    return this.patrimonioService.findManutencaoProlongada(dias || 90);
+    return this.patrimonioService.findManutencaoProlongada(query.dias || 90);
   }
 
   @Get('sem-responsavel')

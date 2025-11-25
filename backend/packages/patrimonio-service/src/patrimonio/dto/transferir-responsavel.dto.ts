@@ -9,7 +9,7 @@ export class TransferirResponsavelDto {
     example: '123e4567-e89b-12d3-a456-426614174000',
     format: 'uuid',
   })
-  @IsUUID('4', { message: 'O ID do responsável deve ser um UUID válido' })
+  @IsUUID('all', { message: 'O ID do responsável deve ser um UUID válido' })
   novoResponsavelId!: string;
 
   @ApiPropertyOptional({

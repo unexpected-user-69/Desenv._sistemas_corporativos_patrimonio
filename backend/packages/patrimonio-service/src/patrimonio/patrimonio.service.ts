@@ -100,25 +100,27 @@ export class PatrimonioService {
   async findAllWithFilters(
     query: QueryPatrimonioDto,
   ): Promise<PaginatedPatrimonioResponseDto> {
-    const {
-      page = 1,
-      limit = 10,
-      q,
-      categoriaId,
-      status,
-      marca,
-      modelo,
-      localizacao,
-      responsavelId,
-      valorMinimo,
-      valorMaximo,
-      dataInicial,
-      dataFinal,
-      sortBy = 'nome',
-      sortOrder = 'ASC',
-    } = query;
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        q,
+        codigo,
+        categoriaId,
+        status,
+        marca,
+        modelo,
+        localizacao,
+        responsavelId,
+        valorMinimo,
+        valorMaximo,
+        dataInicial,
+        dataFinal,
+        sortBy = 'nome',
+        sortOrder = 'ASC',
+      } = query;
 
-    const skip = (page - 1) * limit;
+      const skip = (page - 1) * limit;
 
     // Filtros específicos (base)
     const baseWhere: FindOptionsWhere<Patrimonio> = {};
@@ -127,6 +129,9 @@ export class PatrimonioService {
     }
     if (status) {
       baseWhere.status = status;
+    }
+    if (codigo) {
+      baseWhere.codigo = codigo;
     }
     if (marca && !q) {
       // Se não há busca textual, aplica filtro de marca normalmente
@@ -200,7 +205,6 @@ export class PatrimonioService {
       skip,
       take: limit,
       order: { [orderField]: sortOrder },
-      relations: ['categoria'],
     };
 
     const [patrimonios, total] =
@@ -210,17 +214,25 @@ export class PatrimonioService {
     const hasNextPage = page < totalPages;
     const hasPreviousPage = page > 1;
 
-    return {
-      data: patrimonios.map((patrimonio) =>
-        this.serializePatrimonio(patrimonio),
-      ),
-      total,
-      page,
-      limit,
-      totalPages,
-      hasNextPage,
-      hasPreviousPage,
-    };
+      return {
+        data: patrimonios.map((patrimonio) =>
+          this.serializePatrimonio(patrimonio),
+        ),
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+      };
+    } catch (error) {
+      this.logger.error('Erro ao buscar patrimônios com filtros', {
+        error: error?.message,
+        stack: error?.stack,
+        query,
+      });
+      throw error;
+    }
   }
 
   /**
@@ -229,7 +241,6 @@ export class PatrimonioService {
   async findOne(id: string): Promise<PatrimonioResponseDto> {
     const patrimonio = await this.patrimonioRepository.findOne({
       where: { id },
-      relations: ['categoria'],
     });
     if (!patrimonio) {
       throw new NotFoundException(`Patrimônio com ID "${id}" não encontrado`);
@@ -253,10 +264,9 @@ export class PatrimonioService {
         );
       }
 
-      // Se encontrou, buscar com relações
+      // Se encontrou, buscar novamente (sem relações, pois categoria vem via HTTP)
       patrimonio = await this.patrimonioRepository.findOne({
         where: { codigo: codigo.toUpperCase() },
-        relations: ['categoria'],
       });
 
       if (!patrimonio) {
@@ -371,7 +381,7 @@ export class PatrimonioService {
   /**
    * Remove patrimônio (soft delete)
    */
-  async remove(id: string): Promise<void> {
+  async remove(id: string): Promise<{ message: string }> {
     const patrimonio = await this.patrimonioRepository.findOne({
       where: { id },
     });
@@ -380,6 +390,7 @@ export class PatrimonioService {
     }
 
     await this.patrimonioRepository.softDelete(id);
+    return { message: 'Patrimônio removido com sucesso' };
   }
 
   /**
@@ -475,23 +486,57 @@ export class PatrimonioService {
    * Estatísticas por categoria
    */
   async getStatsByCategoria(): Promise<Record<string, number>> {
-    const result = await this.patrimonioRepository
-      .createQueryBuilder('patrimonio')
-      .leftJoin('patrimonio.categoria', 'categoria')
-      .select('categoria.codigo', 'categoria')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('categoria.codigo')
-      .getRawMany();
+    try {
+      // Como não temos relação TypeORM com categoria, vamos agrupar por categoriaId
+      const result = await this.patrimonioRepository
+        .createQueryBuilder('patrimonio')
+        .select('patrimonio.categoriaId', 'categoriaId')
+        .addSelect('COUNT(*)', 'count')
+        .where('patrimonio.categoriaId IS NOT NULL')
+        .groupBy('patrimonio.categoriaId')
+        .getRawMany();
 
-    return result.reduce(
-      (stats, row) => {
-        if (row.categoria) {
-          stats[row.categoria] = parseInt(row.count);
+      // Buscar todas as categorias de uma vez para mapear IDs para nomes
+      const categorias = await this.categoriasHttpClient.findAll();
+      const categoriasMap = new Map(categorias.map(c => [c.id, c]));
+
+      // Mapear estatísticas usando nomes das categorias quando disponível
+      const stats: Record<string, number> = {};
+      for (const row of result) {
+        if (row.categoriaId) {
+          const categoria = categoriasMap.get(row.categoriaId);
+          const categoriaNome = categoria?.nome || categoria?.codigo || row.categoriaId;
+          stats[categoriaNome] = parseInt(row.count) || 0;
         }
-        return stats;
-      },
-      {} as Record<string, number>,
-    );
+      }
+
+      return stats;
+    } catch (error) {
+      this.logger.error('Erro ao obter estatísticas por categoria', error);
+      // Em caso de erro, retornar estatísticas por categoriaId
+      try {
+        const result = await this.patrimonioRepository
+          .createQueryBuilder('patrimonio')
+          .select('patrimonio.categoriaId', 'categoriaId')
+          .addSelect('COUNT(*)', 'count')
+          .where('patrimonio.categoriaId IS NOT NULL')
+          .groupBy('patrimonio.categoriaId')
+          .getRawMany();
+
+        return result.reduce(
+          (stats, row) => {
+            if (row.categoriaId) {
+              stats[row.categoriaId] = parseInt(row.count) || 0;
+            }
+            return stats;
+          },
+          {} as Record<string, number>,
+        );
+      } catch (fallbackError) {
+        this.logger.error('Erro no fallback de estatísticas por categoria', fallbackError);
+        return {};
+      }
+    }
   }
 
   /**
@@ -521,7 +566,6 @@ export class PatrimonioService {
   async findByStatus(status: string): Promise<PatrimonioResponseDto[]> {
     const patrimonios = await this.patrimonioRepository.find({
       where: { status: status as any },
-      relations: ['responsavel'],
     });
 
     return patrimonios.map((patrimonio) =>
@@ -555,7 +599,6 @@ export class PatrimonioService {
       where: {
         dataGarantia: Between(new Date(), dataLimite),
       },
-      relations: ['responsavel'],
     });
 
     return patrimonios.map((patrimonio) =>
@@ -851,7 +894,6 @@ export class PatrimonioService {
     const patrimonios = await this.patrimonioRepository.find({
       where: { localizacao: ILike(`%${localizacao}%`) },
       order: { nome: 'ASC' },
-      relations: ['categoria', 'responsavel'],
     });
     return patrimonios.map((patrimonio) =>
       this.serializePatrimonio(patrimonio),
@@ -1122,7 +1164,6 @@ export class PatrimonioService {
       patrimonios.data.map(async (patrimonio) => {
         const completo = await this.patrimonioRepository.findOne({
           where: { id: patrimonio.id },
-          relations: ['categoria', 'responsavel'],
         });
         return completo ? this.serializePatrimonio(completo) : patrimonio;
       }),
@@ -1203,7 +1244,6 @@ export class PatrimonioService {
       patrimonios.data.map(async (patrimonio) => {
         const completo = await this.patrimonioRepository.findOne({
           where: { id: patrimonio.id },
-          relations: ['categoria', 'responsavel'],
         });
         return completo ? this.serializePatrimonio(completo) : patrimonio;
       }),
@@ -1304,7 +1344,6 @@ export class PatrimonioService {
   async findByNumeroSerie(numeroSerie: string): Promise<PatrimonioResponseDto> {
     const patrimonio = await this.patrimonioRepository.findOne({
       where: { numeroSerie },
-      relations: ['categoria', 'responsavel'],
     });
 
     if (!patrimonio) {
@@ -1335,7 +1374,6 @@ export class PatrimonioService {
       where: {
         dataAquisicao: Between(dataInicial, dataFinal),
       },
-      relations: ['categoria', 'responsavel'],
       order: { dataAquisicao: 'ASC' },
     });
 
@@ -1384,7 +1422,6 @@ export class PatrimonioService {
       where: {
         status: In(dto.status),
       },
-      relations: ['categoria', 'responsavel'],
       order: { nome: 'ASC' },
     });
 
@@ -1403,7 +1440,6 @@ export class PatrimonioService {
       where: {
         categoriaId: In(dto.categoriaIds),
       },
-      relations: ['categoria', 'responsavel'],
       order: { nome: 'ASC' },
     });
 
@@ -1632,7 +1668,6 @@ export class PatrimonioService {
 
     const patrimonios = await this.patrimonioRepository.find({
       where,
-      relations: ['categoria', 'responsavel'],
     });
 
     return {
@@ -1699,7 +1734,6 @@ export class PatrimonioService {
       where: {
         dataGarantia: LessThanOrEqual(dataLimite),
       },
-      relations: ['categoria', 'responsavel'],
       order: { dataGarantia: 'ASC' },
     });
 
@@ -1724,7 +1758,6 @@ export class PatrimonioService {
       where: {
         dataGarantia: Between(hoje, dataLimite),
       },
-      relations: ['categoria', 'responsavel'],
       order: { dataGarantia: 'ASC' },
     });
 
@@ -1766,7 +1799,6 @@ export class PatrimonioService {
       where: {
         responsavelId: null as any,
       },
-      relations: ['categoria'],
       order: { nome: 'ASC' },
     });
 
@@ -1829,7 +1861,6 @@ export class PatrimonioService {
     // Verificar se patrimônio existe
     const patrimonio = await this.patrimonioRepository.findOne({
       where: { id },
-      relations: ['responsavel'],
     });
 
     if (!patrimonio) {
@@ -1892,7 +1923,6 @@ export class PatrimonioService {
     // Buscar patrimônios atuais do responsável
     const patrimonios = await this.patrimonioRepository.find({
       where: { responsavelId },
-      relations: ['categoria'],
       order: { nome: 'ASC' },
     });
 
@@ -2100,7 +2130,6 @@ export class PatrimonioService {
     // Buscar todos os patrimônios do responsável
     const patrimonios = await this.patrimonioRepository.find({
       where: { responsavelId },
-      relations: ['categoria'],
     });
 
     // Calcular estatísticas
@@ -2256,7 +2285,6 @@ export class PatrimonioService {
     const historico = await this.historicoRepository.find({
       where: { patrimonioId: id },
       order: { dataMudanca: 'DESC' },
-      relations: ['usuario'],
     });
 
     // Converter para DTO

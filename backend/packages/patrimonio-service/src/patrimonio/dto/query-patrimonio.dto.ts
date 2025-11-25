@@ -47,6 +47,15 @@ export class QueryPatrimonioDto {
   q?: string;
 
   @ApiPropertyOptional({
+    description: 'Filtrar por código exato do patrimônio',
+    example: 'PAT-2024-001',
+  })
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  codigo?: string;
+
+  @ApiPropertyOptional({
     description: 'Filtrar por ID da categoria',
     example: '123e4567-e89b-12d3-a456-426614174000',
     format: 'uuid',

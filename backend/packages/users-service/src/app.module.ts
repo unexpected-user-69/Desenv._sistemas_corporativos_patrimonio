@@ -16,7 +16,12 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: [
+        '.env.local',
+        '.env',
+        '../.env', // Backend .env
+        '../../.env', // Backend root .env
+      ],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => {

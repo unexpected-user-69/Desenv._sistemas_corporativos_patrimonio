@@ -484,7 +484,14 @@ export class UsersService {
     if (!isValidPassword) {
       if (process.env.NODE_ENV !== 'production') {
         console.log(`[UsersService.validateCredentials] Senha inválida para: ${normalizedEmail}`);
-        console.log(`[UsersService.validateCredentials] HASH_PEPPER usado: ${process.env.HASH_PEPPER ? 'SIM' : 'NÃO'}`);
+        console.log(`[UsersService.validateCredentials] HASH_PEPPER configurado: ${process.env.HASH_PEPPER ? 'SIM (' + process.env.HASH_PEPPER.substring(0, 10) + '...)' : 'NÃO'}`);
+        console.log(`[UsersService.validateCredentials] HASH_SALT_ROUNDS: ${process.env.HASH_SALT_ROUNDS || '10'}`);
+        // Testar sem pepper também para debug
+        const bcrypt = require('bcryptjs');
+        const testWithoutPepper = await bcrypt.compare(password, user.passwordHash);
+        const testWithPepper = await bcrypt.compare(password + (process.env.HASH_PEPPER || ''), user.passwordHash);
+        console.log(`[UsersService.validateCredentials] Teste sem pepper: ${testWithoutPepper}`);
+        console.log(`[UsersService.validateCredentials] Teste com pepper: ${testWithPepper}`);
       }
       return null;
     }

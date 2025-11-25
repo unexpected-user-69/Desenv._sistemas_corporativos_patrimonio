@@ -19,7 +19,12 @@ import { PatrimonioLocalizacaoHistorico } from './patrimonio/entities/patrimonio
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: [
+        '.env.local',
+        '.env',
+        '../.env', // Backend .env
+        '../../.env', // Backend root .env
+      ],
     }),
     AuthModule,
     HttpClientsModule,

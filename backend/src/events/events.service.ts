@@ -10,7 +10,7 @@ import { Repository, ILike, Between, FindOptionsWhere, In } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { Event } from './entities/event.entity';
 import { EventPatrimonio } from './entities/event-patrimonio.entity';
-import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
+import { PatrimonioHttpClient } from '../http-clients/patrimonio-http-client';
 import { EventState } from './enums/event-state.enum';
 import { EventVisibility } from './enums/event-visibility.enum';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -29,8 +29,7 @@ export class EventsService {
     private readonly eventRepository: Repository<Event>,
     @InjectRepository(EventPatrimonio)
     private readonly eventPatrimonioRepository: Repository<EventPatrimonio>,
-    @InjectRepository(Patrimonio)
-    private readonly patrimonioRepository: Repository<Patrimonio>,
+    private readonly patrimonioHttpClient: PatrimonioHttpClient,
   ) {}
 
   /**
@@ -94,12 +93,13 @@ export class EventsService {
 
     // Validar patrimônios se fornecidos
     if (createEventDto.patrimonioIds && createEventDto.patrimonioIds.length > 0) {
-      const patrimonios = await this.patrimonioRepository.find({
-        where: { id: In(createEventDto.patrimonioIds) },
-        select: ['id'],
-      });
+      const patrimoniosPromises = createEventDto.patrimonioIds.map(id =>
+        this.patrimonioHttpClient.findOne(id).catch(() => null)
+      );
+      const patrimonios = await Promise.all(patrimoniosPromises);
+      const validPatrimonios = patrimonios.filter(p => p !== null);
 
-      if (patrimonios.length !== createEventDto.patrimonioIds.length) {
+      if (validPatrimonios.length !== createEventDto.patrimonioIds.length) {
         throw new BadRequestException(
           'Um ou mais patrimônios fornecidos não foram encontrados',
         );
@@ -383,12 +383,13 @@ export class EventsService {
 
     // Validar patrimônios se fornecidos
     if (updateEventDto.patrimonioIds) {
-      const patrimonios = await this.patrimonioRepository.find({
-        where: { id: In(updateEventDto.patrimonioIds) },
-        select: ['id'],
-      });
+      const patrimoniosPromises = updateEventDto.patrimonioIds.map(id =>
+        this.patrimonioHttpClient.findOne(id).catch(() => null)
+      );
+      const patrimonios = await Promise.all(patrimoniosPromises);
+      const validPatrimonios = patrimonios.filter(p => p !== null);
 
-      if (patrimonios.length !== updateEventDto.patrimonioIds.length) {
+      if (validPatrimonios.length !== updateEventDto.patrimonioIds.length) {
         throw new BadRequestException(
           'Um ou mais patrimônios fornecidos não foram encontrados',
         );

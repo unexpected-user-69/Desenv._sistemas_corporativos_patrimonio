@@ -167,3 +167,5 @@ export class QueryPatrimonioDto {
   sortOrder?: 'ASC' | 'DESC' = 'ASC';
 }
 
+
+

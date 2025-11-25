@@ -37,9 +37,21 @@ export class UsersService {
   }
 
   private serializeUser(user: User): UserResponseDto {
-    return plainToInstance(UserResponseDto, user, {
+    // Garante que o id está presente
+    if (!user.id) {
+      console.warn('[UsersService.serializeUser] Usuário sem id:', user);
+    }
+    const serialized = plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
     });
+    // Log em desenvolvimento para debug
+    if (process.env.NODE_ENV !== 'production' && !serialized.id) {
+      console.warn('[UsersService.serializeUser] Serializado sem id:', {
+        originalId: user.id,
+        serialized: serialized,
+      });
+    }
+    return serialized;
   }
 
   private normalizeEmail(email: string): string {
@@ -450,7 +462,17 @@ export class UsersService {
       select: ['id', 'email', 'name', 'role', 'isActive', 'passwordHash', 'avatarUrl', 'createdAt', 'updatedAt', 'deletedAt', 'version'],
     });
 
-    if (!user || !user.isActive) {
+    if (!user) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[UsersService.validateCredentials] Usuário não encontrado: ${normalizedEmail}`);
+      }
+      return null;
+    }
+
+    if (!user.isActive) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[UsersService.validateCredentials] Usuário inativo: ${normalizedEmail}`);
+      }
       return null;
     }
 
@@ -460,6 +482,10 @@ export class UsersService {
     );
 
     if (!isValidPassword) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[UsersService.validateCredentials] Senha inválida para: ${normalizedEmail}`);
+        console.log(`[UsersService.validateCredentials] HASH_PEPPER usado: ${process.env.HASH_PEPPER ? 'SIM' : 'NÃO'}`);
+      }
       return null;
     }
 

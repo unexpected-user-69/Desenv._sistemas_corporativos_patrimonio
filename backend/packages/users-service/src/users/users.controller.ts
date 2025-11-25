@@ -11,6 +11,7 @@ import {
   UseGuards,
   Req,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { Throttle } from '@nestjs/throttler';
@@ -29,6 +30,7 @@ import {
   ApiBearerAuth,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -216,15 +218,79 @@ export class UsersController {
       );
       if (!user) {
         // Retorna null quando credenciais são inválidas (não é um erro HTTP)
+        // Log para debug em desenvolvimento
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`[UsersController.validate] Credenciais inválidas para: ${dto.email}`);
+        }
         return null;
       }
       // Retorna serializado (sem passwordHash devido ao @Exclude)
       // Não passa autenticação pois este é um endpoint público de validação
-      return await this.usersService.findOne(user.id, undefined, undefined);
+      const userResponse = await this.usersService.findOne(user.id, undefined, undefined);
+      
+      // Log para debug em desenvolvimento
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[UsersController.validate] Usuário validado:`, {
+          id: userResponse.id,
+          email: userResponse.email,
+          name: userResponse.name,
+          role: userResponse.role,
+        });
+      }
+      
+      return userResponse;
     } catch (error: any) {
       // Em caso de erro, retorna null (não lança exceção para não expor detalhes)
       console.error(`[UsersController.validate] Erro ao validar credenciais: ${error.message}`);
       return null;
+    }
+  }
+
+  @Public()
+  @Post('dev-user')
+  @ApiOperation({ 
+    summary: 'Criar usuário de desenvolvimento (apenas em desenvolvimento)',
+    description: 'Endpoint público para criar o usuário de desenvolvimento. Disponível apenas quando NODE_ENV !== "production".',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Usuário de desenvolvimento criado com sucesso',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Endpoint disponível apenas em desenvolvimento',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Usuário já existe',
+  })
+  async createDevUser(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
+    // Apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'production') {
+      throw new UnauthorizedException('Endpoint disponível apenas em desenvolvimento');
+    }
+    
+    // Verificar se é o email de desenvolvimento
+    const devEmail = process.env.SWAGGER_DEV_EMAIL || 'admin@dev.local';
+    if (dto.email.toLowerCase() !== devEmail.toLowerCase()) {
+      throw new BadRequestException('Este endpoint só pode criar o usuário de desenvolvimento');
+    }
+    
+    try {
+      return await this.usersService.create(dto);
+    } catch (error: any) {
+      // Se o usuário já existe, atualizar a senha (idempotente)
+      if (error.status === 409 || error.message?.includes('already exists')) {
+        // Buscar o usuário existente e atualizar a senha
+        const existingUser = await this.usersService.findByEmail(devEmail);
+        if (existingUser) {
+          // Atualizar senha do usuário existente
+          await this.usersService.update(existingUser.id, { password: dto.password });
+          return await this.usersService.findByEmail(devEmail);
+        }
+      }
+      throw error;
     }
   }
 

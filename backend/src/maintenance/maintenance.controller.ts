@@ -49,9 +49,7 @@ import { ReportResponseDto } from './dto/report-response.dto';
 import { MaintenanceDashboardService } from './services/maintenance-dashboard.service';
 import { MaintenanceReportsService } from './services/maintenance-reports.service';
 import { MaintenanceExportService } from './services/maintenance-export.service';
-import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { PatrimonioHttpClient } from '../http-clients/patrimonio-http-client';
 import { NotFoundException } from '@nestjs/common';
 
 @ApiTags('maintenance')
@@ -65,8 +63,7 @@ export class MaintenanceController {
     private readonly dashboardService: MaintenanceDashboardService,
     private readonly reportsService: MaintenanceReportsService,
     private readonly exportService: MaintenanceExportService,
-    @InjectRepository(Patrimonio)
-    private readonly patrimonioRepository: Repository<Patrimonio>,
+    private readonly patrimonioHttpClient: PatrimonioHttpClient,
   ) {}
 
   @Get('os')
@@ -248,11 +245,9 @@ export class MaintenanceController {
     @Query() query: SlaMetricsQueryDto,
   ): Promise<MtbfResponseDto> {
     // Verificar se o patrimônio existe
-    const patrimonio = await this.patrimonioRepository.findOne({
-      where: { id: patrimonioId },
-    });
-    
-    if (!patrimonio) {
+    try {
+      await this.patrimonioHttpClient.findOne(patrimonioId);
+    } catch (error) {
       throw new NotFoundException(`Patrimônio com ID "${patrimonioId}" não encontrado`);
     }
     

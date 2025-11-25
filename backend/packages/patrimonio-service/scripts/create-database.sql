@@ -14,3 +14,5 @@ CREATE DATABASE patrimonio;
 -- npm run migration:run
 
 
+
+

@@ -115,6 +115,16 @@ export class AuthService {
     };
   }
 
+  // Cria usuário de desenvolvimento (apenas em desenvolvimento)
+  async createDevUser(
+    email: string,
+    password: string,
+    name: string,
+    role: string = 'ADMIN',
+  ): Promise<UserIdentity | null> {
+    return await this.usersHttpClient.createDevUser(email, password, name, role);
+  }
+
   // REFRESH: verifica hash, revoga atual, cria novo e retorna novo access+refresh
   async refresh(refreshTokenRaw: string, ip?: string, userAgent?: string) {
     if (!refreshTokenRaw)

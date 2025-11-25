@@ -3,3 +3,5 @@ import { CreatePatrimonioDto } from './create-patrimonio.dto';
 
 export class UpdatePatrimonioDto extends PartialType(CreatePatrimonioDto) {}
 
+
+

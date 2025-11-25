@@ -43,7 +43,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
               port: parseInt(process.env.DB_PORT ?? '5432', 10),
               username: process.env.DB_USER ?? 'postgres',
               password: process.env.DB_PASS ?? 'postgres',
-              database: process.env.DB_NAME ?? 'patrimonio',
+              database: process.env.DB_NAME ?? 'patrimonio_inventario',
               ssl: sslOptions,
               entities: [RefreshToken],
               synchronize: false,

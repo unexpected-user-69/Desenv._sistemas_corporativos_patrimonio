@@ -181,3 +181,5 @@ export class CreatePatrimonioDto {
   fotoUrl?: string;
 }
 
+
+

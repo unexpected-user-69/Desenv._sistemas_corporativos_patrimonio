@@ -101,8 +101,13 @@ export class UsersHttpClient {
     if (configUrl) {
       return configUrl;
     }
-    // Fallback final
-    return 'http://users-service:3002';
+    // Fallback final: usa localhost em desenvolvimento, users-service em Docker
+    // Detecta se está em Docker verificando se o hostname users-service é acessível
+    // Por padrão, assume desenvolvimento local
+    if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'true') {
+      return 'http://users-service:3002';
+    }
+    return 'http://localhost:3002'; // Porta do users-service em desenvolvimento local (sem prefixo /api, apenas para Swagger)
   }
 
   /**
@@ -136,19 +141,43 @@ export class UsersHttpClient {
         ),
       );
 
+      // O TransformResponseInterceptor envolve a resposta em { data: ... }
+      // response.data = { data: UserResponseDto | null }
+      const wrappedData = response.data as any;
+      const userData = wrappedData?.data;
+      
       // Se a resposta for null, as credenciais são inválidas
-      if (!response.data) {
+      if (!userData || userData === null) {
         this.logger.debug(`Credenciais inválidas para email: ${email} (resposta null)`);
         return null;
       }
 
+      // Log detalhado para debug
+      this.logger.debug(`Resposta completa: ${JSON.stringify(userData)}`);
+      
       // Converte a resposta para UserIdentity
-      this.logger.debug(`Credenciais válidas para email: ${email}, userId: ${response.data.id}`);
+      const userId = userData.id;
+      if (!userId) {
+        this.logger.warn(`userId está undefined para email: ${email}. Resposta completa: ${JSON.stringify(wrappedData)}`);
+        // Tenta acessar diretamente se não estiver no formato esperado
+        if (wrappedData.id) {
+          this.logger.debug(`Encontrado id diretamente em response.data: ${wrappedData.id}`);
+          return {
+            id: wrappedData.id,
+            email: wrappedData.email || userData.email,
+            name: wrappedData.name || userData.name,
+            roles: [wrappedData.role || userData.role],
+          };
+        }
+        return null;
+      }
+      
+      this.logger.debug(`Credenciais válidas para email: ${email}, userId: ${userId}`);
       return {
-        id: response.data.id,
-        email: response.data.email,
-        name: response.data.name,
-        roles: [response.data.role], // Converte role (string) para array
+        id: userId,
+        email: userData.email,
+        name: userData.name,
+        roles: [userData.role], // Converte role (string) para array
       };
     } catch (error) {
       // Trata erros de comunicação (rede, timeout, etc.)
@@ -204,12 +233,15 @@ export class UsersHttpClient {
         ),
       );
 
+      // O TransformResponseInterceptor envolve a resposta em { data: ... }
+      const userData = (response.data as any)?.data || response.data;
+
       // Converte a resposta para UserIdentity
       return {
-        id: response.data.id,
-        email: response.data.email,
-        name: response.data.name,
-        roles: [response.data.role], // Converte role (string) para array
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        roles: [userData.role], // Converte role (string) para array
       };
     } catch (error) {
       // Trata erros de comunicação (rede, timeout, etc.)
@@ -227,6 +259,90 @@ export class UsersHttpClient {
       } else {
         this.logger.error(
           `Erro inesperado ao buscar usuário: ${error}`,
+        );
+      }
+
+      // Retorna null em caso de falha (resiliência)
+      return null;
+    }
+  }
+
+  /**
+   * Cria o usuário de desenvolvimento via POST /users/dev-user.
+   * Endpoint público disponível apenas em desenvolvimento.
+   * 
+   * @param email - Email do usuário
+   * @param password - Senha em texto plano
+   * @param name - Nome do usuário
+   * @param role - Role do usuário (padrão: ADMIN)
+   * @returns UserIdentity | null - Identidade do usuário se criado, null caso contrário
+   */
+  async createDevUser(
+    email: string,
+    password: string,
+    name: string,
+    role: string = 'ADMIN',
+  ): Promise<UserIdentity | null> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<ValidateUserResponse>(
+          `${this.baseUrl}/users/dev-user`,
+          {
+            email,
+            password,
+            name,
+            role,
+            isActive: true,
+          },
+          {
+            timeout: this.timeout,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+
+      // O TransformResponseInterceptor envolve a resposta em { data: ... }
+      const wrappedData = response.data as any;
+      const userData = wrappedData?.data || wrappedData;
+
+      // Log para debug
+      this.logger.debug(`Resposta createDevUser: ${JSON.stringify(userData)}`);
+
+      if (!userData || !userData.id) {
+        this.logger.warn(`Resposta inválida do createDevUser: ${JSON.stringify(wrappedData)}`);
+        return null;
+      }
+
+      // Converte a resposta para UserIdentity
+      return {
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        roles: [userData.role],
+      };
+    } catch (error) {
+      // Trata erros de comunicação
+      if (error instanceof AxiosError) {
+        // Se for 409 (Conflict), o endpoint do users-service já trata isso
+        // e retorna o usuário atualizado, então não deveríamos chegar aqui
+        // Mas se chegarmos, é um erro inesperado
+        if (error.response?.status === 409) {
+          this.logger.warn(
+            `Usuário já existe (409), mas o endpoint deveria ter retornado o usuário. Verifique o endpoint /users/dev-user.`,
+          );
+        }
+        
+        this.logger.warn(
+          `Erro ao criar usuário de desenvolvimento: ${error.message} (status: ${error.response?.status})`,
+        );
+        if (error.response?.data) {
+          this.logger.debug(`Response data: ${JSON.stringify(error.response.data)}`);
+        }
+      } else {
+        this.logger.error(
+          `Erro inesperado ao criar usuário de desenvolvimento: ${error}`,
         );
       }
 

@@ -9,9 +9,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppDataSource } from './database/data-source';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PatrimonioModule } from './patrimonio/patrimonio.module';
-import { AuditModule } from './audit/audit.module';
-import { CategoriasModule } from './categorias/categorias.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { CommonModule } from './common/common.module';
 import { HttpClientsModule } from './http-clients/http-clients.module';
@@ -70,9 +67,6 @@ import { SwaggerController } from './swagger/swagger.controller';
     }),
     TypeOrmModule.forRoot(AppDataSource.options),
     HttpClientsModule,
-    PatrimonioModule,
-    CategoriasModule,
-    AuditModule,
     LoggerModule,
     CommonModule,
     IntegrationsErpModule,

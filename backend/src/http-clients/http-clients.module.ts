@@ -14,3 +14,5 @@ import { PatrimonioHttpClient } from './patrimonio-http-client';
   exports: [UsersHttpClient, EventsHttpClient, CategoriasHttpClient, AuditHttpClient, PatrimonioHttpClient],
 })
 export class HttpClientsModule { }
+
+

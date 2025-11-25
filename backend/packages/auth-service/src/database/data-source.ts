@@ -35,7 +35,7 @@ const options: PostgresConnectionOptions = process.env.DATABASE_URL
       port: parseInt(process.env.DB_PORT ?? '5432', 10),
       username: process.env.DB_USER ?? 'postgres',
       password: process.env.DB_PASS ?? 'postgres',
-      database: process.env.DB_NAME ?? 'patrimonio',
+      database: process.env.DB_NAME ?? 'patrimonio_inventario',
       ssl: sslOptions,
     };
 

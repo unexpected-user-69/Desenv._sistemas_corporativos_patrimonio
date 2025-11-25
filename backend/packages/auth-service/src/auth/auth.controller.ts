@@ -135,12 +135,35 @@ export class AuthController {
     const devName = process.env.SWAGGER_DEV_NAME || 'Admin Dev';
 
     // Tenta fazer login com as credenciais padrão
-    // Nota: O usuário deve ser criado manualmente no users-service para desenvolvimento
     try {
       return await this.auth.login(devEmail, devPassword, ip, ua);
     } catch (error) {
+      // Se o login falhar, tenta criar o usuário automaticamente
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('Invalid credentials') || errorMessage.includes('not found')) {
+        try {
+          // Tenta criar o usuário de desenvolvimento
+          const created = await this.auth.createDevUser(devEmail, devPassword, devName, 'ADMIN');
+          
+          if (created) {
+            // Tenta fazer login novamente após criar o usuário
+            return await this.auth.login(devEmail, devPassword, ip, ua);
+          } else {
+            throw new UnauthorizedException(
+              `Não foi possível criar o usuário de desenvolvimento. Verifique se o users-service está acessível.`
+            );
+          }
+        } catch (createError) {
+          throw new UnauthorizedException(
+            `Não foi possível criar ou autenticar usuário de desenvolvimento. Erro: ${createError instanceof Error ? createError.message : 'Unknown error'}`
+          );
+        }
+      }
+      
+      // Se não for erro de credenciais, relança o erro original
       throw new UnauthorizedException(
-        `Não foi possível autenticar usuário de desenvolvimento. Certifique-se de que o usuário ${devEmail} existe no users-service. Erro: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Não foi possível autenticar usuário de desenvolvimento. Erro: ${errorMessage}`
       );
     }
   }

@@ -10,7 +10,6 @@ import { Campaign } from './entities/campaign.entity';
 import { Assignment } from './entities/assignment.entity';
 import { CollectedItem } from './entities/collected-item.entity';
 import { Reconciliation } from './entities/reconciliation.entity';
-import { PatrimonioModule } from '../patrimonio/patrimonio.module';
 
 import { AppCacheModule } from '../common/cache/cache.module';
 import { HttpClientsModule } from '../http-clients/http-clients.module';
@@ -18,7 +17,6 @@ import { HttpClientsModule } from '../http-clients/http-clients.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Campaign, Assignment, CollectedItem, Reconciliation]),
-    forwardRef(() => PatrimonioModule),
     AppCacheModule,
     HttpClientsModule,
   ],

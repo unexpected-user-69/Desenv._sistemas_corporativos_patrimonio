@@ -20,3 +20,5 @@ import { PatrimonioPdfExportService } from './services/patrimonio-pdf-export.ser
 export class PatrimonioModule {}
 
 
+
+

@@ -114,3 +114,5 @@ describe('OpenAPI Contract Structure - Patrimonio Service', () => {
 });
 
 
+
+

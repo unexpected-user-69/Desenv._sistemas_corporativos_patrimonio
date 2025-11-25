@@ -14,7 +14,6 @@ import { WorkOrder } from './entities/work-order.entity';
 import { WorkLog } from './entities/work-log.entity';
 import { MaintenancePlan } from './entities/maintenance-plan.entity';
 import { Part } from './entities/part.entity';
-import { PatrimonioModule } from '../patrimonio/patrimonio.module';
 
 import { HttpClientsModule } from '../http-clients/http-clients.module';
 
@@ -22,7 +21,6 @@ import { HttpClientsModule } from '../http-clients/http-clients.module';
   imports: [
     ScheduleModule.forRoot(),
     TypeOrmModule.forFeature([WorkOrder, WorkLog, MaintenancePlan, Part]),
-    forwardRef(() => PatrimonioModule),
     HttpClientsModule,
   ],
   controllers: [MaintenanceController],

@@ -47,3 +47,5 @@ export class PaginatedPatrimonioResponseDto {
   hasPreviousPage!: boolean;
 }
 
+
+

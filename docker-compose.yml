@@ -46,7 +46,9 @@ services:
       - patrimonio_network
 
   # ============================================
-  # MICROSERVIÇOS - Cada um em container separado
+  # GRUPO BACKEND - Microserviços
+  # Cada microserviço em seu próprio container
+  # Todos compartilham o mesmo PostgreSQL com schemas separados
   # ============================================
 
   # Microserviço de Autenticação
@@ -54,7 +56,7 @@ services:
     build:
       context: ./backend/packages/auth-service
       dockerfile: Dockerfile
-    container_name: patrimonio_auth_service
+    container_name: patrimonio_backend_auth_service
     restart: unless-stopped
     depends_on:
       db:
@@ -83,6 +85,10 @@ services:
       - "3001:3001"
     networks:
       - patrimonio_network
+    labels:
+      - "com.patrimonio.group=backend"
+      - "com.patrimonio.type=microservice"
+      - "com.patrimonio.service=auth"
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -95,7 +101,7 @@ services:
     build:
       context: ./backend/packages/users-service
       dockerfile: Dockerfile
-    container_name: patrimonio_users_service
+    container_name: patrimonio_backend_users_service
     restart: unless-stopped
     depends_on:
       db:
@@ -125,6 +131,10 @@ services:
       - "3002:3002"
     networks:
       - patrimonio_network
+    labels:
+      - "com.patrimonio.group=backend"
+      - "com.patrimonio.type=microservice"
+      - "com.patrimonio.service=users"
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -137,7 +147,7 @@ services:
     build:
       context: ./backend/packages/events-service
       dockerfile: Dockerfile
-    container_name: patrimonio_events_service
+    container_name: patrimonio_backend_events_service
     restart: unless-stopped
     depends_on:
       db:
@@ -172,6 +182,10 @@ services:
       - "3003:3003"
     networks:
       - patrimonio_network
+    labels:
+      - "com.patrimonio.group=backend"
+      - "com.patrimonio.type=microservice"
+      - "com.patrimonio.service=events"
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -184,7 +198,7 @@ services:
     build:
       context: ./backend/packages/audit-service
       dockerfile: Dockerfile
-    container_name: patrimonio_audit_service
+    container_name: patrimonio_backend_audit_service
     restart: unless-stopped
     depends_on:
       db:
@@ -213,6 +227,10 @@ services:
       - "3004:3004"
     networks:
       - patrimonio_network
+    labels:
+      - "com.patrimonio.group=backend"
+      - "com.patrimonio.type=microservice"
+      - "com.patrimonio.service=audit"
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3004/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -225,7 +243,7 @@ services:
     build:
       context: ./backend/packages/categorias-service
       dockerfile: Dockerfile
-    container_name: patrimonio_categorias_service
+    container_name: patrimonio_backend_categorias_service
     restart: unless-stopped
     depends_on:
       db:
@@ -254,6 +272,10 @@ services:
       - "3005:3005"
     networks:
       - patrimonio_network
+    labels:
+      - "com.patrimonio.group=backend"
+      - "com.patrimonio.type=microservice"
+      - "com.patrimonio.service=categorias"
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3005/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -266,7 +288,7 @@ services:
     build:
       context: ./backend/packages/patrimonio-service
       dockerfile: Dockerfile
-    container_name: patrimonio_patrimonio_service
+    container_name: patrimonio_backend_patrimonio_service
     restart: unless-stopped
     depends_on:
       db:
@@ -299,6 +321,10 @@ services:
       - "3006:3006"
     networks:
       - patrimonio_network
+    labels:
+      - "com.patrimonio.group=backend"
+      - "com.patrimonio.type=microservice"
+      - "com.patrimonio.service=patrimonio"
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3006/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -306,59 +332,30 @@ services:
       retries: 3
       start_period: 40s
 
-  # Serviço do backend NestJS (monolito - manter temporariamente se necessário)
-  backend:
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: patrimonio_inventario_backend
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    env_file:
-      - ./backend/.env
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: ${DB_USER:-postgres}
-      DB_PASS: ${DB_PASS:-postgres}
-      DB_NAME: ${DB_NAME:-patrimonio_inventario}
-      NODE_ENV: ${NODE_ENV:-development}
-      PORT: 3101
-      # Redis Configuration
-      REDIS_HOST: ${REDIS_HOST:-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_DB: ${REDIS_DB:-0}
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      # JWT Configuration
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_in_production}
-      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
-      REFRESH_EXPIRES_DAYS: ${REFRESH_EXPIRES_DAYS:-7}
-    ports:
-      - "${BACKEND_PORT:-3101}:3101"
-    networks:
-      - patrimonio_network
+  # ============================================
+  # GRUPO FRONTEND
+  # ============================================
 
   # Serviço do frontend React
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: patrimonio_inventario_frontend
+    container_name: patrimonio_frontend
     restart: unless-stopped
     depends_on:
-      - backend
+      - auth-service
+      - users-service
     environment:
-      VITE_API_BASE_URL: http://localhost:${BACKEND_PORT:-3101}
+      VITE_API_BASE_URL: http://localhost:${BACKEND_PORT:-3001}
       VITE_APP_NAME: Patrimônio Inventário
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     networks:
       - patrimonio_network
+    labels:
+      - "com.patrimonio.group=frontend"
+      - "com.patrimonio.type=application"
 
 # Rede dedicada para comunicação entre serviços
 networks:

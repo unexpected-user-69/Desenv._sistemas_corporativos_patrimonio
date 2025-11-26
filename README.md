@@ -83,12 +83,121 @@ cd frontend
 npm run dev
 ```
 
-### **Produção com Docker**
+### **Produção com Docker - Microserviços**
+
+O sistema está organizado em microserviços, cada um em seu próprio container dentro do grupo "backend". Todos compartilham o mesmo PostgreSQL com schemas separados.
+
+#### Pré-requisitos
+- Docker e Docker Compose instalados
+- Arquivo `.env` configurado (veja seção Configuração)
+
+#### Iniciar Todos os Serviços
 
 ```bash
-# Iniciar tudo com Docker
-docker-compose up --build -d
+# 1. Construir todas as imagens dos microserviços
+docker-compose build auth-service users-service events-service audit-service categorias-service patrimonio-service
+
+# 2. Iniciar banco de dados e Redis
+docker-compose up -d db redis
+
+# 3. Aguardar banco estar pronto (alguns segundos)
+# Os schemas serão criados automaticamente na primeira inicialização
+
+# 4. Iniciar todos os microserviços
+docker-compose up -d auth-service users-service events-service audit-service categorias-service patrimonio-service
+
+# Ou iniciar tudo de uma vez:
+docker-compose up -d
 ```
+
+#### Verificar Status dos Serviços
+
+```bash
+# Ver status de todos os containers
+docker-compose ps
+
+# Ver apenas os microserviços do backend (usando labels)
+docker ps --filter "label=com.patrimonio.group=backend"
+
+# Ver logs de um serviço específico
+docker-compose logs -f auth-service
+
+# Ver logs de todos os microserviços
+docker-compose logs -f auth-service users-service events-service audit-service categorias-service patrimonio-service
+```
+
+#### Testar Health Checks
+
+```bash
+# Auth Service (Porta 3001)
+curl http://localhost:3001/health
+
+# Users Service (Porta 3002)
+curl http://localhost:3002/health
+
+# Events Service (Porta 3003)
+curl http://localhost:3003/health
+
+# Audit Service (Porta 3004)
+curl http://localhost:3004/health
+
+# Categorias Service (Porta 3005)
+curl http://localhost:3005/health
+
+# Patrimonio Service (Porta 3006)
+curl http://localhost:3006/health
+```
+
+#### Estrutura dos Microserviços
+
+| Serviço | Porta | Container | Schema PostgreSQL |
+|---------|-------|-----------|-------------------|
+| **auth-service** | 3001 | `patrimonio_backend_auth_service` | `auth` |
+| **users-service** | 3002 | `patrimonio_backend_users_service` | `users` |
+| **events-service** | 3003 | `patrimonio_backend_events_service` | `events` |
+| **audit-service** | 3004 | `patrimonio_backend_audit_service` | `audit` |
+| **categorias-service** | 3005 | `patrimonio_backend_categorias_service` | `categorias` |
+| **patrimonio-service** | 3006 | `patrimonio_backend_patrimonio_service` | `patrimonio` |
+
+#### Gerenciar Containers
+
+```bash
+# Parar todos os serviços
+docker-compose down
+
+# Parar e remover volumes (CUIDADO: apaga dados)
+docker-compose down -v
+
+# Reiniciar um serviço específico
+docker-compose restart auth-service
+
+# Reconstruir e reiniciar um serviço
+docker-compose up -d --build auth-service
+
+# Ver logs em tempo real
+docker-compose logs -f
+
+# Acessar container de um serviço
+docker exec -it patrimonio_backend_auth_service sh
+```
+
+#### Schemas PostgreSQL
+
+Os schemas são criados automaticamente na primeira inicialização do PostgreSQL. O script está em:
+```
+./backend/scripts/database/init/create-schemas.sql
+```
+
+Para verificar os schemas criados:
+```bash
+docker exec patrimonio_inventario_db psql -U postgres -d patrimonio_inventario -c "\dn"
+```
+
+#### Documentação Completa
+
+Para mais detalhes sobre a estrutura dos containers, veja:
+- [Estrutura dos Containers do Backend](docs/ESTRUTURA_BACKEND_CONTAINERS.md)
+- [Status dos Containers](docs/STATUS_FINAL_CONTAINERS.md)
 ### **Obter Token de Desenvolvimento**
 
 #### Obter token completo (com informações do usuário)
@@ -144,13 +253,30 @@ HASH_SALT_ROUNDS=12
 ```
 
 ### **URLs dos Serviços**
+
+#### Frontend
 - **Frontend**: http://localhost:5173
+
+#### Backend Monolítico (se estiver rodando)
 - **Backend**: http://localhost:3101
 - **Swagger**: http://localhost:3101/docs
+
+#### Microserviços Backend
+- **Auth Service**: http://localhost:3001 (Swagger: http://localhost:3001/api)
+- **Users Service**: http://localhost:3002 (Swagger: http://localhost:3002/api)
+- **Events Service**: http://localhost:3003 (Swagger: http://localhost:3003/api)
+- **Audit Service**: http://localhost:3004 (Swagger: http://localhost:3004/api)
+- **Categorias Service**: http://localhost:3005 (Swagger: http://localhost:3005/api)
+- **Patrimonio Service**: http://localhost:3006 (Swagger: http://localhost:3006/api)
+
+#### Infraestrutura
 - **Database**: localhost:5432
+- **Redis**: localhost:6379
 
 ## 📚 Documentação
 
+- [Estrutura dos Containers do Backend](docs/ESTRUTURA_BACKEND_CONTAINERS.md) - Como os microserviços estão organizados
+- [Status Final dos Containers](docs/STATUS_FINAL_CONTAINERS.md) - Status atual e verificação
 - [Setup Docker](docs/DOCKER_SETUP.md)
 - [Branch Protection](docs/BRANCH_PROTECTION_GUIDE.md)
 - [Definition of Done](docs/DEFINITION_OF_DONE.md)

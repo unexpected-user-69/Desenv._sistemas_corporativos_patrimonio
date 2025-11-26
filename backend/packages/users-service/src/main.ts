@@ -1,3 +1,7 @@
+// Polyfill para crypto (necessário para TypeORM)
+import { webcrypto } from 'crypto';
+(global as any).crypto = webcrypto;
+
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';

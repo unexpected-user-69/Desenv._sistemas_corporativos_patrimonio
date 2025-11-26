@@ -88,3 +88,5 @@
 4. Corrigir validações de query params
 5. Verificar implementação dos endpoints com erro 500/404
 
+
+

@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -12,32 +13,32 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { User } from './users/entities/user.entity';
 import { Patrimonio } from './patrimonio/entities/patrimonio.entity';
+import { TestTokenController } from './test-token.controller';
 
 @Module({
   imports: [
-    // Rate limiting configuration
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1 minuto
-        limit: 100, // 100 requests por minuto
+        ttl: 60000,
+        limit: 100,
       },
     ]),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST ?? 'localhost',
-      port: Number(process.env.DB_PORT ?? 5432),
-      username: process.env.DB_USER ?? 'postgres',
-      password: process.env.DB_PASS ?? 'postgres',
-      database: process.env.DB_NAME ?? 'patrimonio_inventario',
+      type: 'sqlite',
+      database: 'database.sqlite',
       entities: [User, Patrimonio],
-      synchronize: false,
-      logging: process.env.NODE_ENV === 'development',
-    } as TypeOrmModuleOptions),
+      synchronize: true,
+      logging: true,
+    }),
     UsersModule,
     PatrimonioModule,
     LoggerModule,
   ],
-  controllers: [AppController, MetricsController],
+  controllers: [AppController, MetricsController, TestTokenController],
   providers: [
     AppService,
     MetricsInterceptor,
@@ -55,4 +56,4 @@ import { Patrimonio } from './patrimonio/entities/patrimonio.entity';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

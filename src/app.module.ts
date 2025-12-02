@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -13,6 +13,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { User } from './users/entities/user.entity';
 import { Patrimonio } from './patrimonio/entities/patrimonio.entity';
+import { TestTokenController } from './test-token.controller';
 
 @Module({
   imports: [
@@ -20,42 +21,24 @@ import { Patrimonio } from './patrimonio/entities/patrimonio.entity';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    // Rate limiting configuration
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1 minuto
-        limit: 100, // 100 requests por minuto
+        ttl: 60000,
+        limit: 100,
       },
     ]),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const dbType = configService.get<string>('DB_TYPE') || 'postgres';
-        return {
-          type: dbType as any,
-          ...(dbType === 'sqlite'
-            ? {
-              database: configService.get<string>('DB_NAME') || 'database.sqlite',
-            }
-            : {
-              host: configService.get<string>('DB_HOST') || 'localhost',
-              port: configService.get<number>('DB_PORT') || 5432,
-              username: configService.get<string>('DB_USER') || 'postgres',
-              password: configService.get<string>('DB_PASS') || 'postgres',
-              database: configService.get<string>('DB_NAME') || 'patrimonio_inventario',
-            }),
-          entities: [User, Patrimonio],
-          synchronize: true,
-          logging: configService.get<string>('NODE_ENV') === 'development',
-        };
-      },
+    TypeOrmModule.forRoot({
+      type: 'sqlite',
+      database: 'database.sqlite',
+      entities: [User, Patrimonio],
+      synchronize: true,
+      logging: true,
     }),
     UsersModule,
     PatrimonioModule,
     LoggerModule,
   ],
-  controllers: [AppController, MetricsController],
+  controllers: [AppController, MetricsController, TestTokenController],
   providers: [
     AppService,
     MetricsInterceptor,

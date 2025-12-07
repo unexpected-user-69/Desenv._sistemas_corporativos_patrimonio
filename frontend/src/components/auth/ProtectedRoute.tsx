@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuthStore } from '../../stores/authStore';
 import { ProtectedRouteProps } from '../../types/auth';
 import { UserRole } from '../../types/user';
-import { LoginForm } from './LoginForm';
+import { AuthPage } from './AuthPage';
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
@@ -11,9 +11,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { isAuthenticated, user, hasAnyRole } = useAuthStore();
 
-  // Se não estiver autenticado, mostrar formulário de login
+  // Se não estiver autenticado, mostrar formulário de login/registro
   if (!isAuthenticated) {
-    return fallback || <LoginForm />;
+    return fallback || <AuthPage />;
   }
 
   // Se roles específicas são necessárias, verificar permissões

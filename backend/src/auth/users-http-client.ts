@@ -118,9 +118,9 @@ export class UsersHttpClient {
   ): Promise<UserIdentity | null> {
     const baseUrl = this.baseUrl;
     const url = `${baseUrl}/users/validate`;
-    
+
     this.logger.debug(`Validando credenciais para email: ${email}, URL: ${url}`);
-    
+
     try {
       const dto: ValidateCredentialsDto = { email, password };
       const response = await firstValueFrom(
@@ -165,7 +165,7 @@ export class UsersHttpClient {
         this.logger.warn(
           `Erro ao validar credenciais: ${error.message} (status: ${error.response?.status}, URL: ${url}, code: ${error.code})`,
         );
-        
+
         // Log do erro completo em modo debug
         if (error.response) {
           this.logger.debug(`Response data: ${JSON.stringify(error.response.data)}`);
@@ -231,6 +231,53 @@ export class UsersHttpClient {
       }
 
       // Retorna null em caso de falha (resiliência)
+      return null;
+    }
+  }
+  /**
+   * Cria um novo usuário via POST /users.
+   * 
+   * @param userData - Dados do usuário a ser criado
+   * @returns UserIdentity | null - Identidade do usuário criado ou null em caso de erro
+   */
+  async createUser(userData: any): Promise<UserIdentity | null> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<GetUserResponse>(
+          `${this.baseUrl}/users`,
+          userData,
+          {
+            timeout: this.timeout,
+            headers: {
+              'Content-Type': 'application/json',
+              // Em um cenário real, precisaria de um token de serviço ou API Key
+              // para autorizar a criação se o endpoint for protegido
+            },
+          },
+        ),
+      );
+
+      return {
+        id: response.data.id,
+        email: response.data.email,
+        name: response.data.name,
+        roles: [response.data.role],
+      };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        this.logger.warn(
+          `Erro ao criar usuário: ${error.message} (status: ${error.response?.status})`,
+        );
+        if (error.response?.data) {
+          this.logger.debug(`Detalhes do erro: ${JSON.stringify(error.response.data)}`);
+          // Repassa o erro se for validação (400) ou conflito (409) para o controller tratar
+          if (error.response.status === 400 || error.response.status === 409) {
+            throw error;
+          }
+        }
+      } else {
+        this.logger.error(`Erro inesperado ao criar usuário: ${error}`);
+      }
       return null;
     }
   }

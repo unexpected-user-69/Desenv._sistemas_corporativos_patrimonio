@@ -29,7 +29,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly usersHttpClient: UsersHttpClient,
     private readonly hashService: HashService,
-  ) {}
+  ) { }
 
   /**
    * Valida credenciais do usuário usando UsersHttpClient.
@@ -288,6 +288,41 @@ export class AuthService {
       name: user.name,
       roles: user.roles ?? [],
     };
+  }
+  // REGISTER: cria usuário no Users Service e realiza login automático
+  async register(registerDto: any) {
+    // Adiciona role padrão OPERATOR e ativa o usuário
+    const userData = {
+      ...registerDto,
+      role: 'OPERATOR',
+      isActive: true,
+    };
+
+    try {
+      const user = await this.usersHttpClient.createUser(userData);
+      if (!user) {
+        throw new BadRequestException('Não foi possível criar o usuário');
+      }
+
+      // Realiza login automático
+      const accessToken = this.signAccess(user);
+      const { raw: refreshToken } = await this.issueRefresh(user.id);
+
+      return {
+        accessToken,
+        refreshToken,
+        user: { id: user.id, email: user.email, name: user.name, role: user.roles[0] },
+      };
+    } catch (error: any) {
+      // Trata erros repassados pelo HttpClient (ex: email duplicado)
+      if (error.response?.status === 409) {
+        throw new BadRequestException('Email já cadastrado');
+      }
+      if (error.response?.status === 400) {
+        throw new BadRequestException(error.response.data.message || 'Dados inválidos');
+      }
+      throw error;
+    }
   }
 }
 

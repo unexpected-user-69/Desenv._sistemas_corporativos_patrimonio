@@ -24,6 +24,8 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { SwaggerController } from './swagger/swagger.controller';
 import { TestTokenController } from './test-token.controller';
+import { ServiceTokenGuard } from './common/guards/service-token.guard';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -76,6 +78,7 @@ import { TestTokenController } from './test-token.controller';
     NotificationsModule,
     ReportsModule,
     DashboardModule,
+    AuthModule,
   ],
   controllers: [AppController, MetricsController, SwaggerController, TestTokenController],
   providers: [
@@ -109,6 +112,7 @@ import { TestTokenController } from './test-token.controller';
       provide: 'APP_GUARD',
       useClass: ThrottlerGuard,
     },
+    ServiceTokenGuard,
   ],
 })
 export class AppModule { }

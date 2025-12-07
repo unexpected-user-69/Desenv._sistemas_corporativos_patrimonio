@@ -21,11 +21,12 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
+  onRegisterClick?: () => void;
   onSuccess?: () => void;
   onError?: (error: string) => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onError }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ onRegisterClick, onSuccess, onError }) => {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error, clearError } = useAuthStore();
 
@@ -74,7 +75,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onError }) => {
                     Erro no login
                   </h3>
                   <div className="mt-2 text-sm text-red-700">
-                    <p>{error}</p>
+                    <p>{typeof error === 'string' ? error : JSON.stringify(error)}</p>
                   </div>
                 </div>
               </div>
@@ -159,6 +160,21 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onError }) => {
               )}
             </button>
           </div>
+
+          {onRegisterClick && (
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-600">
+                Não tem uma conta?{' '}
+                <button
+                  type="button"
+                  onClick={onRegisterClick}
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Cadastre-se
+                </button>
+              </p>
+            </div>
+          )}
 
           <div className="text-center">
             <p className="text-sm text-gray-600">

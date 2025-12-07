@@ -1,0 +1,33 @@
+# Example production environment file
+# Fill these values in your deployment environment (CI/CD or secrets manager).
+
+NODE_ENV=production
+APP_PORT=3001
+
+# Application DB connection (used by the app)
+DB_HOST=db
+DB_PORT=5432
+DB_USER=postgres
+DB_PASS=please_change_me
+DB_NAME=aurora_users
+DB_SSL=true
+DB_LOGGING=false
+
+# Postgres container initialization (if using docker-compose to create DB)
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=please_change_me
+POSTGRES_DB=aurora_users
+
+# JWT (MUST be set to a strong secret in production)
+JWT_ACCESS_SECRET=replace_with_strong_secret
+JWT_ACCESS_EXPIRES_IN=900
+
+# Optional: docker image name used by docker-compose.prod.yml
+DOCKER_IMAGE=yourregistry/aurora:latest
+
+# Other runtime config
+USERS_API_URL=http://localhost:3001/v1
+POSTGRES_USER=testuser
+POSTGRES_PASSWORD=testpass
+POSTGRES_DB=testdb
+JWT_ACCESS_SECRET=testsecret123

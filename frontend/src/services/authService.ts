@@ -85,7 +85,7 @@ export class AuthService {
       // O backend retorna: { accessToken, refreshToken, user: { id, email, name, role } }
       // Precisamos converter para o formato esperado pelo frontend
       const { accessToken, refreshToken, user: backendUser } = response.data;
-      
+
       // Converter o user do backend para o formato do frontend
       const user: User = {
         id: backendUser.id,
@@ -119,14 +119,23 @@ export class AuthService {
     } catch (error: any) {
       // Se falhar, mostrar erro real do backend
       let errorMessage = 'Erro ao realizar login';
-      
+
       if (error.response?.data) {
         // Backend retorna: { message: "Invalid credentials", error: "Unauthorized", statusCode: 401 }
-        errorMessage = error.response.data.message || error.response.data.error || errorMessage;
+        const backendMessage = error.response.data.message || error.response.data.error;
+        if (backendMessage) {
+          if (typeof backendMessage === 'string') {
+            errorMessage = backendMessage;
+          } else if (Array.isArray(backendMessage)) {
+            errorMessage = backendMessage.join(', ');
+          } else if (typeof backendMessage === 'object') {
+            errorMessage = JSON.stringify(backendMessage);
+          }
+        }
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       console.error('Erro no login:', errorMessage, error.response?.data);
       throw new Error(errorMessage);
     }
@@ -150,6 +159,72 @@ export class AuthService {
     );
 
     return response;
+  }
+
+  /**
+   * Realiza registro de novo usuário
+   */
+  static async register(data: any): Promise<LoginResponse> {
+    if (this.useMock) {
+      // Mock implementation if needed
+      throw new Error('Mock registration not implemented');
+    }
+
+    try {
+      const response: AxiosResponse<any> = await authApi.post(
+        '/auth/register',
+        data,
+      );
+
+      const { accessToken, refreshToken, user: backendUser } = response.data;
+
+      const user: User = {
+        id: backendUser.id,
+        email: backendUser.email,
+        name: backendUser.name,
+        role: backendUser.role as any,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const expiresIn = 15 * 60;
+
+      localStorage.setItem('auth_token', accessToken);
+      localStorage.setItem('refresh_token', refreshToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem(
+        'token_expires',
+        (Date.now() + expiresIn * 1000).toString(),
+      );
+
+      return {
+        user,
+        token: accessToken,
+        refreshToken,
+        expiresIn,
+      };
+    } catch (error: any) {
+      let errorMessage = 'Erro ao realizar cadastro';
+
+      if (error.response?.data) {
+        const backendMessage = error.response.data.message || error.response.data.error;
+        if (backendMessage) {
+          if (typeof backendMessage === 'string') {
+            errorMessage = backendMessage;
+          } else if (Array.isArray(backendMessage)) {
+            errorMessage = backendMessage.join(', ');
+          } else if (typeof backendMessage === 'object') {
+            errorMessage = JSON.stringify(backendMessage);
+          }
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      console.error('Erro no cadastro:', errorMessage);
+      throw new Error(errorMessage);
+    }
   }
 
   /**
@@ -197,7 +272,7 @@ export class AuthService {
 
       // O backend retorna: { accessToken, refreshToken, user: { id, email, name, role } }
       const { accessToken, refreshToken: newRefreshToken, user: backendUser } = response.data;
-      
+
       // Converter o user do backend para o formato do frontend
       const user: User = {
         id: backendUser.id,

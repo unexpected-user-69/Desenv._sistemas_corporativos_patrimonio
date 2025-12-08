@@ -13,6 +13,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
+    // LOG PARA DEBUG
+    console.error('🔴 HttpExceptionFilter capturou exceção:', exception);
+    if (exception instanceof Error) {
+      console.error('   Stack:', exception.stack);
+    }
+
     const status =
       exception instanceof HttpException
         ? exception.getStatus()

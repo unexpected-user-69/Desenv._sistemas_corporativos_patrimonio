@@ -10,9 +10,9 @@ info:
     email: support@example.com
 
 servers:
-  - url: http://localhost:3006
+  - url: http://localhost:3003
     description: Servidor de desenvolvimento local
-  - url: http://patrimonio-service:3006
+  - url: http://patrimonio-service:3003
     description: Servidor Docker interno
 
 paths:

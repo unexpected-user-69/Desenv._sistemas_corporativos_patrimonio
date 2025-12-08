@@ -53,9 +53,12 @@ async function createAdmin2() {
     await client.connect();
     console.log('✅ Conectado ao banco de dados\n');
 
-    // Verificar se o usuário já existe
+    // Definir search_path para usar o schema users
+    await client.query('SET search_path TO users, public;');
+
+    // Verificar se o usuário já existe no schema users
     const checkResult = await client.query(
-      'SELECT id, email, name, role, is_active FROM users WHERE email = $1',
+      'SELECT id, email, name, role, is_active, deleted_at FROM users.users WHERE email = $1',
       [admin2Email.toLowerCase()]
     );
 
@@ -71,29 +74,43 @@ async function createAdmin2() {
     console.log(`   Hash criado: ${passwordHash.substring(0, 30)}...\n`);
 
     if (checkResult.rows.length > 0) {
-      console.log(`⚠️  Usuário ${admin2Email} já existe. Atualizando...`);
+      const user = checkResult.rows[0];
       
-      await client.query(
-        `UPDATE users 
-         SET password_hash = $1, 
-             name = $2, 
-             role = $3,
-             is_active = true,
-             deleted_at = NULL,
-             updated_at = NOW()
-         WHERE email = $4`,
-        [passwordHash, admin2Name, 'ADMIN', admin2Email.toLowerCase()]
-      );
-      
-      console.log(`✅ Usuário ${admin2Email} atualizado\n`);
+      if (user.deleted_at) {
+        console.log(`⚠️  Usuário ${admin2Email} existe mas está deletado. Reativando...`);
+        await client.query(
+          `UPDATE users.users 
+           SET password_hash = $1, 
+               name = $2, 
+               role = $3,
+               is_active = true,
+               deleted_at = NULL,
+               updated_at = NOW()
+           WHERE email = $4`,
+          [passwordHash, admin2Name, 'ADMIN', admin2Email.toLowerCase()]
+        );
+        console.log(`✅ Usuário ${admin2Email} reativado e atualizado\n`);
+      } else {
+        console.log(`⚠️  Usuário ${admin2Email} já existe. Atualizando...`);
+        await client.query(
+          `UPDATE users.users 
+           SET password_hash = $1, 
+               name = $2, 
+               role = $3,
+               is_active = true,
+               updated_at = NOW()
+           WHERE email = $4`,
+          [passwordHash, admin2Name, 'ADMIN', admin2Email.toLowerCase()]
+        );
+        console.log(`✅ Usuário ${admin2Email} atualizado\n`);
+      }
     } else {
       console.log(`📝 Criando novo usuário: ${admin2Email}`);
       
       await client.query(
-        `INSERT INTO users (email, name, password_hash, role, is_active, created_at, updated_at, version)
-         VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), 1)
-         RETURNING id`,
-        [admin2Email.toLowerCase(), admin2Name, passwordHash, 'ADMIN', true]
+        `INSERT INTO users.users (id, name, email, password_hash, role, is_active, created_at, updated_at, version)
+         VALUES (gen_random_uuid(), $1, $2, $3, $4, true, NOW(), NOW(), 1)`,
+        [admin2Name, admin2Email.toLowerCase(), passwordHash, 'ADMIN']
       );
       
       console.log(`✅ Usuário criado com sucesso!\n`);
@@ -101,7 +118,7 @@ async function createAdmin2() {
 
     // Mostrar informações do usuário
     const userResult = await client.query(
-      'SELECT id, email, name, role, is_active FROM users WHERE email = $1',
+      'SELECT id, email, name, role, is_active FROM users.users WHERE email = $1',
       [admin2Email.toLowerCase()]
     );
     const user = userResult.rows[0];

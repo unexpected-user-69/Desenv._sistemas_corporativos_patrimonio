@@ -1,458 +1,623 @@
-# 🏛️ Sistema de Patrimônio e Inventário - Backend
+# 🏢 Sistema de Gestão de Patrimônio - Backend
 
-API RESTful completa para gestão de patrimônio e inventário, construída com NestJS, TypeORM e PostgreSQL.
+Sistema de gerenciamento de patrimônio corporativo construído com arquitetura de microsserviços usando NestJS, TypeORM e PostgreSQL.
 
 ## 📋 Índice
 
-- [Descrição](#descrição)
-- [Tecnologias](#tecnologias)
-- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Visão Geral](#visão-geral)
+- [Arquitetura](#arquitetura)
+- [Pré-requisitos](#pré-requisitos)
 - [Instalação](#instalação)
 - [Configuração](#configuração)
-- [Executando](#executando)
+- [Migrations](#migrations)
+- [Executando os Serviços](#executando-os-serviços)
+- [Usuários de Desenvolvimento](#usuários-de-desenvolvimento)
 - [Testes](#testes)
-- [Documentação](#documentação)
-- [Endpoints](#endpoints)
+- [Documentação da API](#documentação-da-api)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Tecnologias](#tecnologias)
 
-## 📝 Descrição
+---
 
-Backend completo para sistema de gestão de patrimônio e inventário, com autenticação JWT, autorização baseada em roles, sistema de auditoria, validação de dados e documentação Swagger automática.
+## 🎯 Visão Geral
 
-## 🛠️ Tecnologias
+Sistema modular de gestão de patrimônio com arquitetura de microsserviços, implementando:
 
-- **NestJS** - Framework Node.js
-- **TypeORM** - ORM para TypeScript
-- **PostgreSQL** - Banco de dados relacional
-- **JWT** - Autenticação e autorização
-- **Argon2** - Hash de senhas
-- **Swagger** - Documentação da API
-- **Jest** - Framework de testes
-- **Docker** - Containerização
+- ✅ Autenticação e autorização JWT
+- ✅ CRUD completo de usuários, patrimônios, categorias e eventos
+- ✅ Auditoria de operações
+- ✅ Schemas PostgreSQL isolados por serviço
+- ✅ Validação de dados com class-validator
+- ✅ Documentação OpenAPI/Swagger
+- ✅ Testes E2E e de contrato
 
-## 📁 Estrutura do Projeto
+---
 
-```
-backend/
-├── src/
-│   ├── auth/              # Autenticação e autorização
-│   │   ├── dto/           # DTOs de autenticação
-│   │   ├── entities/      # RefreshToken entity
-│   │   ├── strategies/    # JWT Strategy
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   └── auth.module.ts
-│   ├── users/             # Gerenciamento de usuários
-│   │   ├── dto/           # DTOs de usuários
-│   │   ├── entities/      # User entity
-│   │   ├── enums/         # UserRole enum
-│   │   ├── users.controller.ts
-│   │   ├── users.service.ts
-│   │   └── users.module.ts
-│   ├── patrimonio/        # Gestão de patrimônio
-│   │   ├── dto/           # DTOs de patrimônio
-│   │   ├── entities/      # Patrimonio entity
-│   │   ├── patrimonio.controller.ts
-│   │   ├── patrimonio.service.ts
-│   │   └── patrimonio.module.ts
-│   ├── categorias/        # Categorias de patrimônio
-│   ├── audit/             # Sistema de auditoria
-│   ├── common/            # Utilitários compartilhados
-│   │   ├── guards/        # Guards (JWT, Roles)
-│   │   ├── interceptors/  # Interceptors (Logging, Timeout, Transform)
-│   │   ├── decorators/    # Decorators (Roles, OwnerId)
-│   │   ├── validators/    # Validators customizados
-│   │   └── services/      # Serviços compartilhados
-│   ├── database/          # Configuração do banco
-│   │   └── data-source.ts
-│   └── main.ts            # Bootstrap da aplicação
-├── test/                  # Testes (padrão Aurora)
-│   ├── auth/              # Testes de autenticação
-│   ├── users/             # Testes de usuários
-│   ├── patrimonio/        # Testes de patrimônio
-│   ├── common/            # Testes de utilitários
-│   ├── factories/         # Factories de teste
-│   └── mocks/             # Mocks reutilizáveis
-├── scripts/               # Scripts de setup
-├── docker-compose.yml     # Orquestração Docker
-├── Dockerfile             # Imagem Docker
-└── package.json           # Dependências
-```
+## 🏗️ Arquitetura
 
-## 🚀 Instalação
+### API Gateway
 
-### Pré-requisitos
+| Serviço | Porta | Descrição |
+|---------|-------|-----------|
+| **api-gateway** | 3000 | Gateway centralizado - Ponto único de entrada |
 
-- Node.js 18+
-- npm ou yarn
-- PostgreSQL 15+
-- Docker (opcional)
+### Microsserviços
 
-### Instalação Local
-
-```bash
-# Instalar dependências
-npm install
-
-# Copiar arquivo de ambiente
-cp docker.env .env
-
-# Editar .env com suas configurações
-# Ver seção "Configuração" abaixo
-```
-
-## ⚙️ Configuração
-
-### Variáveis de Ambiente (.env)
-
-```env
-# Banco de Dados
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASS=postgres
-DB_NAME=patrimonio_inventario
-
-# Backend
-PORT=3101
-NODE_ENV=development
-
-# JWT
-JWT_SECRET=your-super-secret-jwt-key-change-in-production
-JWT_EXPIRES_IN=15m
-JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-in-production
-JWT_REFRESH_EXPIRES_IN=7d
-
-# Desenvolvimento
-DEV_AUTO_AUTH=false  # Auto-injeta usuário fake quando true (apenas em dev)
-
-# CORS
-CORS_ORIGIN=http://localhost:5173,http://localhost:3000
-
-# Segurança
-HASH_PEPPER=your-pepper-here-change-in-production
-HASH_SALT_ROUNDS=12
-```
+| Serviço | Porta | Descrição | Schema DB |
+|---------|-------|-----------|-----------|
+| **auth-service** | 3001 | Autenticação e tokens JWT | `auth` |
+| **users-service** | 3002 | Gerenciamento de usuários | `users` |
+| **events-service** | 3003 | Gerenciamento de eventos | `events` |
+| **audit-service** | 3004 | Logs de auditoria | `audit` |
+| **categorias-service** | 3005 | Gerenciamento de categorias | `categorias` |
+| **patrimonio-service** | 3006 | Gerenciamento de patrimônios | `patrimonio` |
 
 ### Banco de Dados
 
-#### Opção 1: Docker (Recomendado)
+- **PostgreSQL 15**: Banco de dados compartilhado com schemas isolados
+- **TypeORM**: ORM para gerenciamento de entidades e migrations
+- **Schemas separados**: Cada serviço tem seu próprio schema PostgreSQL
+
+---
+
+## 📦 Pré-requisitos
+
+- **Node.js**: v18+ ou v22+ (recomendado)
+- **npm**: v9+ ou v10+
+- **PostgreSQL**: v15+
+- **Git**: Para controle de versão
+
+---
+
+## 🚀 Instalação
+
+### 1. Clone o repositório
 
 ```bash
-# Iniciar banco de dados
-docker-compose up db -d
-
-# Verificar status
-docker-compose ps
+git clone <url-do-repositorio>
+cd Desenv._sistemas_corporativos_patrimonio/backend
 ```
 
-#### Opção 2: PostgreSQL Local
+### 2. Instale as dependências
 
 ```bash
-# Criar banco de dados
-createdb patrimonio_inventario
-
-# Ou via psql
-psql -U postgres -c "CREATE DATABASE patrimonio_inventario;"
+npm install
 ```
 
-### Migrations
+### 3. Instale as dependências de cada microsserviço
 
 ```bash
-# Rodar migrations
+cd packages/api-gateway && npm install --legacy-peer-deps && cd ../..
+cd packages/auth-service && npm install && cd ../..
+cd packages/users-service && npm install && cd ../..
+cd packages/events-service && npm install && cd ../..
+cd packages/audit-service && npm install && cd ../..
+cd packages/categorias-service && npm install && cd ../..
+cd packages/patrimonio-service && npm install && cd ../..
+```
+
+---
+
+## ⚙️ Configuração
+
+### 1. Configure o PostgreSQL
+
+Crie o banco de dados:
+
+```sql
+CREATE DATABASE patrimonio_inventario;
+```
+
+### 2. Configure as variáveis de ambiente
+
+#### Opção 1: Usar arquivo de referência (Recomendado)
+
+Copie o arquivo `.env.example` para `.env` na raiz do backend:
+
+```bash
+cp .env.example .env
+```
+
+O arquivo `.env.example` contém todas as variáveis de ambiente necessárias para todos os serviços, incluindo:
+- Configurações do banco de dados
+- Schemas por serviço
+- JWT secrets
+- SERVICE_TOKEN para comunicação service-to-service
+- URLs dos serviços
+- Portas de cada serviço
+- Configurações de CORS e ambiente
+
+**⚠️ IMPORTANTE**: Edite o arquivo `.env` e configure os valores adequados, especialmente:
+- `JWT_ACCESS_SECRET` e `JWT_REFRESH_SECRET` (gere secrets seguros)
+- `SERVICE_TOKEN` (gere um token seguro de pelo menos 32 caracteres)
+- `HASH_PEPPER` (gere um pepper aleatório)
+- Credenciais do banco de dados
+
+#### Opção 2: Configurar manualmente
+
+Se preferir, crie um arquivo `.env` manualmente com as variáveis necessárias. Veja o `.env.example` como referência.
+
+### 3. Configure variáveis específicas de cada serviço (opcional)
+
+Cada serviço pode ter seu próprio `.env` em `packages/<service-name>/.env`. Os serviços procuram variáveis nesta ordem:
+1. `.env.local` (prioridade máxima)
+2. `.env` (no diretório do serviço)
+3. `../.env` (diretório pai)
+4. `../../.env` (raiz do backend - `.env.example` como referência)
+
+---
+
+## 🗃️ Migrations
+
+### Executar todas as migrations
+
+```bash
+npm run migration:run:all
+```
+
+Este comando executa as migrations de todos os microsserviços na ordem correta:
+
+1. users-service
+2. auth-service
+3. events-service
+4. audit-service
+5. categorias-service
+6. patrimonio-service
+
+### Executar migrations de um serviço específico
+
+```bash
+cd packages/<service-name>
 npm run migration:run
+```
 
-# Reverter última migration
+### Reverter migrations
+
+```bash
+cd packages/<service-name>
 npm run migration:revert
-
-# Gerar nova migration
-npm run migration:generate -- -n MigrationName
 ```
 
-## ▶️ Executando
-
-### Desenvolvimento
+### Gerar nova migration
 
 ```bash
-# Iniciar em modo desenvolvimento (watch mode)
+cd packages/<service-name>
+npm run migration:generate -- src/database/migrations/NomeDaMigration
+```
+
+---
+
+## 🏃 Executando os Serviços
+
+### Modo Desenvolvimento (com watch)
+
+Execute cada serviço em um terminal separado:
+
+#### Terminal 1 - API Gateway (Recomendado)
+```bash
+cd packages/api-gateway
 npm run start:dev
-
-# A aplicação estará disponível em http://localhost:3101
 ```
 
-### Produção
+**Nota**: O API Gateway é o ponto único de entrada recomendado. Ele roteia requisições para todos os microsserviços e fornece autenticação centralizada, rate limiting e circuit breaker.
+
+#### Terminal 2 - Auth Service
+```bash
+cd packages/auth-service
+npm run start:dev
+```
+
+#### Terminal 3 - Users Service
+```bash
+cd packages/users-service
+npm run start:dev
+```
+
+#### Terminal 4 - Events Service
+```bash
+cd packages/events-service
+npm run start:dev
+```
+
+#### Terminal 5 - Audit Service
+```bash
+cd packages/audit-service
+npm run start:dev
+```
+
+#### Terminal 6 - Categorias Service
+```bash
+cd packages/categorias-service
+npm run start:dev
+```
+
+#### Terminal 7 - Patrimonio Service
+```bash
+cd packages/patrimonio-service
+npm run start:dev
+```
+
+### Modo Produção
 
 ```bash
-# Build
+cd packages/<service-name>
 npm run build
-
-# Iniciar em produção
 npm run start:prod
 ```
 
-### Docker
+---
+
+## 👤 Usuários de Desenvolvimento
+
+Após executar as migrations, crie os usuários de desenvolvimento:
+
+### Criar usuário admin principal
 
 ```bash
-# Build e iniciar
-docker-compose up --build -d
-
-# Ver logs
-docker-compose logs -f backend
-
-# Parar
-docker-compose down
+cd packages/users-service
+node scripts/create-dev-user.js
 ```
 
-### Execução Manual (Microsserviços + Monolito)
+**Credenciais padrão:**
+- Email: `admin@dev.local`
+- Senha: `AdminPassword123!`
 
-Para iniciar todo o ecossistema manualmente, abra terminais separados para cada serviço e execute os comandos na ordem abaixo:
+### Criar usuário admin secundário
 
-#### 1. Audit Service (Porta 3005)
-```powershell
-cd packages/audit-service; npm install; npm run start:dev
+```bash
+cd packages/users-service
+node scripts/create-admin2.js
 ```
 
-#### 2. Auth Service (Porta 3001)
-```powershell
-cd packages/auth-service; npm install; npm run start:dev
-```
+**Credenciais:**
+- Email: `admin2@dev.local`
+- Senha: `Admin2Password123!`
 
-#### 3. Categorias Service (Porta 3004)
-```powershell
-cd packages/categorias-service; npm install; npm run start:dev
-```
-
-#### 4. Events Service (Porta 3002)
-```powershell
-cd packages/events-service; npm install; npm run start:dev
-```
-
-#### 5. Patrimonio Service (Porta 3006)
-```powershell
-cd packages/patrimonio-service; npm install; npm run start:dev
-```
-
-#### 6. Users Service (Porta 3003)
-```powershell
-cd packages/users-service; npm install; npm run start:dev
-```
-
-#### 7. Monolito (Backend Principal - Porta 3000)
-**Nota:** Inicie este por último para garantir que os microsserviços já estejam disponíveis.
-```powershell
-npm install; npm run start:dev
-```
+---
 
 ## 🧪 Testes
 
-### Executar Todos os Testes
+### Executar todos os testes
 
 ```bash
+cd packages/<service-name>
 npm test
-```
-
-### Testes com Cobertura
-
-```bash
-npm run test:cov
 ```
 
 ### Testes E2E
 
 ```bash
+cd packages/<service-name>
 npm run test:e2e
 ```
 
-### Testes Específicos
+### Testes de Contrato (OpenAPI)
 
 ```bash
-# Testes de um módulo
-npm test -- --testPathPatterns=test/auth
-
-# Testes em modo watch
-npm test -- --watch
+cd packages/<service-name>
+npm run test:contract
 ```
 
-### Estrutura de Testes
+### Cobertura de testes
 
-Os testes seguem o padrão Aurora, organizados em:
-
-- `test/<feature>/controllers/` - Testes de controllers
-- `test/<feature>/services/` - Testes de services
-- `test/factories/` - Factories para criar dados de teste
-- `test/mocks/` - Mocks reutilizáveis
-
-## 📚 Documentação
-
-### Swagger
-
-Acesse a documentação interativa da API em:
-
-**http://localhost:3101/docs**
-
-A documentação Swagger inclui:
-- Todos os endpoints disponíveis
-- Schemas de request/response
-- Exemplos de uso
-- Autenticação Bearer Token
-
-### LLM-UNIFIED-GUIDE
-
-Guia completo para desenvolvimento e interação com LLMs:
-
-**Veja `LLM-UNIFIED-GUIDE.md`**
-
-## 🔌 Endpoints
-
-### Autenticação
-
-#### POST /v1/auth/login
-Autentica um usuário.
-
-**Request:**
-```json
-{
-  "email": "user@example.com",
-  "password": "StrongP@ssw0rd!"
-}
+```bash
+cd packages/<service-name>
+npm run test:cov
 ```
 
-**Response:**
+---
+
+## 📚 Documentação da API
+
+### API Gateway (Recomendado)
+
+Acesse todos os serviços através do gateway:
+
+- **API Gateway**: http://localhost:3000/api
+
+O gateway roteia requisições para todos os microsserviços usando o padrão:
+```
+http://localhost:3000/api/{service}/{path}
+```
+
+### Microsserviços (Acesso Direto)
+
+Cada serviço expõe sua documentação Swagger em `/api`:
+
+- **Auth Service**: http://localhost:3001/api
+- **Users Service**: http://localhost:3002/api
+- **Events Service**: http://localhost:3003/api
+- **Audit Service**: http://localhost:3004/api
+- **Categorias Service**: http://localhost:3005/api
+- **Patrimonio Service**: http://localhost:3006/api
+
+### Exemplo de uso da API
+
+#### Via API Gateway (Recomendado)
+
+##### 1. Login
+
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@dev.local",
+    "password": "AdminPassword123!"
+  }'
+```
+
+##### 2. Usar o token em requisições
+
+```bash
+curl -X GET http://localhost:3000/api/users \
+  -H "Authorization: Bearer <accessToken>"
+```
+
+#### Via Microsserviços Direto
+
+##### 1. Login
+
+```bash
+curl -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@dev.local",
+    "password": "AdminPassword123!"
+  }'
+```
+
+**Resposta:**
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "refresh-token-string",
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "name": "User Name",
-    "role": "STUDENT"
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "base64-encoded-refresh-token",
+    "user": {
+      "id": "uuid",
+      "email": "admin@dev.local",
+      "name": "Admin Dev",
+      "role": "ADMIN"
+    }
   }
 }
 ```
 
-#### POST /v1/auth/refresh
-Renova o access token.
+#### 2. Usar o token em requisições
 
-**Request:**
-```json
-{
-  "refreshToken": "refresh-token-string"
-}
+```bash
+curl -X GET http://localhost:3002/users \
+  -H "Authorization: Bearer <accessToken>"
 ```
 
-#### POST /v1/auth/logout
-Revoga o refresh token.
+---
 
-**Request:**
-```json
-{
-  "refreshToken": "refresh-token-string"
-}
-```
-
-#### GET /v1/auth/me
-Obtém informações do usuário autenticado.
-
-**Headers:**
-```
-Authorization: Bearer <access-token>
-```
-
-### Usuários
-
-#### GET /v1/users
-Lista usuários (com paginação e filtros).
-
-#### GET /v1/users/:id
-Obtém um usuário por ID.
-
-#### POST /v1/users
-Cria um novo usuário (requer ADMIN ou TEACHER).
-
-#### PATCH /v1/users/:id
-Atualiza um usuário (requer ADMIN ou o próprio usuário).
-
-#### DELETE /v1/users/:id
-Remove um usuário (soft delete, requer ADMIN).
-
-### Patrimônio
-
-#### GET /v1/patrimonio
-Lista patrimônios (com paginação e filtros avançados).
-
-#### GET /v1/patrimonio/:id
-Obtém um patrimônio por ID.
-
-#### POST /v1/patrimonio
-Cria um novo patrimônio (requer ADMIN ou TEACHER).
-
-#### PATCH /v1/patrimonio/:id
-Atualiza um patrimônio (requer ADMIN ou TEACHER).
-
-#### DELETE /v1/patrimonio/:id
-Remove um patrimônio (soft delete, requer ADMIN ou TEACHER).
-
-## 🔐 Autenticação e Autorização
-
-### Roles
-
-- **ADMIN**: Acesso total ao sistema
-- **TEACHER**: Pode gerenciar patrimônio e usuários básicos
-- **STUDENT**: Acesso de leitura
-
-### Uso de Guards
-
-```typescript
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.TEACHER)
-@Get('protected')
-async protectedRoute() {
-  // ...
-}
-```
-
-### Token JWT
-
-O token JWT deve ser enviado no header:
+## 📁 Estrutura do Projeto
 
 ```
-Authorization: Bearer <access-token>
+backend/
+├── packages/
+│   ├── api-gateway/           # Gateway centralizado (porta 3000)
+│   │   ├── src/
+│   │   │   ├── common/        # Guards, interceptors, filters
+│   │   │   ├── health/        # Health check
+│   │   │   ├── proxy/         # Roteamento e circuit breaker
+│   │   │   ├── app.module.ts
+│   │   │   └── main.ts
+│   │   ├── Dockerfile
+│   │   └── package.json
+│   │
+│   ├── auth-service/          # Serviço de autenticação
+│   │   ├── src/
+│   │   │   ├── auth/          # Módulo de autenticação
+│   │   │   ├── common/        # Utilitários compartilhados
+│   │   │   ├── database/      # Configuração DB e migrations
+│   │   │   └── main.ts        # Entry point
+│   │   ├── test/              # Testes E2E e de contrato
+│   │   ├── openapi.yaml       # Especificação OpenAPI
+│   │   └── package.json
+│   │
+│   ├── users-service/         # Serviço de usuários
+│   │   ├── src/
+│   │   │   ├── users/         # Módulo de usuários
+│   │   │   ├── auth/          # Estratégias JWT
+│   │   │   ├── common/        # Utilitários
+│   │   │   ├── database/      # Migrations
+│   │   │   └── main.ts
+│   │   ├── scripts/           # Scripts utilitários
+│   │   │   ├── create-dev-user.js
+│   │   │   └── create-admin2.js
+│   │   └── test/
+│   │
+│   ├── events-service/        # Serviço de eventos
+│   ├── audit-service/         # Serviço de auditoria
+│   ├── categorias-service/    # Serviço de categorias
+│   └── patrimonio-service/    # Serviço de patrimônios
+│
+├── scripts/
+│   └── run-all-migrations.ts  # Script para rodar todas as migrations
+│
+├── .env                       # Variáveis de ambiente
+├── package.json               # Dependências do workspace
+└── README.md                  # Este arquivo
 ```
 
-## 📊 Status do Projeto
+---
 
-### ✅ Implementado
+## 🛠️ Tecnologias
 
-- ✅ Autenticação JWT completa
-- ✅ Autorização baseada em roles
-- ✅ CRUD de usuários
-- ✅ CRUD de patrimônio
-- ✅ Sistema de auditoria
-- ✅ Validação de dados
-- ✅ Documentação Swagger
-- ✅ Testes unitários (padrão Aurora)
-- ✅ Estrutura de testes completa
-- ✅ Docker e Docker Compose
+### Backend Framework
+- **NestJS 11**: Framework Node.js progressivo
+- **TypeScript 5.7**: Superset tipado do JavaScript
+- **Express**: Framework HTTP subjacente
 
-### 🔄 Em Desenvolvimento
+### Banco de Dados
+- **PostgreSQL 15**: Banco de dados relacional
+- **TypeORM 0.3**: ORM para TypeScript/JavaScript
+- **pg**: Driver PostgreSQL para Node.js
 
-- 🔄 Testes E2E completos
-- 🔄 Métricas avançadas
-- 🔄 Performance testing
+### Autenticação & Segurança
+- **Passport**: Middleware de autenticação
+- **JWT**: JSON Web Tokens
+- **bcryptjs**: Hashing de senhas
+- **argon2**: Hashing de refresh tokens
+- **class-validator**: Validação de DTOs
+- **class-transformer**: Transformação de objetos
 
-## 🤝 Contribuindo
+### Documentação
+- **Swagger/OpenAPI 3.1**: Documentação de APIs
+- **@nestjs/swagger**: Integração Swagger com NestJS
 
-1. Leia o `LLM-UNIFIED-GUIDE.md`
-2. Siga o padrão Aurora para testes
-3. Use UUID para IDs
-4. Execute testes antes de fazer commit
-5. Documente mudanças significativas
+### Testes
+- **Jest**: Framework de testes
+- **Supertest**: Testes HTTP
+- **ts-jest**: Suporte TypeScript para Jest
+
+### Utilitários
+- **dotenv**: Gerenciamento de variáveis de ambiente
+- **rxjs**: Programação reativa
+- **axios**: Cliente HTTP
+
+---
+
+## 🔒 Segurança
+
+### Autenticação
+- JWT com access tokens (15 minutos) e refresh tokens (7 dias)
+- Refresh tokens armazenados com hash Argon2
+- Senhas com bcrypt + pepper + salt
+
+### Autorização
+- RBAC (Role-Based Access Control)
+- Guards: JwtAuthGuard, RolesGuard, OwnershipGuard
+- Roles: ADMIN, MANAGER, OPERATOR
+
+### Validação
+- DTOs com class-validator
+- ValidationPipe global
+- Sanitização de entrada
+
+### Headers de Segurança
+- CORS configurado
+- Rate limiting (Throttler)
+- Timeout interceptor
+
+---
+
+## 🐛 Troubleshooting
+
+### Erro: "Cannot set property crypto"
+
+**Problema**: Polyfill do crypto em Node.js v22+
+
+**Solução**: O polyfill foi removido. Se ainda aparecer, verifique `main.ts` dos serviços.
+
+### Erro: "Invalid credentials" no login
+
+**Soluções**:
+1. Verifique se o users-service está rodando
+2. Verifique se as migrations foram executadas
+3. Verifique se o usuário foi criado
+4. Reinicie ambos os serviços (auth e users)
+
+### Erro: "relation does not exist"
+
+**Problema**: Migrations não foram executadas
+
+**Solução**:
+```bash
+npm run migration:run:all
+```
+
+### Erro: "ECONNREFUSED" entre serviços
+
+**Problema**: Serviço não está rodando ou URL incorreta
+
+**Solução**:
+1. Verifique se todos os serviços estão rodando
+2. Verifique as variáveis de ambiente (USERS_SERVICE_URL, etc.)
+3. Verifique as portas (3001-3006)
+
+---
+
+## 📝 Scripts Úteis
+
+### Backend (raiz)
+
+```bash
+# Rodar todas as migrations
+npm run migration:run:all
+
+# Limpar node_modules
+npm run clean
+
+# Reinstalar dependências
+npm run clean && npm install
+```
+
+### Por serviço
+
+```bash
+# Desenvolvimento com watch
+npm run start:dev
+
+# Build
+npm run build
+
+# Produção
+npm run start:prod
+
+# Testes
+npm test
+npm run test:e2e
+npm run test:cov
+
+# Migrations
+npm run migration:generate -- src/database/migrations/NomeDaMigration
+npm run migration:run
+npm run migration:revert
+
+# Linting
+npm run lint
+npm run format
+```
+
+---
+
+## 👥 Contribuindo
+
+1. Crie uma branch para sua feature: `git checkout -b feature/minha-feature`
+2. Commit suas mudanças: `git commit -m 'feat: adiciona nova feature'`
+3. Push para a branch: `git push origin feature/minha-feature`
+4. Abra um Pull Request
+
+### Convenção de Commits
+
+Seguimos [Conventional Commits](https://www.conventionalcommits.org/):
+
+- `feat:` Nova funcionalidade
+- `fix:` Correção de bug
+- `docs:` Documentação
+- `style:` Formatação
+- `refactor:` Refatoração
+- `test:` Testes
+- `chore:` Manutenção
+
+---
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](../LICENSE) para mais detalhes.
+Este projeto é parte de um trabalho acadêmico.
+
+---
+
+## 📞 Suporte
+
+Para dúvidas ou problemas:
+
+1. Verifique a [documentação](#documentação-da-api)
+2. Consulte o [troubleshooting](#troubleshooting)
+3. Abra uma issue no repositório
 
 ---
 
 **Desenvolvido com ❤️ usando NestJS**
-

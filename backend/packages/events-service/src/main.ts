@@ -29,8 +29,8 @@ async function bootstrap() {
     .setDescription('Serviço de gestão de eventos relacionados a patrimônio')
     .setVersion('1.0.0')
     .addBearerAuth()
-    .addServer('http://localhost:3003', 'Servidor de desenvolvimento local')
-    .addServer('http://events-service:3003', 'Servidor Docker interno')
+    .addServer('http://localhost:3006', 'Servidor de desenvolvimento local')
+    .addServer('http://events-service:3006', 'Servidor Docker interno')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -46,7 +46,7 @@ async function bootstrap() {
     console.warn('Não foi possível carregar openapi.yaml:', error);
   }
 
-  const port = process.env.PORT || 3003;
+  const port = process.env.PORT || 3006;
   await app.listen(port);
   console.log(`Events Service está rodando em: http://localhost:${port}`);
   console.log(`Swagger está disponível em: http://localhost:${port}/api`);

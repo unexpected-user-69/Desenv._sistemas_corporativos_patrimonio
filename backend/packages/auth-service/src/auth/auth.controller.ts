@@ -129,10 +129,10 @@ export class AuthController {
 
     const ua = req.get('user-agent') ?? undefined;
     
-    // Email e senha padrão para desenvolvimento
-    const devEmail = process.env.SWAGGER_DEV_EMAIL || 'admin@dev.local';
+    // Email e senha padrão para desenvolvimento - usa admin@admin.local
+    const devEmail = process.env.SWAGGER_DEV_EMAIL || 'admin@admin.local';
     const devPassword = process.env.SWAGGER_DEV_PASSWORD || 'AdminPassword123!';
-    const devName = process.env.SWAGGER_DEV_NAME || 'Admin Dev';
+    const devName = process.env.SWAGGER_DEV_NAME || 'admin';
 
     // Tenta fazer login com as credenciais padrão
     try {

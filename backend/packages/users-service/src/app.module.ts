@@ -11,6 +11,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
               applicationName: 'users-service',
+              schema: process.env.DB_SCHEMA ?? 'users', // Schema isolado para users-service
             }
           : {
               type: 'postgres',
@@ -55,6 +57,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
               migrationsRun: false,
               logging: process.env.DB_LOGGING === 'true',
               applicationName: 'users-service',
+              schema: process.env.DB_SCHEMA ?? 'users', // Schema isolado para users-service
             };
       },
     }),
@@ -83,6 +86,10 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_INTERCEPTOR,

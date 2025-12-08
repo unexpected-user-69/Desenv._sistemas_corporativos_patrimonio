@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, FindManyOptions, ILike, Between, FindOptionsWhere, IsNull } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { User } from './entities/user.entity';
+import { UserRole } from './enums/user-role.enum';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -34,6 +35,16 @@ export class UsersService {
 
   private async hash(plain: string): Promise<string> {
     return this.hashService.hash(plain);
+  }
+
+  /**
+   * Verifica se existe pelo menos um usuário ADMIN no sistema
+   */
+  async hasAdminUsers(): Promise<boolean> {
+    const count = await this.userRepository.count({
+      where: { role: UserRole.ADMIN, isActive: true },
+    });
+    return count > 0;
   }
 
   private serializeUser(user: User): UserResponseDto {

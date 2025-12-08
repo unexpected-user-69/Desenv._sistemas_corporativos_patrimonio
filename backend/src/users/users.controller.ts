@@ -244,7 +244,7 @@ export class UsersController {
         value: {
           name: 'João Silva',
           email: 'joao.silva@email.com',
-          password: 'senha123',
+          password: 'Senha123!',
           role: 'OPERATOR',
           isActive: true,
         },
@@ -254,7 +254,7 @@ export class UsersController {
         value: {
           name: 'Maria Santos',
           email: 'maria.santos@email.com',
-          password: 'senha456',
+          password: 'Senha456!',
           role: 'MANAGER',
           isActive: true,
         },
@@ -311,14 +311,14 @@ export class UsersController {
           {
             name: 'João Silva',
             email: 'joao.silva@email.com',
-            password: 'senha123',
+            password: 'Senha123!',
             role: 'OPERATOR',
             isActive: true,
           },
           {
             name: 'Maria Santos',
             email: 'maria.santos@email.com',
-            password: 'senha456',
+            password: 'Senha456!',
             role: 'MANAGER',
             isActive: true,
           },

@@ -39,9 +39,12 @@ async function createDevUser() {
     await client.connect();
     console.log('✅ Conectado ao banco de dados');
 
-    // Verificar se o usuário já existe
+    // Definir search_path para usar o schema users
+    await client.query('SET search_path TO users, public;');
+
+    // Verificar se o usuário já existe no schema users
     const checkResult = await client.query(
-      'SELECT id, email, is_active, deleted_at FROM users WHERE email = $1',
+      'SELECT id, email, is_active, deleted_at FROM users.users WHERE email = $1',
       [devEmail.toLowerCase()]
     );
 
@@ -55,7 +58,7 @@ async function createDevUser() {
         const passwordHash = await bcrypt.hash(passwordWithPepper, saltRounds);
         
         await client.query(
-          `UPDATE users 
+          `UPDATE users.users 
            SET password_hash = $1, 
                name = $2, 
                role = $3, 
@@ -74,7 +77,7 @@ async function createDevUser() {
         const passwordHash = await bcrypt.hash(passwordWithPepper, saltRounds);
         
         await client.query(
-          `UPDATE users 
+          `UPDATE users.users 
            SET password_hash = $1, 
                name = $2, 
                role = $3,
@@ -93,7 +96,7 @@ async function createDevUser() {
       const passwordHash = await bcrypt.hash(passwordWithPepper, saltRounds);
       
       await client.query(
-        `INSERT INTO users (id, name, email, password_hash, role, is_active, created_at, updated_at, version)
+        `INSERT INTO users.users (id, name, email, password_hash, role, is_active, created_at, updated_at, version)
          VALUES (gen_random_uuid(), $1, $2, $3, $4, true, NOW(), NOW(), 1)`,
         [devName, devEmail.toLowerCase(), passwordHash, 'ADMIN']
       );
@@ -103,7 +106,7 @@ async function createDevUser() {
 
     // Verificar criação
     const verifyResult = await client.query(
-      'SELECT id, email, name, role, is_active FROM users WHERE email = $1',
+      'SELECT id, email, name, role, is_active FROM users.users WHERE email = $1',
       [devEmail.toLowerCase()]
     );
     

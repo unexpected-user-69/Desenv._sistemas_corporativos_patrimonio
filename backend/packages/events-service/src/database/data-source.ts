@@ -5,17 +5,24 @@ import type { TlsOptions } from 'tls';
 import { config } from 'dotenv';
 import { Event } from '../events/entities/event.entity';
 import { EventPatrimonio } from '../events/entities/event-patrimonio.entity';
+import { Patrimonio } from '../events/entities/patrimonio.entity';
 config();
+
+const dbSchema = process.env.DB_SCHEMA ?? 'events';
 
 const common = {
   type: 'postgres' as const,
-  entities: [Event, EventPatrimonio],
+  entities: [Event, EventPatrimonio, Patrimonio],
   migrations: [__dirname + '/migrations/*.{ts,js}'],
   synchronize: false,
   migrationsRun: false,
   logging: process.env.DB_LOGGING === 'true',
   applicationName: 'events-service',
-  schema: process.env.DB_SCHEMA ?? 'events', // Schema isolado para events-service
+  schema: dbSchema, // Schema isolado para events-service
+  // Configuração do search_path conforme especificação (meusarq_md - 1211)
+  extra: {
+    options: `-c search_path=${dbSchema},public`,
+  },
 };
 
 const sslOptions: TlsOptions | boolean | undefined =

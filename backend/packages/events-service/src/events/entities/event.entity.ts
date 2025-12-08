@@ -19,7 +19,7 @@ import { EventType } from '../enums/event-type.enum';
 import { EventVisibility } from '../enums/event-visibility.enum';
 import { EventState } from '../enums/event-state.enum';
 
-@Entity({ name: 'events' })
+@Entity({ name: 'events', schema: 'events' })
 @Index('uq_events_slug', ['slug'], { unique: true })
 @Index('idx_events_created_by', ['createdBy'])
 @Index('idx_events_start_date', ['startDate'])
@@ -86,6 +86,7 @@ export class Event {
   })
   @JoinTable({
     name: 'event_patrimonios',
+    schema: 'events',
     joinColumn: { name: 'event_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'patrimonio_id', referencedColumnName: 'id' },
   })

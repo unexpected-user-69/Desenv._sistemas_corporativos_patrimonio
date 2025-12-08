@@ -11,6 +11,7 @@ import {
   UseGuards,
   Req,
   UnauthorizedException,
+  ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
 import { Request } from 'express';
@@ -33,10 +34,12 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { ServiceTokenGuard } from '../common/guards/service-token.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { OwnerId } from '../common/decorators/owner-id.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { ServiceOnly } from '../common/decorators/service-only.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -201,15 +204,20 @@ export class UsersController {
     return this.usersService.findByEmail(email);
   }
 
-  @Public()
+  @ServiceOnly()
+  @UseGuards(ServiceTokenGuard)
   @Post('validate')
-  @ApiOperation({ summary: 'Validar credenciais de usuário' })
+  @ApiOperation({ 
+    summary: 'Validar credenciais de usuário (service-to-service)',
+    description: 'Endpoint interno para validação de credenciais. Requer SERVICE_TOKEN no header x-service-token.',
+  })
   @ApiBody({ type: ValidateUserDto })
   @ApiOkResponse({
     description: 'Retorna o usuário se as credenciais forem válidas, null caso contrário',
     type: UserResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
+  @ApiUnauthorizedResponse({ description: 'Service token inválido ou ausente' })
   async validate(@Body() dto: ValidateUserDto): Promise<UserResponseDto | null> {
     try {
       const user = await this.usersService.validateCredentials(
@@ -295,10 +303,12 @@ export class UsersController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Public() // Permite acesso público em desenvolvimento quando não houver admins
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requisições por minuto
-  @ApiOperation({ summary: 'Criar um novo usuário' })
+  @ApiOperation({ 
+    summary: 'Criar um novo usuário',
+    description: 'Requer autenticação ADMIN. Em desenvolvimento, permite criação pública se não houver usuários ADMIN no sistema.',
+  })
   @ApiUnauthorizedResponse({ description: 'Não autenticado' })
   @ApiForbiddenResponse({ description: 'Acesso negado - apenas ADMIN' })
   @ApiBody({
@@ -310,7 +320,7 @@ export class UsersController {
         value: {
           name: 'João Silva',
           email: 'joao.silva@email.com',
-          password: 'senha123',
+          password: 'Senha123!',
           role: 'OPERATOR',
           isActive: true,
         },
@@ -320,7 +330,7 @@ export class UsersController {
         value: {
           name: 'Maria Santos',
           email: 'maria.santos@email.com',
-          password: 'senha456',
+          password: 'Senha456!',
           role: 'MANAGER',
           isActive: true,
         },
@@ -357,7 +367,26 @@ export class UsersController {
       },
     },
   })
-  create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
+  async create(@Body() dto: CreateUserDto, @Req() req: Request & { user?: AuthUser }): Promise<UserResponseDto> {
+    // Em desenvolvimento, permite criação pública se não houver admins
+    if (process.env.NODE_ENV !== 'production') {
+      const hasAdmins = await this.usersService.hasAdminUsers();
+      if (!hasAdmins) {
+        // Permite criação do primeiro admin sem autenticação
+        return this.usersService.create(dto);
+      }
+    }
+    
+    // Verifica autenticação e role
+    if (!req.user) {
+      throw new UnauthorizedException('Autenticação necessária');
+    }
+    
+    if (!req.user.roles || !req.user.roles.includes(UserRole.ADMIN)) {
+      throw new ForbiddenException('Acesso negado - apenas ADMIN');
+    }
+    
+    // Comportamento normal: requer autenticação ADMIN
     return this.usersService.create(dto);
   }
 
@@ -377,14 +406,14 @@ export class UsersController {
           {
             name: 'João Silva',
             email: 'joao.silva@email.com',
-            password: 'senha123',
+            password: 'Senha123!',
             role: 'OPERATOR',
             isActive: true,
           },
           {
             name: 'Maria Santos',
             email: 'maria.santos@email.com',
-            password: 'senha456',
+            password: 'Senha456!',
             role: 'MANAGER',
             isActive: true,
           },

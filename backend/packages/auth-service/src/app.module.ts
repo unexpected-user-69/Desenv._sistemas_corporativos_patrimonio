@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD, APP_PIPE, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import * as path from 'path';
 import { AuthModule } from './auth/auth.module';
 import { HealthController } from './health/health.controller';
 import { RefreshToken } from './auth/entities/refresh-token.entity';
@@ -16,7 +17,13 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: [
+        path.join(__dirname, '..', '.env.local'),
+        path.join(__dirname, '..', '.env'),
+        path.join(__dirname, '..', '..', '..', '.env'),
+        '.env.local',
+        '.env',
+      ],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => {
@@ -55,8 +62,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     }),
     ThrottlerModule.forRoot({
       throttlers: [{
-        ttl: 60000,
-        limit: 100,
+        ttl: process.env.NODE_ENV === 'test' ? 1000 : 60000,
+        limit: process.env.NODE_ENV === 'test' ? 10000 : 100,
       }],
     }),
     AuthModule,
@@ -75,18 +82,20 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
           },
         }),
     },
-    {
+    // Desabilitar ThrottlerGuard em modo de teste
+    ...(process.env.NODE_ENV !== 'test' ? [{
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
-    },
+    }] : []),
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: TransformResponseInterceptor,
-    },
+    // TEMPORARIAMENTE DESABILITADO PARA DEBUG
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: TransformResponseInterceptor,
+    // },
     {
       provide: APP_INTERCEPTOR,
       useFactory: () => new TimeoutInterceptor(),

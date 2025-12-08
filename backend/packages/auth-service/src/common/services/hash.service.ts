@@ -37,6 +37,13 @@ export class HashService {
   ): Promise<boolean> {
     const pepper = process.env.HASH_PEPPER || '';
     const passwordWithPepper = plainPassword + (pepper ? pepper : '');
+    
+    // Log para debug (apenas em desenvolvimento)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[HashService] Comparando senha:`);
+      console.log(`   Pepper configurado: ${pepper ? pepper.substring(0, 10) + '... (length: ' + pepper.length + ')' : '(vazio)'}`);
+      console.log(`   Senha + Pepper length: ${passwordWithPepper.length}`);
+    }
 
     return bcrypt.compare(passwordWithPepper, hashedPassword);
   }

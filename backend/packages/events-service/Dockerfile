@@ -26,6 +26,7 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
+COPY bootstrap.js ./
 
 # Criar usuário não-root
 RUN addgroup -g 1001 -S nodejs && \

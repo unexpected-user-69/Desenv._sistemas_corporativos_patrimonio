@@ -26,23 +26,25 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
+COPY bootstrap.js ./
 
 # Criar usuário não-root
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
-# Mudar ownership
-RUN chown -R nestjs:nodejs /app
+# Criar diretório de uploads e mudar ownership
+RUN mkdir -p /app/uploads/patrimonio && \
+    chown -R nestjs:nodejs /app
 
 USER nestjs
 
 # Expor porta
-EXPOSE 3006
+EXPOSE 3003
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3006/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:3003/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Comando de inicialização
-CMD ["node", "dist/main.js"]
+CMD ["node", "bootstrap.js"]
 

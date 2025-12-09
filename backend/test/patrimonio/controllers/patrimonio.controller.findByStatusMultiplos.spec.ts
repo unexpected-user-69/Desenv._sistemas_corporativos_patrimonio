@@ -14,6 +14,8 @@ describe('PatrimonioController – findByStatusMultiplos', () => {
     const mod = await Test.createTestingModule({
       controllers: [PatrimonioController],
       providers: [
+        { provide: 'Reflector', useValue: { getAllAndOverride: jest.fn() } },
+
         { provide: PatrimonioService, useValue: service },
         { provide: PatrimonioPdfExportService, useValue: pdfExportService },
       ],

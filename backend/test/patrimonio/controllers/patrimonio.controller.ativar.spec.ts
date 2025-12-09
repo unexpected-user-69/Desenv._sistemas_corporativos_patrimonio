@@ -7,7 +7,7 @@ import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
 import { PatrimonioStatus } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
-describe('PatrimonioController – ativar', () => {
+describe('PatrimonioController ï¿½ ativar', () => {
   let controller: PatrimonioController;
   const service = { ativar: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -18,6 +18,7 @@ describe('PatrimonioController – ativar', () => {
       providers: [
         { provide: PatrimonioService, useValue: service },
         { provide: PatrimonioPdfExportService, useValue: pdfExportService },
+        { provide: 'Reflector', useValue: { getAllAndOverride: jest.fn() } },
       ],
     }).compile();
     controller = mod.get(PatrimonioController);
@@ -41,7 +42,7 @@ describe('PatrimonioController – ativar', () => {
   it('should throw NotFoundException when patrimonio not found', async () => {
     const id = randomUUID();
     service.ativar.mockRejectedValue(
-      new NotFoundException(`Patrimônio com ID "${id}" não encontrado`),
+      new NotFoundException(`Patrimï¿½nio com ID "${id}" nï¿½o encontrado`),
     );
 
     await expect(controller.ativar(id)).rejects.toThrow(NotFoundException);
@@ -51,7 +52,7 @@ describe('PatrimonioController – ativar', () => {
   it('should throw BadRequestException when patrimonio is already active', async () => {
     const id = randomUUID();
     service.ativar.mockRejectedValue(
-      new BadRequestException('O patrimônio já está ativo'),
+      new BadRequestException('O patrimï¿½nio jï¿½ estï¿½ ativo'),
     );
 
     await expect(controller.ativar(id)).rejects.toThrow(BadRequestException);

@@ -11,7 +11,9 @@ describe('PatrimonioController – getHistoricoPorResponsavel', () => {
   beforeEach(async () => {
     const mod = await Test.createTestingModule({
       controllers: [PatrimonioController],
-      providers: [{ provide: PatrimonioService, useValue: service },
+      providers: [
+        { provide: 'Reflector', useValue: { getAllAndOverride: jest.fn() } },
+{ provide: PatrimonioService, useValue: service },
         { provide: PatrimonioPdfExportService, useValue: pdfExportService }],
     }).compile();
     controller = mod.get(PatrimonioController);

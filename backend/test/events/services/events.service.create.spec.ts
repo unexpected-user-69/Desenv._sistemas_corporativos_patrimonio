@@ -1,6 +1,6 @@
 ﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { Event } from '../../../src/events/entities/event.entity';
@@ -18,7 +18,7 @@ describe('EventsService.create (unit)', () => {
   let service: EventsService;
   let eventRepository: MockType<Repository<Event>>;
   let eventPatrimonioRepository: MockType<Repository<EventPatrimonio>>;
-  let patrimonioRepository: MockType<Repository<Patrimonio>>;
+  let patrimonioHttpClient: jest.Mocked<PatrimonioHttpClient>;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -44,7 +44,7 @@ describe('EventsService.create (unit)', () => {
     service = module.get(EventsService);
     eventRepository = module.get(getRepositoryToken(Event));
     eventPatrimonioRepository = module.get(getRepositoryToken(EventPatrimonio));
-    patrimonioRepository = module.get(getRepositoryToken(Patrimonio));
+    patrimonioHttpClient = module.get(PatrimonioHttpClient);
   });
 
   it('should create an event successfully', async () => {
@@ -91,10 +91,9 @@ describe('EventsService.create (unit)', () => {
     });
 
     eventRepository.findOne.mockResolvedValue(null); // Slug não existe
-    patrimonioRepository.find.mockResolvedValue([
-      patrimonio1,
-      patrimonio2,
-    ] as Patrimonio[]);
+    patrimonioHttpClient.findOne
+      .mockResolvedValueOnce(patrimonio1 as any)
+      .mockResolvedValueOnce(patrimonio2 as any);
     eventRepository.create.mockReturnValue(eventEntity as Event);
     eventRepository.save.mockResolvedValue(eventEntity as Event);
     eventPatrimonioRepository.create.mockImplementation((entity) => entity as EventPatrimonio);
@@ -103,10 +102,9 @@ describe('EventsService.create (unit)', () => {
 
     const result = await service.create(dto, createdBy);
 
-    expect(patrimonioRepository.find).toHaveBeenCalledWith({
-      where: { id: In(patrimonioIds) },
-      select: ['id'],
-    });
+    expect(patrimonioHttpClient.findOne).toHaveBeenCalledTimes(2);
+    expect(patrimonioHttpClient.findOne).toHaveBeenCalledWith(patrimonio1.id);
+    expect(patrimonioHttpClient.findOne).toHaveBeenCalledWith(patrimonio2.id);
     expect(eventPatrimonioRepository.create).toHaveBeenCalledTimes(2);
     expect(eventPatrimonioRepository.save).toHaveBeenCalled();
     expect(result).toBeDefined();
@@ -134,7 +132,7 @@ describe('EventsService.create (unit)', () => {
     const createdBy = randomUUID();
 
     eventRepository.findOne.mockResolvedValue(null);
-    patrimonioRepository.find.mockResolvedValue([]); // Nenhum patrimônio encontrado
+    patrimonioHttpClient.findOne.mockResolvedValue(null); // Nenhum patrimônio encontrado
 
     await expect(service.create(dto, createdBy)).rejects.toThrow(
       BadRequestException,

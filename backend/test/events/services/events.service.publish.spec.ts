@@ -11,6 +11,7 @@ import { Event } from '../../../src/events/entities/event.entity';
 import { EventPatrimonio } from '../../../src/events/entities/event-patrimonio.entity';
 import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 import { EventsService } from '../../../src/events/events.service';
+import { PatrimonioHttpClient } from '../../../src/http-clients/patrimonio-http-client';
 import { makeEventEntity } from '../../factories/event.factory';
 import { EventState } from '../../../src/events/enums/event-state.enum';
 import { randomUUID } from 'crypto';
@@ -32,8 +33,10 @@ describe('EventsService.publish (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: getRepositoryToken(Patrimonio),
-          useFactory: repositoryMockFactory,
+          provide: PatrimonioHttpClient,
+          useValue: {
+            findOne: jest.fn(),
+          },
         },
       ],
     }).compile();

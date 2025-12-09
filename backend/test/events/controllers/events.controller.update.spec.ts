@@ -28,7 +28,7 @@ describe('EventsController – update', () => {
       user: {
         roles: ['teacher'],
       },
-    };
+    } as any;
 
     service.update.mockResolvedValue(mockEvent);
 
@@ -50,7 +50,7 @@ describe('EventsController – update', () => {
       user: {
         roles: ['admin'],
       },
-    };
+    } as any;
 
     service.update.mockResolvedValue(mockEvent);
 
@@ -70,7 +70,7 @@ describe('EventsController – update', () => {
       user: {
         roles: ['teacher'],
       },
-    };
+    } as any;
 
     service.update.mockRejectedValue(
       new NotFoundException(`Evento com ID "${eventId}" não encontrado`),

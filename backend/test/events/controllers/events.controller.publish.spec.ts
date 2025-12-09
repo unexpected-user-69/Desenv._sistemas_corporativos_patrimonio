@@ -54,7 +54,7 @@ describe('EventsController – publish', () => {
       user: {
         roles: ['admin'],
       },
-    };
+    } as any;
 
     service.publish.mockResolvedValue(mockEvent);
 

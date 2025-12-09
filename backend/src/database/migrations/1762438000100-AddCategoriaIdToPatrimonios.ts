@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
+import { MigrationInterface, QueryRunner, TableColumn, TableIndex } from 'typeorm';
 
 export class AddCategoriaIdToPatrimonios1762438000100 implements MigrationInterface {
   name = 'AddCategoriaIdToPatrimonios1762438000100';

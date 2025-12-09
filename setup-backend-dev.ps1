@@ -9,28 +9,28 @@ param(
 $ErrorActionPreference = "Stop"
 $DefaultTag = "latest"
 
-Write-Host "🚀 Sistema de Gestão de Patrimônio - Setup Backend para Frontend" -ForegroundColor Cyan
+Write-Host "🚀 Sistema de Gestao de Patrimonio - Setup Backend para Frontend" -ForegroundColor Cyan
 Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Verificar Docker
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-    Write-Host "❌ Docker não está instalado. Instale o Docker Desktop primeiro." -ForegroundColor Red
+    Write-Host "❌ Docker nao esta instalado. Instale o Docker Desktop primeiro." -ForegroundColor Red
     Write-Host "   Acesse: https://docs.docker.com/desktop/install/windows-install/" -ForegroundColor Yellow
     exit 1
 }
 
-# Solicitar REPO_OWNER se não fornecido
+# Solicitar REPO_OWNER se nao fornecido
 if ($RepoOwner -eq "CHANGEME_SEU_USUARIO_GITHUB") {
-    $RepoOwner = Read-Host "📝 Informe o usuário/organização do GitHub Container Registry"
+    $RepoOwner = Read-Host "📝 Informe o usuario/organizacao do GitHub Container Registry"
     if ([string]::IsNullOrWhiteSpace($RepoOwner)) {
-        Write-Host "❌ REPO_OWNER é obrigatório. Saindo." -ForegroundColor Red
+        Write-Host "❌ REPO_OWNER e obrigatorio. Saindo." -ForegroundColor Red
         exit 1
     }
 }
 
 Write-Host ""
-Write-Host "📦 Imagens que serão baixadas:" -ForegroundColor Yellow
+Write-Host "📦 Imagens que serao baixadas:" -ForegroundColor Yellow
 Write-Host "   - ghcr.io/$RepoOwner/users-service:$DefaultTag"
 Write-Host "   - ghcr.io/$RepoOwner/auth-service:$DefaultTag"
 Write-Host "   - ghcr.io/$RepoOwner/patrimonio-service:$DefaultTag"
@@ -40,9 +40,9 @@ Write-Host "   - ghcr.io/$RepoOwner/events-service:$DefaultTag"
 Write-Host "   - ghcr.io/$RepoOwner/api-gateway:$DefaultTag"
 Write-Host ""
 
-# Criar .env.prod se não existir
+# Criar .env.prod se nao existir
 if (-not (Test-Path ".env.prod")) {
-    Write-Host "📄 Criando arquivo .env.prod com configurações padrão..." -ForegroundColor Yellow
+    Write-Host "📄 Criando arquivo .env.prod com configuracoes padrao..." -ForegroundColor Yellow
     
     # Gerar string aleatória para segredos
     $randomSecret = -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 32 | ForEach-Object {[char]$_})
@@ -67,7 +67,7 @@ DB_NAME=patrimonio_inventario
 DB_SSL=false
 DB_LOGGING=false
 
-# JWT (valores padrão para desenvolvimento - NÃO usar em produção!)
+# JWT (valores padrao para desenvolvimento - NAO usar em producao!)
 JWT_ACCESS_SECRET=dev-secret-key-$randomHex
 JWT_REFRESH_SECRET=dev-refresh-secret-$randomHex
 JWT_ACCESS_EXPIRES_IN=900
@@ -155,7 +155,7 @@ Write-Host "⏳ Aguardando serviços inicializarem (aguarde ~30 segundos)..." -F
 Start-Sleep -Seconds 20
 
 Write-Host ""
-Write-Host "🏥 Verificando saúde dos serviços..." -ForegroundColor Yellow
+Write-Host "🏥 Verificando saude dos servicos..." -ForegroundColor Yellow
 Write-Host ""
 
 function Test-HealthEndpoint {
@@ -166,7 +166,7 @@ function Test-HealthEndpoint {
     while ($attempt -le $maxAttempts) {
         try {
             $response = Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
-            Write-Host "✅ $Name está funcionando" -ForegroundColor Green
+            Write-Host "✅ $Name esta funcionando" -ForegroundColor Green
             return $true
         } catch {
             if ($attempt -lt $maxAttempts) {
@@ -176,7 +176,7 @@ function Test-HealthEndpoint {
         }
     }
     
-    Write-Host "⚠️  $Name ainda não está respondendo (tente novamente em alguns segundos)" -ForegroundColor Yellow
+    Write-Host "⚠️  $Name ainda nao esta respondendo (tente novamente em alguns segundos)" -ForegroundColor Yellow
     return $false
 }
 
@@ -190,9 +190,9 @@ Test-HealthEndpoint "http://localhost:3100/health" "API Gateway"
 
 Write-Host ""
 Write-Host "=================================================================" -ForegroundColor Cyan
-Write-Host "✅ Setup concluído!" -ForegroundColor Green
+Write-Host "✅ Setup concluido!" -ForegroundColor Green
 Write-Host ""
-Write-Host "📋 Informações importantes:" -ForegroundColor Cyan
+Write-Host "📋 Informacoes importantes:" -ForegroundColor Cyan
 Write-Host "   - API Gateway: http://localhost:3100"
 Write-Host "   - Auth Service: http://localhost:3001"
 Write-Host "   - Users Service: http://localhost:3002"
@@ -204,7 +204,7 @@ Write-Host "   - Parar tudo:      docker compose -f docker-compose.deploy.yml do
 Write-Host "   - Reiniciar:       docker compose -f docker-compose.deploy.yml restart"
 Write-Host "   - Ver status:      docker compose -f docker-compose.deploy.yml ps"
 Write-Host ""
-Write-Host "⚠️  NOTA: Esta configuração usa valores padrão de desenvolvimento." -ForegroundColor Yellow
-Write-Host "   Para produção, edite o arquivo .env.prod e substitua os segredos!" -ForegroundColor Yellow
+Write-Host "NOTA: Esta configuracao usa valores padrao de desenvolvimento." -ForegroundColor Yellow
+Write-Host "   Para producao, edite o arquivo .env.prod e substitua os segredos!" -ForegroundColor Yellow
 Write-Host ""
 

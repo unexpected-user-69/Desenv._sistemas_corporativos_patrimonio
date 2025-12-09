@@ -4,23 +4,23 @@ import { ProtectedRouteProps } from '../../types/auth';
 import { UserRole } from '../../types/user';
 import { AuthPage } from './AuthPage';
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+export const ProtectedRoute = ({
   children,
   requiredRoles,
   fallback,
-}) => {
+}: ProtectedRouteProps) => {
   const { isAuthenticated, user, hasAnyRole } = useAuthStore();
 
   // Se não estiver autenticado, mostrar formulário de login/registro
   if (!isAuthenticated) {
-    return fallback || <AuthPage />;
+    return fallback ? <>{fallback}</> : <AuthPage />;
   }
 
   // Se roles específicas são necessárias, verificar permissões
   if (requiredRoles && requiredRoles.length > 0) {
     if (!user || !hasAnyRole(requiredRoles)) {
       return (
-        fallback || (
+        (fallback ? <>{fallback}</> : null) || (
           <div className="min-h-screen flex items-center justify-center bg-gray-50">
             <div className="max-w-md w-full space-y-8 text-center">
               <div>

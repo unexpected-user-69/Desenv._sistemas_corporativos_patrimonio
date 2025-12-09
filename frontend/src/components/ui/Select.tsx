@@ -49,7 +49,7 @@ export const Select: React.FC<SelectProps> = ({
     <div ref={selectRef} className="relative">
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-          return React.cloneElement(child, {
+          return React.cloneElement(child as React.ReactElement<any>, {
             isOpen,
             setIsOpen,
             value: currentValue,
@@ -67,6 +67,10 @@ export interface SelectTriggerProps {
   children: React.ReactNode;
   className?: string;
   disabled?: boolean;
+  isOpen?: boolean;
+  setIsOpen?: (open: boolean) => void;
+  value?: string;
+  onValueChange?: (value: string) => void;
 }
 
 export const SelectTrigger: React.FC<SelectTriggerProps> = ({
@@ -91,6 +95,10 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({
 export interface SelectValueProps {
   placeholder?: string;
   value?: string;
+  isOpen?: boolean;
+  setIsOpen?: (open: boolean) => void;
+  onValueChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 export const SelectValue: React.FC<SelectValueProps> = ({
@@ -107,6 +115,11 @@ export const SelectValue: React.FC<SelectValueProps> = ({
 export interface SelectContentProps {
   children: React.ReactNode;
   className?: string;
+  isOpen?: boolean;
+  setIsOpen?: (open: boolean) => void;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 export const SelectContent: React.FC<SelectContentProps> = ({
@@ -129,6 +142,10 @@ export interface SelectItemProps {
   children: React.ReactNode;
   value: string;
   className?: string;
+  isOpen?: boolean;
+  setIsOpen?: (open: boolean) => void;
+  onValueChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 export const SelectItem: React.FC<SelectItemProps> = ({

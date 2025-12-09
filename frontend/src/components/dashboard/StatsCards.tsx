@@ -109,9 +109,20 @@ const StatCard: React.FC<StatCardProps> = ({
   );
 };
 
-export const StatsCards: React.FC = () => {
-  const stats = useDashboardStats();
-  const isLoading = useDashboardLoading();
+interface StatsCardsProps {
+  stats?: DashboardStats | null;
+  isLoading?: boolean;
+}
+
+export const StatsCards: React.FC<StatsCardsProps> = ({
+  stats: propStats,
+  isLoading: propLoading,
+}) => {
+  const storeStats = useDashboardStats();
+  const storeLoading = useDashboardLoading();
+
+  const stats = propStats !== undefined ? propStats : storeStats;
+  const isLoading = propLoading !== undefined ? propLoading : storeLoading;
 
   if (!stats && !isLoading) {
     return (

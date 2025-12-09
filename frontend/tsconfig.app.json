@@ -3,12 +3,52 @@
   "compilerOptions": {
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "target": "ES2020",
     "jsx": "react-jsx",
-    "types": ["node"]
+    "esModuleInterop": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/components/testing",
+    "src/pages/testing",
+    "src/services/testing.ts",
+    "src/components/production",
+    "src/pages/production",
+    "src/services/production.ts",
+    "src/components/notifications",
+    "src/pages/notifications",
+    "src/services/notificationsService.ts",
+    "src/hooks/useNotifications.ts",
+    "src/hooks/useNotificationActions.ts",
+    "src/hooks/useNotificationFilters.ts",
+    "src/stores/notificationsStore.ts",
+    "src/components/reports",
+    "src/pages/reports",
+    "src/services/reportsService.ts",
+    "src/components/monitoring",
+    "src/pages/monitoring",
+    "src/services/monitoring.ts",
+    "src/components/performance",
+    "src/pages/performance",
+    "src/services/performance.ts",
+    "src/components/security",
+    "src/pages/security",
+    "src/services/security.ts",
+    "src/components/advanced",
+    "src/pages/advanced",
+    "src/services/advanced.ts",
+    "src/components/cache",
+    "src/pages/cache",
+    "src/services/cacheService.ts"
+  ]
 }

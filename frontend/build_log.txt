@@ -1,0 +1,9 @@
+src/components/auth/ProtectedRoute.tsx(71,6): error TS2786: 'ProtectedRoute' cannot be used as a JSX component.
+  Its return type 'string | number | true | Element | Iterable<ReactNode>' is not a valid JSX element.
+    Type 'string' is not assignable to type 'ReactElement<any, any>'.
+src/components/auth/ProtectedRoute.tsx(82,6): error TS2786: 'ProtectedRoute' cannot be used as a JSX component.
+  Its return type 'string | number | true | Element | Iterable<ReactNode>' is not a valid JSX element.
+src/components/auth/ProtectedRoute.tsx(96,6): error TS2786: 'ProtectedRoute' cannot be used as a JSX component.
+  Its return type 'string | number | true | Element | Iterable<ReactNode>' is not a valid JSX element.
+src/App.tsx(528,8): error TS2786: 'ProtectedRoute' cannot be used as a JSX component.
+  Its return type 'string | number | true | Element | Iterable<ReactNode>' is not a valid JSX element.

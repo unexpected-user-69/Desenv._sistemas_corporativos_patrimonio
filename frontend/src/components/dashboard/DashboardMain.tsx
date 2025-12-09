@@ -9,10 +9,8 @@ import {
 import { StatsCards } from './StatsCards';
 import { ChartsSection } from './ChartsSection';
 import { RecentActivity } from './RecentActivity';
-import {
-  dashboardService,
-  DashboardStats,
-} from '../../services/dashboardService';
+import { dashboardService } from '../../services/dashboardService';
+import { DashboardStats } from '../../types/dashboard';
 
 export const DashboardMain: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -132,7 +130,7 @@ export const DashboardMain: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Uptime</p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {stats.sistema.uptime}
+                    {stats.system.uptime}
                   </p>
                 </div>
               </div>
@@ -143,7 +141,7 @@ export const DashboardMain: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Versão</p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {stats.sistema.versao}
+                    "1.0.0"
                   </p>
                 </div>
               </div>

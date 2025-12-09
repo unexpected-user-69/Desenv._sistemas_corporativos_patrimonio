@@ -11,12 +11,12 @@ import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+
   // Configurar diretório de arquivos estáticos para uploads
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',
   });
-  
+
   // Servir arquivos estáticos públicos (para scripts do Swagger)
   app.useStaticAssets(join(process.cwd(), 'public'), {
     prefix: '/public/',
@@ -33,6 +33,7 @@ async function bootstrap() {
       'http://localhost:3002',
       'http://localhost:3101',
       'http://localhost:5173', // Vite dev server
+      'http://localhost:5174', // Vite dev server (alternative port)
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
@@ -103,31 +104,31 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  
+
   // Customizar Swagger UI para autenticação automática (apenas em desenvolvimento)
-  const swaggerOptions = process.env.NODE_ENV === 'production' 
+  const swaggerOptions = process.env.NODE_ENV === 'production'
     ? {
-        // Em produção, ignorar o prefixo global para evitar duplicação
-        ignoreGlobalPrefix: true,
-      }
+      // Em produção, ignorar o prefixo global para evitar duplicação
+      ignoreGlobalPrefix: true,
+    }
     : {
-        // Ignorar o prefixo global para o Swagger UI (serve em /docs, não /v1/docs)
-        // Isso evita duplicação do prefixo v1 nas URLs dos endpoints
-        ignoreGlobalPrefix: true,
-        customSiteTitle: 'Patrimonio & Inventario API - Swagger',
-        swaggerOptions: {
-          persistAuthorization: true, // Persiste a autorização entre recarregamentos
-          // Configurar URL base para scripts customizados
-          customCssUrl: undefined,
-        },
-        // URLs dos scripts customizados (relativas à raiz da aplicação)
-        customJs: [
-          // Usar URL absoluta desde a raiz (sem prefixo v1, pois o Swagger UI gerencia isso)
-          '/v1/swagger/auto-auth.js',
-        ],
-        customCss: undefined,
-      };
-  
+      // Ignorar o prefixo global para o Swagger UI (serve em /docs, não /v1/docs)
+      // Isso evita duplicação do prefixo v1 nas URLs dos endpoints
+      ignoreGlobalPrefix: true,
+      customSiteTitle: 'Patrimonio & Inventario API - Swagger',
+      swaggerOptions: {
+        persistAuthorization: true, // Persiste a autorização entre recarregamentos
+        // Configurar URL base para scripts customizados
+        customCssUrl: undefined,
+      },
+      // URLs dos scripts customizados (relativas à raiz da aplicação)
+      customJs: [
+        // Usar URL absoluta desde a raiz (sem prefixo v1, pois o Swagger UI gerencia isso)
+        '/v1/swagger/auto-auth.js',
+      ],
+      customCss: undefined,
+    };
+
   SwaggerModule.setup('docs', app, document, swaggerOptions);
 
   await app.listen(process.env.PORT ?? 3101);

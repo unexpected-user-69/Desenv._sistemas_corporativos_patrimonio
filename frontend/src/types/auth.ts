@@ -1,4 +1,5 @@
 // Tipos para o sistema de autenticação
+import React from 'react';
 import type { User, UserRole } from './user';
 
 // Re-exportar tipos de usuários para compatibilidade

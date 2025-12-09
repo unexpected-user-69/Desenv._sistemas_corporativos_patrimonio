@@ -132,15 +132,18 @@ interface RecentActivityProps {
   limit?: number;
   showHeader?: boolean;
   showViewAll?: boolean;
+  isLoading?: boolean;
 }
 
 export const RecentActivity: React.FC<RecentActivityProps> = ({
   limit = 10,
   showHeader = true,
   showViewAll = true,
+  isLoading: propLoading,
 }) => {
   const activities = useRecentActivity();
-  const isLoading = useDashboardLoading();
+  const storeLoading = useDashboardLoading();
+  const isLoading = propLoading !== undefined ? propLoading : storeLoading;
 
   const displayActivities = activities.slice(0, limit);
 

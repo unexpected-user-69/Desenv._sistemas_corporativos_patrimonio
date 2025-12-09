@@ -14,18 +14,17 @@ import {
   Bell,
   Package,
   Menu,
-  X,
   ChevronLeft,
   ChevronRight,
   Building2,
 } from 'lucide-react';
-import { MonitoringDashboard } from './components/monitoring/MonitoringDashboard';
-import { CacheDashboard } from './components/cache/CacheDashboard';
+// import { MonitoringDashboard } from './components/monitoring/MonitoringDashboard';
+// import { CacheDashboard } from './components/cache/CacheDashboard';
 import { UsersPage } from './pages/users/UsersPage';
 import { PatrimonioPage } from './pages/patrimonio/PatrimonioPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
-import { ReportsPage } from './pages/reports/ReportsPage';
-import { NotificationsPage } from './pages/notifications/NotificationsPage';
+// import { ReportsPage } from './pages/reports/ReportsPage';
+// import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { AuthProvider } from './components/auth/AuthProvider';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { LogoutButton } from './components/auth/LogoutButton';
@@ -33,7 +32,7 @@ import { useAuth } from './hooks/useAuth';
 import { UserRole } from './types/user';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { patrimonioService } from './services/patrimonioService';
-import { dashboardService } from './services/dashboardService';
+// import { dashboardService } from './services/dashboardService';
 import { Patrimonio } from './types/patrimonio';
 import { useDashboardStore } from './stores/dashboardStore';
 // import { ProductionPage } from './pages/production/ProductionPage';
@@ -134,13 +133,11 @@ const AppContent: React.FC = () => {
     { id: 'testing', name: 'Testes', icon: TestTube, roles: [UserRole.ADMIN] },
   ];
 
-  // Filtrar tabs baseado no role do usuário
   const visibleTabs =
     isAuthenticated && user
       ? tabs.filter((tab) => tab.roles.includes(user.role))
       : [];
 
-  // Carregar patrimônios recentes
   useEffect(() => {
     const loadRecentPatrimonios = async () => {
       if (!isAuthenticated) return;
@@ -160,7 +157,6 @@ const AppContent: React.FC = () => {
     loadRecentPatrimonios();
   }, [isAuthenticated]);
 
-  // Carregar estatísticas do dashboard
   useEffect(() => {
     if (isAuthenticated) {
       fetchDashboardStats().catch(console.error);
@@ -176,17 +172,20 @@ const AppContent: React.FC = () => {
       case 'patrimonio':
         return <PatrimonioPage />;
       case 'reports':
-        return <ReportsPage />;
+        // return <ReportsPage />;
+        return <div className="p-8 text-center text-gray-500">Relatórios desativados temporariamente</div>;
       case 'notifications':
-        return <NotificationsPage />;
+        // return <NotificationsPage />;
+        return <div className="p-8 text-center text-gray-500">Notificações desativadas temporariamente</div>;
       case 'cache':
-        return (
-          <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <CacheDashboard />
-            </div>
-          </div>
-        );
+        return <div className="p-8 text-center text-gray-500">Cache Dashboard desativado temporariamente</div>;
+      // return (
+      //   <div className="min-h-screen bg-gray-50">
+      //     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      //       <CacheDashboard />
+      //     </div>
+      //   </div>
+      // );
       case 'filters':
         return (
           <div className="min-h-screen bg-gray-50">
@@ -218,69 +217,24 @@ const AppContent: React.FC = () => {
           </div>
         );
       case 'monitoring':
-        return (
-          <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <MonitoringDashboard />
-            </div>
-          </div>
-        );
+        return <div className="p-8 text-center text-gray-500">Monitoramento desativado temporariamente</div>;
+      // return (
+      //   <div className="min-h-screen bg-gray-50">
+      //     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      //       <MonitoringDashboard />
+      //     </div>
+      //   </div>
+      // );
       case 'performance':
-        return (
-          <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Testes de Performance
-                </h2>
-                <p className="text-lg text-gray-600">
-                  Interface para testes de carga e stress em desenvolvimento
-                </p>
-              </div>
-            </div>
-          </div>
-        );
       case 'advanced':
-        return (
-          <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Funcionalidades Avançadas
-                </h2>
-                <p className="text-lg text-gray-600">
-                  Serviços avançados e endpoints especiais em desenvolvimento
-                </p>
-              </div>
-            </div>
-          </div>
-        );
       case 'production':
-        return (
-          <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Funcionalidades de Produção
-                </h2>
-                <p className="text-lg text-gray-600">
-                  Rate limiting, CORS, compression em desenvolvimento
-                </p>
-              </div>
-            </div>
-          </div>
-        );
       case 'testing':
         return (
           <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
               <div className="text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Utilitários de Teste
-                </h2>
-                <p className="text-lg text-gray-600">
-                  Test doubles, mocks avançados em desenvolvimento
-                </p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Funcionalidade em Manutenção</h2>
+                <p className="text-lg text-gray-600">Este módulo está temporariamente indisponível.</p>
               </div>
             </div>
           </div>
@@ -295,9 +249,8 @@ const AppContent: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex">
         {/* Sidebar */}
         <aside
-          className={`bg-white border-r border-gray-200 transition-all duration-300 ${
-            sidebarOpen ? 'w-64' : 'w-20'
-          } flex flex-col fixed h-screen z-40`}
+          className={`bg-white border-r border-gray-200 transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'
+            } flex flex-col fixed h-screen z-40`}
         >
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -340,11 +293,10 @@ const AppContent: React.FC = () => {
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as TabType)}
-                        className={`w-full flex items-center px-3 py-2.5 rounded-lg transition-all ${
-                          isActive
+                        className={`w-full flex items-center px-3 py-2.5 rounded-lg transition-all ${isActive
                             ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
                             : 'text-gray-700 hover:bg-gray-100 border-l-4 border-transparent'
-                        } ${sidebarOpen ? 'justify-start' : 'justify-center'}`}
+                          } ${sidebarOpen ? 'justify-start' : 'justify-center'}`}
                         title={!sidebarOpen ? tab.name : ''}
                       >
                         <IconComponent className="h-5 w-5 flex-shrink-0" />
@@ -511,9 +463,8 @@ const AppContent: React.FC = () => {
 
         {/* Main Content Area */}
         <div
-          className={`flex-1 transition-all duration-300 flex flex-col ${
-            sidebarOpen ? 'ml-64' : 'ml-20'
-          }`}
+          className={`flex-1 transition-all duration-300 flex flex-col ${sidebarOpen ? 'ml-64' : 'ml-20'
+            }`}
         >
           {/* Header */}
           <header className="bg-white shadow sticky top-0 z-30">

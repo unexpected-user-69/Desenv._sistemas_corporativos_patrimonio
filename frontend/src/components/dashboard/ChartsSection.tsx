@@ -163,7 +163,7 @@ const reduceLabels = (labels: string[], maxLabels: number = 10): string[] => {
   // Preencher os anteriores com strings vazias para manter o alinhamento dos dados
   const emptyLabels = new Array(labels.length - maxLabels).fill('');
   const lastLabels = labels.slice(-maxLabels);
-  
+
   return [...emptyLabels, ...lastLabels];
 };
 
@@ -182,7 +182,7 @@ const convertUserGrowthToChartData = (
       return date.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
     });
     const values = data.map((item) => item.count);
-    
+
     // Reduzir labels para mostrar apenas os últimos 8
     const labels = reduceLabels(allLabels, 8);
 
@@ -209,7 +209,7 @@ const convertUserGrowthToChartData = (
       return `${monthNames[parseInt(month) - 1]} ${year.slice(2)}`;
     });
     const values = data.map((item) => item.new || 0);
-    
+
     // Reduzir labels para mostrar apenas os últimos 6
     const labels = reduceLabels(allLabels, 6);
 
@@ -245,7 +245,7 @@ const convertPatrimonioGrowthToChartData = (
       return date.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
     });
     const values = data.map((item) => item.count);
-    
+
     // Reduzir labels para mostrar apenas os últimos 8
     const labels = reduceLabels(allLabels, 8);
 
@@ -272,7 +272,7 @@ const convertPatrimonioGrowthToChartData = (
       return `${monthNames[parseInt(month) - 1]} ${year.slice(2)}`;
     });
     const values = data.map((item) => item.novos || 0);
-    
+
     // Reduzir labels para mostrar apenas os últimos 6
     const labels = reduceLabels(allLabels, 6);
 
@@ -308,7 +308,7 @@ const convertSystemMetricsToChartData = (
 
   // Usar cpuUsage ou cpu dependendo do formato
   const values = data.map((item) => item.cpuUsage || item.cpu || 0);
-  
+
   // Reduzir labels para mostrar apenas os últimos 6
   const labels = reduceLabels(allLabels, 6);
 
@@ -341,7 +341,7 @@ const convertCacheMetricsToChartData = (
 
   // Usar hitRate ou hit_rate dependendo do formato
   const values = data.map((item) => item.hitRate || item.hit_rate || 0);
-  
+
   // Reduzir labels para mostrar apenas os últimos 6
   const labels = reduceLabels(allLabels, 6);
 
@@ -373,7 +373,13 @@ const getDefaultChartData = (label: string, color: string): ChartData => ({
   ],
 });
 
-export const ChartsSection: React.FC = () => {
+interface ChartsSectionProps {
+  isLoading?: boolean;
+}
+
+export const ChartsSection: React.FC<ChartsSectionProps> = ({
+  isLoading: propLoading,
+}) => {
   const {
     userGrowthData,
     patrimonioGrowthData,
@@ -383,8 +389,10 @@ export const ChartsSection: React.FC = () => {
     fetchPatrimonioGrowthData,
     fetchSystemMetrics,
     fetchCacheMetrics,
-    isLoading,
+    isLoading: storeLoading,
   } = useDashboardStore();
+
+  const isLoading = propLoading !== undefined ? propLoading : storeLoading;
 
   // Carregar dados ao montar o componente
   useEffect(() => {

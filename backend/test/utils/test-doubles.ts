@@ -149,8 +149,24 @@ export class FakeUserRepository {
             // Verificar cada propriedade da condição
             if (condition.role !== undefined && user.role !== condition.role) matches = false;
             if (condition.isActive !== undefined && user.isActive !== condition.isActive) matches = false;
-            if (condition.name && !user.name?.toLowerCase().includes(condition.name.toLowerCase().replace(/%/g, ''))) matches = false;
-            if (condition.email && !user.email?.toLowerCase().includes(condition.email.toLowerCase().replace(/%/g, ''))) matches = false;
+            if (condition.name) {
+              let pattern: string;
+              if (typeof condition.name === 'object' && condition.name._type === 'ilike') {
+                pattern = condition.name._value.toLowerCase().replace(/%/g, '');
+              } else {
+                pattern = String(condition.name).toLowerCase().replace(/%/g, '');
+              }
+              if (pattern && !user.name?.toLowerCase().includes(pattern)) matches = false;
+            }
+            if (condition.email) {
+              let pattern: string;
+              if (typeof condition.email === 'object' && condition.email._type === 'ilike') {
+                pattern = condition.email._value.toLowerCase().replace(/%/g, '');
+              } else {
+                pattern = String(condition.email).toLowerCase().replace(/%/g, '');
+              }
+              if (pattern && !user.email?.toLowerCase().includes(pattern)) matches = false;
+            }
             return matches;
           }),
         );
@@ -162,13 +178,28 @@ export class FakeUserRepository {
         if (where.isActive !== undefined) {
           result = result.filter((user) => user.isActive === where.isActive);
         }
+        // Verificar se é um objeto ILike (do TypeORM)
         if (where.name) {
-          const pattern = where.name.toLowerCase().replace(/%/g, '');
-          result = result.filter((user) => user.name?.toLowerCase().includes(pattern));
+          let pattern: string;
+          if (typeof where.name === 'object' && where.name._type === 'ilike') {
+            pattern = where.name._value.toLowerCase().replace(/%/g, '');
+          } else {
+            pattern = String(where.name).toLowerCase().replace(/%/g, '');
+          }
+          if (pattern) {
+            result = result.filter((user) => user.name?.toLowerCase().includes(pattern));
+          }
         }
         if (where.email) {
-          const pattern = where.email.toLowerCase().replace(/%/g, '');
-          result = result.filter((user) => user.email?.toLowerCase().includes(pattern));
+          let pattern: string;
+          if (typeof where.email === 'object' && where.email._type === 'ilike') {
+            pattern = where.email._value.toLowerCase().replace(/%/g, '');
+          } else {
+            pattern = String(where.email).toLowerCase().replace(/%/g, '');
+          }
+          if (pattern) {
+            result = result.filter((user) => user.email?.toLowerCase().includes(pattern));
+          }
         }
       }
     }
@@ -215,8 +246,24 @@ export class FakeUserRepository {
             let matches = true;
             if (condition.role !== undefined && user.role !== condition.role) matches = false;
             if (condition.isActive !== undefined && user.isActive !== condition.isActive) matches = false;
-            if (condition.name && !user.name?.toLowerCase().includes(condition.name.toLowerCase().replace(/%/g, ''))) matches = false;
-            if (condition.email && !user.email?.toLowerCase().includes(condition.email.toLowerCase().replace(/%/g, ''))) matches = false;
+            if (condition.name) {
+              let pattern: string;
+              if (typeof condition.name === 'object' && condition.name._type === 'ilike') {
+                pattern = condition.name._value.toLowerCase().replace(/%/g, '');
+              } else {
+                pattern = String(condition.name).toLowerCase().replace(/%/g, '');
+              }
+              if (pattern && !user.name?.toLowerCase().includes(pattern)) matches = false;
+            }
+            if (condition.email) {
+              let pattern: string;
+              if (typeof condition.email === 'object' && condition.email._type === 'ilike') {
+                pattern = condition.email._value.toLowerCase().replace(/%/g, '');
+              } else {
+                pattern = String(condition.email).toLowerCase().replace(/%/g, '');
+              }
+              if (pattern && !user.email?.toLowerCase().includes(pattern)) matches = false;
+            }
             return matches;
           }),
         );
@@ -229,12 +276,26 @@ export class FakeUserRepository {
           filtered = filtered.filter((user) => user.isActive === where.isActive);
         }
         if (where.name) {
-          const pattern = where.name.toLowerCase().replace(/%/g, '');
-          filtered = filtered.filter((user) => user.name?.toLowerCase().includes(pattern));
+          let pattern: string;
+          if (typeof where.name === 'object' && where.name._type === 'ilike') {
+            pattern = where.name._value.toLowerCase().replace(/%/g, '');
+          } else {
+            pattern = String(where.name).toLowerCase().replace(/%/g, '');
+          }
+          if (pattern) {
+            filtered = filtered.filter((user) => user.name?.toLowerCase().includes(pattern));
+          }
         }
         if (where.email) {
-          const pattern = where.email.toLowerCase().replace(/%/g, '');
-          filtered = filtered.filter((user) => user.email?.toLowerCase().includes(pattern));
+          let pattern: string;
+          if (typeof where.email === 'object' && where.email._type === 'ilike') {
+            pattern = where.email._value.toLowerCase().replace(/%/g, '');
+          } else {
+            pattern = String(where.email).toLowerCase().replace(/%/g, '');
+          }
+          if (pattern) {
+            filtered = filtered.filter((user) => user.email?.toLowerCase().includes(pattern));
+          }
         }
       }
     }

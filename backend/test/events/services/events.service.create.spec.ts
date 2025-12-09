@@ -144,7 +144,16 @@ describe('EventsService.create (unit)', () => {
     const createdBy = randomUUID();
     const existingSlug = makeEventEntity({ slug: 'evento-teste' });
     const newSlug = makeEventEntity({ slug: 'evento-teste-1' });
-    const savedEvent = makeEventEntity({ ...dto, createdBy });
+    const savedEvent = makeEventEntity({
+      title: dto.title,
+      description: dto.description,
+      startDate: new Date(dto.startDate),
+      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      eventType: dto.eventType,
+      visibility: dto.visibility,
+      state: dto.state,
+      createdBy,
+    });
 
     eventRepository.findOne
       .mockResolvedValueOnce(existingSlug as Event) // Slug existe

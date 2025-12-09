@@ -21,7 +21,7 @@ describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
 
   beforeEach(async () => {
     usersHttpClient = {
-      findOne: jest.fn(),
+      findOne: jest.fn() as jest.MockedFunction<(userId: string) => Promise<any>>,
     };
 
     categoriasHttpClient = {
@@ -79,7 +79,7 @@ describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
       makePatrimonioEntity({ responsavelId }),
     ];
 
-    usersHttpClient.findOne!.mockResolvedValue({ id: responsavelId, name: 'Test User', email: 'test@example.com' } as any);
+    (usersHttpClient.findOne as jest.Mock).mockResolvedValue({ id: responsavelId, name: 'Test User', email: 'test@example.com' } as any);
     repository.find.mockResolvedValue(patrimonios as Patrimonio[]);
 
     const result = await service.getHistoricoPorResponsavel(responsavelId);
@@ -96,7 +96,7 @@ describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
   it('should throw NotFoundException when responsavel not found', async () => {
     const responsavelId = randomUUID();
 
-    usersHttpClient.findOne!.mockRejectedValue(
+    (usersHttpClient.findOne as jest.Mock).mockRejectedValue(
       new NotFoundException('Usuário não encontrado'),
     );
 
@@ -108,7 +108,7 @@ describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
   it('should return empty array when no patrimonios found', async () => {
     const responsavelId = randomUUID();
 
-    usersHttpClient.findOne!.mockResolvedValue({ id: responsavelId, name: 'Test User', email: 'test@example.com' } as any);
+    (usersHttpClient.findOne as jest.Mock).mockResolvedValue({ id: responsavelId, name: 'Test User', email: 'test@example.com' } as any);
     repository.find.mockResolvedValue([]);
 
     const result = await service.getHistoricoPorResponsavel(responsavelId);

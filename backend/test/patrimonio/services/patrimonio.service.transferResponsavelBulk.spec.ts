@@ -105,11 +105,11 @@ describe('PatrimonioService.transferResponsavelBulk (unit)', () => {
       patrimonio1,
       patrimonio2,
     ] as Patrimonio[]);
-    usersHttpClient.findOne!.mockResolvedValue({
+    (usersHttpClient.findOne as jest.Mock).mockResolvedValue({
       id: novoResponsavelId,
     } as any);
-    queryRunner.manager!.save!.mockResolvedValueOnce(patrimonio1 as Patrimonio);
-    queryRunner.manager!.save!.mockResolvedValueOnce(patrimonio2 as Patrimonio);
+    (queryRunner.manager.save as jest.Mock).mockResolvedValueOnce(patrimonio1 as Patrimonio);
+    (queryRunner.manager.save as jest.Mock).mockResolvedValueOnce(patrimonio2 as Patrimonio);
 
     const result = await service.transferResponsavelBulk(dto);
 
@@ -149,8 +149,8 @@ describe('PatrimonioService.transferResponsavelBulk (unit)', () => {
     const patrimonio1 = makePatrimonioEntity({ id: id1 });
 
     repository.find.mockResolvedValue([patrimonio1] as Patrimonio[]);
-    usersHttpClient.findOne!.mockRejectedValue(
-      new NotFoundException('UsuÃ¡rio nÃ£o encontrado'),
+    (usersHttpClient.findOne as jest.Mock).mockRejectedValue(
+      new NotFoundException('Usuário não encontrado'),
     );
 
     await expect(service.transferResponsavelBulk(dto)).rejects.toThrow(

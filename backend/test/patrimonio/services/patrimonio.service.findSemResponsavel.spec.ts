@@ -76,7 +76,7 @@ describe('PatrimonioService.findSemResponsavel (unit)', () => {
   it('should return patrimonios without responsavel', async () => {
     const patrimonios = [
       makePatrimonioEntity({ responsavelId: undefined }),
-      makePatrimonioEntity({ responsavelId: null }),
+      makePatrimonioEntity({ responsavelId: undefined }),
     ];
 
     repository.find.mockResolvedValue(patrimonios as Patrimonio[]);

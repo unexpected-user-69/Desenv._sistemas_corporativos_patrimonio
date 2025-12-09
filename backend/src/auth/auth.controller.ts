@@ -13,7 +13,6 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { LogoutDto } from './dto/logout.dto';
-import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Public } from '../common/decorators/public.decorator';
@@ -31,7 +30,6 @@ import { UserResponseDto } from '../shared/dto/user-response.dto';
 export class AuthController {
   constructor(
     private readonly auth: AuthService,
-    private readonly jwt: JwtService,
   ) {}
 
   @Public()

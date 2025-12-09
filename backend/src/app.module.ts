@@ -23,6 +23,7 @@ import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { SwaggerController } from './swagger/swagger.controller';
+import { TestTokenController } from './test-token.controller';
 
 @Module({
   imports: [
@@ -76,7 +77,7 @@ import { SwaggerController } from './swagger/swagger.controller';
     ReportsModule,
     DashboardModule,
   ],
-  controllers: [AppController, MetricsController, SwaggerController],
+  controllers: [AppController, MetricsController, SwaggerController, TestTokenController],
   providers: [
     AppService,
     MetricsInterceptor,

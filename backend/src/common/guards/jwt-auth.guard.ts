@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
@@ -15,6 +15,8 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
   constructor(private reflector: Reflector) {
     super();
   }
@@ -64,12 +66,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
    * Trata erros de autenticação do Passport.
    * Converte erros do Passport em UnauthorizedException do NestJS.
    */
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+  handleRequest(err: any, user: any, info: any, _context: ExecutionContext) {
     // Se houver um erro, lança a exceção
     if (err) {
       // Log do erro para debug (apenas em desenvolvimento/testes)
       if (process.env.NODE_ENV !== 'production') {
-        console.error('[JwtAuthGuard] Erro na validação do token:', err.message || err);
+        this.logger.error(`Erro na validação do token: ${err.message || err}`);
       }
       throw err;
     }
@@ -80,8 +82,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
       const errorMessage = info?.message || info?.name || 'Invalid or expired token';
       // Log do erro para debug (apenas em desenvolvimento/testes)
       if (process.env.NODE_ENV !== 'production') {
-        console.error('[JwtAuthGuard] Token inválido:', errorMessage, info);
-        console.error('[JwtAuthGuard] JWT_ACCESS_SECRET atual:', process.env.JWT_ACCESS_SECRET?.substring(0, 10) + '...');
+        this.logger.error(`Token inválido: ${errorMessage}`, info);
+        this.logger.debug(`JWT_ACCESS_SECRET atual: ${process.env.JWT_ACCESS_SECRET?.substring(0, 10)}...`);
       }
       throw new UnauthorizedException(errorMessage);
     }

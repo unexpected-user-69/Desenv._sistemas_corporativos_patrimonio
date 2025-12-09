@@ -11,6 +11,7 @@ import {
   UseGuards,
   Req,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { Throttle } from '@nestjs/throttler';
@@ -47,6 +48,8 @@ import { AuthUser } from '../auth/strategies/jwt.strategy';
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
+  private readonly logger = new Logger(UsersController.name);
+
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
@@ -223,7 +226,7 @@ export class UsersController {
       return await this.usersService.findOne(user.id, undefined, undefined);
     } catch (error: any) {
       // Em caso de erro, retorna null (não lança exceção para não expor detalhes)
-      console.error(`[UsersController.validate] Erro ao validar credenciais: ${error.message}`);
+      this.logger.error(`Erro ao validar credenciais: ${error.message}`);
       return null;
     }
   }

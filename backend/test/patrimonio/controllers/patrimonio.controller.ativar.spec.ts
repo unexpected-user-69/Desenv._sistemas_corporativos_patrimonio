@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { Reflector } from '@nestjs/core';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
@@ -18,7 +19,7 @@ describe('PatrimonioController � ativar', () => {
       providers: [
         { provide: PatrimonioService, useValue: service },
         { provide: PatrimonioPdfExportService, useValue: pdfExportService },
-        { provide: 'Reflector', useValue: { getAllAndOverride: jest.fn() } },
+        { provide: Reflector, useValue: { getAllAndOverride: jest.fn() } },
       ],
     }).compile();
     controller = mod.get(PatrimonioController);

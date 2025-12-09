@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { Reflector } from '@nestjs/core';
 import { NotFoundException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
@@ -14,7 +15,7 @@ describe('PatrimonioController – remove', () => {
     const mod = await Test.createTestingModule({
       controllers: [PatrimonioController],
       providers: [
-        { provide: 'Reflector', useValue: { getAllAndOverride: jest.fn() } },
+        { provide: Reflector, useValue: { getAllAndOverride: jest.fn() } },
 
         { provide: PatrimonioService, useValue: service },
         { provide: PatrimonioPdfExportService, useValue: pdfExportService },

@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { Reflector } from '@nestjs/core';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
@@ -14,7 +15,7 @@ describe('PatrimonioController – createBulk', () => {
     const mod = await Test.createTestingModule({
       controllers: [PatrimonioController],
       providers: [
-        { provide: 'Reflector', useValue: { getAllAndOverride: jest.fn() } },
+        { provide: Reflector, useValue: { getAllAndOverride: jest.fn() } },
 { provide: PatrimonioService, useValue: service },
         { provide: PatrimonioPdfExportService, useValue: pdfExportService }],
     }).compile();

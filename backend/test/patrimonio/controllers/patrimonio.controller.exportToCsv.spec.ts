@@ -1,10 +1,10 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { Response } from 'express';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { QueryPatrimonioDto } from '../../../src/patrimonio/dto/query-patrimonio.dto';
-import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { QueryPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-patrimonio.dto';
+import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
 describe('PatrimonioController – exportToCsv', () => {
   let controller: PatrimonioController;

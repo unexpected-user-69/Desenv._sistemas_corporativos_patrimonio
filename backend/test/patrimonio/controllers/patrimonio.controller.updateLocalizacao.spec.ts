@@ -1,11 +1,11 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { UpdateLocalizacaoPatrimonioDto } from '../../../src/patrimonio/dto/update-localizacao-patrimonio.dto';
+import { UpdateLocalizacaoPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/update-localizacao-patrimonio.dto';
 
 describe('PatrimonioController – updateLocalizacao', () => {
   let controller: PatrimonioController;

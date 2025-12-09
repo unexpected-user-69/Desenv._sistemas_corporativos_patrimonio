@@ -1,25 +1,31 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersService } from '../../../src/users/users.service';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
-import { QueryValorRangeDto } from '../../../src/patrimonio/dto/query-valor-range.dto';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { QueryValorRangeDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-valor-range.dto';
 
 describe('PatrimonioService.findByValorRange (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
+  let categoriasHttpClient: Partial<CategoriasHttpClient>;
   let storageService: Partial<StorageService>;
   let queryBuilder: any;
 
   beforeEach(async () => {
-    usersService = {
+    usersHttpClient = {
+      findOne: jest.fn(),
+    };
+
+    categoriasHttpClient = {
       findOne: jest.fn(),
     };
 
@@ -49,8 +55,12 @@ describe('PatrimonioService.findByValorRange (unit)', () => {
           }),
         },
         {
-          provide: UsersService,
-          useValue: usersService,
+          provide: UsersHttpClient,
+          useValue: usersHttpClient,
+        },
+        {
+          provide: CategoriasHttpClient,
+          useValue: categoriasHttpClient,
         },
         {
           provide: DataSource,
@@ -99,7 +109,7 @@ describe('PatrimonioService.findByValorRange (unit)', () => {
       BadRequestException,
     );
     await expect(service.findByValorRange(dto)).rejects.toThrow(
-      'Valor mínimo deve ser menor ou igual ao valor máximo',
+      'Valor mÃƒÂ­nimo deve ser menor ou igual ao valor mÃƒÂ¡ximo',
     );
   });
 

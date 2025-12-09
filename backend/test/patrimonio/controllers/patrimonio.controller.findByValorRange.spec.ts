@@ -1,8 +1,8 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { QueryValorRangeDto } from '../../../src/patrimonio/dto/query-valor-range.dto';
+import { QueryValorRangeDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-valor-range.dto';
 
 describe('PatrimonioController – findByValorRange', () => {
   let controller: PatrimonioController;

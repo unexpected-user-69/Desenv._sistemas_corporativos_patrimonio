@@ -1,16 +1,17 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { UpdatePatrimonioDto } from '../../../src/patrimonio/dto/update-patrimonio.dto';
-import { UsersService } from '../../../src/users/users.service';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
+import { UpdatePatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/update-patrimonio.dto';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.update (unit)', () => {
   let service: PatrimonioService;
@@ -29,7 +30,13 @@ describe('PatrimonioService.update (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersService,
+          provide: UsersHttpClient,
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: CategoriasHttpClient,
           useValue: {
             findOne: jest.fn(),
           },
@@ -99,9 +106,9 @@ describe('PatrimonioService.update (unit)', () => {
     expect(repository.save).not.toHaveBeenCalled();
   });
 
-  // Note: O método update atual não valida código duplicado antes de salvar
-  // A validação de conflito de código é feita pelo banco de dados (unique constraint)
-  // Este teste pode ser removido ou ajustado quando a validação for implementada
+  // Note: O mÃ©todo update atual nÃ£o valida cÃ³digo duplicado antes de salvar
+  // A validaÃ§Ã£o de conflito de cÃ³digo Ã© feita pelo banco de dados (unique constraint)
+  // Este teste pode ser removido ou ajustado quando a validaÃ§Ã£o for implementada
   it.skip('should throw ConflictException if codigo already exists', async () => {
     // Skipped: update method doesn't check for duplicate codigo before saving
     // Conflict is handled by database unique constraint

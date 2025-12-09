@@ -1,24 +1,30 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { UpdateLocalizacaoPatrimonioDto } from '../../../src/patrimonio/dto/update-localizacao-patrimonio.dto';
-import { UsersService } from '../../../src/users/users.service';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
+import { UpdateLocalizacaoPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/update-localizacao-patrimonio.dto';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.updateLocalizacao (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
+  let categoriasHttpClient: Partial<CategoriasHttpClient>;
 
   beforeEach(async () => {
-    usersService = {
+    usersHttpClient = {
+      findOne: jest.fn(),
+    };
+
+    categoriasHttpClient = {
       findOne: jest.fn(),
     };
 
@@ -34,8 +40,12 @@ describe('PatrimonioService.updateLocalizacao (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersService,
-          useValue: usersService,
+          provide: UsersHttpClient,
+          useValue: usersHttpClient,
+        },
+        {
+          provide: CategoriasHttpClient,
+          useValue: categoriasHttpClient,
         },
         {
           provide: DataSource,
@@ -111,7 +121,7 @@ describe('PatrimonioService.updateLocalizacao (unit)', () => {
     });
     const dto: UpdateLocalizacaoPatrimonioDto = {
       localizacao: 'Sala 205',
-      observacoes: 'Mudança de setor',
+      observacoes: 'MudanÃƒÂ§a de setor',
     };
 
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);

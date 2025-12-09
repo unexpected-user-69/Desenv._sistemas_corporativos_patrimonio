@@ -1,25 +1,31 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio, PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { Patrimonio, PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { UpdateStatusPatrimonioDto } from '../../../src/patrimonio/dto/update-status-patrimonio.dto';
-import { UsersService } from '../../../src/users/users.service';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
+import { UpdateStatusPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/update-status-patrimonio.dto';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.updateStatus (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
+  let categoriasHttpClient: Partial<CategoriasHttpClient>;
   let storageService: Partial<StorageService>;
 
   beforeEach(async () => {
-    usersService = {
+    usersHttpClient = {
+      findOne: jest.fn(),
+    };
+
+    categoriasHttpClient = {
       findOne: jest.fn(),
     };
 
@@ -42,8 +48,12 @@ describe('PatrimonioService.updateStatus (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersService,
-          useValue: usersService,
+          provide: UsersHttpClient,
+          useValue: usersHttpClient,
+        },
+        {
+          provide: CategoriasHttpClient,
+          useValue: categoriasHttpClient,
         },
         {
           provide: DataSource,
@@ -71,12 +81,12 @@ describe('PatrimonioService.updateStatus (unit)', () => {
     });
     const updateDto: UpdateStatusPatrimonioDto = {
       status: PatrimonioStatus.MANUTENCAO,
-      observacoes: 'Enviado para manutenção preventiva',
+      observacoes: 'Enviado para manutenÃƒÂ§ÃƒÂ£o preventiva',
     };
     const updatedPatrimonio = makePatrimonioEntity({
       ...existingPatrimonio,
       status: PatrimonioStatus.MANUTENCAO,
-      observacoes: 'Enviado para manutenção preventiva',
+      observacoes: 'Enviado para manutenÃƒÂ§ÃƒÂ£o preventiva',
     });
 
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);

@@ -1,17 +1,19 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder, DataSource } from 'typeorm';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
-import { UsersService } from '../../../src/users/users.service';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
+import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.getDashboard (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
+  let categoriasHttpClient: Partial<CategoriasHttpClient>;
   let storageService: Partial<StorageService>;
   let queryBuilder: {
     select: jest.Mock;
@@ -24,7 +26,11 @@ describe('PatrimonioService.getDashboard (unit)', () => {
   };
 
   beforeEach(async () => {
-    usersService = {
+    usersHttpClient = {
+      findOne: jest.fn(),
+    };
+
+    categoriasHttpClient = {
       findOne: jest.fn(),
     };
 
@@ -57,8 +63,12 @@ describe('PatrimonioService.getDashboard (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersService,
-          useValue: usersService,
+          provide: UsersHttpClient,
+          useValue: usersHttpClient,
+        },
+        {
+          provide: CategoriasHttpClient,
+          useValue: categoriasHttpClient,
         },
         {
           provide: DataSource,
@@ -96,10 +106,10 @@ describe('PatrimonioService.getDashboard (unit)', () => {
     const novosUltimoMes = 25;
 
     repository.count
-      .mockResolvedValueOnce(total) // Total de patrimônios
+      .mockResolvedValueOnce(total) // Total de patrimÃƒÂ´nios
       .mockResolvedValueOnce(garantiasVencendo) // Garantias vencendo
-      .mockResolvedValueOnce(emManutencao) // Em manutenção
-      .mockResolvedValueOnce(novosUltimoMes); // Novos no último mês
+      .mockResolvedValueOnce(emManutencao) // Em manutenÃƒÂ§ÃƒÂ£o
+      .mockResolvedValueOnce(novosUltimoMes); // Novos no ÃƒÂºltimo mÃƒÂªs
 
     queryBuilder.getRawOne.mockResolvedValue({ total: valorTotal.toString() });
     queryBuilder.getRawMany

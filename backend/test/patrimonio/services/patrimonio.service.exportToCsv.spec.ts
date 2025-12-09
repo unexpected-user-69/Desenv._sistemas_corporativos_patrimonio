@@ -3,24 +3,30 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Response } from 'express';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { QueryPatrimonioDto } from '../../../src/patrimonio/dto/query-patrimonio.dto';
-import { UsersService } from '../../../src/users/users.service';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
-import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { QueryPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-patrimonio.dto';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
 describe('PatrimonioService.exportToCsv (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
+  let categoriasHttpClient: Partial<CategoriasHttpClient>;
   let storageService: Partial<StorageService>;
   let mockResponse: Partial<Response>;
 
   beforeEach(async () => {
-    usersService = {
+    usersHttpClient = {
+      findOne: jest.fn(),
+    };
+
+    categoriasHttpClient = {
       findOne: jest.fn(),
     };
 
@@ -48,8 +54,12 @@ describe('PatrimonioService.exportToCsv (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersService,
-          useValue: usersService,
+          provide: UsersHttpClient,
+          useValue: usersHttpClient,
+        },
+        {
+          provide: CategoriasHttpClient,
+          useValue: categoriasHttpClient,
         },
         {
           provide: DataSource,
@@ -76,13 +86,13 @@ describe('PatrimonioService.exportToCsv (unit)', () => {
     repository.findAndCount.mockResolvedValue([patrimonios as Patrimonio[], 1]);
     repository.findOne.mockResolvedValue(patrimonios[0] as Patrimonio);
 
-    // Nota: Este teste pode falhar se as dependências de CSV não estiverem mockadas
-    // O importante é que o método seja testado via testes de integração ou E2E
+    // Nota: Este teste pode falhar se as dependÃƒÂªncias de CSV nÃƒÂ£o estiverem mockadas
+    // O importante ÃƒÂ© que o mÃƒÂ©todo seja testado via testes de integraÃƒÂ§ÃƒÂ£o ou E2E
     try {
       await service.exportToCsv(query, mockResponse as Response);
       expect(repository.findAndCount).toHaveBeenCalled();
     } catch (error) {
-      // Se falhar devido a dependências externas, pelo menos verificamos que tentou buscar
+      // Se falhar devido a dependÃƒÂªncias externas, pelo menos verificamos que tentou buscar
       expect(repository.findAndCount).toHaveBeenCalled();
     }
   });
@@ -95,7 +105,7 @@ describe('PatrimonioService.exportToCsv (unit)', () => {
     try {
       await service.exportToCsv(query, mockResponse as Response);
     } catch (error) {
-      // Erro esperado se dependências não mockadas
+      // Erro esperado se dependÃƒÂªncias nÃƒÂ£o mockadas
     }
 
     expect(repository.findAndCount).toHaveBeenCalled();

@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
+import { QueryDiasDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/query-dias.dto';
 
 describe('PatrimonioController – findGarantiaVencendo', () => {
   let controller: PatrimonioController;
@@ -23,7 +24,8 @@ describe('PatrimonioController – findGarantiaVencendo', () => {
   it('GET /patrimonio/alertas/garantia → delega ao service.findGarantiaVencendo com dias padrão', async () => {
     service.findGarantiaVencendo.mockResolvedValue([]);
 
-    const res = await controller.findGarantiaVencendo();
+    const query: QueryDiasDto = {};
+    const res = await controller.findGarantiaVencendo(query);
 
     expect(service.findGarantiaVencendo).toHaveBeenCalledWith(30);
     expect(res).toEqual([]);
@@ -32,7 +34,8 @@ describe('PatrimonioController – findGarantiaVencendo', () => {
   it('GET /patrimonio/alertas/garantia?dias=60 → delega ao service.findGarantiaVencendo com dias customizado', async () => {
     service.findGarantiaVencendo.mockResolvedValue([]);
 
-    const res = await controller.findGarantiaVencendo(60);
+    const query: QueryDiasDto = { dias: 60 };
+    const res = await controller.findGarantiaVencendo(query);
 
     expect(service.findGarantiaVencendo).toHaveBeenCalledWith(60);
     expect(res).toEqual([]);

@@ -1,12 +1,12 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { UpdateStatusPatrimonioDto } from '../../../src/patrimonio/dto/update-status-patrimonio.dto';
+import { UpdateStatusPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/update-status-patrimonio.dto';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
 describe('PatrimonioController – updateStatus', () => {
   let controller: PatrimonioController;

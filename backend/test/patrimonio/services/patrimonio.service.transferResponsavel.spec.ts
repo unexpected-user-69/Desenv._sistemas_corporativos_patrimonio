@@ -1,26 +1,32 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { TransferirResponsavelDto } from '../../../src/patrimonio/dto/transferir-responsavel.dto';
-import { UsersService } from '../../../src/users/users.service';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
+import { TransferirResponsavelDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/transferir-responsavel.dto';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 import { UserResponseDto } from '../../../src/users/dto/user-response.dto';
 
 describe('PatrimonioService.transferResponsavel (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
+  let categoriasHttpClient: Partial<CategoriasHttpClient>;
   let storageService: Partial<StorageService>;
 
   beforeEach(async () => {
-    usersService = {
+    usersHttpClient = {
+      findOne: jest.fn(),
+    };
+
+    categoriasHttpClient = {
       findOne: jest.fn(),
     };
 
@@ -43,8 +49,12 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersService,
-          useValue: usersService,
+          provide: UsersHttpClient,
+          useValue: usersHttpClient,
+        },
+        {
+          provide: CategoriasHttpClient,
+          useValue: categoriasHttpClient,
         },
         {
           provide: DataSource,
@@ -74,11 +84,11 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     });
     const updateDto: TransferirResponsavelDto = {
       novoResponsavelId,
-      observacoes: 'Transferência de setor',
+      observacoes: 'TransferÃƒÂªncia de setor',
     };
     const novoResponsavel: Partial<UserResponseDto> = {
       id: novoResponsavelId,
-      name: 'Novo Responsável',
+      name: 'Novo ResponsÃƒÂ¡vel',
     };
     const updatedPatrimonio = makePatrimonioEntity({
       ...existingPatrimonio,
@@ -86,7 +96,7 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     });
 
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);
-    (usersService.findOne as jest.Mock).mockResolvedValue(novoResponsavel);
+    (usersHttpClient.findOne as jest.Mock).mockResolvedValue(novoResponsavel);
     repository.save.mockResolvedValue(updatedPatrimonio as Patrimonio);
 
     const result = await service.transferResponsavel(patrimonioId, updateDto);
@@ -94,7 +104,7 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     expect(repository.findOne).toHaveBeenCalledWith({
       where: { id: patrimonioId },
     });
-    expect(usersService.findOne).toHaveBeenCalledWith(novoResponsavelId);
+    expect(usersHttpClient.findOne).toHaveBeenCalledWith(novoResponsavelId);
     expect(repository.save).toHaveBeenCalled();
     expect(result).toMatchObject({
       id: patrimonioId,
@@ -127,7 +137,7 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     };
 
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);
-    (usersService.findOne as jest.Mock).mockRejectedValue(
+    (usersHttpClient.findOne as jest.Mock).mockRejectedValue(
       new NotFoundException(`User with ID "${novoResponsavelId}" not found`),
     );
 
@@ -149,11 +159,11 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     };
     const responsavel: Partial<UserResponseDto> = {
       id: responsavelId,
-      name: 'Responsável',
+      name: 'ResponsÃƒÂ¡vel',
     };
 
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);
-    (usersService.findOne as jest.Mock).mockResolvedValue(responsavel);
+    (usersHttpClient.findOne as jest.Mock).mockResolvedValue(responsavel);
 
     await expect(
       service.transferResponsavel(patrimonioId, updateDto),
@@ -174,7 +184,7 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     };
     const novoResponsavel: Partial<UserResponseDto> = {
       id: novoResponsavelId,
-      name: 'Novo Responsável',
+      name: 'Novo ResponsÃƒÂ¡vel',
     };
     const updatedPatrimonio = makePatrimonioEntity({
       ...existingPatrimonio,
@@ -182,7 +192,7 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     });
 
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);
-    (usersService.findOne as jest.Mock).mockResolvedValue(novoResponsavel);
+    (usersHttpClient.findOne as jest.Mock).mockResolvedValue(novoResponsavel);
     repository.save.mockResolvedValue(updatedPatrimonio as Patrimonio);
 
     const result = await service.transferResponsavel(patrimonioId, updateDto);

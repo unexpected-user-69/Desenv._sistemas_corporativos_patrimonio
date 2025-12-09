@@ -1,5 +1,5 @@
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
-import { PatrimonioPdfExportService } from '../../../src/patrimonio/services/patrimonio-pdf-export.service';
+﻿import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
 
 /**
  * Helper para criar providers de teste do PatrimonioController

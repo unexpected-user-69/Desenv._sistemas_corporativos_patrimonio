@@ -1,9 +1,9 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { UpdatePatrimonioDto } from '../../../src/patrimonio/dto/update-patrimonio.dto';
+import { UpdatePatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/update-patrimonio.dto';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
 

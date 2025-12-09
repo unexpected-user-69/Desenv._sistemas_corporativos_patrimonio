@@ -1,8 +1,8 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { CreateBulkPatrimonioDto } from '../../../src/patrimonio/dto/create-bulk-patrimonio.dto';
+import { CreateBulkPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/create-bulk-patrimonio.dto';
 import { makeCreatePatrimonioDto } from '../../factories/patrimonio.factory';
 
 describe('PatrimonioController – createBulk', () => {

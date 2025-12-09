@@ -30,7 +30,7 @@ describe('EventsController – publish', () => {
       user: {
         roles: ['teacher'],
       },
-    };
+    } as any;
 
     service.publish.mockResolvedValue(mockEvent);
 
@@ -73,7 +73,7 @@ describe('EventsController – publish', () => {
       user: {
         roles: ['teacher'],
       },
-    };
+    } as any;
 
     service.publish.mockRejectedValue(
       new NotFoundException(`Evento com ID "${eventId}" não encontrado`),
@@ -91,7 +91,7 @@ describe('EventsController – publish', () => {
       user: {
         roles: ['teacher'],
       },
-    };
+    } as any;
 
     service.publish.mockRejectedValue(
       new BadRequestException('Apenas eventos em rascunho podem ser publicados'),

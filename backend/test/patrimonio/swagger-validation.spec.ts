@@ -4,7 +4,11 @@ import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
+// Aumentar timeout global para este arquivo - testes de Swagger precisam inicializar a aplicação completa
+jest.setTimeout(60000);
+
 describe('Swagger Documentation Validation', () => {
+
   let app: INestApplication;
   let swaggerDocument: any;
 
@@ -12,16 +16,17 @@ describe('Swagger Documentation Validation', () => {
     process.env.DEV_AUTO_AUTH = 'true';
     process.env.NODE_ENV = 'test';
 
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    try {
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
 
-    app = moduleFixture.createNestApplication();
-    // Configurar o prefixo global como no main.ts
-    app.setGlobalPrefix('v1');
-    await app.init();
+      app = moduleFixture.createNestApplication();
+      // Configurar o prefixo global como no main.ts
+      app.setGlobalPrefix('v1');
+      await app.init();
 
-    // Obter documento Swagger - usar a mesma configuração do main.ts
+      // Obter documento Swagger - usar a mesma configuração do main.ts
     const config = new DocumentBuilder()
       .setTitle('Patrimonio & Inventario API')
       .setDescription(
@@ -59,11 +64,17 @@ describe('Swagger Documentation Validation', () => {
         'bearer',
       )
       .build();
-    swaggerDocument = SwaggerModule.createDocument(app, config);
-  });
+      swaggerDocument = SwaggerModule.createDocument(app, config);
+    } catch (error) {
+      console.error('Erro ao inicializar aplicação no teste:', error);
+      throw error;
+    }
+  }, 60000); // Aumentar timeout para 60 segundos
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
     delete process.env.DEV_AUTO_AUTH;
   });
 

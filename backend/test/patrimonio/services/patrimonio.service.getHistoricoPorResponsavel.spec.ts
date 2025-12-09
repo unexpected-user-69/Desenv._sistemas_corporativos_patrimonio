@@ -3,22 +3,28 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersService } from '../../../src/users/users.service';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
 import { randomUUID } from 'crypto';
 
 describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
+  let categoriasHttpClient: Partial<CategoriasHttpClient>;
   let storageService: Partial<StorageService>;
 
   beforeEach(async () => {
-    usersService = {
+    usersHttpClient = {
+      findOne: jest.fn(),
+    };
+
+    categoriasHttpClient = {
       findOne: jest.fn(),
     };
 
@@ -41,8 +47,12 @@ describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersService,
-          useValue: usersService,
+          provide: UsersHttpClient,
+          useValue: usersHttpClient,
+        },
+        {
+          provide: CategoriasHttpClient,
+          useValue: categoriasHttpClient,
         },
         {
           provide: DataSource,
@@ -69,12 +79,12 @@ describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
       makePatrimonioEntity({ responsavelId }),
     ];
 
-    usersService.findOne!.mockResolvedValue({ id: responsavelId } as any);
+    usersHttpClient.findOne!.mockResolvedValue({ id: responsavelId, name: 'Test User', email: 'test@example.com' } as any);
     repository.find.mockResolvedValue(patrimonios as Patrimonio[]);
 
     const result = await service.getHistoricoPorResponsavel(responsavelId);
 
-    expect(usersService.findOne).toHaveBeenCalledWith(responsavelId);
+    expect(usersHttpClient.findOne).toHaveBeenCalledWith(responsavelId);
     expect(repository.find).toHaveBeenCalledWith({
       where: { responsavelId },
       relations: ['categoria'],
@@ -86,7 +96,7 @@ describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
   it('should throw NotFoundException when responsavel not found', async () => {
     const responsavelId = randomUUID();
 
-    usersService.findOne!.mockRejectedValue(
+    usersHttpClient.findOne!.mockRejectedValue(
       new NotFoundException('Usuário não encontrado'),
     );
 
@@ -98,7 +108,7 @@ describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
   it('should return empty array when no patrimonios found', async () => {
     const responsavelId = randomUUID();
 
-    usersService.findOne!.mockResolvedValue({ id: responsavelId } as any);
+    usersHttpClient.findOne!.mockResolvedValue({ id: responsavelId, name: 'Test User', email: 'test@example.com' } as any);
     repository.find.mockResolvedValue([]);
 
     const result = await service.getHistoricoPorResponsavel(responsavelId);

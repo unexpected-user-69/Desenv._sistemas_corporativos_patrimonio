@@ -1,9 +1,9 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { QueryStatusMultiplosDto } from '../../../src/patrimonio/dto/query-status-multiplos.dto';
-import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { QueryStatusMultiplosDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-status-multiplos.dto';
+import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
 describe('PatrimonioController – findByStatusMultiplos', () => {
   let controller: PatrimonioController;

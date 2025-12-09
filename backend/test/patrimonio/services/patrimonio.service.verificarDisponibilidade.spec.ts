@@ -1,25 +1,31 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersService } from '../../../src/users/users.service';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
-import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 import { randomUUID } from 'crypto';
 
 describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
+  let categoriasHttpClient: Partial<CategoriasHttpClient>;
   let storageService: Partial<StorageService>;
 
   beforeEach(async () => {
-    usersService = {
+    usersHttpClient = {
+      findOne: jest.fn(),
+    };
+
+    categoriasHttpClient = {
       findOne: jest.fn(),
     };
 
@@ -42,8 +48,12 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersService,
-          useValue: usersService,
+          provide: UsersHttpClient,
+          useValue: usersHttpClient,
+        },
+        {
+          provide: CategoriasHttpClient,
+          useValue: categoriasHttpClient,
         },
         {
           provide: DataSource,
@@ -90,7 +100,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
     const result = await service.verificarDisponibilidade(id);
 
     expect(result.disponivel).toBe(false);
-    expect(result.motivo).toBe('Patrimônio em manutenção');
+    expect(result.motivo).toBe('PatrimÃƒÂ´nio em manutenÃƒÂ§ÃƒÂ£o');
   });
 
   it('should return disponivel: false when patrimonio is DESCARTADO', async () => {
@@ -105,7 +115,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
     const result = await service.verificarDisponibilidade(id);
 
     expect(result.disponivel).toBe(false);
-    expect(result.motivo).toBe('Patrimônio descartado');
+    expect(result.motivo).toBe('PatrimÃƒÂ´nio descartado');
   });
 
   it('should return disponivel: false when patrimonio is INATIVO', async () => {
@@ -120,7 +130,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
     const result = await service.verificarDisponibilidade(id);
 
     expect(result.disponivel).toBe(false);
-    expect(result.motivo).toContain('Patrimônio está com status:');
+    expect(result.motivo).toContain('PatrimÃƒÂ´nio estÃƒÂ¡ com status:');
   });
 
   it('should throw NotFoundException when patrimonio not found', async () => {
@@ -132,7 +142,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
       NotFoundException,
     );
     await expect(service.verificarDisponibilidade(id)).rejects.toThrow(
-      `Patrimônio com ID "${id}" não encontrado`,
+      `PatrimÃƒÂ´nio com ID "${id}" nÃƒÂ£o encontrado`,
     );
   });
 });

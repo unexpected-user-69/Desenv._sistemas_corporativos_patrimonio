@@ -1,27 +1,33 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersService } from '../../../src/users/users.service';
-import { StorageService } from '../../../src/patrimonio/services/storage.service';
-import { CreateBulkPatrimonioDto } from '../../../src/patrimonio/dto/create-bulk-patrimonio.dto';
+import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { CreateBulkPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/create-bulk-patrimonio.dto';
 import { makeCreatePatrimonioDto } from '../../factories/patrimonio.factory';
 
 describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;
   let historicoRepository: MockType<Repository<PatrimonioLocalizacaoHistorico>>;
-  let usersService: Partial<UsersService>;
+  let usersHttpClient: Partial<UsersHttpClient>;
+  let categoriasHttpClient: Partial<CategoriasHttpClient>;
   let storageService: Partial<StorageService>;
   let dataSource: DataSource;
   let queryRunner: Partial<QueryRunner>;
 
   beforeEach(async () => {
-    usersService = {
+    usersHttpClient = {
+      findOne: jest.fn(),
+    };
+
+    categoriasHttpClient = {
       findOne: jest.fn(),
     };
 
@@ -63,8 +69,12 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: UsersService,
-          useValue: usersService,
+          provide: UsersHttpClient,
+          useValue: usersHttpClient,
+        },
+        {
+          provide: CategoriasHttpClient,
+          useValue: categoriasHttpClient,
         },
         {
           provide: StorageService,
@@ -94,7 +104,7 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
     const created1 = makePatrimonioEntity({ codigo: 'PAT-001' });
     const created2 = makePatrimonioEntity({ codigo: 'PAT-002' });
 
-    (queryRunner.manager!.findOne as jest.Mock).mockResolvedValue(null); // Códigos não existem
+    (queryRunner.manager!.findOne as jest.Mock).mockResolvedValue(null); // CÃƒÂ³digos nÃƒÂ£o existem
     (queryRunner.manager!.create as jest.Mock).mockImplementation((_entity: any, data: any) => data);
     (queryRunner.manager!.save as jest.Mock)
       .mockResolvedValueOnce(created1 as Patrimonio)
@@ -124,7 +134,7 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
     const existing = makePatrimonioEntity({ codigo: 'PAT-EXISTENTE' });
 
     (queryRunner.manager!.findOne as jest.Mock)
-      .mockResolvedValueOnce(null) // PAT-001 não existe
+      .mockResolvedValueOnce(null) // PAT-001 nÃƒÂ£o existe
       .mockResolvedValueOnce(existing as Patrimonio); // PAT-EXISTENTE existe
 
     (queryRunner.manager!.create as jest.Mock).mockImplementation((_entity: any, data: any) => data);
@@ -134,6 +144,6 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
 
     expect(result.totalSucessos).toBe(1);
     expect(result.totalErros).toBe(1);
-    expect(result.erros[0].erro).toBe('Código já existe');
+    expect(result.erros[0].erro).toBe('CÃƒÂ³digo jÃƒÂ¡ existe');
   });
 });

@@ -1,4 +1,4 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -9,7 +9,7 @@ import {
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
 import { Event } from '../../../src/events/entities/event.entity';
 import { EventPatrimonio } from '../../../src/events/entities/event-patrimonio.entity';
-import { Patrimonio } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 import { EventsService } from '../../../src/events/events.service';
 import { makeEventEntity } from '../../factories/event.factory';
 import { EventState } from '../../../src/events/enums/event-state.enum';

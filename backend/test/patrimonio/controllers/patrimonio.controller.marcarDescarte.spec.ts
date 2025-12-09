@@ -1,12 +1,12 @@
-import { Test } from '@nestjs/testing';
+﻿import { Test } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { DescartePatrimonioDto } from '../../../src/patrimonio/dto/descarte-patrimonio.dto';
-import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
+import { DescartePatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/descarte-patrimonio.dto';
+import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
 describe('PatrimonioController – descartar', () => {
   let controller: PatrimonioController;

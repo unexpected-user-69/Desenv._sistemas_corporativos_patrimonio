@@ -123,8 +123,10 @@ export class FakeUserRepository {
       );
     }
     if (where?.email) {
+      // Verificar email de forma case-insensitive (normalizado)
+      const normalizedEmail = where.email.toLowerCase().trim();
       return Promise.resolve(
-        this.users.find((user) => user.email === where.email) || null,
+        this.users.find((user) => user.email?.toLowerCase().trim() === normalizedEmail) || null,
       );
     }
     return Promise.resolve(null);
@@ -133,17 +135,62 @@ export class FakeUserRepository {
   find(options: any = {}): Promise<any[]> {
     let result = [...this.users];
 
+    // Filtrar usuários deletados (soft delete)
+    result = result.filter((user) => !user.deletedAt);
+
     if (options.where) {
       const { where } = options;
-      if (where.role) {
-        result = result.filter((user) => user.role === where.role);
-      }
-      if (where.isActive !== undefined) {
-        result = result.filter((user) => user.isActive === where.isActive);
+      // Lidar com array de condições where (OR no TypeORM)
+      if (Array.isArray(where)) {
+        // Quando é array, significa OR - usuário deve satisfazer pelo menos uma condição
+        result = result.filter((user) =>
+          where.some((condition: any) => {
+            let matches = true;
+            // Verificar cada propriedade da condição
+            if (condition.role !== undefined && user.role !== condition.role) matches = false;
+            if (condition.isActive !== undefined && user.isActive !== condition.isActive) matches = false;
+            if (condition.name && !user.name?.toLowerCase().includes(condition.name.toLowerCase().replace(/%/g, ''))) matches = false;
+            if (condition.email && !user.email?.toLowerCase().includes(condition.email.toLowerCase().replace(/%/g, ''))) matches = false;
+            return matches;
+          }),
+        );
+      } else {
+        // Condição única (AND)
+        if (where.role !== undefined) {
+          result = result.filter((user) => user.role === where.role);
+        }
+        if (where.isActive !== undefined) {
+          result = result.filter((user) => user.isActive === where.isActive);
+        }
+        if (where.name) {
+          const pattern = where.name.toLowerCase().replace(/%/g, '');
+          result = result.filter((user) => user.name?.toLowerCase().includes(pattern));
+        }
+        if (where.email) {
+          const pattern = where.email.toLowerCase().replace(/%/g, '');
+          result = result.filter((user) => user.email?.toLowerCase().includes(pattern));
+        }
       }
     }
 
-    if (options.skip && options.take) {
+    // Ordenação
+    if (options.order) {
+      const orderKey = Object.keys(options.order)[0];
+      const orderDirection = options.order[orderKey];
+      result.sort((a, b) => {
+        const aVal = a[orderKey];
+        const bVal = b[orderKey];
+        if (aVal === undefined || aVal === null) return 1;
+        if (bVal === undefined || bVal === null) return -1;
+        if (orderDirection === 'DESC') {
+          return bVal > aVal ? 1 : bVal < aVal ? -1 : 0;
+        }
+        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+      });
+    }
+
+    // Paginação - aplicar DEPOIS da ordenação
+    if (options.skip !== undefined && options.take !== undefined) {
       const start = Number(options.skip);
       const end = start + Number(options.take);
       result = result.slice(start, end);
@@ -153,24 +200,80 @@ export class FakeUserRepository {
   }
 
   async findAndCount(options: any = {}): Promise<[any[], number]> {
+    // Primeiro aplicar filtros para contar o total filtrado (sem paginação)
+    let filtered = [...this.users];
+    
+    // Filtrar usuários deletados
+    filtered = filtered.filter((user) => !user.deletedAt);
+
+    if (options.where) {
+      const { where } = options;
+      if (Array.isArray(where)) {
+        // OR logic
+        filtered = filtered.filter((user) =>
+          where.some((condition: any) => {
+            let matches = true;
+            if (condition.role !== undefined && user.role !== condition.role) matches = false;
+            if (condition.isActive !== undefined && user.isActive !== condition.isActive) matches = false;
+            if (condition.name && !user.name?.toLowerCase().includes(condition.name.toLowerCase().replace(/%/g, ''))) matches = false;
+            if (condition.email && !user.email?.toLowerCase().includes(condition.email.toLowerCase().replace(/%/g, ''))) matches = false;
+            return matches;
+          }),
+        );
+      } else {
+        // AND logic
+        if (where.role !== undefined) {
+          filtered = filtered.filter((user) => user.role === where.role);
+        }
+        if (where.isActive !== undefined) {
+          filtered = filtered.filter((user) => user.isActive === where.isActive);
+        }
+        if (where.name) {
+          const pattern = where.name.toLowerCase().replace(/%/g, '');
+          filtered = filtered.filter((user) => user.name?.toLowerCase().includes(pattern));
+        }
+        if (where.email) {
+          const pattern = where.email.toLowerCase().replace(/%/g, '');
+          filtered = filtered.filter((user) => user.email?.toLowerCase().includes(pattern));
+        }
+      }
+    }
+
+    const total = filtered.length;
+    
+    // Agora aplicar ordenação e paginação para os dados
     const data = await this.find(options);
-    const total = this.users.length;
+    
     return [data, total];
   }
 
-  save(entity: any): Promise<any> {
+  async save(entity: any): Promise<any> {
     if (entity.id) {
       // Update
       const index = this.users.findIndex((user) => user.id === entity.id);
       if (index !== -1) {
-        this.users[index] = { ...this.users[index], ...entity };
+        this.users[index] = { ...this.users[index], ...entity, updatedAt: new Date() };
         return Promise.resolve(this.users[index]);
       }
     } else {
+      // Create - verificar se email já existe (normalizado)
+      if (entity.email) {
+        const normalizedEmail = entity.email.toLowerCase().trim();
+        const existing = this.users.find(
+          (user) => user.email?.toLowerCase().trim() === normalizedEmail
+        );
+        if (existing) {
+          // Simular erro de constraint do banco
+          const error: any = new Error('Duplicate key');
+          error.code = '23505';
+          throw error;
+        }
+      }
       // Create
       const newUser = {
         id: this.nextId++,
         ...entity,
+        email: entity.email?.toLowerCase().trim(),
         createdAt: new Date(),
         updatedAt: new Date(),
         version: 1,
@@ -204,6 +307,21 @@ export class FakeUserRepository {
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 1,
+    };
+  }
+
+  async preload(entityData: any): Promise<any> {
+    if (!entityData.id) {
+      return null;
+    }
+    const existing = this.users.find((user) => user.id === entityData.id);
+    if (!existing) {
+      return null;
+    }
+    // Merge com os dados fornecidos
+    return {
+      ...existing,
+      ...entityData,
     };
   }
 

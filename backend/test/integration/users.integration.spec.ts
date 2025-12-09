@@ -243,6 +243,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
       it('should update user information', async () => {
         // Arrange
         const users = await service.findAllWithAdvancedFilters({});
+        expect(users.data.length).toBeGreaterThan(0);
         const userId = users.data[0].id;
         const updateDto: UpdateUserDto = {
           name: 'John Updated',
@@ -267,6 +268,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
       it('should update password when provided', async () => {
         // Arrange
         const users = await service.findAllWithAdvancedFilters({});
+        expect(users.data.length).toBeGreaterThan(0);
         const userId = users.data[0].id;
         const updateDto: UpdateUserDto = {
           password: 'newpassword123',
@@ -296,6 +298,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
       it('should soft delete user', async () => {
         // Arrange
         const users = await service.findAllWithAdvancedFilters({});
+        expect(users.data.length).toBeGreaterThan(0);
         const userId = users.data[0].id;
 
         // Act

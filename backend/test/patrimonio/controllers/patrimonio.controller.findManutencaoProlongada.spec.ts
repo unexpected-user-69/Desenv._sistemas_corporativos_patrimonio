@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
+import { QueryDiasDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/query-dias.dto';
 
 describe('PatrimonioController – findManutencaoProlongada', () => {
   let controller: PatrimonioController;
@@ -21,7 +22,7 @@ describe('PatrimonioController – findManutencaoProlongada', () => {
   it('GET /patrimonio/manutencao-prolongada → delega ao service.findManutencaoProlongada com dias padrão', async () => {
     service.findManutencaoProlongada.mockResolvedValue([]);
 
-    const res = await controller.findManutencaoProlongada();
+    const res = await controller.findManutencaoProlongada({});
 
     expect(service.findManutencaoProlongada).toHaveBeenCalledWith(90);
     expect(res).toEqual([]);
@@ -29,8 +30,9 @@ describe('PatrimonioController – findManutencaoProlongada', () => {
 
   it('GET /patrimonio/manutencao-prolongada?dias=120 → delega ao service.findManutencaoProlongada com dias customizado', async () => {
     service.findManutencaoProlongada.mockResolvedValue([]);
+    const query: QueryDiasDto = { dias: 120 };
 
-    const res = await controller.findManutencaoProlongada(120);
+    const res = await controller.findManutencaoProlongada(query);
 
     expect(service.findManutencaoProlongada).toHaveBeenCalledWith(120);
     expect(res).toEqual([]);

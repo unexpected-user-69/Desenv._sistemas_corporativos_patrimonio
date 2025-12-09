@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { Response } from 'express';
-import { PatrimonioController } from '../../../src/patrimonio/patrimonio.controller';
-import { PatrimonioService } from '../../../src/patrimonio/patrimonio.service';
-import { PatrimonioPdfExportService } from '../../../src/patrimonio/services/patrimonio-pdf-export.service';
+import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
 import { QueryPatrimonioDto } from '../../../src/patrimonio/dto/query-patrimonio.dto';
 import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
 

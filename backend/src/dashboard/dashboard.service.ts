@@ -115,14 +115,9 @@ export class DashboardService {
    * Obtém dados de crescimento de patrimônios
    */
   async getPatrimonioGrowthData(period: string) {
-    try {
-      // TODO: Implementar endpoint no microserviço para obter dados de crescimento
-      // Por enquanto retorna dados vazios para não quebrar o dashboard
-      return [];
-    } catch (error) {
-      this.logger.error('Erro ao obter dados de crescimento de patrimônios', error);
-      return [];
-    }
+    // TODO: Implementar endpoint no microserviço para obter dados de crescimento
+    // Por enquanto retorna dados vazios para não quebrar o dashboard
+    return [];
   }
 
   /**

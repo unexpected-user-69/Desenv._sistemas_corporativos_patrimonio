@@ -8,6 +8,8 @@ import { SystemLog } from '../audit/entities/system-log.entity';
 import { Metric } from '../audit/entities/metric.entity';
 config();
 
+const dbSchema = process.env.DB_SCHEMA ?? 'audit';
+
 const common = {
   type: 'postgres' as const,
   entities: [AuditLog, SystemLog, Metric],
@@ -16,7 +18,11 @@ const common = {
   migrationsRun: false, // rode pelos scripts
   logging: process.env.DB_LOGGING === 'true',
   applicationName: 'audit-service',
-  schema: process.env.DB_SCHEMA ?? 'audit', // Schema isolado para audit-service
+  schema: dbSchema, // Schema isolado para audit-service
+  // Configuração do search_path conforme especificação (meusarq_md - 1211)
+  extra: {
+    options: `-c search_path=${dbSchema},public`,
+  },
 };
 
 // SSL quando necessário (ex.: Supabase/Render/Heroku)

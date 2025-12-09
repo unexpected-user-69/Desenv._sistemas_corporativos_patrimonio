@@ -392,3 +392,10 @@ Antes de considerar uma fase completa, verifique:
 
 
 
+
+
+
+
+
+
+

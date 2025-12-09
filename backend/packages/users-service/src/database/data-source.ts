@@ -6,6 +6,8 @@ import { config } from 'dotenv';
 import { User } from '../users/entities/user.entity';
 config();
 
+const dbSchema = process.env.DB_SCHEMA ?? 'users';
+
 const common = {
   type: 'postgres' as const,
   entities: [User],
@@ -14,7 +16,11 @@ const common = {
   migrationsRun: false,
   logging: process.env.DB_LOGGING === 'true',
   applicationName: 'users-service',
-  schema: process.env.DB_SCHEMA ?? 'users', // Schema isolado para users-service
+  schema: dbSchema, // Schema isolado para users-service
+  // Configuração do search_path conforme especificação (meusarq_md - 1211)
+  extra: {
+    options: `-c search_path=${dbSchema},public`,
+  },
 };
 
 const sslOptions: TlsOptions | boolean | undefined =

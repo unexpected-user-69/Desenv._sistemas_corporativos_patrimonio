@@ -11,7 +11,7 @@ import {
 import { Exclude } from 'class-transformer';
 import { UserRole } from '../enums/user-role.enum';
 
-@Entity({ name: 'users' })
+@Entity({ name: 'users', schema: 'users' })
 @Index('uq_users_email', ['email'], { unique: true })
 export class User {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })

@@ -8,7 +8,7 @@
 import { DataSource } from 'typeorm';
 import { UserRole } from '../../src/shared/enums/user-role.enum';
 import { randomUUID } from 'crypto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
 export interface TestUser {

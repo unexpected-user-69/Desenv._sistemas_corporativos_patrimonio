@@ -332,6 +332,52 @@ services:
       retries: 3
       start_period: 40s
 
+  # API Gateway - Ponto único de entrada
+  api-gateway:
+    build:
+      context: ./backend/packages/api-gateway
+      dockerfile: Dockerfile
+    container_name: patrimonio_backend_api_gateway
+    restart: unless-stopped
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      users-service:
+        condition: service_healthy
+      events-service:
+        condition: service_healthy
+      audit-service:
+        condition: service_healthy
+      categorias-service:
+        condition: service_healthy
+      patrimonio-service:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      NODE_ENV: ${NODE_ENV:-development}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_in_production}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USERS_SERVICE_URL: http://users-service:3002
+      EVENTS_SERVICE_URL: http://events-service:3003
+      AUDIT_SERVICE_URL: http://audit-service:3004
+      CATEGORIAS_SERVICE_URL: http://categorias-service:3005
+      PATRIMONIO_SERVICE_URL: http://patrimonio-service:3006
+    ports:
+      - "3000:3000"
+    networks:
+      - patrimonio_network
+    labels:
+      - "com.patrimonio.group=backend"
+      - "com.patrimonio.type=gateway"
+      - "com.patrimonio.service=api-gateway"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # ============================================
   # GRUPO FRONTEND
   # ============================================

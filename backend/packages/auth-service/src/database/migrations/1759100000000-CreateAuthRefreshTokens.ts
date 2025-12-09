@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
  * Migração para criar a tabela auth_refresh_tokens.
@@ -9,114 +9,54 @@ export class CreateAuthRefreshTokens1759100000000 implements MigrationInterface 
   name = 'CreateAuthRefreshTokens1759100000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.createTable(
-      new Table({
-        name: 'auth_refresh_tokens',
-        columns: [
-          {
-            name: 'id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
-          },
-          {
-            name: 'user_id',
-            type: 'uuid',
-            isNullable: false,
-          },
-          {
-            name: 'lookup_key',
-            type: 'varchar',
-            length: '64',
-            isNullable: true,
-          },
-          {
-            name: 'token_hash',
-            type: 'varchar',
-            length: '255',
-            isNullable: false,
-          },
-          {
-            name: 'issued_at',
-            type: 'timestamp with time zone',
-            isNullable: false,
-          },
-          {
-            name: 'expires_at',
-            type: 'timestamp with time zone',
-            isNullable: false,
-          },
-          {
-            name: 'revoked_at',
-            type: 'timestamp with time zone',
-            isNullable: true,
-          },
-          {
-            name: 'replaced_by_token_id',
-            type: 'int',
-            isNullable: true,
-          },
-          {
-            name: 'ip',
-            type: 'varchar',
-            length: '45',
-            isNullable: true,
-          },
-          {
-            name: 'user_agent',
-            type: 'varchar',
-            length: '255',
-            isNullable: true,
-          },
-          {
-            name: 'created_at',
-            type: 'timestamp with time zone',
-            default: 'CURRENT_TIMESTAMP',
-          },
-          {
-            name: 'updated_at',
-            type: 'timestamp with time zone',
-            default: 'CURRENT_TIMESTAMP',
-          },
-        ],
-      }),
-      true,
-    );
+    // Criar schema auth se não existir
+    await queryRunner.query(`CREATE SCHEMA IF NOT EXISTS auth;`);
+
+    // Criar tabela auth_refresh_tokens
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS auth.auth_refresh_tokens (
+        id SERIAL PRIMARY KEY,
+        user_id uuid NOT NULL,
+        lookup_key varchar(64),
+        token_hash varchar(255) NOT NULL,
+        issued_at timestamptz NOT NULL,
+        expires_at timestamptz NOT NULL,
+        revoked_at timestamptz,
+        replaced_by_token_id int,
+        ip varchar(45),
+        user_agent varchar(255),
+        created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
     // Criar índices
-    await queryRunner.createIndex(
-      'auth_refresh_tokens',
-      new TableIndex({
-        name: 'idx_auth_refresh_tokens_user_id',
-        columnNames: ['user_id'],
-      }),
-    );
+    await queryRunner.query(`
+      CREATE INDEX IF NOT EXISTS idx_auth_refresh_tokens_user_id 
+      ON auth.auth_refresh_tokens(user_id);
+    `);
 
-    await queryRunner.createIndex(
-      'auth_refresh_tokens',
-      new TableIndex({
-        name: 'idx_auth_refresh_tokens_expires_at',
-        columnNames: ['expires_at'],
-      }),
-    );
+    await queryRunner.query(`
+      CREATE INDEX IF NOT EXISTS idx_auth_refresh_tokens_expires_at 
+      ON auth.auth_refresh_tokens(expires_at);
+    `);
 
-    await queryRunner.createIndex(
-      'auth_refresh_tokens',
-      new TableIndex({
-        name: 'idx_auth_refresh_tokens_lookup_key',
-        columnNames: ['lookup_key'],
-      }),
-    );
+    await queryRunner.query(`
+      CREATE INDEX IF NOT EXISTS idx_auth_refresh_tokens_lookup_key 
+      ON auth.auth_refresh_tokens(lookup_key);
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('auth_refresh_tokens');
+    // Remover índices
+    await queryRunner.query(`DROP INDEX IF EXISTS auth.idx_auth_refresh_tokens_lookup_key;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS auth.idx_auth_refresh_tokens_expires_at;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS auth.idx_auth_refresh_tokens_user_id;`);
+
+    // Remover tabela auth_refresh_tokens
+    await queryRunner.query(`DROP TABLE IF EXISTS auth.auth_refresh_tokens;`);
+
+    // Remover schema auth (opcional - comentado para não remover se houver outros objetos)
+    // await queryRunner.query(`DROP SCHEMA IF EXISTS auth CASCADE;`);
   }
 }
-
-
-
-
-
-

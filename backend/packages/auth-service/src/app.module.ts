@@ -55,8 +55,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     }),
     ThrottlerModule.forRoot({
       throttlers: [{
-        ttl: 60000,
-        limit: 100,
+        ttl: process.env.NODE_ENV === 'test' ? 1000 : 60000,
+        limit: process.env.NODE_ENV === 'test' ? 10000 : 100,
       }],
     }),
     AuthModule,
@@ -75,10 +75,11 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
           },
         }),
     },
-    {
+    // Desabilitar ThrottlerGuard em modo de teste
+    ...(process.env.NODE_ENV !== 'test' ? [{
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
-    },
+    }] : []),
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,

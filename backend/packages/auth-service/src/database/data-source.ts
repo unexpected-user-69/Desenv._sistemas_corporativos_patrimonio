@@ -6,6 +6,8 @@ import { config } from 'dotenv';
 import { RefreshToken } from '../auth/entities/refresh-token.entity';
 config();
 
+const dbSchema = process.env.DB_SCHEMA ?? 'auth';
+
 const common = {
   type: 'postgres' as const,
   entities: [RefreshToken],
@@ -14,7 +16,11 @@ const common = {
   migrationsRun: false, // rode pelos scripts
   logging: process.env.DB_LOGGING === 'true',
   applicationName: 'auth-service',
-  schema: process.env.DB_SCHEMA ?? 'auth', // Schema isolado para auth-service
+  schema: dbSchema, // Schema isolado para auth-service
+  // Configuração do search_path conforme especificação (meusarq_md - 1211)
+  extra: {
+    options: `-c search_path=${dbSchema},public`,
+  },
 };
 
 // SSL quando necessário (ex.: Supabase/Render/Heroku)

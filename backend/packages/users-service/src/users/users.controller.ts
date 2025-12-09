@@ -33,10 +33,12 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { ServiceTokenGuard } from '../common/guards/service-token.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { OwnerId } from '../common/decorators/owner-id.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { ServiceOnly } from '../common/decorators/service-only.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -201,15 +203,20 @@ export class UsersController {
     return this.usersService.findByEmail(email);
   }
 
-  @Public()
+  @ServiceOnly()
+  @UseGuards(ServiceTokenGuard)
   @Post('validate')
-  @ApiOperation({ summary: 'Validar credenciais de usuário' })
+  @ApiOperation({ 
+    summary: 'Validar credenciais de usuário (service-to-service)',
+    description: 'Endpoint interno para validação de credenciais. Requer SERVICE_TOKEN no header x-service-token.',
+  })
   @ApiBody({ type: ValidateUserDto })
   @ApiOkResponse({
     description: 'Retorna o usuário se as credenciais forem válidas, null caso contrário',
     type: UserResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
+  @ApiUnauthorizedResponse({ description: 'Service token inválido ou ausente' })
   async validate(@Body() dto: ValidateUserDto): Promise<UserResponseDto | null> {
     try {
       const user = await this.usersService.validateCredentials(

@@ -1,6 +1,5 @@
-// Polyfill para crypto (necessário para TypeORM)
-import { webcrypto } from 'crypto';
-(global as any).crypto = webcrypto;
+// No Node.js v18+, crypto já está disponível globalmente
+// Não é necessário fazer polyfill - removido para compatibilidade com Node.js v22+
 
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';

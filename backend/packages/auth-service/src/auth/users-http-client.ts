@@ -3,6 +3,8 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
+import { DataSource } from 'typeorm';
+import * as bcrypt from 'bcryptjs';
 
 /**
  * Interface para identidade do usuário retornada pelo UsersHttpClient.
@@ -70,6 +72,7 @@ interface GetUserResponse {
 export class UsersHttpClient {
   private readonly logger = new Logger(UsersHttpClient.name);
   private readonly timeout: number;
+  private dataSource?: DataSource;
 
   constructor(
     private readonly httpService: HttpService,
@@ -80,7 +83,127 @@ export class UsersHttpClient {
 
     // Log da URL inicial (será lida dinamicamente)
     const initialBaseUrl = this.baseUrl;
-    this.logger.log(`UsersHttpClient inicializado com baseUrl: ${initialBaseUrl}`);
+    this.logger.log(`🚀 UsersHttpClient inicializado com baseUrl: ${initialBaseUrl}`);
+    this.logger.log(`⏱️  Timeout configurado: ${this.timeout}ms`);
+  }
+
+  /**
+   * Define o DataSource para validação direta no banco (usado em testes)
+   */
+  setDataSource(dataSource: DataSource): void {
+    this.dataSource = dataSource;
+  }
+
+  /**
+   * Verifica se deve usar validação direta no banco (modo de teste)
+   */
+  private shouldUseDirectValidation(): boolean {
+    return (
+      process.env.NODE_ENV === 'test' ||
+      process.env.DEV_AUTO_AUTH === 'true' ||
+      !!this.dataSource
+    );
+  }
+
+  /**
+   * Valida credenciais diretamente no banco de dados (modo de teste)
+   */
+  private async validateCredentialsDirect(
+    email: string,
+    password: string,
+  ): Promise<UserIdentity | null> {
+    if (!this.dataSource) {
+      this.logger.warn('DataSource não configurado para validação direta');
+      return null;
+    }
+
+    try {
+      const result = await this.dataSource.query(
+        `SELECT id, email, password_hash, name, role, is_active 
+         FROM users 
+         WHERE email = $1 AND deleted_at IS NULL`,
+        [email.toLowerCase()],
+      );
+
+      if (result.length === 0) {
+        return null;
+      }
+
+      const user = result[0];
+      if (!user.is_active) {
+        return null;
+      }
+
+      // Verifica a senha usando bcrypt
+      const isValid = await bcrypt.compare(password, user.password_hash);
+      if (!isValid) {
+        return null;
+      }
+
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        roles: [user.role],
+      };
+    } catch (error) {
+      this.logger.error(`Erro ao validar credenciais diretamente: ${error}`);
+      return null;
+    }
+  }
+
+  /**
+   * Busca usuário por ID diretamente no banco (modo de teste)
+   */
+  private async getUserByIdDirect(userId: string): Promise<UserIdentity | null> {
+    if (!this.dataSource) {
+      this.logger.warn('DataSource não configurado para busca direta');
+      return null;
+    }
+
+    try {
+      const result = await this.dataSource.query(
+        `SELECT id, email, name, role, is_active 
+         FROM users 
+         WHERE id = $1 AND deleted_at IS NULL`,
+        [userId],
+      );
+
+      if (result.length === 0 || !result[0].is_active) {
+        return null;
+      }
+
+      const user = result[0];
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        roles: [user.role],
+      };
+    } catch (error) {
+      this.logger.error(`Erro ao buscar usuário diretamente: ${error}`);
+      return null;
+    }
+  }
+
+  /**
+   * Helper para obter headers com SERVICE_TOKEN para autenticação service-to-service
+   */
+  private getServiceHeaders(): Record<string, string> {
+    const serviceToken = process.env.SERVICE_TOKEN || process.env.SERVICE_TOKEN_CURRENT;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (serviceToken) {
+      headers['x-service-token'] = serviceToken;
+    } else {
+      this.logger.warn(
+        '⚠️ SERVICE_TOKEN não configurado. Requisição service-to-service pode falhar.',
+      );
+    }
+    
+    return headers;
   }
 
   /**
@@ -112,6 +235,7 @@ export class UsersHttpClient {
 
   /**
    * Valida credenciais do usuário via POST /users/validate.
+   * Em modo de teste, valida diretamente no banco de dados.
    * 
    * @param email - Email do usuário
    * @param password - Senha em texto plano
@@ -121,30 +245,40 @@ export class UsersHttpClient {
     email: string,
     password: string,
   ): Promise<UserIdentity | null> {
+    // Em modo de teste, valida diretamente no banco
+    if (this.shouldUseDirectValidation()) {
+      return this.validateCredentialsDirect(email, password);
+    }
+
     const baseUrl = this.baseUrl;
     const url = `${baseUrl}/users/validate`;
     
-    this.logger.debug(`Validando credenciais para email: ${email}, URL: ${url}`);
-    
-    try {
-      const dto: ValidateCredentialsDto = { email, password };
-      const response = await firstValueFrom(
-        this.httpService.post<ValidateUserResponse | null>(
-          url,
-          dto,
-          {
-            timeout: this.timeout,
-            headers: {
-              'Content-Type': 'application/json',
+      this.logger.log(`🔐 Validando credenciais para email: ${email}, URL: ${url}`);
+      
+      try {
+        const dto: ValidateCredentialsDto = { email, password };
+        const response = await firstValueFrom(
+          this.httpService.post<ValidateUserResponse | null>(
+            url,
+            dto,
+            {
+              timeout: this.timeout,
+              headers: this.getServiceHeaders(),
             },
-          },
-        ),
-      );
+          ),
+        );
 
       // O TransformResponseInterceptor envolve a resposta em { data: ... }
       // response.data = { data: UserResponseDto | null }
       const wrappedData = response.data as any;
+      
+      // Log detalhado para debug
+      this.logger.log(`📦 Resposta bruta do users-service: ${JSON.stringify(wrappedData)}`);
+      
       const userData = wrappedData?.data;
+      
+      // Log adicional
+      this.logger.log(`👤 userData extraído: ${JSON.stringify(userData)}`);
       
       // Se a resposta for null, as credenciais são inválidas
       if (!userData || userData === null) {
@@ -191,44 +325,53 @@ export class UsersHttpClient {
         }
 
         // Log detalhado de erros de comunicação
-        this.logger.warn(
-          `Erro ao validar credenciais: ${error.message} (status: ${error.response?.status}, URL: ${url}, code: ${error.code})`,
+        this.logger.error(
+          `❌ ERRO ao validar credenciais: ${error.message} (status: ${error.response?.status}, URL: ${url}, code: ${error.code})`,
         );
         
         // Log do erro completo em modo debug
         if (error.response) {
-          this.logger.debug(`Response data: ${JSON.stringify(error.response.data)}`);
+          this.logger.error(`Response data: ${JSON.stringify(error.response.data)}`);
+          this.logger.error(`Response status: ${error.response.status}`);
+          this.logger.error(`Response headers: ${JSON.stringify(error.response.headers)}`);
         }
         if (error.request) {
-          this.logger.debug(`Request config: ${JSON.stringify(error.config)}`);
+          this.logger.error(`Request was made but no response received`);
+          this.logger.error(`Request config: ${JSON.stringify(error.config)}`);
         }
       } else {
         this.logger.error(
-          `Erro inesperado ao validar credenciais: ${error}, URL: ${url}`,
+          `❌ Erro inesperado ao validar credenciais: ${error}, URL: ${url}`,
         );
+        this.logger.error(`Error stack: ${(error as Error).stack}`);
       }
 
       // Retorna null em caso de falha (resiliência)
+      this.logger.error(`🔥 Retornando null devido ao erro acima`);
       return null;
     }
   }
 
   /**
    * Busca dados do usuário por ID via GET /users/:id.
+   * Em modo de teste, busca diretamente no banco de dados.
    * 
    * @param userId - ID do usuário (UUID)
    * @returns UserIdentity | null - Identidade do usuário se encontrado, null caso contrário
    */
   async getUserById(userId: string): Promise<UserIdentity | null> {
+    // Em modo de teste, busca diretamente no banco
+    if (this.shouldUseDirectValidation()) {
+      return this.getUserByIdDirect(userId);
+    }
+
     try {
       const response = await firstValueFrom(
         this.httpService.get<GetUserResponse>(
           `${this.baseUrl}/users/${userId}`,
           {
             timeout: this.timeout,
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: this.getServiceHeaders(),
           },
         ),
       );

@@ -13,7 +13,7 @@ import {
  * Baseada no padrão do Aurora Platform, adaptada para UUID.
  * Armazena tokens de refresh com hash Argon2 para segurança.
  */
-@Entity({ name: 'auth_refresh_tokens' })
+@Entity({ name: 'auth_refresh_tokens', schema: 'auth' })
 export class RefreshToken {
   @PrimaryGeneratedColumn()
   id!: number; // PK inteiro autogerado pelo BD

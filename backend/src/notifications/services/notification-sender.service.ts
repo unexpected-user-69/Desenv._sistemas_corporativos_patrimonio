@@ -126,7 +126,7 @@ export class NotificationSenderService {
 
       // Enviar via canal apropriado
       switch (channel) {
-        case NotificationChannel.EMAIL:
+        case NotificationChannel.EMAIL: {
           if (!recipient) {
             throw new Error('Destinatário não fornecido para canal email');
           }
@@ -138,8 +138,9 @@ export class NotificationSenderService {
           status = emailResult.success ? NotificationStatus.SENT : NotificationStatus.FAILED;
           error = emailResult.error;
           break;
+        }
 
-        case NotificationChannel.WEBHOOK:
+        case NotificationChannel.WEBHOOK: {
           // Buscar webhooks ativos
           const webhooks = await this.webhookRepository.find({
             where: { enabled: true },
@@ -165,6 +166,7 @@ export class NotificationSenderService {
             );
           }
           return; // Já criou logs, não precisa criar outro
+        }
 
         case NotificationChannel.SLACK:
         case NotificationChannel.TEAMS:

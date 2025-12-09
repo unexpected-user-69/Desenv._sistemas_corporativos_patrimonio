@@ -9,7 +9,8 @@ COPY tsconfig*.json ./
 COPY nest-cli.json ./
 
 # Instalar dependências
-RUN npm ci
+# Usa npm ci se package-lock.json existe, caso contrário usa npm install
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # Copiar código fonte
 COPY . .

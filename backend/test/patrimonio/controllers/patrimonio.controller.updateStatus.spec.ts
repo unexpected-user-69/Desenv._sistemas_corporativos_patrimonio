@@ -1,14 +1,14 @@
-Ôªøimport { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { UpdateStatusPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/update-status-patrimonio.dto';
+import { UpdateStatusPatrimonioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/update-status-patrimonio.dto';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioStatus } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
-describe('PatrimonioController ‚Äì updateStatus', () => {
+describe('PatrimonioController ñ updateStatus', () => {
   let controller: PatrimonioController;
   const service = { updateStatus: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -25,11 +25,11 @@ describe('PatrimonioController ‚Äì updateStatus', () => {
     jest.clearAllMocks();
   });
 
-  it('PATCH /patrimonio/:id/status ‚Üí delega ao service.updateStatus', async () => {
+  it('PATCH /patrimonio/:id/status ? delega ao service.updateStatus', async () => {
     const id = randomUUID();
     const dto: UpdateStatusPatrimonioDto = {
       status: PatrimonioStatus.MANUTENCAO,
-      observacoes: 'Enviado para manuten√ß√£o preventiva',
+      observacoes: 'Enviado para manutenÁ„o preventiva',
     };
     const mockPatrimonio = makePatrimonioEntity({
       id,
@@ -49,7 +49,7 @@ describe('PatrimonioController ‚Äì updateStatus', () => {
       status: PatrimonioStatus.MANUTENCAO,
     };
     service.updateStatus.mockRejectedValue(
-      new NotFoundException(`Patrim√¥nio com ID "${id}" n√£o encontrado`),
+      new NotFoundException(`PatrimÙnio com ID "${id}" n„o encontrado`),
     );
 
     await expect(controller.updateStatus(id, dto)).rejects.toThrow(
@@ -65,7 +65,7 @@ describe('PatrimonioController ‚Äì updateStatus', () => {
     };
     service.updateStatus.mockRejectedValue(
       new BadRequestException(
-        `O patrim√¥nio j√° possui o status "${PatrimonioStatus.MANUTENCAO}"`,
+        `O patrimÙnio j· possui o status "${PatrimonioStatus.MANUTENCAO}"`,
       ),
     );
 

@@ -1,12 +1,12 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { Response } from 'express';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { QueryPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-patrimonio.dto';
-import { InventarioRelatorioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/inventario-relatorio.dto';
+import { QueryPatrimonioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/query-patrimonio.dto';
+import { InventarioRelatorioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/inventario-relatorio.dto';
 
-describe('PatrimonioController – gerarRelatorioInventario', () => {
+describe('PatrimonioController � gerarRelatorioInventario', () => {
   let controller: PatrimonioController;
   const service = { gerarRelatorioInventario: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -27,7 +27,7 @@ describe('PatrimonioController – gerarRelatorioInventario', () => {
     jest.clearAllMocks();
   });
 
-  it('GET /patrimonio/relatorio/inventario → delega ao service.gerarRelatorioInventario', async () => {
+  it('GET /patrimonio/relatorio/inventario ? delega ao service.gerarRelatorioInventario', async () => {
     const query: QueryPatrimonioDto & InventarioRelatorioDto = {};
     service.gerarRelatorioInventario.mockResolvedValue(undefined);
 

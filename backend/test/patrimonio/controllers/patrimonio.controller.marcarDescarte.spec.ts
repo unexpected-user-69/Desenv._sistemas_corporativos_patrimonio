@@ -1,14 +1,14 @@
-Ôªøimport { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { DescartePatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/descarte-patrimonio.dto';
-import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { DescartePatrimonioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/descarte-patrimonio.dto';
+import { PatrimonioStatus } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
-describe('PatrimonioController ‚Äì descartar', () => {
+describe('PatrimonioController ñ descartar', () => {
   let controller: PatrimonioController;
   const service = { marcarDescarte: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };;
@@ -25,12 +25,12 @@ describe('PatrimonioController ‚Äì descartar', () => {
     jest.clearAllMocks();
   });
 
-  it('POST /patrimonio/:id/descarte ‚Üí delega ao service.marcarDescarte', async () => {
+  it('POST /patrimonio/:id/descarte ? delega ao service.marcarDescarte', async () => {
     const id = randomUUID();
     const dto: DescartePatrimonioDto = {
       dataDescarte: '2025-12-31',
       motivoDescarte: 'Equipamento obsoleto',
-      destinoDescarte: 'Leil√£o p√∫blico',
+      destinoDescarte: 'Leil„o p˙blico',
     };
     const mockPatrimonio = makePatrimonioEntity({
       id,
@@ -51,7 +51,7 @@ describe('PatrimonioController ‚Äì descartar', () => {
       motivoDescarte: 'Equipamento obsoleto',
     };
     service.marcarDescarte.mockRejectedValue(
-      new NotFoundException(`Patrim√¥nio com ID "${id}" n√£o encontrado`),
+      new NotFoundException(`PatrimÙnio com ID "${id}" n„o encontrado`),
     );
 
     await expect(controller.descartar(id, dto)).rejects.toThrow(

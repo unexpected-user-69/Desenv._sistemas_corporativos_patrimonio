@@ -1,11 +1,11 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { CreateBulkPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/create-bulk-patrimonio.dto';
+import { CreateBulkPatrimonioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/create-bulk-patrimonio.dto';
 import { makeCreatePatrimonioDto } from '../../factories/patrimonio.factory';
 
-describe('PatrimonioController – createBulk', () => {
+describe('PatrimonioController � createBulk', () => {
   let controller: PatrimonioController;
   const service = { createBulkWithTransaction: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -20,7 +20,7 @@ describe('PatrimonioController – createBulk', () => {
     jest.clearAllMocks();
   });
 
-  it('POST /patrimonio/bulk → delega ao service.createBulkWithTransaction', async () => {
+  it('POST /patrimonio/bulk ? delega ao service.createBulkWithTransaction', async () => {
     const dto: CreateBulkPatrimonioDto = {
       patrimonios: [makeCreatePatrimonioDto()],
     };

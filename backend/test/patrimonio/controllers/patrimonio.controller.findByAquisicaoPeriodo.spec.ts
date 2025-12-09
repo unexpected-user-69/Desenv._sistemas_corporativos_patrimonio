@@ -1,10 +1,10 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { QueryAquisicaoPeriodoDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-aquisicao-periodo.dto';
+import { QueryAquisicaoPeriodoDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/query-aquisicao-periodo.dto';
 
-describe('PatrimonioController – findByAquisicaoPeriodo', () => {
+describe('PatrimonioController � findByAquisicaoPeriodo', () => {
   let controller: PatrimonioController;
   const service = { findByAquisicaoPeriodo: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -19,7 +19,7 @@ describe('PatrimonioController – findByAquisicaoPeriodo', () => {
     jest.clearAllMocks();
   });
 
-  it('GET /patrimonio/aquisicao-periodo → delega ao service.findByAquisicaoPeriodo', async () => {
+  it('GET /patrimonio/aquisicao-periodo ? delega ao service.findByAquisicaoPeriodo', async () => {
     const query: QueryAquisicaoPeriodoDto = {
       dataInicial: '2024-01-01',
       dataFinal: '2024-12-31',

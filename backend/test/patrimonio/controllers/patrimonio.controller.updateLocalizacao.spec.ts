@@ -1,13 +1,13 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { UpdateLocalizacaoPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/update-localizacao-patrimonio.dto';
+import { UpdateLocalizacaoPatrimonioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/update-localizacao-patrimonio.dto';
 
-describe('PatrimonioController – updateLocalizacao', () => {
+describe('PatrimonioController � updateLocalizacao', () => {
   let controller: PatrimonioController;
   const service = { updateLocalizacao: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -24,7 +24,7 @@ describe('PatrimonioController – updateLocalizacao', () => {
     jest.clearAllMocks();
   });
 
-  it('PATCH /patrimonio/:id/localizacao → delega ao service.updateLocalizacao', async () => {
+  it('PATCH /patrimonio/:id/localizacao ? delega ao service.updateLocalizacao', async () => {
     const id = randomUUID();
     const dto: UpdateLocalizacaoPatrimonioDto = {
       localizacao: 'Sala 205 - Setor Financeiro',
@@ -49,7 +49,7 @@ describe('PatrimonioController – updateLocalizacao', () => {
     };
     const req = { user: { sub: 'user-id' } };
     service.updateLocalizacao.mockRejectedValue(
-      new NotFoundException(`Patrimônio com ID "${id}" não encontrado`),
+      new NotFoundException(`Patrim�nio com ID "${id}" n�o encontrado`),
     );
 
     await expect(controller.updateLocalizacao(id, dto, req)).rejects.toThrow(

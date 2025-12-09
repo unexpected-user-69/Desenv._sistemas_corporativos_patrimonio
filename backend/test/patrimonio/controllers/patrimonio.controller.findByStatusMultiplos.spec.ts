@@ -1,11 +1,11 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { QueryStatusMultiplosDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-status-multiplos.dto';
-import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { QueryStatusMultiplosDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/query-status-multiplos.dto';
+import { PatrimonioStatus } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
-describe('PatrimonioController – findByStatusMultiplos', () => {
+describe('PatrimonioController � findByStatusMultiplos', () => {
   let controller: PatrimonioController;
   const service = { findByStatusMultiplos: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -22,7 +22,7 @@ describe('PatrimonioController – findByStatusMultiplos', () => {
     jest.clearAllMocks();
   });
 
-  it('GET /patrimonio/status-multiplos → delega ao service.findByStatusMultiplos', async () => {
+  it('GET /patrimonio/status-multiplos ? delega ao service.findByStatusMultiplos', async () => {
     const query: QueryStatusMultiplosDto = {
       status: [PatrimonioStatus.ATIVO, PatrimonioStatus.MANUTENCAO],
     };

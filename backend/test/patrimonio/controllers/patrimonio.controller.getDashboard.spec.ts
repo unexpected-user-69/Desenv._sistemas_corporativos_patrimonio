@@ -1,10 +1,10 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { PatrimonioDashboardResponseDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/dashboard-response.dto';
+import { PatrimonioDashboardResponseDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/dashboard-response.dto';
 
-describe('PatrimonioController – getDashboard', () => {
+describe('PatrimonioController � getDashboard', () => {
   let controller: PatrimonioController;
   const service = { getDashboard: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -21,7 +21,7 @@ describe('PatrimonioController – getDashboard', () => {
     jest.clearAllMocks();
   });
 
-  it('GET /patrimonio/dashboard → delega ao service.getDashboard', async () => {
+  it('GET /patrimonio/dashboard ? delega ao service.getDashboard', async () => {
     const mockDashboard: PatrimonioDashboardResponseDto = {
       total: 1000,
       valorTotal: 5000000,

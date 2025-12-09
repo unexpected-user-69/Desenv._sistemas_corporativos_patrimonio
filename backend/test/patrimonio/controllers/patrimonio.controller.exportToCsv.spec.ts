@@ -1,12 +1,12 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { Response } from 'express';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { QueryPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-patrimonio.dto';
-import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { QueryPatrimonioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/query-patrimonio.dto';
+import { PatrimonioStatus } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
-describe('PatrimonioController – exportToCsv', () => {
+describe('PatrimonioController � exportToCsv', () => {
   let controller: PatrimonioController;
   const service = { exportToCsv: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -27,7 +27,7 @@ describe('PatrimonioController – exportToCsv', () => {
     jest.clearAllMocks();
   });
 
-  it('GET /patrimonio/export/csv → delega ao service.exportToCsv', async () => {
+  it('GET /patrimonio/export/csv ? delega ao service.exportToCsv', async () => {
     const query: QueryPatrimonioDto = {};
     service.exportToCsv.mockResolvedValue(undefined);
 

@@ -1,10 +1,10 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { QueryCategoriasMultiplasDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-categorias-multiplas.dto';
+import { QueryCategoriasMultiplasDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/query-categorias-multiplas.dto';
 
-describe('PatrimonioController – findByCategoriasMultiplas', () => {
+describe('PatrimonioController � findByCategoriasMultiplas', () => {
   let controller: PatrimonioController;
   const service = { findByCategoriasMultiplas: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -19,7 +19,7 @@ describe('PatrimonioController – findByCategoriasMultiplas', () => {
     jest.clearAllMocks();
   });
 
-  it('GET /patrimonio/categorias-multiplas → delega ao service.findByCategoriasMultiplas', async () => {
+  it('GET /patrimonio/categorias-multiplas ? delega ao service.findByCategoriasMultiplas', async () => {
     const query: QueryCategoriasMultiplasDto = {
       categoriaIds: [
         '123e4567-e89b-12d3-a456-426614174000',

@@ -1,13 +1,13 @@
-Ôªøimport { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { TransferirResponsavelDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/transferir-responsavel.dto';
+import { TransferirResponsavelDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/transferir-responsavel.dto';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
 
-describe('PatrimonioController ‚Äì transferResponsavel', () => {
+describe('PatrimonioController ñ transferResponsavel', () => {
   let controller: PatrimonioController;
   const service = { transferResponsavel: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -24,12 +24,12 @@ describe('PatrimonioController ‚Äì transferResponsavel', () => {
     jest.clearAllMocks();
   });
 
-  it('POST /patrimonio/:id/transferir-responsavel ‚Üí delega ao service.transferResponsavel', async () => {
+  it('POST /patrimonio/:id/transferir-responsavel ? delega ao service.transferResponsavel', async () => {
     const id = randomUUID();
     const novoResponsavelId = randomUUID();
     const dto: TransferirResponsavelDto = {
       novoResponsavelId,
-      observacoes: 'Transfer√™ncia de setor',
+      observacoes: 'TransferÍncia de setor',
     };
     const mockPatrimonio = makePatrimonioEntity({
       id,
@@ -49,7 +49,7 @@ describe('PatrimonioController ‚Äì transferResponsavel', () => {
       novoResponsavelId: randomUUID(),
     };
     service.transferResponsavel.mockRejectedValue(
-      new NotFoundException(`Patrim√¥nio com ID "${id}" n√£o encontrado`),
+      new NotFoundException(`PatrimÙnio com ID "${id}" n„o encontrado`),
     );
 
     await expect(controller.transferResponsavel(id, dto)).rejects.toThrow(
@@ -66,7 +66,7 @@ describe('PatrimonioController ‚Äì transferResponsavel', () => {
     };
     service.transferResponsavel.mockRejectedValue(
       new NotFoundException(
-        `Usu√°rio com ID "${novoResponsavelId}" n√£o encontrado`,
+        `Usu·rio com ID "${novoResponsavelId}" n„o encontrado`,
       ),
     );
 
@@ -82,7 +82,7 @@ describe('PatrimonioController ‚Äì transferResponsavel', () => {
     };
     service.transferResponsavel.mockRejectedValue(
       new BadRequestException(
-        'O patrim√¥nio j√° est√° atribu√≠do a este respons√°vel',
+        'O patrimÙnio j· est· atribuÌdo a este respons·vel',
       ),
     );
 

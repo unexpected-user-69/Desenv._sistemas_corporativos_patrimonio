@@ -1,11 +1,11 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { Response } from 'express';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { QueryPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-patrimonio.dto';
+import { QueryPatrimonioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/query-patrimonio.dto';
 
-describe('PatrimonioController – exportToExcel', () => {
+describe('PatrimonioController � exportToExcel', () => {
   let controller: PatrimonioController;
   const service = { exportToExcel: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -26,7 +26,7 @@ describe('PatrimonioController – exportToExcel', () => {
     jest.clearAllMocks();
   });
 
-  it('GET /patrimonio/export/excel → delega ao service.exportToExcel', async () => {
+  it('GET /patrimonio/export/excel ? delega ao service.exportToExcel', async () => {
     const query: QueryPatrimonioDto = {};
     service.exportToExcel.mockResolvedValue(undefined);
 

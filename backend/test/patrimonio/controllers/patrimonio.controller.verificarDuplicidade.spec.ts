@@ -1,10 +1,10 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { VerificarDuplicidadeDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/verificar-duplicidade.dto';
+import { VerificarDuplicidadeDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/verificar-duplicidade.dto';
 
-describe('PatrimonioController – verificarDuplicidade', () => {
+describe('PatrimonioController � verificarDuplicidade', () => {
   let controller: PatrimonioController;
   const service = { verificarDuplicidade: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -21,7 +21,7 @@ describe('PatrimonioController – verificarDuplicidade', () => {
     jest.clearAllMocks();
   });
 
-  it('POST /patrimonio/verificar-duplicidade → delega ao service.verificarDuplicidade', async () => {
+  it('POST /patrimonio/verificar-duplicidade ? delega ao service.verificarDuplicidade', async () => {
     const dto: VerificarDuplicidadeDto = {
       marca: 'Dell',
       modelo: 'Inspiron 15',

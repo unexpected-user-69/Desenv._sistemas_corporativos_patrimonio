@@ -1,13 +1,13 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PatrimonioController } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.controller';
 import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { PatrimonioPdfExportService } from '../../../packages/patrimonio-service/src/patrimonio/services/patrimonio-pdf-export.service';
-import { UpdatePatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/update-patrimonio.dto';
+import { UpdatePatrimonioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/update-patrimonio.dto';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
 
-describe('PatrimonioController – update', () => {
+describe('PatrimonioController � update', () => {
   let controller: PatrimonioController;
   const service = { update: jest.fn() };
   const pdfExportService = { generatePdf: jest.fn() };
@@ -24,7 +24,7 @@ describe('PatrimonioController – update', () => {
     jest.clearAllMocks();
   });
 
-  it('PATCH /patrimonio/:id → delega ao service.update', async () => {
+  it('PATCH /patrimonio/:id ? delega ao service.update', async () => {
     const id = randomUUID();
     const dto: UpdatePatrimonioDto = { nome: 'Nome Atualizado' };
     const mockPatrimonio = makePatrimonioEntity({ id, nome: dto.nome });

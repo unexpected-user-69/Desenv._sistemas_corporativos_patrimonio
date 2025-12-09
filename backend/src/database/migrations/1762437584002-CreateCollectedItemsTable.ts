@@ -95,7 +95,7 @@ export class CreateCollectedItemsTable1762437584002 implements MigrationInterfac
           name: 'fk_collected_items_patrimonio',
         }),
       );
-    } catch (error) {
+    } catch (_error) {
       // Se a tabela patrimonio não existir, apenas logar o erro
       console.warn('Foreign key para patrimonio não criada (tabela pode não existir ainda)');
     }
@@ -142,7 +142,7 @@ export class CreateCollectedItemsTable1762437584002 implements MigrationInterfac
     await queryRunner.dropIndex('collected_items', 'ix_collected_items_assignment_coletado');
     try {
       await queryRunner.dropForeignKey('collected_items', 'fk_collected_items_patrimonio');
-    } catch (error) {
+    } catch (_error) {
       // Ignorar se não existir
     }
     await queryRunner.dropForeignKey('collected_items', 'fk_collected_items_assignment');

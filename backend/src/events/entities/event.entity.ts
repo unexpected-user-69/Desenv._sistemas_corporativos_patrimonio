@@ -6,8 +6,6 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  ManyToMany,
-  JoinTable,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   VersionColumn,

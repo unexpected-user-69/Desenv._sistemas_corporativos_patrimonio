@@ -43,6 +43,7 @@
     "src/maintenance/**/*",
     "src/notifications/**/*",
     "src/events/**/*",
+    "src/swagger/**/*",
     "test/**/*"
   ],
   "exclude": ["node_modules", "dist", "frontend", "frontend-new"]

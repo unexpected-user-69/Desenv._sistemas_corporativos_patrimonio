@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Ip,
   Post,
   Req,
@@ -24,7 +23,6 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
 import { LogoutResponseDto } from './dto/logout-response.dto';
 import { UserResponseDto } from '../shared/dto/user-response.dto';
-import { UserRole } from '../shared/enums/user-role.enum';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -141,7 +139,6 @@ export class AuthController {
     // Email e senha padrão para desenvolvimento
     const devEmail = process.env.SWAGGER_DEV_EMAIL || 'admin@dev.local';
     const devPassword = process.env.SWAGGER_DEV_PASSWORD || 'AdminPassword123!';
-    const devName = process.env.SWAGGER_DEV_NAME || 'Admin Dev';
 
     // Tenta fazer login com as credenciais padrão
     // Nota: O usuário deve ser criado manualmente no users-service para desenvolvimento

@@ -81,18 +81,20 @@ export class FieldTransformerService {
     switch (transformType) {
       case TransformType.TO_STRING:
         return String(value);
-      case TransformType.TO_NUMBER:
+      case TransformType.TO_NUMBER: {
         const num = Number(value);
         if (isNaN(num)) {
           throw new Error(`Não é possível converter "${value}" para número`);
         }
         return num;
-      case TransformType.TO_DATE:
+      }
+      case TransformType.TO_DATE: {
         const date = new Date(value);
         if (isNaN(date.getTime())) {
           throw new Error(`Não é possível converter "${value}" para data`);
         }
         return date;
+      }
       case TransformType.TO_BOOLEAN:
         if (typeof value === 'boolean') return value;
         if (typeof value === 'string') {
@@ -124,66 +126,77 @@ export class FieldTransformerService {
     fieldName: string,
   ): string | null {
     switch (rule.type) {
-      case ValidationType.REQUIRED:
+      case ValidationType.REQUIRED: {
         if (value === null || value === undefined || value === '') {
           return rule.message || `Campo ${fieldName} é obrigatório`;
         }
         break;
-      case ValidationType.MIN:
+      }
+      case ValidationType.MIN: {
         if (Number(value) < rule.value!) {
           return rule.message || `Campo ${fieldName} deve ser maior ou igual a ${rule.value}`;
         }
         break;
-      case ValidationType.MAX:
+      }
+      case ValidationType.MAX: {
         if (Number(value) > rule.value!) {
           return rule.message || `Campo ${fieldName} deve ser menor ou igual a ${rule.value}`;
         }
         break;
-      case ValidationType.MIN_LENGTH:
+      }
+      case ValidationType.MIN_LENGTH: {
         if (String(value).length < rule.value!) {
           return rule.message || `Campo ${fieldName} deve ter no mínimo ${rule.value} caracteres`;
         }
         break;
-      case ValidationType.MAX_LENGTH:
+      }
+      case ValidationType.MAX_LENGTH: {
         if (String(value).length > rule.value!) {
           return rule.message || `Campo ${fieldName} deve ter no máximo ${rule.value} caracteres`;
         }
         break;
-      case ValidationType.PATTERN:
+      }
+      case ValidationType.PATTERN: {
         const regex = new RegExp(rule.value!);
         if (!regex.test(String(value))) {
           return rule.message || `Campo ${fieldName} não corresponde ao padrão esperado`;
         }
         break;
-      case ValidationType.ENUM:
+      }
+      case ValidationType.ENUM: {
         if (!rule.value!.includes(value)) {
           return rule.message || `Campo ${fieldName} deve ser um dos valores: ${rule.value!.join(', ')}`;
         }
         break;
-      case ValidationType.EMAIL:
+      }
+      case ValidationType.EMAIL: {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(String(value))) {
           return rule.message || `Campo ${fieldName} deve ser um email válido`;
         }
         break;
-      case ValidationType.URL:
+      }
+      case ValidationType.URL: {
         try {
           new URL(String(value));
         } catch {
           return rule.message || `Campo ${fieldName} deve ser uma URL válida`;
         }
         break;
-      case ValidationType.DATE:
+      }
+      case ValidationType.DATE: {
         const date = new Date(value);
         if (isNaN(date.getTime())) {
           return rule.message || `Campo ${fieldName} deve ser uma data válida`;
         }
         break;
-      case ValidationType.NUMBER:
+      }
+      case ValidationType.NUMBER: {
         if (isNaN(Number(value))) {
           return rule.message || `Campo ${fieldName} deve ser um número válido`;
         }
         break;
+      }
     }
     return null;
   }

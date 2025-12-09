@@ -218,7 +218,7 @@ export class ReportQuotaService {
         periodEnd.setDate(periodEnd.getDate() + 1);
         break;
 
-      case 'weekly':
+      case 'weekly': {
         const dayOfWeek = now.getDay();
         periodStart = new Date(now);
         periodStart.setDate(now.getDate() - dayOfWeek);
@@ -226,6 +226,7 @@ export class ReportQuotaService {
         periodEnd = new Date(periodStart);
         periodEnd.setDate(periodEnd.getDate() + 7);
         break;
+      }
 
       case 'monthly':
         periodStart = new Date(now.getFullYear(), now.getMonth(), 1);

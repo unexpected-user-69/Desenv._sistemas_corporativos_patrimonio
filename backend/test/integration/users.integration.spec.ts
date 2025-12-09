@@ -113,7 +113,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
             name: 'Bob Johnson',
             email: 'bob@example.com',
             passwordHash: 'hashed_password2',
-            role: UserRole.TEACHER,
+            role: UserRole.MANAGER,
             isActive: true,
             createdAt: new Date('2023-01-02T10:00:00Z'),
             updatedAt: new Date('2023-01-02T10:00:00Z'),
@@ -179,7 +179,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
         // Assert
         expect(result.data).toHaveLength(2);
         expect(
-          result.data.every((user) => user.role === UserRole.STUDENT),
+          result.data.every((user) => user.role === UserRole.OPERATOR),
         ).toBe(true);
         expect(result.total).toBe(2);
       });
@@ -240,7 +240,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
         const userId = users.data[0].id;
         const updateDto: UpdateUserDto = {
           name: 'John Updated',
-          role: UserRole.TEACHER,
+          role: UserRole.MANAGER,
         };
 
         // Act
@@ -251,7 +251,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
           expect.objectContaining({
             id: userId,
             name: 'John Updated',
-            role: UserRole.TEACHER,
+            role: UserRole.MANAGER,
             email: 'john@example.com', // Should remain unchanged
           }),
         );
@@ -330,7 +330,7 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
             name: 'Bob Johnson',
             email: 'bob.johnson@example.com',
             passwordHash: 'hashed_password2',
-            role: UserRole.TEACHER,
+            role: UserRole.MANAGER,
             isActive: true,
             createdAt: new Date('2023-01-02T10:00:00Z'),
             updatedAt: new Date('2023-01-02T10:00:00Z'),

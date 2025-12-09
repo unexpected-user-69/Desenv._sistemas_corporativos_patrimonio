@@ -106,7 +106,7 @@ export class CategoriasHttpClient {
     private handleError(error: any): Error {
         if (error.response) {
             // Repassa o erro do microsserviço com o mesmo status e mensagem
-            const { status, data } = error.response;
+            const { data } = error.response;
             // Aqui poderíamos mapear para HttpException do NestJS se necessário,
             // mas lançar o erro original muitas vezes funciona se o filtro de exceção global tratar.
             // Para garantir, vamos lançar uma exceção genérica com os dados ou deixar o Nest tratar.

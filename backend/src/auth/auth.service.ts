@@ -152,7 +152,7 @@ export class AuthService {
           current = t;
           break;
         }
-      } catch (error) {
+      } catch (_error) {
         // Se houver erro na verificação (token inválido), continua procurando
         continue;
       }
@@ -182,7 +182,7 @@ export class AuthService {
             }
             break;
           }
-        } catch (error) {
+        } catch (_error) {
           continue;
         }
       }
@@ -238,7 +238,7 @@ export class AuthService {
           current = t;
           break;
         }
-      } catch (error) {
+      } catch (_error) {
         continue;
       }
     }
@@ -265,7 +265,7 @@ export class AuthService {
             }
             break;
           }
-        } catch (error) {
+        } catch (_error) {
           continue;
         }
       }

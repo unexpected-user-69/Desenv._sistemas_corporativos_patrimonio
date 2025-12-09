@@ -87,7 +87,7 @@ services:
 
   patrimonio-service:
     container_name: patrimonio-service-deploy
-    image: ghcr.io/${REPO_OWNER}/patrimonio-service:${PATRIMONIO_IMAGE_TAG:-latest}
+    image: desenv_sistemas_corporativos_patrimonio-patrimonio-service:latest
     restart: unless-stopped
     env_file:
       - .env.prod
@@ -98,11 +98,11 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: ${POSTGRES_USER:-postgres}
-      DB_PASS: ${POSTGRES_PASSWORD:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-postgres123}
       DB_NAME: ${POSTGRES_DB:-patrimonio_inventario}
       AUTH_API_URL: "http://auth-service:3001"
       USERS_API_URL: "http://users-service:3002"
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-testsecret123}
     depends_on:
       db:
         condition: service_healthy

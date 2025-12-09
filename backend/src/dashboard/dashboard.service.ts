@@ -114,21 +114,16 @@ export class DashboardService {
   /**
    * Obtém dados de crescimento de patrimônios
    */
-  async getPatrimonioGrowthData(period: string) {
-    try {
-      // TODO: Implementar endpoint no microserviço para obter dados de crescimento
-      // Por enquanto retorna dados vazios para não quebrar o dashboard
-      return [];
-    } catch (error) {
-      this.logger.error('Erro ao obter dados de crescimento de patrimônios', error);
-      return [];
-    }
+  async getPatrimonioGrowthData(_period: string) {
+    // TODO: Implementar endpoint no microserviço para obter dados de crescimento
+    // Por enquanto retorna dados vazios para não quebrar o dashboard
+    return [];
   }
 
   /**
    * Obtém métricas do sistema
    */
-  async getSystemMetrics(period: string) {
+  async getSystemMetrics(_period: string) {
     try {
       const memUsage = process.memoryUsage();
 
@@ -170,7 +165,7 @@ export class DashboardService {
   /**
    * Obtém métricas do cache
    */
-  async getCacheMetrics(period: string) {
+  async getCacheMetrics(_period: string) {
     try {
       // Em produção, isso seria obtido do Redis ou do cache manager
       // Por enquanto, retornamos métricas simuladas baseadas em estatísticas
@@ -207,7 +202,7 @@ export class DashboardService {
   /**
    * Obtém atividade recente
    */
-  async getRecentActivity(limit: number) {
+  async getRecentActivity(_limit: number) {
     // TODO: implementar busca de atividade recente do audit log
     return [];
   }
@@ -240,7 +235,7 @@ export class DashboardService {
   /**
    * Obtém métricas de atividade de usuários
    */
-  async getUserActivityMetrics(period: string) {
+  async getUserActivityMetrics(_period: string) {
     // TODO: implementar métricas de atividade de usuários
     return {
       totalLogins: 0,

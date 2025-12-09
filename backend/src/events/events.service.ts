@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike, Between, FindOptionsWhere, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { Event } from './entities/event.entity';
 import { EventPatrimonio } from './entities/event-patrimonio.entity';
@@ -244,7 +244,7 @@ export class EventsService {
             continue;
           }
         }
-      } catch (error: any) {
+      } catch (_error: any) {
         // Se falhar ao carregar patrimônios, simplesmente continuar sem eles
         this.logger.warn('Aviso: Não foi possível carregar patrimônios dos eventos devido a problema com categoria_id');
       }

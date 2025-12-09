@@ -9,7 +9,6 @@ import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { UsersService } from '../../../src/users/users.service';
 import { StorageService } from '../../../src/patrimonio/services/storage.service';
 import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
 
 describe('PatrimonioService.findManutencaoProlongada (unit)', () => {
   let service: PatrimonioService;

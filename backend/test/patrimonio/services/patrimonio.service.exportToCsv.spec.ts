@@ -11,7 +11,6 @@ import { QueryPatrimonioDto } from '../../../src/patrimonio/dto/query-patrimonio
 import { UsersService } from '../../../src/users/users.service';
 import { StorageService } from '../../../src/patrimonio/services/storage.service';
 import { PatrimonioStatus } from '../../../src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../src/patrimonio/entities/patrimonio-localizacao-historico.entity';
 
 describe('PatrimonioService.exportToCsv (unit)', () => {
   let service: PatrimonioService;

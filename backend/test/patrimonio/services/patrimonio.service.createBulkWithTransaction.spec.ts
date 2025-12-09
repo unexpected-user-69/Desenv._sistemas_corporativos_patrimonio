@@ -1,15 +1,15 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
-import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
-import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
-import { CreateBulkPatrimonioDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/create-bulk-patrimonio.dto';
+import { UsersHttpClient } from '../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { CreateBulkPatrimonioDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/create-bulk-patrimonio.dto';
 import { makeCreatePatrimonioDto } from '../../factories/patrimonio.factory';
 
 describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
@@ -104,7 +104,7 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
     const created1 = makePatrimonioEntity({ codigo: 'PAT-001' });
     const created2 = makePatrimonioEntity({ codigo: 'PAT-002' });
 
-    (queryRunner.manager!.findOne as jest.Mock).mockResolvedValue(null); // CÃƒÂ³digos nÃƒÂ£o existem
+    (queryRunner.manager!.findOne as jest.Mock).mockResolvedValue(null); // CÃ³digos nÃ£o existem
     (queryRunner.manager!.create as jest.Mock).mockImplementation((_entity: any, data: any) => data);
     (queryRunner.manager!.save as jest.Mock)
       .mockResolvedValueOnce(created1 as Patrimonio)
@@ -134,7 +134,7 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
     const existing = makePatrimonioEntity({ codigo: 'PAT-EXISTENTE' });
 
     (queryRunner.manager!.findOne as jest.Mock)
-      .mockResolvedValueOnce(null) // PAT-001 nÃƒÂ£o existe
+      .mockResolvedValueOnce(null) // PAT-001 nÃ£o existe
       .mockResolvedValueOnce(existing as Patrimonio); // PAT-EXISTENTE existe
 
     (queryRunner.manager!.create as jest.Mock).mockImplementation((_entity: any, data: any) => data);
@@ -144,6 +144,6 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
 
     expect(result.totalSucessos).toBe(1);
     expect(result.totalErros).toBe(1);
-    expect(result.erros[0].erro).toBe('CÃƒÂ³digo jÃƒÂ¡ existe');
+    expect(result.erros[0].erro).toBe('CÃ³digo jÃ¡ existe');
   });
 });

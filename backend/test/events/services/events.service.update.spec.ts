@@ -1,6 +1,6 @@
 ﻿import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   NotFoundException,
   ForbiddenException,
@@ -11,6 +11,7 @@ import { Event } from '../../../src/events/entities/event.entity';
 import { EventPatrimonio } from '../../../src/events/entities/event-patrimonio.entity';
 import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 import { EventsService } from '../../../src/events/events.service';
+import { PatrimonioHttpClient } from '../../../src/http-clients/patrimonio-http-client';
 import { makeEventEntity } from '../../factories/event.factory';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { UpdateEventDto } from '../../../src/events/dto/update-event.dto';
@@ -20,7 +21,7 @@ describe('EventsService.update (unit)', () => {
   let service: EventsService;
   let eventRepository: MockType<Repository<Event>>;
   let eventPatrimonioRepository: MockType<Repository<EventPatrimonio>>;
-  let patrimonioRepository: MockType<Repository<Patrimonio>>;
+  let patrimonioHttpClient: jest.Mocked<PatrimonioHttpClient>;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -35,8 +36,10 @@ describe('EventsService.update (unit)', () => {
           useFactory: repositoryMockFactory,
         },
         {
-          provide: getRepositoryToken(Patrimonio),
-          useFactory: repositoryMockFactory,
+          provide: PatrimonioHttpClient,
+          useValue: {
+            findOne: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -44,7 +47,7 @@ describe('EventsService.update (unit)', () => {
     service = module.get(EventsService);
     eventRepository = module.get(getRepositoryToken(Event));
     eventPatrimonioRepository = module.get(getRepositoryToken(EventPatrimonio));
-    patrimonioRepository = module.get(getRepositoryToken(Patrimonio));
+    patrimonioHttpClient = module.get(PatrimonioHttpClient);
   });
 
   it('should update event successfully', async () => {
@@ -149,10 +152,9 @@ describe('EventsService.update (unit)', () => {
     };
 
     eventRepository.findOne.mockResolvedValueOnce(event as Event);
-    patrimonioRepository.find.mockResolvedValue([
-      patrimonio1,
-      patrimonio2,
-    ] as Patrimonio[]);
+    patrimonioHttpClient.findOne
+      .mockResolvedValueOnce(patrimonio1 as any)
+      .mockResolvedValueOnce(patrimonio2 as any);
     eventPatrimonioRepository.delete.mockResolvedValue({ affected: 0 } as any);
     eventPatrimonioRepository.create.mockImplementation(
       (entity) => entity as EventPatrimonio,
@@ -170,10 +172,12 @@ describe('EventsService.update (unit)', () => {
     expect(eventPatrimonioRepository.delete).toHaveBeenCalledWith({
       eventId,
     });
-    expect(patrimonioRepository.find).toHaveBeenCalledWith({
-      where: { id: In(updateDto.patrimonioIds) },
-      select: ['id'],
-    });
+    // O serviço usa patrimonioHttpClient.findOne para validar patrimônios
+    if (updateDto.patrimonioIds && updateDto.patrimonioIds.length > 0) {
+      expect(patrimonioHttpClient.findOne).toHaveBeenCalledTimes(updateDto.patrimonioIds.length);
+      expect(patrimonioHttpClient.findOne).toHaveBeenCalledWith(patrimonio1.id);
+      expect(patrimonioHttpClient.findOne).toHaveBeenCalledWith(patrimonio2.id);
+    }
     expect(result).toBeDefined();
   });
 

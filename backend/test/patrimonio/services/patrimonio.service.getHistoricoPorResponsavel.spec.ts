@@ -3,13 +3,13 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
-import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
-import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { UsersHttpClient } from '../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { CategoriasHttpClient } from '../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
 import { randomUUID } from 'crypto';
 
 describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {

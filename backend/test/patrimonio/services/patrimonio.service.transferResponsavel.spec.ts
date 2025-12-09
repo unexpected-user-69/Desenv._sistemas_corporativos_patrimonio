@@ -1,17 +1,17 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
 import { randomUUID } from 'crypto';
-import { TransferirResponsavelDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/transferir-responsavel.dto';
-import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
-import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
-import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { TransferirResponsavelDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/transferir-responsavel.dto';
+import { UsersHttpClient } from '../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 import { UserResponseDto } from '../../../src/users/dto/user-response.dto';
 
 describe('PatrimonioService.transferResponsavel (unit)', () => {
@@ -84,11 +84,11 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     });
     const updateDto: TransferirResponsavelDto = {
       novoResponsavelId,
-      observacoes: 'TransferÃƒÂªncia de setor',
+      observacoes: 'TransferÃªncia de setor',
     };
     const novoResponsavel: Partial<UserResponseDto> = {
       id: novoResponsavelId,
-      name: 'Novo ResponsÃƒÂ¡vel',
+      name: 'Novo ResponsÃ¡vel',
     };
     const updatedPatrimonio = makePatrimonioEntity({
       ...existingPatrimonio,
@@ -159,7 +159,7 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     };
     const responsavel: Partial<UserResponseDto> = {
       id: responsavelId,
-      name: 'ResponsÃƒÂ¡vel',
+      name: 'ResponsÃ¡vel',
     };
 
     repository.findOne.mockResolvedValue(existingPatrimonio as Patrimonio);
@@ -184,7 +184,7 @@ describe('PatrimonioService.transferResponsavel (unit)', () => {
     };
     const novoResponsavel: Partial<UserResponseDto> = {
       id: novoResponsavelId,
-      name: 'Novo ResponsÃƒÂ¡vel',
+      name: 'Novo ResponsÃ¡vel',
     };
     const updatedPatrimonio = makePatrimonioEntity({
       ...existingPatrimonio,

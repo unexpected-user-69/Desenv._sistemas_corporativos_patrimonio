@@ -1,13 +1,13 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder, DataSource } from 'typeorm';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
-import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
-import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
-import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { UsersHttpClient } from '../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.getDashboard (unit)', () => {
   let service: PatrimonioService;
@@ -106,10 +106,10 @@ describe('PatrimonioService.getDashboard (unit)', () => {
     const novosUltimoMes = 25;
 
     repository.count
-      .mockResolvedValueOnce(total) // Total de patrimÃƒÂ´nios
+      .mockResolvedValueOnce(total) // Total de patrimÃ´nios
       .mockResolvedValueOnce(garantiasVencendo) // Garantias vencendo
-      .mockResolvedValueOnce(emManutencao) // Em manutenÃƒÂ§ÃƒÂ£o
-      .mockResolvedValueOnce(novosUltimoMes); // Novos no ÃƒÂºltimo mÃƒÂªs
+      .mockResolvedValueOnce(emManutencao) // Em manutenÃ§Ã£o
+      .mockResolvedValueOnce(novosUltimoMes); // Novos no Ãºltimo mÃªs
 
     queryBuilder.getRawOne.mockResolvedValue({ total: valorTotal.toString() });
     queryBuilder.getRawMany

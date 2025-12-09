@@ -1,17 +1,17 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-// NOTE: PatrimonioService estÃƒÂ¡ no microserviÃƒÂ§o patrimonio-service
-// Este teste precisa ser movido ou ajustado para usar o microserviÃƒÂ§o
-// Por enquanto, vamos usar imports do microserviÃƒÂ§o
-import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+// NOTE: PatrimonioService estÃ¡ no microserviÃ§o patrimonio-service
+// Este teste precisa ser movido ou ajustado para usar o microserviÃ§o
+// Por enquanto, vamos usar imports do microserviÃ§o
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
-import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
-import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { UsersHttpClient } from '../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.findSemResponsavel (unit)', () => {
   let service: PatrimonioService;

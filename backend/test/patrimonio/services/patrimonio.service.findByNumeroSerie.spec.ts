@@ -1,15 +1,15 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
-import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
-import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { UsersHttpClient } from '../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 
 describe('PatrimonioService.findByNumeroSerie (unit)', () => {
   let service: PatrimonioService;
@@ -96,7 +96,7 @@ describe('PatrimonioService.findByNumeroSerie (unit)', () => {
       NotFoundException,
     );
     await expect(service.findByNumeroSerie(numeroSerie)).rejects.toThrow(
-      `PatrimÃƒÂ´nio com nÃƒÂºmero de sÃƒÂ©rie "${numeroSerie}" nÃƒÂ£o encontrado`,
+      `PatrimÃ´nio com nÃºmero de sÃ©rie "${numeroSerie}" nÃ£o encontrado`,
     );
   });
 });

@@ -1,16 +1,16 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
-import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
-import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
-import { PatrimonioStatus } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { UsersHttpClient } from '../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { PatrimonioStatus } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 import { randomUUID } from 'crypto';
 
 describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
@@ -100,7 +100,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
     const result = await service.verificarDisponibilidade(id);
 
     expect(result.disponivel).toBe(false);
-    expect(result.motivo).toBe('PatrimÃƒÂ´nio em manutenÃƒÂ§ÃƒÂ£o');
+    expect(result.motivo).toBe('PatrimÃ´nio em manutenÃ§Ã£o');
   });
 
   it('should return disponivel: false when patrimonio is DESCARTADO', async () => {
@@ -115,7 +115,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
     const result = await service.verificarDisponibilidade(id);
 
     expect(result.disponivel).toBe(false);
-    expect(result.motivo).toBe('PatrimÃƒÂ´nio descartado');
+    expect(result.motivo).toBe('PatrimÃ´nio descartado');
   });
 
   it('should return disponivel: false when patrimonio is INATIVO', async () => {
@@ -130,7 +130,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
     const result = await service.verificarDisponibilidade(id);
 
     expect(result.disponivel).toBe(false);
-    expect(result.motivo).toContain('PatrimÃƒÂ´nio estÃƒÂ¡ com status:');
+    expect(result.motivo).toContain('PatrimÃ´nio estÃ¡ com status:');
   });
 
   it('should throw NotFoundException when patrimonio not found', async () => {
@@ -142,7 +142,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
       NotFoundException,
     );
     await expect(service.verificarDisponibilidade(id)).rejects.toThrow(
-      `PatrimÃƒÂ´nio com ID "${id}" nÃƒÂ£o encontrado`,
+      `PatrimÃ´nio com ID "${id}" nÃ£o encontrado`,
     );
   });
 });

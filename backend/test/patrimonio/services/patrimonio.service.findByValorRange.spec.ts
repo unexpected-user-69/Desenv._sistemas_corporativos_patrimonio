@@ -1,16 +1,16 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
-import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
-import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
-import { QueryValorRangeDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/query-valor-range.dto';
+import { UsersHttpClient } from '../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { QueryValorRangeDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/query-valor-range.dto';
 
 describe('PatrimonioService.findByValorRange (unit)', () => {
   let service: PatrimonioService;
@@ -109,7 +109,7 @@ describe('PatrimonioService.findByValorRange (unit)', () => {
       BadRequestException,
     );
     await expect(service.findByValorRange(dto)).rejects.toThrow(
-      'Valor mÃƒÂ­nimo deve ser menor ou igual ao valor mÃƒÂ¡ximo',
+      'Valor mÃ­nimo deve ser menor ou igual ao valor mÃ¡ximo',
     );
   });
 

@@ -1,16 +1,16 @@
-﻿import { Test } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { repositoryMockFactory, MockType } from '../../mocks/repository.mock';
-import { Patrimonio } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
-import { PatrimonioService } from '../../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
+import { Patrimonio } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { PatrimonioService } from '../../../packages/patrimonio-service/src/patrimonio/patrimonio.service';
 import { makePatrimonioEntity } from '../../factories/patrimonio.factory';
-import { UsersHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/users-http-client';
-import { CategoriasHttpClient } from '../../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
-import { StorageService } from '../../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
-import { TransferirResponsavelBulkDto } from '../../../../packages/patrimonio-service/src/patrimonio/dto/transferir-responsavel-bulk.dto';
+import { UsersHttpClient } from '../../../packages/patrimonio-service/src/http-clients/users-http-client';
+import { CategoriasHttpClient } from '../../../packages/patrimonio-service/src/http-clients/categorias-http-client';
+import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
+import { TransferirResponsavelBulkDto } from '../../../packages/patrimonio-service/src/patrimonio/dto/transferir-responsavel-bulk.dto';
 import { randomUUID } from 'crypto';
 
 describe('PatrimonioService.transferResponsavelBulk (unit)', () => {
@@ -95,7 +95,7 @@ describe('PatrimonioService.transferResponsavelBulk (unit)', () => {
     const dto: TransferirResponsavelBulkDto = {
       ids: [id1, id2],
       novoResponsavelId,
-      observacoes: 'TransferÃƒÂªncia em lote',
+      observacoes: 'TransferÃªncia em lote',
     };
 
     const patrimonio1 = makePatrimonioEntity({ id: id1 });
@@ -150,7 +150,7 @@ describe('PatrimonioService.transferResponsavelBulk (unit)', () => {
 
     repository.find.mockResolvedValue([patrimonio1] as Patrimonio[]);
     usersHttpClient.findOne!.mockRejectedValue(
-      new NotFoundException('UsuÃƒÂ¡rio nÃƒÂ£o encontrado'),
+      new NotFoundException('UsuÃ¡rio nÃ£o encontrado'),
     );
 
     await expect(service.transferResponsavelBulk(dto)).rejects.toThrow(

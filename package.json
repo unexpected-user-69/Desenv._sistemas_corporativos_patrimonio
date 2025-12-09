@@ -1,0 +1,13 @@
+{
+    "name": "patrimonio-inventario-root",
+    "version": "1.0.0",
+    "description": "Root package for Patrimonio Inventario system",
+    "scripts": {
+        "start": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,green\" \"npm run start:dev --prefix backend\" \"npm run dev --prefix frontend\"",
+        "start:windows": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1",
+        "test": "npm run test --prefix backend && npm run test --prefix frontend"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}

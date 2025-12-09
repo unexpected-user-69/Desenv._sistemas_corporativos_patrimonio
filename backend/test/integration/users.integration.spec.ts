@@ -6,6 +6,9 @@ import { UserRole } from '../../src/users/enums/user-role.enum';
 import { CreateUserDto } from '../../src/users/dto/create-user.dto';
 import { UpdateUserDto } from '../../src/users/dto/update-user.dto';
 import { FakeUserRepository } from '../utils/test-doubles';
+import { HashService } from '../../src/common/services/hash.service';
+import { NormalizationService } from '../../src/common/services/normalization.service';
+import { FilterService } from '../../src/common/services/filter.service';
 import * as bcrypt from 'bcryptjs';
 
 // Mock bcrypt
@@ -27,6 +30,9 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
+        HashService,
+        NormalizationService,
+        FilterService,
         {
           provide: getRepositoryToken(User),
           useValue: fakeRepository,

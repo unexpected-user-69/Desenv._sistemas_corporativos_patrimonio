@@ -9,6 +9,7 @@ import { HashService } from '../src/common/services/hash.service';
 import { setupTestUsers, authenticatedRequest, TestUserTokens } from './helpers/auth-helper';
 import { UserRole } from '../src/users/enums/user-role.enum';
 import { PatrimonioStatus } from '../src/patrimonio/entities/patrimonio.entity';
+import { setupTestApp } from './helpers/app-init.helper';
 
 /**
  * Testes E2E para PatrimonioController
@@ -33,10 +34,7 @@ describe('PatrimonioController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('v1');
-    await app.init();
-
-    httpServer = app.getHttpServer() as http.Server;
+    httpServer = await setupTestApp(app);
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 

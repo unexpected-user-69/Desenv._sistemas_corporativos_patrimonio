@@ -14,6 +14,7 @@ import { LogLevel } from '../../src/integrations-erp/entities/execution-log.enti
 import { setupTestUsers, authenticatedRequest, TestUserTokens } from '../helpers/auth-helper';
 import { UserRole } from '../../src/users/enums/user-role.enum';
 import { HashService } from '../../src/common/services/hash.service';
+import { setupTestApp } from '../helpers/app-init.helper';
 
 /**
  * Testes E2E para o módulo integrations-erp
@@ -45,10 +46,7 @@ describe('Integrations ERP (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('v1');
-    await app.init();
-
-    httpServer = app.getHttpServer() as http.Server;
+    httpServer = await setupTestApp(app);
     
     // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
     await new Promise((resolve) => setTimeout(resolve, 500));

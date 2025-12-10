@@ -9,6 +9,8 @@ import { config } from 'dotenv';
 // Isso também evita conflitos com outras entidades que usam o mesmo nome de tabela
 import { Patrimonio } from '../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 import { PatrimonioLocalizacaoHistorico } from '../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { Categoria } from '../../packages/categorias-service/src/categorias/entities/categoria.entity';
+import { AuditLog } from '../../packages/audit-service/src/audit/entities/audit-log.entity';
 config();
 
 const common = {
@@ -23,6 +25,9 @@ const common = {
     // para garantir que Patrimonio seja registrado antes de PatrimonioLocalizacaoHistorico.
     Patrimonio, // Alvo da relação - deve estar registrado primeiro
     PatrimonioLocalizacaoHistorico, // Referencia Patrimonio - depende de Patrimonio estar registrado
+    // Entidades de módulos adicionais usados nos testes E2E
+    Categoria,
+    AuditLog,
     // Carregar outras entidades via padrão
     // Nota: TypeORM automaticamente ignora entidades duplicadas baseado no nome da tabela/entidade
     __dirname + '/../**/*.entity.{ts,js}',

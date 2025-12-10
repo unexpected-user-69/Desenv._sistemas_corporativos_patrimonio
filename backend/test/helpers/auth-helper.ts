@@ -368,6 +368,26 @@ export async function setupTestUsers(
   
   let baseUrl: string | undefined;
   let detectedPort: number | undefined;
+
+  // Garantir que o servidor HTTP esteja "listening".
+  // Em vários specs e2e antigos, apenas app.init() era chamado (sem listen),
+  // o que faz o UsersHttpClient falhar ao chamar /users/validate.
+  // Se não estiver escutando, abrimos uma porta efêmera aqui.
+  try {
+    // @ts-expect-error - httpServer expõe a flag listening no runtime
+    const isListening = (httpServer as any).listening as boolean | undefined;
+    if (!isListening) {
+      await new Promise<void>((resolve, reject) => {
+        try {
+          (httpServer as any).listen(0, () => resolve());
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+  } catch (_err) {
+    // Se não conseguirmos verificar/abrir a porta, continuamos com os fallbacks abaixo.
+  }
   
   // Aguardar um pouco para garantir que o servidor está totalmente iniciado
   await new Promise((resolve) => setTimeout(resolve, 100));

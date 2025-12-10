@@ -21,6 +21,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
+import { CategoriasModule } from '../packages/categorias-service/src/categorias/categorias.module';
+import { AuditModule } from '../packages/audit-service/src/audit/audit.module';
 import { MetricsController } from './common/controllers/metrics.controller';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -82,6 +84,8 @@ import { TestTokenController } from './test-token.controller';
     NotificationsModule,
     ReportsModule,
     DashboardModule,
+    CategoriasModule,
+    AuditModule,
   ],
   controllers: [AppController, MetricsController, SwaggerController, TestTokenController],
   providers: [

@@ -8,6 +8,7 @@ import { DataSource } from 'typeorm';
 import { setupTestUsers, authenticatedRequest, TestUserTokens } from '../helpers/auth-helper';
 import { UserRole } from '../../src/users/enums/user-role.enum';
 import { HashService } from '../../src/common/services/hash.service';
+import { setupTestApp } from '../helpers/app-init.helper';
 
 /**
  * Testes E2E para o módulo inventory-mobile
@@ -38,10 +39,7 @@ describe('Inventory Mobile (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('v1');
-    await app.init();
-
-    httpServer = app.getHttpServer() as http.Server;
+    httpServer = await setupTestApp(app);
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 

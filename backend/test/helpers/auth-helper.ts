@@ -374,12 +374,12 @@ export async function setupTestUsers(
   // o que faz o UsersHttpClient falhar ao chamar /users/validate.
   // Se não estiver escutando, abrimos uma porta efêmera aqui.
   try {
-    // @ts-expect-error - httpServer expõe a flag listening no runtime
-    const isListening = (httpServer as any).listening as boolean | undefined;
-    if (!isListening) {
+    const maybeServer: any = httpServer as any;
+    const isListening = maybeServer?.listening as boolean | undefined;
+    if (!isListening && typeof maybeServer?.listen === 'function') {
       await new Promise<void>((resolve, reject) => {
         try {
-          (httpServer as any).listen(0, () => resolve());
+          maybeServer.listen(0, () => resolve());
         } catch (err) {
           reject(err);
         }

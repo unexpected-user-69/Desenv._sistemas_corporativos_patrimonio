@@ -22,6 +22,9 @@ COPY . .
 # Compilar aplicação
 RUN npm run build
 
+# Converter CRLF para LF no start.sh (se existir)
+RUN if [ -f ./start.sh ]; then sed -i 's/\r$//' ./start.sh; fi
+
 # Estágio prod (Produção/Runtime)
 FROM node:22-alpine AS prod
 
@@ -42,6 +45,9 @@ COPY --from=base /usr/src/app/dist ./dist
 
 # Copiar script de inicialização
 COPY --from=base /usr/src/app/start.sh ./
+
+# Converter CRLF para LF (corrigir terminações de linha do Windows)
+RUN sed -i 's/\r$//' ./start.sh || true
 
 # Tornar script executável
 RUN chmod +x ./start.sh

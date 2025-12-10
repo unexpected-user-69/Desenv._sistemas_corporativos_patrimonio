@@ -1,21 +1,21 @@
 ﻿#!/bin/bash
-# Script de inicializaÃ§Ã£o do container
-# Baseado em PDF 084 - ContainerizaÃ§Ã£o e ConfiguraÃ§Ã£o
+# Script de inicialização do container
+# Baseado em PDF 084 - Containerização e Configuração
 
-# ConfiguraÃ§Ã£o de seguranÃ§a
+# Configuração de segurança
 set -euo pipefail
 
-echo "ðŸš€ Iniciando aplicaÃ§Ã£o PatrimÃ´nio e InventÃ¡rio..."
+echo "🚀 Iniciando aplicação Patrimônio e Inventário..."
 
 # Aguardar banco de dados estar pronto
-echo "â³ Aguardando banco de dados..."
+echo "⏳ Aguardando banco de dados..."
 until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER; do
-  echo "Banco de dados nÃ£o estÃ¡ pronto - aguardando..."
+  echo "Banco de dados não está pronto - aguardando..."
   sleep 2
 done
 
-echo "âœ… Banco de dados estÃ¡ pronto!"
+echo "✅ Banco de dados está pronto!"
 
-# Iniciar aplicaÃ§Ã£o em modo produÃ§Ã£o
-echo "ðŸŽ¯ Iniciando aplicaÃ§Ã£o em modo produÃ§Ã£o..."
+# Iniciar aplicação em modo produção
+echo "🎯 Iniciando aplicação em modo produção..."
 node dist/main.js

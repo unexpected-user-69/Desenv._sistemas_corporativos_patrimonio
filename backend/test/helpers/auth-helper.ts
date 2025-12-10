@@ -398,16 +398,23 @@ export async function setupTestUsers(
     const envPort = process.env.PORT || process.env.APP_PORT || process.env.BACKEND_PORT;
     if (envPort) {
       baseUrl = `http://localhost:${envPort}/v1`;
-    } else if (process.env.USERS_API_URL) {
-      // Usar o valor já configurado em process.env
+    } else if (process.env.USERS_API_URL && process.env.USERS_API_URL !== 'http://users:3000') {
+      // Usar o valor já configurado em process.env (mas não o padrão do Docker)
       baseUrl = process.env.USERS_API_URL;
     } else {
       // Fallback: usar porta padrão do NestJS em desenvolvimento (3101 conforme BACKEND_PORT)
       // Em testes e2e com supertest, o servidor pode não estar escutando em uma porta TCP real
       // Nesse caso, o UsersHttpClient precisa de uma URL válida para fazer requisições HTTP
+      // IMPORTANTE: Em testes e2e, o servidor está rodando no mesmo processo, então podemos usar localhost
       baseUrl = 'http://localhost:3101/v1';
     }
   }
+  
+  // Em testes e2e, garantir que o USERS_API_URL aponte para o próprio servidor
+  // Mesmo que não esteja escutando em uma porta TCP real, o supertest pode fazer requisições
+  // através do httpServer, mas o UsersHttpClient precisa de uma URL válida
+  // Se o servidor não está escutando em uma porta TCP real, usar o fallback
+  // O importante é que a URL seja consistente e o endpoint /users/validate esteja acessível
   
   // Garantir que baseUrl está definido (TypeScript safety)
   if (!baseUrl) {

@@ -15,6 +15,7 @@ import {
   authenticatedRequest,
   TestUserTokens,
 } from '../helpers/auth-helper';
+import { setupTestApp } from '../helpers/app-init.helper';
 
 /**
  * Testes E2E para o módulo maintenance
@@ -38,52 +39,20 @@ describe('Maintenance (e2e)', () => {
   let testWorkOrderId: string;
 
   beforeAll(async () => {
-    // Configurar USERS_API_URL antes de compilar o módulo
-    if (!process.env.USERS_API_URL) {
-      process.env.USERS_API_URL = 'http://localhost:3000/v1';
-    }
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     
-    // Habilitar CORS (igual ao main.ts)
-    app.enableCors({
-      origin: process.env.CORS_ORIGIN?.split(',') || [
-        'http://localhost:3000',
-        'http://localhost:3101',
-        'http://localhost:3002',
-        'http://localhost:5173',
-      ],
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-      credentials: true,
-    });
+    // Usar helper para configurar a aplicação corretamente (CORS, prefixo global, etc.)
+    httpServer = await setupTestApp(app);
     
-    // Configurar prefixo global v1 (deve vir antes de app.init())
-    app.setGlobalPrefix('v1');
-    
-    // Inicializar a aplicação
-    await app.init();
-
-    httpServer = app.getHttpServer() as http.Server;
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 
-    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
-    // Isso é importante porque o app.init() pode não ter terminado completamente
+    // Aguardar um pouco mais para garantir que todas as rotas estão registradas
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Atualizar USERS_API_URL com a porta real do servidor
-    const address = httpServer.address();
-    if (address && typeof address === 'object') {
-      const port = address.port;
-      process.env.USERS_API_URL = `http://localhost:${port}/v1`;
-    } else {
-      process.env.USERS_API_URL = process.env.USERS_API_URL || 'http://localhost:3000/v1';
-    }
 
     // Criar tabelas se não existirem
     await setupDatabaseTables(dataSource);

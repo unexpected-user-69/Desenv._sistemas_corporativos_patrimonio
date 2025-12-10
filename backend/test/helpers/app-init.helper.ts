@@ -31,11 +31,22 @@ export async function setupTestApp(app: INestApplication): Promise<http.Server> 
   // Configurar prefixo global v1 (deve vir antes de app.init())
   app.setGlobalPrefix('v1');
 
-  // Inicializar a aplicação
+  // Inicializar a aplicação e abrir uma porta TCP efêmera.
+  // Sem o listen(), o HttpService/axios não consegue alcançar os endpoints
+  // (ex.: /users/validate) e o login retorna 401 nos testes.
   await app.init();
+  await app.listen(0);
 
-  // Obter servidor HTTP
+  // Obter servidor HTTP e propagar a porta detectada para outras configs que
+  // dependem de variáveis de ambiente (ex.: USERS_API_URL nos helpers de teste).
   const httpServer = app.getHttpServer() as http.Server;
+  const address = httpServer.address();
+  if (address && typeof address === 'object' && address.port) {
+    const port = address.port.toString();
+    if (!process.env.PORT) process.env.PORT = port;
+    if (!process.env.BACKEND_PORT) process.env.BACKEND_PORT = port;
+    if (!process.env.APP_PORT) process.env.APP_PORT = port;
+  }
 
   // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
   // Isso é importante porque o app.init() pode não ter terminado completamente

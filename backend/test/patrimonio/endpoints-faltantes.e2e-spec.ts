@@ -10,11 +10,14 @@ import { join } from 'path';
 import { existsSync, unlinkSync, writeFileSync, mkdirSync } from 'fs';
 import { Patrimonio } from '../../src/patrimonio/entities/patrimonio.entity';
 import { setupTestUsers, authenticatedRequest, TestUserTokens } from '../helpers/auth-helper';
+import { setupTestApp } from '../helpers/app-init.helper';
+import * as http from 'http';
 import { UserRole } from '../../src/users/enums/user-role.enum';
 import { HashService } from '../../src/common/services/hash.service';
 
 describe('PatrimonioController - Endpoints Faltantes (e2e)', () => {
   let app: INestApplication;
+  let httpServer: http.Server;
   let dataSource: DataSource;
   let hashService: HashService;
   let tokens: TestUserTokens;
@@ -33,16 +36,17 @@ describe('PatrimonioController - Endpoints Faltantes (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('v1');
-    await app.init();
-
-    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
+    
+    // Usar helper para configurar a aplicação corretamente (CORS, prefixo global, etc.)
+    httpServer = await setupTestApp(app);
+    
     dataSource = moduleFixture.get<DataSource>(DataSource);
     hashService = moduleFixture.get<HashService>(HashService);
+
+    // Aguardar um pouco mais para garantir que todas as rotas estão registradas
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     
-    tokens = await setupTestUsers(app.getHttpServer(), dataSource, hashService, 'endpoints-faltantes');
+    tokens = await setupTestUsers(httpServer, dataSource, hashService, 'endpoints-faltantes');
   });
 
   afterAll(async () => {

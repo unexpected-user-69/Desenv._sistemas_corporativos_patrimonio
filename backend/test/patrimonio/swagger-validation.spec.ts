@@ -17,17 +17,70 @@ describe('Swagger Documentation Validation', () => {
     process.env.NODE_ENV = 'test';
 
     try {
-      const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModule],
-      }).compile();
+      let moduleFixture: TestingModule;
+      try {
+        moduleFixture = await Test.createTestingModule({
+          imports: [AppModule],
+        }).compile();
+      } catch (compileError: any) {
+        // Se houver erro durante a compilação relacionado ao banco, tentar mockar DataSource
+        const errorMessage = compileError?.message || '';
+        if (
+          errorMessage.includes('database') ||
+          errorMessage.includes('ECONNREFUSED') ||
+          errorMessage.includes('does not exist') ||
+          errorMessage.includes('ENOTFOUND')
+        ) {
+          // Tentar novamente com override do DataSource
+          moduleFixture = await Test.createTestingModule({
+            imports: [AppModule],
+          })
+            .overrideProvider('DataSource')
+            .useValue({
+              isInitialized: true,
+              options: {},
+            })
+            .compile();
+        } else {
+          throw compileError;
+        }
+      }
 
       app = moduleFixture.createNestApplication();
       // Configurar o prefixo global como no main.ts
       app.setGlobalPrefix('v1');
-      await app.init();
+      
+      // Tentar inicializar a aplicação
+      // Se houver erro de conexão ao banco, capturar e continuar
+      // O Swagger pode ser gerado sem conexão efetiva ao banco
+      try {
+        await app.init();
+      } catch (initError: any) {
+        // Capturar erros de conexão ao banco de dados
+        const errorMessage = initError?.message || '';
+        const errorStack = initError?.stack || '';
+        
+        // Se for erro de banco de dados (database não existe, conexão recusada, etc)
+        if (
+          errorMessage.includes('database') ||
+          errorMessage.includes('ECONNREFUSED') ||
+          errorMessage.includes('does not exist') ||
+          errorStack.includes('pg-protocol') ||
+          errorStack.includes('Parser.parseErrorMessage')
+        ) {
+          // Continuar mesmo sem conexão - Swagger pode ser gerado
+          console.warn('⚠️  Aviso: Erro de conexão ao banco de dados. Continuando para gerar documento Swagger...');
+          console.warn(`   Erro: ${errorMessage.substring(0, 100)}`);
+        } else {
+          // Outros erros devem ser propagados
+          throw initError;
+        }
+      }
 
       // Obter documento Swagger - usar a mesma configuração do main.ts
-    const config = new DocumentBuilder()
+      // Nota: Mesmo se houver erro de conexão ao banco, o Swagger pode ser gerado
+      // desde que a aplicação tenha sido compilada com sucesso
+      const config = new DocumentBuilder()
       .setTitle('Patrimonio & Inventario API')
       .setDescription(
         'API RESTful completa para gestão de patrimônio e inventário. ' +

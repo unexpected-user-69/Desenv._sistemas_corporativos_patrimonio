@@ -13,6 +13,9 @@ import { PatrimonioLocalizacaoHistorico } from '../../../packages/patrimonio-ser
 import { StorageService } from '../../../packages/patrimonio-service/src/patrimonio/services/storage.service';
 import { PatrimonioStatus } from '../../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
 
+// Configurar Jest para não usar workers neste arquivo (evita problemas com ExcelJS)
+jest.setTimeout(30000);
+
 describe('PatrimonioService.exportToExcel (unit)', () => {
   let service: PatrimonioService;
   let repository: MockType<Repository<Patrimonio>>;

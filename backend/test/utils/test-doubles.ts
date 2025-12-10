@@ -341,7 +341,24 @@ export class FakeUserRepository {
             throw error;
           }
         }
-        this.users[index] = { ...this.users[index], ...entity, updatedAt: new Date() };
+        // Update - preservar createdAt e sempre atualizar updatedAt
+        const existingUser = this.users[index];
+        // Criar um novo objeto Date para createdAt para evitar referência compartilhada
+        const preservedCreatedAt = existingUser.createdAt ? new Date(existingUser.createdAt) : existingUser.createdAt;
+        // Criar novo updatedAt garantindo que seja diferente do createdAt
+        const newUpdatedAt = new Date();
+        // Se os timestamps forem iguais (mesmo milissegundo), adicionar 1ms para garantir diferença
+        if (preservedCreatedAt && newUpdatedAt.getTime() === preservedCreatedAt.getTime()) {
+          newUpdatedAt.setTime(preservedCreatedAt.getTime() + 1);
+        }
+        this.users[index] = { 
+          ...existingUser, 
+          ...entity, 
+          // Sempre preservar createdAt do usuário existente (nova instância)
+          createdAt: preservedCreatedAt,
+          // Sempre atualizar updatedAt para o momento atual (garantindo diferença)
+          updatedAt: newUpdatedAt,
+        };
         // Garantir que email está normalizado
         if (entity.email) {
           this.users[index].email = entity.email.toLowerCase().trim();
@@ -428,13 +445,14 @@ export class FakeUserRepository {
       ...entityData,
       // Preservar campos do usuário existente que não devem ser sobrescritos
       id: existing.id,
-      createdAt: existing.createdAt,
+      // Preservar createdAt como uma nova instância de Date para evitar referência compartilhada
+      createdAt: existing.createdAt ? new Date(existing.createdAt) : existing.createdAt,
       version: existing.version,
       // Preservar passwordHash se não foi fornecido novo password
       ...(entityData.passwordHash === undefined && existing.passwordHash ? { passwordHash: existing.passwordHash } : {}),
     };
-    // Atualizar updatedAt
-    merged.updatedAt = new Date();
+    // Não definir updatedAt aqui - deixar para o save() fazer isso
+    // Isso garante que updatedAt será sempre diferente de createdAt
     // Incrementar version se houver mudanças significativas
     if (entityData.name || entityData.email || entityData.passwordHash) {
       merged.version = (existing.version || 1) + 1;

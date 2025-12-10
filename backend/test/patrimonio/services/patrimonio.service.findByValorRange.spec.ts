@@ -55,6 +55,10 @@ describe('PatrimonioService.findByValorRange (unit)', () => {
           }),
         },
         {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
+          useFactory: repositoryMockFactory,
+        },
+        {
           provide: UsersHttpClient,
           useValue: usersHttpClient,
         },
@@ -109,7 +113,7 @@ describe('PatrimonioService.findByValorRange (unit)', () => {
       BadRequestException,
     );
     await expect(service.findByValorRange(dto)).rejects.toThrow(
-      'Valor mÃ­nimo deve ser menor ou igual ao valor mÃ¡ximo',
+      'Valor mínimo deve ser menor ou igual ao valor máximo',
     );
   });
 

@@ -108,8 +108,8 @@ describe('PatrimonioService.transferResponsavelBulk (unit)', () => {
     (usersHttpClient.findOne as jest.Mock).mockResolvedValue({
       id: novoResponsavelId,
     } as any);
-    (queryRunner.manager.save as jest.Mock).mockResolvedValueOnce(patrimonio1 as Patrimonio);
-    (queryRunner.manager.save as jest.Mock).mockResolvedValueOnce(patrimonio2 as Patrimonio);
+    (queryRunner.manager!.save as jest.Mock).mockResolvedValueOnce(patrimonio1 as Patrimonio);
+    (queryRunner.manager!.save as jest.Mock).mockResolvedValueOnce(patrimonio2 as Patrimonio);
 
     const result = await service.transferResponsavelBulk(dto);
 

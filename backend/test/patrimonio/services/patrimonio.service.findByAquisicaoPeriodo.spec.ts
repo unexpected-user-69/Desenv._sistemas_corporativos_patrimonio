@@ -100,7 +100,7 @@ describe('PatrimonioService.findByAquisicaoPeriodo (unit)', () => {
       BadRequestException,
     );
     await expect(service.findByAquisicaoPeriodo(dto)).rejects.toThrow(
-      'Data inicial deve ser anterior ou igual Ã  data final',
+      'Data inicial deve ser anterior ou igual à data final',
     );
   });
 

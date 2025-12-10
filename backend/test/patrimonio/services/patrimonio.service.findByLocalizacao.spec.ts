@@ -84,7 +84,6 @@ describe('PatrimonioService.findByLocalizacao (unit)', () => {
     expect(repository.find).toHaveBeenCalledWith({
       where: { localizacao: expect.anything() },
       order: { nome: 'ASC' },
-      relations: ['categoria', 'responsavel'],
     });
     expect(result).toHaveLength(2);
   });

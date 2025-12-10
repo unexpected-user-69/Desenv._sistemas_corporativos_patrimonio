@@ -54,6 +54,10 @@ describe('PatrimonioService.findManutencaoProlongada (unit)', () => {
           }),
         },
         {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
+          useFactory: repositoryMockFactory,
+        },
+        {
           provide: UsersHttpClient,
           useValue: usersHttpClient,
         },

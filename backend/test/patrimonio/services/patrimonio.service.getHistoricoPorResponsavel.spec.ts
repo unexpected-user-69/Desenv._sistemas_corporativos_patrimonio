@@ -87,7 +87,6 @@ describe('PatrimonioService.getHistoricoPorResponsavel (unit)', () => {
     expect(usersHttpClient.findOne).toHaveBeenCalledWith(responsavelId);
     expect(repository.find).toHaveBeenCalledWith({
       where: { responsavelId },
-      relations: ['categoria'],
       order: { nome: 'ASC' },
     });
     expect(result).toHaveLength(2);

@@ -55,6 +55,10 @@ describe('PatrimonioService.getStatsFaixaValor (unit)', () => {
           }),
         },
         {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
+          useFactory: repositoryMockFactory,
+        },
+        {
           provide: UsersHttpClient,
           useValue: usersHttpClient,
         },

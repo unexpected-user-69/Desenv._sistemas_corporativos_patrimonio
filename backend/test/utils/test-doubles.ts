@@ -119,15 +119,21 @@ export class FakeUserRepository {
     const { where } = options;
     if (where?.id) {
       return Promise.resolve(
-        this.users.find((user) => user.id === where.id) || null,
+        this.users.find((user) => user.id === where.id && !user.deletedAt) || null,
       );
     }
     if (where?.email) {
       // Verificar email de forma case-insensitive (normalizado)
-      const normalizedEmail = where.email.toLowerCase().trim();
-      return Promise.resolve(
-        this.users.find((user) => user.email?.toLowerCase().trim() === normalizedEmail) || null,
-      );
+      // O email pode já estar normalizado (vindo do service) ou não
+      const normalizedEmail = typeof where.email === 'string' 
+        ? where.email.toLowerCase().trim() 
+        : where.email;
+      const found = this.users.find((user) => {
+        if (user.deletedAt) return false; // Ignorar soft-deleted users
+        const userEmail = user.email?.toLowerCase().trim() || '';
+        return userEmail === normalizedEmail;
+      });
+      return Promise.resolve(found || null);
     }
     return Promise.resolve(null);
   }

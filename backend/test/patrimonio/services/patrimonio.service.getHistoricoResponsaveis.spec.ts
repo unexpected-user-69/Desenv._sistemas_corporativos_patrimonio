@@ -92,7 +92,6 @@ describe('PatrimonioService.getHistoricoResponsaveis (unit)', () => {
 
     expect(repository.findOne).toHaveBeenCalledWith({
       where: { id },
-      relations: ['responsavel'],
     });
     expect(result.patrimonioId).toBe(id);
     expect(result.responsaveis).toBeDefined();
@@ -108,7 +107,7 @@ describe('PatrimonioService.getHistoricoResponsaveis (unit)', () => {
       NotFoundException,
     );
     await expect(service.getHistoricoResponsaveis(id)).rejects.toThrow(
-      `PatrimÃ´nio com ID "${id}" nÃ£o encontrado`,
+      `Patrimônio com ID "${id}" não encontrado`,
     );
   });
 });

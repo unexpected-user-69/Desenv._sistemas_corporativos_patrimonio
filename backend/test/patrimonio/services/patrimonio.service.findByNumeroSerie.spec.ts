@@ -81,7 +81,6 @@ describe('PatrimonioService.findByNumeroSerie (unit)', () => {
 
     expect(repository.findOne).toHaveBeenCalledWith({
       where: { numeroSerie },
-      relations: ['categoria', 'responsavel'],
     });
     expect(result).toBeDefined();
     expect(result.numeroSerie).toBe(numeroSerie);
@@ -96,7 +95,7 @@ describe('PatrimonioService.findByNumeroSerie (unit)', () => {
       NotFoundException,
     );
     await expect(service.findByNumeroSerie(numeroSerie)).rejects.toThrow(
-      `PatrimÃ´nio com nÃºmero de sÃ©rie "${numeroSerie}" nÃ£o encontrado`,
+      `Patrimônio com número de série "${numeroSerie}" não encontrado`,
     );
   });
 });

@@ -107,8 +107,8 @@ describe('PatrimonioService.updateBulk (unit)', () => {
       patrimonio1,
       patrimonio2,
     ] as Patrimonio[]);
-    (queryRunner.manager.save as jest.Mock).mockResolvedValueOnce(patrimonio1 as Patrimonio);
-    (queryRunner.manager.save as jest.Mock).mockResolvedValueOnce(patrimonio2 as Patrimonio);
+    (queryRunner.manager!.save as jest.Mock).mockResolvedValueOnce(patrimonio1 as Patrimonio);
+    (queryRunner.manager!.save as jest.Mock).mockResolvedValueOnce(patrimonio2 as Patrimonio);
 
     const result = await service.updateBulk(dto);
 

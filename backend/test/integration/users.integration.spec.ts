@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ConflictException } from '@nestjs/common';
 import { UsersService } from '../../src/users/users.service';
 import { User } from '../../src/users/entities/user.entity';
 import { UserRole } from '../../src/users/enums/user-role.enum';
@@ -88,14 +89,25 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
         };
 
         // Act - Criar primeiro usuário
-        await service.create(createUserDto);
+        const firstUser = await service.create(createUserDto);
+        expect(firstUser).toBeDefined();
+        expect(firstUser.email).toBe('john@example.com');
 
         // Act & Assert - Tentar criar segundo usuário com mesmo email (case insensitive)
+        // O service.create normaliza o email antes de verificar duplicação
+        await expect(service.create(createUserDto)).rejects.toThrow(
+          ConflictException,
+        );
         await expect(service.create(createUserDto)).rejects.toThrow(
           'Email already exists',
         );
         
         // Tentar também com email em maiúsculas (deve ser considerado duplicado)
+        // O normalizeEmail deve normalizar para lowercase, então deve encontrar o email duplicado
+        await expect(service.create({
+          ...createUserDto,
+          email: 'JOHN@EXAMPLE.COM',
+        })).rejects.toThrow(ConflictException);
         await expect(service.create({
           ...createUserDto,
           email: 'JOHN@EXAMPLE.COM',
@@ -287,25 +299,23 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
     });
 
     describe('User Deletion Flow', () => {
+      let createdUserId: string;
+
       beforeEach(async () => {
-        // Create a user first
+        // Create a user first and store the ID
         const createUserDto: CreateUserDto = {
           name: 'John Doe',
           email: 'john@example.com',
           password: 'password123',
           role: UserRole.OPERATOR,
         };
-        await service.create(createUserDto);
+        const created = await service.create(createUserDto);
+        createdUserId = created.id;
       });
 
       it('should soft delete user', async () => {
-        // Arrange
-        const users = await service.findAllWithAdvancedFilters({});
-        expect(users.data.length).toBeGreaterThan(0);
-        const userId = users.data[0].id;
-
         // Act
-        await service.remove(userId);
+        await service.remove(createdUserId);
 
         // Assert - User should still exist but be soft deleted
         const allUsers = await service.findAllWithAdvancedFilters({});

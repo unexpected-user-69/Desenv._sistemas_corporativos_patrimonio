@@ -62,6 +62,10 @@ describe('PatrimonioService.getStatsEvolucao (unit)', () => {
           }),
         },
         {
+          provide: getRepositoryToken(PatrimonioLocalizacaoHistorico),
+          useFactory: repositoryMockFactory,
+        },
+        {
           provide: UsersHttpClient,
           useValue: usersHttpClient,
         },

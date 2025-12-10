@@ -100,7 +100,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
     const result = await service.verificarDisponibilidade(id);
 
     expect(result.disponivel).toBe(false);
-    expect(result.motivo).toBe('PatrimÃ´nio em manutenÃ§Ã£o');
+    expect(result.motivo).toBe('Patrimônio em manutenção');
   });
 
   it('should return disponivel: false when patrimonio is DESCARTADO', async () => {
@@ -115,7 +115,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
     const result = await service.verificarDisponibilidade(id);
 
     expect(result.disponivel).toBe(false);
-    expect(result.motivo).toBe('PatrimÃ´nio descartado');
+    expect(result.motivo).toBe('Patrimônio descartado');
   });
 
   it('should return disponivel: false when patrimonio is INATIVO', async () => {
@@ -130,7 +130,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
     const result = await service.verificarDisponibilidade(id);
 
     expect(result.disponivel).toBe(false);
-    expect(result.motivo).toContain('PatrimÃ´nio estÃ¡ com status:');
+    expect(result.motivo).toContain('Patrimônio está com status:');
   });
 
   it('should throw NotFoundException when patrimonio not found', async () => {
@@ -142,7 +142,7 @@ describe('PatrimonioService.verificarDisponibilidade (unit)', () => {
       NotFoundException,
     );
     await expect(service.verificarDisponibilidade(id)).rejects.toThrow(
-      `PatrimÃ´nio com ID "${id}" nÃ£o encontrado`,
+      `Patrimônio com ID "${id}" não encontrado`,
     );
   });
 });

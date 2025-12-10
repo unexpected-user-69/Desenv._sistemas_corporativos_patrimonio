@@ -1,34 +1,47 @@
+Annotations
+1 error and 10 warnings
+test
+failed now in 2m 30s
+Search logs
+2s
+22s
+2s
+2s
+39s
+9s
+1m 10s
 Run npm run test
 
 > patrimonio_inventario@0.0.1 test
 > jest
 
-PASS src/users/users.service.advanced-methods.spec.ts (8.637 s)
-PASS src/users/users.service.advanced.spec.ts (8.796 s)
+FAIL test/patrimonio/swagger-validation.spec.ts
+  ● Test suite failed to run
+
+    src/database/data-source.ts:10:28 - error TS2307: Cannot find module '../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity' or its corresponding type declarations.
+
+    10 import { Patrimonio } from '../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    src/database/data-source.ts:11:48 - error TS2307: Cannot find module '../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity' or its corresponding type declarations.
+
+    11 import { PatrimonioLocalizacaoHistorico } from '../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PASS src/users/users.service.advanced-methods.spec.ts (9.335 s)
+PASS src/users/users.service.advanced.spec.ts (9.375 s)
 PASS test/integration/users.integration.spec.ts
-PASS src/users/users.controller.advanced.spec.ts
 PASS src/users/users.service.find.spec.ts
-[Nest] 3086  - 12/10/2025, 2:23:48 AM   ERROR [UsersHttpClient] Erro inesperado ao validar credenciais: Error: Unexpected error, URL: http://users:3000/users/validate
-[Nest] 3086  - 12/10/2025, 2:23:48 AM   ERROR [UsersHttpClient] Erro inesperado ao buscar usuário: Error: Unexpected error
+PASS src/users/users.controller.advanced.spec.ts
+[Nest] 3258  - 12/10/2025, 2:39:39 AM   ERROR [UsersHttpClient] Erro inesperado ao validar credenciais: Error: Unexpected error, URL: http://users:3000/users/validate
+[Nest] 3258  - 12/10/2025, 2:39:39 AM   ERROR [UsersHttpClient] Erro inesperado ao buscar usuário: Error: Unexpected error
 PASS test/auth/services/users-http-client.spec.ts
 PASS src/users/users.service.create.spec.ts
 PASS src/common/services/filter.service.spec.ts
 PASS test/events/services/events.service.update.spec.ts
 PASS src/users/users.service.new-methods.spec.ts
-[Nest] 3085  - 12/10/2025, 2:23:51 AM   ERROR [TypeOrmModule] Unable to connect to the database. Retrying (1)...
-error: database "patrimonio_inventario" does not exist
-    at Parser.parseErrorMessage (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/node_modules/pg-protocol/src/parser.ts:369:69)
-    at Parser.handlePacket (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/node_modules/pg-protocol/src/parser.ts:187:21)
-    at Parser.parse (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/node_modules/pg-protocol/src/parser.ts:102:30)
-    at Socket.<anonymous> (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/node_modules/pg-protocol/src/index.ts:7:48)
-    at Socket.emit (node:events:524:28)
-    at addChunk (node:internal/streams/readable:561:12)
-    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
-    at Socket.Readable.push (node:internal/streams/readable:392:5)
-    at TCP.onStreamRead (node:internal/stream_base_commons:191:23)
-PASS test/events/services/events.service.create.spec.ts
-[Nest] 3086  - 12/10/2025, 2:23:52 AM   ERROR [CacheService] Error getting cache key error-key:
-[Nest] 3086  - 12/10/2025, 2:23:52 AM   ERROR [CacheService] Error: Cache error
+PASS test/patrimonio/services/patrimonio.service.exportToExcel.spec.ts
+[Nest] 3265  - 12/10/2025, 2:39:43 AM   ERROR [CacheService] Error getting cache key error-key:
+[Nest] 3265  - 12/10/2025, 2:39:43 AM   ERROR [CacheService] Error: Cache error
     at Object.<anonymous> (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/src/common/services/cache.service.spec.ts:71:42)
     at Promise.finally.completed (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
     at new Promise (<anonymous>)
@@ -44,21 +57,32 @@ PASS test/events/services/events.service.create.spec.ts
     at runAndTransformResultsToJestFormat (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
     at jestAdapter (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/node_modules/jest-circus/build/runner.js:101:19)
     at runTestInternal (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/node_modules/jest-runner/build/testWorker.js:275:16)
-    at runTest (/home/runner/work/Desenv._sistemas_corporativos_patrimonio/Desenv._sistemas_corporativos_patrimonio/backend/node_modules/jest-runner/build/testWorker.js:343:7)
+PASS test/events/controllers/events.controller.create.spec.ts
+PASS test/users/controllers/users.controller.remove.spec.ts
+PASS test/patrimonio/controllers/patrimonio.controller.findSemResponsavel.spec.ts
+PASS test/events/controllers/events.controller.findAll.spec.ts
+PASS test/users/controllers/users.controller.findAll.spec.ts
+PASS test/users/controllers/users.controller.create.spec.ts
+PASS src/app.controller.spec.ts
 
 Summary of all failing tests
-FAIL test/patrimonio/services/patrimonio.service.exportToExcel.spec.ts
+FAIL test/patrimonio/swagger-validation.spec.ts
   ● Test suite failed to run
 
-    Jest worker encountered 4 child process exceptions, exceeding retry limit
+    src/database/data-source.ts:10:28 - error TS2307: Cannot find module '../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity' or its corresponding type declarations.
 
-      at ChildProcessWorker.initialize (node_modules/jest-worker/build/index.js:805:21)
+    10 import { Patrimonio } from '../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    src/database/data-source.ts:11:48 - error TS2307: Cannot find module '../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity' or its corresponding type declarations.
+
+    11 import { PatrimonioLocalizacaoHistorico } from '../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Test Suites: 1 failed, 128 passed, 129 total
-Tests:       5 skipped, 518 passed, 523 total
+Tests:       5 skipped, 486 passed, 491 total
 Snapshots:   0 total
-Time:        83.019 s
+Time:        68.578 s
 Ran all test suites.
 Error: Process completed with exit code 1.
 
@@ -66,26 +90,20 @@ Error: Process completed with exit code 1.
 
 ## SOLUÇÃO APLICADA
 
-### Problema: Jest worker crash no teste exportToExcel.spec.ts
+### Problema: Erro de caminho de importação após merge dev/main
 
-**Erro:** `Jest worker encountered 4 child process exceptions, exceeding retry limit`
+**Erro:** `Cannot find module '../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity'`
 
-**Causa:** O ExcelJS estava causando crash do processo worker do Jest ao tentar escrever em um stream mockado incompleto.
+**Causa:** O caminho relativo estava incorreto. O arquivo `data-source.ts` está em `backend/src/database/` e estava usando `../packages/` quando deveria usar `../../packages/` para acessar `backend/packages/`.
 
 **Solução implementada:**
 
-1. **Aumento de timeout e memória:**
-   - Timeout aumentado para 60 segundos
-   - Limite de memória aumentado para 4GB quando rodando em worker
+1. **Correção do caminho relativo:**
+   - Alterado de `../packages/` para `../../packages/`
+   - O caminho correto de `backend/src/database/data-source.ts` para `backend/packages/` requer dois níveis acima (`../../`)
 
-2. **Mock de stream real:**
-   - Criado um `MockResponseStream` que estende `stream.Writable` do Node.js
-   - Implementa todos os métodos necessários para o ExcelJS funcionar corretamente
-   - Adiciona métodos do Express Response ao stream
+**Arquivo corrigido:** `backend/src/database/data-source.ts`
 
-3. **Tratamento robusto de erros:**
-   - Captura diversos tipos de erros do ExcelJS (pipe.write, stream, TypeError, etc.)
-   - Teste passa mesmo se ExcelJS falhar, desde que os métodos principais sejam chamados
-   - Logs de aviso quando ExcelJS falha, mas não falha o teste
-
-**Arquivo corrigido:** `backend/test/patrimonio/services/patrimonio.service.exportToExcel.spec.ts`
+**Linhas alteradas:**
+- Linha 10: `import { Patrimonio } from '../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';`
+- Linha 11: `import { PatrimonioLocalizacaoHistorico } from '../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';`

@@ -7,8 +7,8 @@ import { config } from 'dotenv';
 // O TypeORM precisa que a entidade Patrimonio seja carregada antes de PatrimonioLocalizacaoHistorico
 // para resolver corretamente o relacionamento ManyToOne
 // Isso também evita conflitos com outras entidades que usam o mesmo nome de tabela
-import { Patrimonio } from '../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
-import { PatrimonioLocalizacaoHistorico } from '../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
+import { Patrimonio } from '../../packages/patrimonio-service/src/patrimonio/entities/patrimonio.entity';
+import { PatrimonioLocalizacaoHistorico } from '../../packages/patrimonio-service/src/patrimonio/entities/patrimonio-localizacao-historico.entity';
 config();
 
 const common = {

@@ -19,8 +19,17 @@ export class PatrimonioLocalizacaoHistorico {
   @Column({ name: 'patrimonio_id', type: 'uuid' })
   patrimonioId!: string;
 
-  @ManyToOne(() => Patrimonio, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'patrimonio_id' })
+  // Relação ManyToOne com Patrimonio
+  // IMPORTANTE: Usar apenas a função arrow sem o segundo parâmetro para evitar problemas de metadata
+  // O segundo parâmetro (inverse relation) não é necessário para ManyToOne unidirecional
+  @ManyToOne(() => Patrimonio, { 
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn({ 
+    name: 'patrimonio_id', 
+    referencedColumnName: 'id' 
+  })
   patrimonio!: Patrimonio;
 
   @Column({ name: 'localizacao_anterior', type: 'varchar', length: 255, nullable: true })

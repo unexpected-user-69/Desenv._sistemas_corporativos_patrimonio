@@ -13,13 +13,19 @@ config();
 
 const common = {
   type: 'postgres' as const,
-  // Importar entidades principais explicitamente primeiro para garantir ordem de carregamento
-  // e evitar conflitos com outras entidades que usam o mesmo nome de tabela
-  // O TypeORM processa o array na ordem, então Patrimonio deve vir antes de PatrimonioLocalizacaoHistorico
+  // IMPORTANTE: Para entidades com relações ManyToOne, o TypeORM precisa que ambas as entidades
+  // estejam carregadas antes de processar as relações. Usamos imports explícitos para garantir ordem.
+  // O padrão glob pode carregar as entidades em ordem diferente, causando erro de metadata não encontrada.
   entities: [
-    Patrimonio, // Carregar primeiro - necessário para o relacionamento ManyToOne
-    PatrimonioLocalizacaoHistorico, // Carregar depois - depende de Patrimonio
-    __dirname + '/../**/*.entity.{ts,js}', // Carregar outras entidades via padrão
+    // IMPORTANTE: Para relações ManyToOne, o TypeORM precisa que a entidade alvo esteja registrada
+    // antes da entidade que referencia. Importamos explicitamente para garantir ordem de carregamento.
+    // As entidades Patrimonio e PatrimonioLocalizacaoHistorico são carregadas explicitamente aqui
+    // para garantir que Patrimonio seja registrado antes de PatrimonioLocalizacaoHistorico.
+    Patrimonio, // Alvo da relação - deve estar registrado primeiro
+    PatrimonioLocalizacaoHistorico, // Referencia Patrimonio - depende de Patrimonio estar registrado
+    // Carregar outras entidades via padrão
+    // Nota: TypeORM automaticamente ignora entidades duplicadas baseado no nome da tabela/entidade
+    __dirname + '/../**/*.entity.{ts,js}',
   ],
   // Migrations apenas no padrão Aurora (database/migrations/)
   migrations: [__dirname + '/migrations/*.{ts,js}'],

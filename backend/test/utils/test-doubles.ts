@@ -116,21 +116,31 @@ export class FakeUserRepository {
   private nextId = 1;
 
   findOne(options: any): Promise<any> {
-    const { where } = options;
+    const { where, withDeleted } = options || {};
     if (where?.id) {
-      return Promise.resolve(
-        this.users.find((user) => user.id === where.id && !user.deletedAt) || null,
-      );
+      // Garantir comparação consistente convertendo para string
+      const searchId = String(where.id);
+      const user = this.users.find((user) => {
+        const matchesId = String(user.id) === searchId;
+        // Se withDeleted for true, incluir soft-deleted users
+        // Se withDeleted for false ou undefined, excluir soft-deleted users
+        if (withDeleted === true) {
+          return matchesId;
+        }
+        return matchesId && !user.deletedAt;
+      });
+      return Promise.resolve(user || null);
     }
     if (where?.email) {
       // Verificar email de forma case-insensitive (normalizado)
       // O email pode já estar normalizado (vindo do service) ou não
       const normalizedEmail = typeof where.email === 'string' 
         ? where.email.toLowerCase().trim() 
-        : where.email;
+        : String(where.email).toLowerCase().trim();
       const found = this.users.find((user) => {
         if (user.deletedAt) return false; // Ignorar soft-deleted users
-        const userEmail = user.email?.toLowerCase().trim() || '';
+        if (!user.email) return false;
+        const userEmail = String(user.email).toLowerCase().trim();
         return userEmail === normalizedEmail;
       });
       return Promise.resolve(found || null);
@@ -340,10 +350,12 @@ export class FakeUserRepository {
       }
     } else {
       // Create - verificar se email já existe (normalizado)
+      // Esta verificação é redundante (service.create já verifica via findOne),
+      // mas mantemos para simular comportamento real do banco
       if (entity.email) {
         const normalizedEmail = entity.email.toLowerCase().trim();
         const existing = this.users.find(
-          (user) => user.email?.toLowerCase().trim() === normalizedEmail
+          (user) => !user.deletedAt && user.email?.toLowerCase().trim() === normalizedEmail
         );
         if (existing) {
           // Simular erro de constraint do banco
@@ -352,14 +364,14 @@ export class FakeUserRepository {
           throw error;
         }
       }
-      // Create
+      // Create - apenas se não tiver ID ainda
       const newUser = {
-        id: String(this.nextId++),
+        id: entity.id || String(this.nextId++),
         ...entity,
-        email: entity.email?.toLowerCase().trim(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        version: 1,
+        email: entity.email ? entity.email.toLowerCase().trim() : entity.email,
+        createdAt: entity.createdAt || new Date(),
+        updatedAt: entity.updatedAt || new Date(),
+        version: entity.version || 1,
       };
       this.users.push(newUser);
       return Promise.resolve(newUser);
@@ -384,28 +396,50 @@ export class FakeUserRepository {
   }
 
   create(entityData: any): any {
+    // O create do TypeORM apenas cria a entidade, não salva
+    // O ID será gerado pelo save() se não existir
+    // Retornar apenas os dados fornecidos, sem modificar
     return {
       ...entityData,
-      id: this.nextId++,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 1,
+      // Não gerar ID aqui, deixar para o save()
+      // Se já tem ID, preservar; se não, será gerado no save
     };
   }
 
   async preload(entityData: any): Promise<any> {
-    if (!entityData.id) {
+    if (!entityData || !entityData.id) {
       return null;
     }
-    const existing = this.users.find((user) => user.id === entityData.id);
+    // Garantir que ID seja string para comparação consistente
+    const searchId = String(entityData.id);
+    // Buscar usuário que não está soft-deleted
+    // Tentar comparação direta primeiro, depois conversão para string
+    const existing = this.users.find((user) => {
+      if (user.deletedAt) return false; // Ignorar soft-deleted users
+      // Comparar ID de forma flexível (pode ser string ou número)
+      return String(user.id) === searchId || user.id === entityData.id;
+    });
     if (!existing) {
       return null;
     }
-    // Merge com os dados fornecidos
-    return {
+    // Merge com os dados fornecidos, mas preservar campos importantes
+    const merged = {
       ...existing,
       ...entityData,
+      // Preservar campos do usuário existente que não devem ser sobrescritos
+      id: existing.id,
+      createdAt: existing.createdAt,
+      version: existing.version,
+      // Preservar passwordHash se não foi fornecido novo password
+      ...(entityData.passwordHash === undefined && existing.passwordHash ? { passwordHash: existing.passwordHash } : {}),
     };
+    // Atualizar updatedAt
+    merged.updatedAt = new Date();
+    // Incrementar version se houver mudanças significativas
+    if (entityData.name || entityData.email || entityData.passwordHash) {
+      merged.version = (existing.version || 1) + 1;
+    }
+    return merged;
   }
 
   // Método para limpar o repositório fake (útil para beforeEach)

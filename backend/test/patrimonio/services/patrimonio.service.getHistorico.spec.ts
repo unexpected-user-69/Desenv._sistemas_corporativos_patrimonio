@@ -101,7 +101,7 @@ describe('PatrimonioService.getHistorico (unit)', () => {
       NotFoundException,
     );
     await expect(service.getHistorico(id)).rejects.toThrow(
-      `PatrimÃ´nio com ID "${id}" nÃ£o encontrado`,
+      `Patrimônio com ID "${id}" não encontrado`,
     );
   });
 });

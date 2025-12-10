@@ -93,6 +93,11 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
         expect(firstUser).toBeDefined();
         expect(firstUser.email).toBe('john@example.com');
 
+        // Verificar que o usuário foi salvo no repositório
+        const allUsers = await fakeRepository.find({});
+        expect(allUsers.length).toBe(1);
+        expect(allUsers[0].email).toBe('john@example.com');
+
         // Act & Assert - Tentar criar segundo usuário com mesmo email (case insensitive)
         // O service.create normaliza o email antes de verificar duplicação
         await expect(service.create(createUserDto)).rejects.toThrow(

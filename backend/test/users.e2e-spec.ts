@@ -25,6 +25,10 @@ describe('Users (e2e)', () => {
     await app.init();
 
     httpServer = app.getHttpServer() as http.Server;
+    
+    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    
     dataSource = moduleFixture.get<DataSource>(DataSource);
     hashService = moduleFixture.get<HashService>(HashService);
     

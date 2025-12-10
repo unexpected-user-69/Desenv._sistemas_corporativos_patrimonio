@@ -18,6 +18,9 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { EventsModule } from './events/events.module';
 import { MetricsController } from './common/controllers/metrics.controller';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -70,6 +73,9 @@ import { TestTokenController } from './test-token.controller';
     HttpClientsModule,
     LoggerModule,
     CommonModule,
+    AuthModule,
+    UsersModule,
+    EventsModule,
     IntegrationsErpModule,
     InventoryMobileModule,
     MaintenanceModule,

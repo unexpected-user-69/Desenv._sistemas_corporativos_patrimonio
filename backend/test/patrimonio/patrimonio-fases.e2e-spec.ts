@@ -48,6 +48,9 @@ describe('PatrimonioController - Fases 1, 2 e 3 (e2e)', () => {
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 
+    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Atualizar USERS_API_URL com a porta real do servidor (se disponível)
     // O UsersHttpClient lê dinamicamente de process.env como fallback
     const address = httpServer.address();

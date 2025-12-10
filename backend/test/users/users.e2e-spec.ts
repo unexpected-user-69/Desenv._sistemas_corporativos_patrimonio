@@ -60,6 +60,9 @@ describe('Users (e2e)', () => {
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 
+    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Atualizar USERS_API_URL com a porta real do servidor
     // O getter baseUrl do UsersHttpClient lê do process.env como fallback,
     // então esta atualização será refletida nas próximas chamadas

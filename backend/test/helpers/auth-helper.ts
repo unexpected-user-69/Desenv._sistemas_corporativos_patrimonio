@@ -281,6 +281,10 @@ export async function loginUser(
 ): Promise<string> {
   const normalizedEmail = normalizeEmail(email);
   
+  // Aguardar um pouco para garantir que o servidor está totalmente inicializado
+  // Isso é importante porque o app.init() pode não ter terminado completamente
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const response = await request(httpServer)

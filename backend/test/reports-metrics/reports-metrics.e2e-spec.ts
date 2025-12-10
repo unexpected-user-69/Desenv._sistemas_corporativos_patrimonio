@@ -48,6 +48,9 @@ describe('Reports Metrics (e2e)', () => {
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 
+    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Criar tabelas se não existirem
     await setupDatabaseTables(dataSource);
 

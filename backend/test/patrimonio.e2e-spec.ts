@@ -40,6 +40,9 @@ describe('PatrimonioController (e2e)', () => {
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 
+    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Configurar usuários de teste
     tokens = await setupTestUsers(httpServer, dataSource, hashService, 'patrimonio-basic');
   });

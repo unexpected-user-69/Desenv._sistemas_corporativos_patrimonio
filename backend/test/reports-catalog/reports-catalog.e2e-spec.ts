@@ -50,6 +50,11 @@ describe('Reports Catalog (e2e)', () => {
   let versionId1: string;
 
   beforeAll(async () => {
+    // Configurar USERS_API_URL antes de compilar o módulo
+    if (!process.env.USERS_API_URL) {
+      process.env.USERS_API_URL = 'http://localhost:3000/v1';
+    }
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -61,6 +66,18 @@ describe('Reports Catalog (e2e)', () => {
     httpServer = app.getHttpServer() as http.Server;
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
+
+    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Atualizar USERS_API_URL com a porta real do servidor
+    const address = httpServer.address();
+    if (address && typeof address === 'object') {
+      const port = address.port;
+      process.env.USERS_API_URL = `http://localhost:${port}/v1`;
+    } else {
+      process.env.USERS_API_URL = process.env.USERS_API_URL || 'http://localhost:3000/v1';
+    }
 
     // Criar tabelas se não existirem
     await setupDatabaseTables(dataSource);

@@ -57,6 +57,9 @@ describe('Categorias (e2e)', () => {
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
 
+    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Configurar USERS_API_URL para apontar para o próprio servidor de teste
     // Isso permite que o AuthService use o UsersHttpClient para chamar o endpoint local
     const address = httpServer.address();

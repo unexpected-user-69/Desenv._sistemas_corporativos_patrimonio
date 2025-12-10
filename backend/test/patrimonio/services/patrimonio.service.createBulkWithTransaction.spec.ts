@@ -144,6 +144,6 @@ describe('PatrimonioService.createBulkWithTransaction (unit)', () => {
 
     expect(result.totalSucessos).toBe(1);
     expect(result.totalErros).toBe(1);
-    expect(result.erros[0].erro).toBe('CÃ³digo jÃ¡ existe');
+    expect(result.erros[0].erro).toBe('Código já existe');
   });
 });

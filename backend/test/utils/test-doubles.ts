@@ -313,7 +313,23 @@ export class FakeUserRepository {
       // Update
       const index = this.users.findIndex((user) => user.id === entity.id);
       if (index !== -1) {
+        // Verificar duplicação de email ao atualizar (se email mudou)
+        if (entity.email) {
+          const normalizedEmail = entity.email.toLowerCase().trim();
+          const existingWithEmail = this.users.find(
+            (user) => user.id !== entity.id && user.email?.toLowerCase().trim() === normalizedEmail
+          );
+          if (existingWithEmail) {
+            const error: any = new Error('Duplicate key');
+            error.code = '23505';
+            throw error;
+          }
+        }
         this.users[index] = { ...this.users[index], ...entity, updatedAt: new Date() };
+        // Garantir que email está normalizado
+        if (entity.email) {
+          this.users[index].email = entity.email.toLowerCase().trim();
+        }
         return Promise.resolve(this.users[index]);
       }
     } else {
@@ -332,7 +348,7 @@ export class FakeUserRepository {
       }
       // Create
       const newUser = {
-        id: this.nextId++,
+        id: String(this.nextId++),
         ...entity,
         email: entity.email?.toLowerCase().trim(),
         createdAt: new Date(),

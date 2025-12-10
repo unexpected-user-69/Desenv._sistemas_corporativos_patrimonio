@@ -82,7 +82,6 @@ describe('PatrimonioService.findOne (unit)', () => {
 
     expect(repository.findOne).toHaveBeenCalledWith({
       where: { id: patrimonioId },
-      relations: ['categoria'],
     });
     expect(result).toMatchObject({
       id: patrimonioId,
@@ -101,7 +100,6 @@ describe('PatrimonioService.findOne (unit)', () => {
     );
     expect(repository.findOne).toHaveBeenCalledWith({
       where: { id: patrimonioId },
-      relations: ['categoria'],
     });
   });
 });

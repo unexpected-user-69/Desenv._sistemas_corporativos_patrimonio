@@ -90,10 +90,16 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
         // Act - Criar primeiro usuário
         await service.create(createUserDto);
 
-        // Act & Assert - Tentar criar segundo usuário com mesmo email
+        // Act & Assert - Tentar criar segundo usuário com mesmo email (case insensitive)
         await expect(service.create(createUserDto)).rejects.toThrow(
           'Email already exists',
         );
+        
+        // Tentar também com email em maiúsculas (deve ser considerado duplicado)
+        await expect(service.create({
+          ...createUserDto,
+          email: 'JOHN@EXAMPLE.COM',
+        })).rejects.toThrow('Email already exists');
       });
     });
 
@@ -229,34 +235,34 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
     });
 
     describe('User Update Flow', () => {
+      let createdUserId: string;
+
       beforeEach(async () => {
-        // Create a user first
+        // Create a user first and store the ID
         const createUserDto: CreateUserDto = {
           name: 'John Doe',
           email: 'john@example.com',
           password: 'password123',
           role: UserRole.OPERATOR,
         };
-        await service.create(createUserDto);
+        const created = await service.create(createUserDto);
+        createdUserId = created.id;
       });
 
       it('should update user information', async () => {
         // Arrange
-        const users = await service.findAllWithAdvancedFilters({});
-        expect(users.data.length).toBeGreaterThan(0);
-        const userId = users.data[0].id;
         const updateDto: UpdateUserDto = {
           name: 'John Updated',
           role: UserRole.MANAGER,
         };
 
         // Act
-        const result = await service.update(userId, updateDto);
+        const result = await service.update(createdUserId, updateDto);
 
         // Assert
         expect(result).toEqual(
           expect.objectContaining({
-            id: userId,
+            id: createdUserId,
             name: 'John Updated',
             role: UserRole.MANAGER,
             email: 'john@example.com', // Should remain unchanged
@@ -267,15 +273,12 @@ describe('UsersService - Integration Tests with Fake Repository (PDF 086)', () =
 
       it('should update password when provided', async () => {
         // Arrange
-        const users = await service.findAllWithAdvancedFilters({});
-        expect(users.data.length).toBeGreaterThan(0);
-        const userId = users.data[0].id;
         const updateDto: UpdateUserDto = {
           password: 'newpassword123',
         };
 
         // Act
-        const result = await service.update(userId, updateDto);
+        const result = await service.update(createdUserId, updateDto);
 
         // Assert
         expect(result).toBeDefined();

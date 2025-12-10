@@ -23,6 +23,7 @@ import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { CategoriasModule } from '../packages/categorias-service/src/categorias/categorias.module';
 import { AuditModule } from '../packages/audit-service/src/audit/audit.module';
+import { PatrimonioModule } from '../packages/patrimonio-service/src/patrimonio/patrimonio.module';
 import { MetricsController } from './common/controllers/metrics.controller';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -32,6 +33,22 @@ import { TestTokenController } from './test-token.controller';
 
 @Module({
   imports: [
+    // Detectar ambiente de teste para configurar limites de throttling mais altos
+    // e evitar 429 nos e2e.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...((): any[] => {
+      const isTest = process.env.NODE_ENV === 'test';
+      const ttl = 60000;
+      const limit = isTest ? 100000 : 100;
+      return [
+        ThrottlerModule.forRoot([
+          {
+            ttl,
+            limit,
+          },
+        ]),
+      ];
+    })(),
     // ConfigModule global para gerenciar variáveis de ambiente
     // Habilitado globalmente conforme padrão Aurora Platform
     ConfigModule.forRoot({
@@ -43,13 +60,6 @@ import { TestTokenController } from './test-token.controller';
     }),
     // Schedule module for cron jobs
     ScheduleModule.forRoot(),
-    // Rate limiting configuration
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000, // 1 minuto
-        limit: 100, // 100 requests por minuto
-      },
-    ]),
     // BullMQ configuration (Redis)
     BullModule.forRoot({
       redis: {
@@ -86,6 +96,7 @@ import { TestTokenController } from './test-token.controller';
     DashboardModule,
     CategoriasModule,
     AuditModule,
+    PatrimonioModule,
   ],
   controllers: [AppController, MetricsController, SwaggerController, TestTokenController],
   providers: [

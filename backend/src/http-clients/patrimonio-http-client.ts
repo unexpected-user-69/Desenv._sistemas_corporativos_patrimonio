@@ -13,13 +13,26 @@ import { UpdateLocalizacaoPatrimonioDto } from '../patrimonio/dto/update-localiz
 
 @Injectable()
 export class PatrimonioHttpClient {
-    private readonly baseUrl: string;
-
     constructor(
         private readonly httpService: HttpService,
         private readonly configService: ConfigService,
-    ) {
-        this.baseUrl = this.configService.get<string>('PATRIMONIO_SERVICE_URL', 'http://localhost:3006');
+    ) {}
+
+    /**
+     * Resolve dinamicamente a baseUrl em tempo de execução para permitir
+     * que os testes e2e atualizem process.env (porta efêmera) e o client
+     * acompanhe. Fallback para 3101/v1.
+     */
+    private get baseUrl(): string {
+        const envUrl = process.env.PATRIMONIO_SERVICE_URL || this.configService.get<string>('PATRIMONIO_SERVICE_URL');
+        if (envUrl) {
+            return envUrl;
+        }
+        const port = process.env.PORT || process.env.APP_PORT || process.env.BACKEND_PORT;
+        if (port) {
+            return `http://localhost:${port}/v1`;
+        }
+        return 'http://localhost:3101/v1';
     }
 
     async create(createPatrimonioDto: CreatePatrimonioDto): Promise<any> {

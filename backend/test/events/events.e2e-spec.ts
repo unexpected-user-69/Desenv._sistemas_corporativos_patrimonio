@@ -106,14 +106,15 @@ describe('Events (e2e)', () => {
 
   describe('POST /v1/events', () => {
     it('deve criar evento com sucesso (201) - ADMIN', async () => {
+      const suffix = Date.now();
       const startDate = new Date();
       startDate.setMonth(startDate.getMonth() + 1);
       const endDate = new Date(startDate);
       endDate.setHours(endDate.getHours() + 8);
 
       const createEventDto = {
-        title: 'Evento de Teste E2E',
-        description: 'Descrição do evento de teste',
+        title: `Evento de Teste E2E ${suffix}`,
+        description: `Descrição do evento de teste ${suffix}`,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
         eventType: EventType.MANUTENCAO,
@@ -147,14 +148,15 @@ describe('Events (e2e)', () => {
     });
 
     it('deve criar evento com sucesso (201) - MANAGER', async () => {
+      const suffix = Date.now();
       const startDate = new Date();
       startDate.setMonth(startDate.getMonth() + 2);
       const endDate = new Date(startDate);
       endDate.setHours(endDate.getHours() + 4);
 
       const createEventDto = {
-        title: 'Evento Criado por MANAGER',
-        description: 'Descrição do evento criado por MANAGER',
+        title: `Evento Criado por MANAGER ${suffix}`,
+        description: `Descrição do evento criado por MANAGER ${suffix}`,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
         eventType: EventType.AUDITORIA,

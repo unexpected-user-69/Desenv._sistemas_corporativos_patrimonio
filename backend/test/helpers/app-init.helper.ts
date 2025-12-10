@@ -46,6 +46,8 @@ export async function setupTestApp(app: INestApplication): Promise<http.Server> 
     if (!process.env.PORT) process.env.PORT = port;
     if (!process.env.BACKEND_PORT) process.env.BACKEND_PORT = port;
     if (!process.env.APP_PORT) process.env.APP_PORT = port;
+    // Propagar também para PATRIMONIO_SERVICE_URL para que HttpClients locais funcionem nos e2e
+    process.env.PATRIMONIO_SERVICE_URL = `http://localhost:${port}/v1`;
   }
 
   // Aguardar um pouco para garantir que a aplicação está totalmente inicializada

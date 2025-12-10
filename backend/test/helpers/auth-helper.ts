@@ -283,10 +283,17 @@ export async function loginUser(
   
   // Aguardar um pouco para garantir que o servidor está totalmente inicializado
   // Isso é importante porque o app.init() pode não ter terminado completamente
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  // Aumentar o tempo de espera para garantir que todas as rotas estão registradas
+  await new Promise((resolve) => setTimeout(resolve, 500));
   
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
+      // Verificar se o servidor está escutando antes de fazer a requisição
+      const address = httpServer.address();
+      if (!address) {
+        throw new Error('Server is not listening yet');
+      }
+      
       const response = await request(httpServer)
         .post('/v1/auth/login')
         .send({ email: normalizedEmail, password });

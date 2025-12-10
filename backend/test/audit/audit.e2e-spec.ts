@@ -17,6 +17,7 @@ import {
   authenticatedRequest,
   TestUserTokens,
 } from '../helpers/auth-helper';
+import { setupTestApp } from '../helpers/app-init.helper';
 
 /**
  * Testes E2E para Audit Controller
@@ -54,15 +55,12 @@ describe('Audit (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('v1');
-    await app.init();
-
-    httpServer = app.getHttpServer() as http.Server;
+    
+    // Usar helper para configurar a aplicação corretamente (CORS, prefixo global, etc.)
+    httpServer = await setupTestApp(app);
+    
     dataSource = app.get(DataSource);
     hashService = app.get(HashService);
-
-    // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Atualizar USERS_API_URL com a porta real do servidor
     const address = httpServer.address();
@@ -72,6 +70,9 @@ describe('Audit (e2e)', () => {
     } else {
       process.env.USERS_API_URL = process.env.USERS_API_URL || 'http://localhost:3000/v1';
     }
+
+    // Aguardar um pouco mais para garantir que todas as rotas estão registradas
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Criar tabelas se não existirem
     await setupDatabaseTables(dataSource);

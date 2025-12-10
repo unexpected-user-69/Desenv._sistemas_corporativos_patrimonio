@@ -284,19 +284,19 @@ export async function loginUser(
   // Aguardar um pouco para garantir que o servidor está totalmente inicializado
   // Isso é importante porque o app.init() pode não ter terminado completamente
   // Aumentar o tempo de espera para garantir que todas as rotas estão registradas
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  // Com supertest, o servidor pode não estar "listening" em uma porta TCP real,
+  // mas ainda pode receber requisições através do supertest
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      // Verificar se o servidor está escutando antes de fazer a requisição
-      const address = httpServer.address();
-      if (!address) {
-        throw new Error('Server is not listening yet');
-      }
-      
+      // Com supertest, o servidor pode não estar "listening" no sentido tradicional,
+      // mas ainda pode receber requisições. Não precisamos verificar address().
+      // O supertest funciona mesmo quando o servidor não está em uma porta TCP real.
       const response = await request(httpServer)
         .post('/v1/auth/login')
-        .send({ email: normalizedEmail, password });
+        .send({ email: normalizedEmail, password })
+        .timeout(10000); // Timeout de 10 segundos para evitar espera infinita
 
       if (response.status === 200 || response.status === 201) {
         const token = response.body.accessToken || response.body.token;
@@ -317,11 +317,29 @@ export async function loginUser(
         `Login failed after ${retries} attempts: Expected 200 or 201, got ${response.status}. Body: ${JSON.stringify(response.body)}. Email: ${normalizedEmail}`,
       );
     } catch (error: any) {
+      // Se o erro menciona "listening", "address", "ECONNREFUSED" ou é um erro de timeout,
+      // pode ser um problema de inicialização. Nesse caso, aguardar mais tempo antes de tentar novamente.
+      const isInitializationError = 
+        error?.message?.includes('listening') || 
+        error?.message?.includes('address') ||
+        error?.message?.includes('ECONNREFUSED') ||
+        error?.message?.includes('timeout') ||
+        error?.code === 'ECONNREFUSED' ||
+        error?.code === 'ETIMEDOUT';
+      
       if (attempt === retries) {
+        // Se for erro de inicialização, fornecer mensagem mais útil
+        if (isInitializationError) {
+          throw new Error(
+            `Login failed: Server may not be fully initialized. Try increasing wait time in setupTestApp. Original error: ${error.message}. Email: ${normalizedEmail}`
+          );
+        }
         throw error;
       }
-      // Aguardar antes de tentar novamente
-      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      
+      // Aguardar mais tempo se for erro de inicialização
+      const waitTime = isInitializationError ? 2000 * attempt : 1000 * attempt;
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
   }
 

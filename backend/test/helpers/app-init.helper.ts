@@ -40,7 +40,9 @@ export async function setupTestApp(app: INestApplication): Promise<http.Server> 
   // Aguardar um pouco para garantir que a aplicação está totalmente inicializada
   // Isso é importante porque o app.init() pode não ter terminado completamente
   // Aumentar o tempo de espera para garantir que todas as rotas estão registradas
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // Com supertest, o servidor pode não estar "listening" em uma porta TCP real,
+  // mas ainda pode receber requisições através do supertest
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   return httpServer;
 }

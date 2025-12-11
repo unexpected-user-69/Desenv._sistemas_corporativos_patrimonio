@@ -8,6 +8,10 @@ describe('RolesGuard (unit)', () => {
   let reflector: Reflector;
 
   beforeEach(async () => {
+    // Garantir que o bypass não interfere nos testes unitários de negação
+    process.env.BYPASS_AUTH = 'false';
+    process.env.ALLOW_GUARD_BLOCK = 'true';
+
     const module = await Test.createTestingModule({
       providers: [RolesGuard, Reflector],
     }).compile();

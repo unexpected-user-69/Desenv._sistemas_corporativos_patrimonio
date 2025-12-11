@@ -49,6 +49,23 @@ export class UsersHttpClient {
    * Busca um usuário por ID
    */
   async findOne(userId: string): Promise<UserInfo | null> {
+    // Bypass apenas quando explicitamente habilitado e não estamos rodando unit tests de client
+    const bypass =
+      (process.env.BYPASS_AUTH || '').toLowerCase() === 'true' &&
+      (process.env.ALLOW_HTTP_CLIENT_TESTS || '').toLowerCase() !== 'true';
+    if (bypass) {
+      return {
+        id: userId,
+        email: `user-${userId}@example.com`,
+        name: 'Test User',
+        role: 'ADMIN',
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        version: 1,
+      };
+    }
+
     const url = `${this.baseUrl}/users/${userId}`;
     this.logger.debug(`Buscando usuário: ${userId}, URL: ${url}`);
     try {

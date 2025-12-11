@@ -116,13 +116,13 @@ export class UsersHttpClient {
     email: string,
     password: string,
   ): Promise<UserIdentity | null> {
-    // Bypass para testes/local quando não há serviço externo disponível
+    // Bypass apenas quando explicitamente habilitado e não estamos rodando unit tests de client
     const bypass =
-      (process.env.BYPASS_AUTH || '').toLowerCase() === 'true' ||
-      (process.env.NODE_ENV || '').toLowerCase() === 'test';
+      (process.env.BYPASS_AUTH || '').toLowerCase() === 'true' &&
+      (process.env.ALLOW_HTTP_CLIENT_TESTS || '').toLowerCase() !== 'true';
     if (bypass) {
       return {
-        id: '123e4567-e89b-12d3-a456-426614174000', // mantém id esperado pelos testes unitários
+        id: '123e4567-e89b-12d3-a456-426614174000',
         email,
         name: 'Test User',
         roles: ['ADMIN'],
@@ -204,10 +204,10 @@ export class UsersHttpClient {
    * @returns UserIdentity | null - Identidade do usuário se encontrado, null caso contrário
    */
   async getUserById(userId: string): Promise<UserIdentity | null> {
-    // Bypass para testes/local quando não há serviço externo disponível
+    // Bypass apenas quando explicitamente habilitado e não estamos rodando unit tests de client
     const bypass =
-      (process.env.BYPASS_AUTH || '').toLowerCase() === 'true' ||
-      (process.env.NODE_ENV || '').toLowerCase() === 'test';
+      (process.env.BYPASS_AUTH || '').toLowerCase() === 'true' &&
+      (process.env.ALLOW_HTTP_CLIENT_TESTS || '').toLowerCase() !== 'true';
     if (bypass) {
       return {
         id: userId,

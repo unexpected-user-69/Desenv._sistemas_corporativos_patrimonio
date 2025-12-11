@@ -3,7 +3,7 @@
 # ========================================================================
 
 param(
-    # Namespace do GHCR com as imagens já publicadas
+    # Namespace do GHCR com as imagens jÃ¡ publicadas
     [string]$RepoOwner = "unexpected-user-69"
 )
 
@@ -112,7 +112,7 @@ $env:EVENTS_IMAGE_TAG = $DefaultTag
 $env:GATEWAY_IMAGE_TAG = $DefaultTag
 
 Write-Host "Baixando imagens Docker do GitHub Container Registry..." -ForegroundColor Yellow
-Write-Host "   (Isso pode levar alguns minutos na primeira vez)"
+Write-Host "   (Isso pode levar alguns minutos na primeira vez)" -ForegroundColor Yellow
 Write-Host ""
 
 # Baixar todas as imagens

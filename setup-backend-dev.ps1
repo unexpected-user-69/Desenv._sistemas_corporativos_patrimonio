@@ -3,7 +3,8 @@
 # ========================================================================
 
 param(
-    [string]$RepoOwner = "CHANGEME_SEU_USUARIO_GITHUB"
+    # Namespace do GHCR com as imagens já publicadas
+    [string]$RepoOwner = "unexpected-user-69"
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,13 +21,10 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-# Solicitar REPO_OWNER se nao fornecido
-if ($RepoOwner -eq "CHANGEME_SEU_USUARIO_GITHUB") {
-    $RepoOwner = Read-Host "Informe o usuario/organizacao do GitHub Container Registry"
-    if ([string]::IsNullOrWhiteSpace($RepoOwner)) {
-        Write-Host "[ERRO] REPO_OWNER e obrigatorio. Saindo." -ForegroundColor Red
-        exit 1
-    }
+# Validar REPO_OWNER
+if ([string]::IsNullOrWhiteSpace($RepoOwner)) {
+    Write-Host "[ERRO] REPO_OWNER nao pode ser vazio. Ajuste o parametro -RepoOwner." -ForegroundColor Red
+    exit 1
 }
 
 Write-Host ""
@@ -143,7 +141,7 @@ Write-Host ""
 Write-Host "Subindo containers Docker Compose..." -ForegroundColor Yellow
 Write-Host ""
 
-docker compose -f docker-compose.deploy.yml up -d
+docker compose --env-file .env.prod -f docker-compose.deploy.yml up -d
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERRO] Erro ao subir containers. Verifique os logs." -ForegroundColor Red
@@ -186,7 +184,7 @@ Test-HealthEndpoint "http://localhost:3003/health" "Patrimonio Service"
 Test-HealthEndpoint "http://localhost:3004/health" "Categorias Service"
 Test-HealthEndpoint "http://localhost:3005/health" "Audit Service"
 Test-HealthEndpoint "http://localhost:3006/health" "Events Service"
-Test-HealthEndpoint "http://localhost:3100/health" "API Gateway"
+Test-HealthEndpoint "http://localhost:3100/api/health" "API Gateway"
 
 Write-Host ""
 Write-Host "=================================================================" -ForegroundColor Cyan

@@ -122,7 +122,7 @@ export class UsersHttpClient {
       (process.env.NODE_ENV || '').toLowerCase() === 'test';
     if (bypass) {
       return {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '123e4567-e89b-12d3-a456-426614174000', // mantém id esperado pelos testes unitários
         email,
         name: 'Test User',
         roles: ['ADMIN'],

@@ -21,7 +21,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     // Em ambiente de teste E2E, liberar tudo para evitar 401/403 nos e2e.
-    if ((process.env.BYPASS_AUTH || '').toLowerCase() === 'true') {
+    // Para unit tests de guard, pode-se setar ALLOW_GUARD_BLOCK=true para não bypassar.
+    if (
+      (process.env.BYPASS_AUTH || '').toLowerCase() === 'true' &&
+      (process.env.ALLOW_GUARD_BLOCK || '').toLowerCase() !== 'true'
+    ) {
       return true;
     }
     // Verifica se a rota é pública usando o decorator @Public()

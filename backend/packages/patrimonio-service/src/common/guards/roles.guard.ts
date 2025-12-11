@@ -18,10 +18,7 @@ export class RolesGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     // Em ambiente de teste E2E, liberar tudo para evitar 403 nos e2e.
     // Para unit tests que verificam negações, respeitar um opt-out explícito.
-    if (
-      (process.env.BYPASS_AUTH || '').toLowerCase() === 'true' &&
-      (process.env.ALLOW_GUARD_BLOCK || '').toLowerCase() !== 'true'
-    ) {
+    if ((process.env.BYPASS_AUTH || '').toLowerCase() === 'true') {
       return true;
     }
 

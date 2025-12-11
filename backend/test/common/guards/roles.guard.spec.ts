@@ -10,7 +10,6 @@ describe('RolesGuard (unit)', () => {
   beforeEach(async () => {
     // Garantir que o bypass não interfere nos testes unitários de negação
     process.env.BYPASS_AUTH = 'false';
-    process.env.ALLOW_GUARD_BLOCK = 'true';
 
     const module = await Test.createTestingModule({
       providers: [RolesGuard, Reflector],
@@ -59,7 +58,11 @@ describe('RolesGuard (unit)', () => {
   });
 
   it('should deny access when user does not have required role', () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['ADMIN']);
+    const spy = jest.spyOn(reflector, 'getAllAndOverride');
+    // Primeiro para IS_PUBLIC_KEY (false/undefined)
+    spy.mockImplementationOnce(() => undefined);
+    // Depois para ROLES_KEY
+    spy.mockReturnValue(['ADMIN']);
 
     const context = makeContext(['STUDENT']);
     const result = guard.canActivate(context);
@@ -68,7 +71,9 @@ describe('RolesGuard (unit)', () => {
   });
 
   it('should deny access when user is not authenticated', () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['ADMIN']);
+    const spy = jest.spyOn(reflector, 'getAllAndOverride');
+    spy.mockImplementationOnce(() => undefined);
+    spy.mockReturnValue(['ADMIN']);
 
     const context = makeContext();
     const result = guard.canActivate(context);
@@ -77,7 +82,9 @@ describe('RolesGuard (unit)', () => {
   });
 
   it('should deny access when user has no roles', () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['ADMIN']);
+    const spy = jest.spyOn(reflector, 'getAllAndOverride');
+    spy.mockImplementationOnce(() => undefined);
+    spy.mockReturnValue(['ADMIN']);
 
     const context = makeContext([]);
     const result = guard.canActivate(context);

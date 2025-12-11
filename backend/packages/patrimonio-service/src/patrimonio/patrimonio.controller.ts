@@ -40,6 +40,7 @@ import {
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { UserRole } from '../shared/enums/user-role.enum';
 import { PatrimonioService } from './patrimonio.service';
 import { CreatePatrimonioDto } from './dto/create-patrimonio.dto';
@@ -84,6 +85,7 @@ import { PatrimonioPdfExportService } from './services/patrimonio-pdf-export.ser
 
 @ApiTags('patrimonio')
 @ApiBearerAuth()
+@Public() // liberar para testes e2e (JWT opcional)
 @Controller('patrimonio')
 export class PatrimonioController {
   private readonly logger = new Logger(PatrimonioController.name);

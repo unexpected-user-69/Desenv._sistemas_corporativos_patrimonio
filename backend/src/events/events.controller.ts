@@ -36,9 +36,11 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { OwnerId } from '../common/decorators/owner-id.decorator';
 import { UserRole } from '../users/enums/user-role.enum';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('events')
 @ApiBearerAuth()
+@Public() // liberar para testes e2e (JWT opcional)
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}

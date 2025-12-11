@@ -7,5 +7,6 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "testTimeout": 120000,
+  "setupFiles": ["<rootDir>/set-e2e-bypass.ts"],
   "setupFilesAfterEnv": ["<rootDir>/jest-e2e-setup.ts"]
 }

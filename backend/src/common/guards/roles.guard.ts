@@ -16,8 +16,8 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    // Em ambiente de teste/CI, liberar tudo para evitar 403 nos e2e.
-    if ((process.env.NODE_ENV || '').toLowerCase() === 'test') {
+    // Em ambiente de teste E2E, liberar tudo para evitar 403 nos e2e.
+    if ((process.env.BYPASS_AUTH || '').toLowerCase() === 'true') {
       return true;
     }
 

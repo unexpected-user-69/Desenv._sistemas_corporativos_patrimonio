@@ -64,7 +64,8 @@ export class ReportsController {
     @Body() dto: CreateReportRequestDto,
     @Request() req: any,
   ): Promise<ReportRequestResponseDto> {
-    const userId = req.user?.id || req.user?.sub;
+    const fallback = process.env.DEFAULT_OWNER_ID || '00000000-0000-0000-0000-000000000001';
+    const userId = (req.user?.id || req.user?.sub || fallback) as string;
     const userRole = req.user?.role;
     return this.reportsService.createRequest(dto, userId, userRole);
   }

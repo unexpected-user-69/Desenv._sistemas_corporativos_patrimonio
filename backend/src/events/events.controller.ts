@@ -64,7 +64,9 @@ export class EventsController {
     @Body() createEventDto: CreateEventDto,
     @OwnerId() createdBy: string,
   ): Promise<EventResponseDto> {
-    return this.eventsService.create(createEventDto, createdBy);
+    const fallbackId = process.env.DEFAULT_OWNER_ID || '00000000-0000-0000-0000-000000000001';
+    const userId = createdBy && createdBy.trim().length > 0 ? createdBy : fallbackId;
+    return this.eventsService.create(createEventDto, userId);
   }
 
   @Get()

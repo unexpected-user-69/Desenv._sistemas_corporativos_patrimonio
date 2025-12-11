@@ -83,6 +83,19 @@ describe('Categorias (e2e)', () => {
   afterAll(async () => {
     // Limpeza de dados de teste (opcional)
     try {
+      // Remover planos de manutenção que referenciem as categorias de teste antes de deletar as categorias
+      await dataSource.query(
+        `DELETE FROM maintenance_plans 
+         WHERE categoria_id IN (
+           SELECT id FROM categorias 
+           WHERE codigo LIKE 'TEST_%' 
+             OR codigo LIKE 'TEST_CAT_%' 
+             OR codigo LIKE 'TEST_CAT_MANAGER_%' 
+             OR codigo LIKE 'TEST_UPDATE_%' 
+             OR codigo LIKE 'TEST_DELETE_%'
+         )`,
+      );
+
       await dataSource.query(
         `DELETE FROM categorias 
          WHERE codigo LIKE 'TEST_%' 

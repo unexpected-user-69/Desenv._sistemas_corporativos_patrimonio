@@ -13,6 +13,15 @@ import { Categoria } from '../../packages/categorias-service/src/categorias/enti
 import { AuditLog } from '../../packages/audit-service/src/audit/entities/audit-log.entity';
 config();
 
+// Helper para aplicar defaults seguros em ambiente de teste (CI)
+function envOrDefault(key: string, fallback: string) {
+  const val = process.env[key];
+  if (val && val.trim().length > 0) return val;
+  // Em CI alguns runners não exportam as envs; garantir defaults para evitar "root"/db inexistente.
+  if (process.env.NODE_ENV === 'test') return fallback;
+  return val ?? fallback;
+}
+
 const common = {
   type: 'postgres' as const,
   // IMPORTANTE: Para entidades com relações ManyToOne, o TypeORM precisa que ambas as entidades
@@ -55,11 +64,11 @@ const options: PostgresConnectionOptions = process.env.DATABASE_URL
     }
   : {
       ...common,
-      host: process.env.DB_HOST!,
-      port: parseInt(process.env.DB_PORT ?? '5432', 10),
-      username: process.env.DB_USER!,
-      password: process.env.DB_PASS!,
-      database: process.env.DB_NAME!,
+      host: envOrDefault('DB_HOST', 'localhost'),
+      port: parseInt(envOrDefault('DB_PORT', '5432'), 10),
+      username: envOrDefault('DB_USER', 'postgres'),
+      password: envOrDefault('DB_PASS', 'postgres'),
+      database: envOrDefault('DB_NAME', 'patrimonio_inventario_test'),
       ssl: sslOptions,
     };
 

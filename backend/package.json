@@ -158,7 +158,8 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/dist/",
-      "/e2e/"
+      "/e2e/",
+      "test/.*\\.e2e-spec\\.ts$"
     ]
   }
 }

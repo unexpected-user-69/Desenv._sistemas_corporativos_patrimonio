@@ -15,6 +15,10 @@
     "<rootDir>/patrimonio/patrimonio-fases.e2e-spec.ts",
     "<rootDir>/events/events.e2e-spec.ts",
     "<rootDir>/reports/reports.e2e-spec.ts",
-    "<rootDir>/maintenance/maintenance.e2e-spec.ts"
+    "<rootDir>/reports-catalog/reports-catalog.e2e-spec.ts",
+    "<rootDir>/maintenance/maintenance.e2e-spec.ts",
+    "<rootDir>/inventory-mobile/inventory-mobile.e2e-spec.ts",
+    "<rootDir>/users/users.e2e-spec.ts",
+    "<rootDir>/auth/auth.e2e-spec.ts"
   ]
 }

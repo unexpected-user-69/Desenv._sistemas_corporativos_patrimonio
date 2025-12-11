@@ -22,7 +22,7 @@ export const RateLimitConfig: React.FC<Props> = ({ config, onUpdate }) => {
       setLoading(true);
       setMessage(null);
 
-      await productionService.updateRateLimitConfig(formData);
+      await productionService.updateRateLimitConfig();
       setMessage({
         type: 'success',
         text: 'Configuração de Rate Limiting salva com sucesso!',

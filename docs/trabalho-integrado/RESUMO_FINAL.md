@@ -4,7 +4,7 @@
 
 ### **1. Swagger com Prefixo Global /v1** ✅
 - ✅ **Configuração correta**: Prefixo `/v1` definido **antes** do Swagger no `main.ts`
-- ✅ **URLs funcionais**: `http://localhost:3001/v1/users`
+- ✅ **URLs funcionais**: `http://localhost:3101/v1/users`
 - ✅ **Documentação completa**: `@ApiQuery`, `@ApiOkResponse`, exemplos
 - ✅ **Swagger acessível**: `/docs` com todas as rotas documentadas
 

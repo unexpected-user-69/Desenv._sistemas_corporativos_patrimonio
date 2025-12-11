@@ -24,7 +24,7 @@ export const SecurityConfig: React.FC<Props> = ({ config, onUpdate }) => {
       setLoading(true);
       setMessage(null);
 
-      await productionService.updateSecurityConfig(formData);
+      await productionService.updateSecurityConfig();
       setMessage({
         type: 'success',
         text: 'Configuração de Segurança salva com sucesso!',

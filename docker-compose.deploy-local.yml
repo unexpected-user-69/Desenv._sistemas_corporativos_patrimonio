@@ -1,0 +1,235 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: patrimonio-db-deploy
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: patrimonio_inventario
+    volumes:
+      - ./postgres-init:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d patrimonio_inventario"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - patrimonio_network
+    ports:
+      - "5432:5432"
+
+  users-service:
+    container_name: patrimonio-users-deploy
+    build:
+      context: ./backend/packages/users-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: "--openssl-legacy-provider"
+      PORT: 3002
+      DB_SCHEMA: users
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres123
+      DB_NAME: patrimonio_inventario
+      HASH_PEPPER: test_pepper_super_secret_do_not_use_in_production_123456
+      HASH_SALT_ROUNDS: 12
+      JWT_ACCESS_SECRET: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
+      SERVICE_TOKEN: service_token_for_microservices_communication_test_123
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3002:3002"
+    networks:
+      - patrimonio_network
+
+  auth-service:
+    container_name: patrimonio-auth-deploy
+    build:
+      context: ./backend/packages/auth-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_SCHEMA: auth
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres123
+      DB_NAME: patrimonio_inventario
+      USERS_API_URL: "http://users-service:3002"
+      JWT_ACCESS_SECRET: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
+      JWT_REFRESH_SECRET: z6y5x4w3v2u1t0s9r8q7p6o5n4m3l2k1j0i9h8g7f6e5d4c3b2a1
+      HASH_PEPPER: test_pepper_super_secret_do_not_use_in_production_123456
+      HASH_SALT_ROUNDS: 12
+      SERVICE_TOKEN: service_token_for_microservices_communication_test_123
+    depends_on:
+      db:
+        condition: service_healthy
+      users-service:
+        condition: service_started
+    ports:
+      - "3001:3001"
+    networks:
+      - patrimonio_network
+
+  patrimonio-service:
+    container_name: patrimonio-service-deploy
+    build:
+      context: ./backend/packages/patrimonio-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      DB_SCHEMA: patrimonio
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres123
+      DB_NAME: patrimonio_inventario
+      AUTH_API_URL: "http://auth-service:3001"
+      USERS_API_URL: "http://users-service:3002"
+      JWT_ACCESS_SECRET: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
+      SERVICE_TOKEN: service_token_for_microservices_communication_test_123
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    ports:
+      - "3003:3003"
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      - patrimonio_network
+
+  categorias-service:
+    container_name: patrimonio-categorias-deploy
+    build:
+      context: ./backend/packages/categorias-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      DB_SCHEMA: categorias
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres123
+      DB_NAME: patrimonio_inventario
+      AUTH_API_URL: "http://auth-service:3001"
+      JWT_ACCESS_SECRET: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
+      SERVICE_TOKEN: service_token_for_microservices_communication_test_123
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    ports:
+      - "3004:3004"
+    networks:
+      - patrimonio_network
+
+  audit-service:
+    container_name: patrimonio-audit-deploy
+    build:
+      context: ./backend/packages/audit-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      DB_SCHEMA: audit
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres123
+      DB_NAME: patrimonio_inventario
+      AUTH_API_URL: "http://auth-service:3001"
+      USERS_API_URL: "http://users-service:3002"
+      JWT_ACCESS_SECRET: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
+      SERVICE_TOKEN: service_token_for_microservices_communication_test_123
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    ports:
+      - "3005:3005"
+    networks:
+      - patrimonio_network
+
+  events-service:
+    container_name: patrimonio-events-deploy
+    build:
+      context: ./backend/packages/events-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3006
+      DB_SCHEMA: events
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres123
+      DB_NAME: patrimonio_inventario
+      AUTH_API_URL: "http://auth-service:3001"
+      JWT_ACCESS_SECRET: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
+      SERVICE_TOKEN: service_token_for_microservices_communication_test_123
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    ports:
+      - "3006:3006"
+    networks:
+      - patrimonio_network
+
+  api-gateway:
+    container_name: patrimonio-gateway-deploy
+    build:
+      context: ./backend/packages/api-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3100
+      AUTH_SERVICE_URL: "http://auth-service:3001"
+      USERS_SERVICE_URL: "http://users-service:3002"
+      PATRIMONIO_SERVICE_URL: "http://patrimonio-service:3003"
+      CATEGORIAS_SERVICE_URL: "http://categorias-service:3004"
+      AUDIT_SERVICE_URL: "http://audit-service:3005"
+      EVENTS_SERVICE_URL: "http://events-service:3006"
+      JWT_ACCESS_SECRET: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
+    depends_on:
+      - auth-service
+      - users-service
+      - patrimonio-service
+      - categorias-service
+      - audit-service
+      - events-service
+    ports:
+      - "3100:3100"
+    networks:
+      - patrimonio_network
+
+volumes:
+  pgdata:
+  uploads:
+
+networks:
+  patrimonio_network:
+    driver: bridge
+

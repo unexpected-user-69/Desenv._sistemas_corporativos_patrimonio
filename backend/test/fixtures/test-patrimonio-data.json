@@ -1,0 +1,63 @@
+{
+  "patrimonios": [
+    {
+      "codigo": "PAT-2024-001",
+      "nome": "Notebook Dell Inspiron 15",
+      "descricao": "Notebook para uso administrativo com Windows 11",
+      "categoria": "EQUIPAMENTO",
+      "status": "ATIVO",
+      "marca": "Dell",
+      "modelo": "Inspiron 15 3000",
+      "numeroSerie": "ABC123456789",
+      "valorAquisicao": 2500.00,
+      "dataAquisicao": "2024-01-15",
+      "dataGarantia": "2025-01-15",
+      "localizacao": "Sala 101 - Setor Administrativo",
+      "observacoes": "Equipamento em perfeito estado de conservação"
+    },
+    {
+      "codigo": "PAT-2024-002",
+      "nome": "Mesa de Escritório",
+      "descricao": "Mesa de escritório com gavetas",
+      "categoria": "MOBILIARIO",
+      "status": "ATIVO",
+      "marca": "Ikea",
+      "modelo": "MALM",
+      "valorAquisicao": 450.00,
+      "dataAquisicao": "2024-02-01",
+      "localizacao": "Sala 102 - Setor Administrativo",
+      "observacoes": "Mesa em bom estado"
+    },
+    {
+      "codigo": "PAT-2024-003",
+      "nome": "Projetor Epson",
+      "descricao": "Projetor para apresentações",
+      "categoria": "EQUIPAMENTO",
+      "status": "ATIVO",
+      "marca": "Epson",
+      "modelo": "PowerLite 1781W",
+      "numeroSerie": "EPS789012345",
+      "valorAquisicao": 1200.00,
+      "dataAquisicao": "2024-03-10",
+      "dataGarantia": "2025-03-10",
+      "localizacao": "Sala de Reuniões",
+      "observacoes": "Projetor funcionando perfeitamente"
+    }
+  ],
+  "usuarios": [
+    {
+      "name": "João Silva",
+      "email": "joao.silva@empresa.com",
+      "password": "senha123",
+      "role": "ADMIN",
+      "isActive": true
+    },
+    {
+      "name": "Maria Santos",
+      "email": "maria.santos@empresa.com",
+      "password": "senha456",
+      "role": "TEACHER",
+      "isActive": true
+    }
+  ]
+}

@@ -20,7 +20,7 @@ class CacheService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = 'http://localhost:3000'; // Hardcoded for now, was import.meta.env.VITE_API_BASE_URL
+    this.baseURL = 'http://localhost:3101'; // Hardcoded for now, was import.meta.env.VITE_API_BASE_URL
     this.api = axios.create({
       baseURL: this.baseURL,
       timeout: 10000,
@@ -43,7 +43,7 @@ class CacheService {
   async getStats(): Promise<CacheStats> {
     try {
       const response = await this.api.get('/v1/cache/stats');
-      return response.data as unknown;
+      return response.data as CacheStats;
     } catch (error) {
       console.error('Erro ao buscar estatísticas do cache:', error);
       // Retorna dados mockados em caso de erro
@@ -67,7 +67,7 @@ class CacheService {
       const response = await this.api.get('/v1/cache/keys', {
         params: { pattern, limit },
       });
-      return response.data as unknown;
+      return response.data as CacheKey[];
     } catch (error) {
       console.error('Erro ao buscar chaves do cache:', error);
       // Retorna dados mockados
@@ -102,7 +102,7 @@ class CacheService {
       const response = await this.api.get(
         `/v1/cache/keys/${encodeURIComponent(key)}`,
       );
-      return response.data as unknown;
+      return response.data as CacheKey[];
     } catch (error) {
       console.error(`Erro ao buscar chave ${key}:`, error);
       throw error;
@@ -137,7 +137,7 @@ class CacheService {
   async getConfig(): Promise<CacheConfig> {
     try {
       const response = await this.api.get('/v1/cache/config');
-      return response.data as unknown;
+      return response.data as CacheConfig;
     } catch (error) {
       console.error('Erro ao buscar configuração do cache:', error);
       // Retorna configuração padrão
@@ -152,7 +152,7 @@ class CacheService {
   async updateConfig(config: Partial<CacheConfig>): Promise<CacheConfig> {
     try {
       const response = await this.api.patch('/v1/cache/config', config);
-      return response.data as unknown;
+      return response.data as CacheConfig;
     } catch (error) {
       console.error('Erro ao atualizar configuração do cache:', error);
       throw error;
@@ -165,7 +165,7 @@ class CacheService {
       const response = await this.api.get('/v1/cache/operations', {
         params: { limit },
       });
-      return response.data as unknown;
+      return response.data as CacheOperation[];
     } catch (error) {
       console.error('Erro ao buscar operações do cache:', error);
       // Retorna dados mockados
@@ -202,7 +202,7 @@ class CacheService {
   async getMetrics(): Promise<CacheMetrics> {
     try {
       const response = await this.api.get('/v1/cache/metrics');
-      return response.data as unknown;
+      return response.data as CacheMetrics;
     } catch (error) {
       console.error('Erro ao buscar métricas do cache:', error);
       // Retorna métricas mockadas
@@ -231,7 +231,7 @@ class CacheService {
   async getAlerts(): Promise<CacheAlert[]> {
     try {
       const response = await this.api.get('/v1/cache/alerts');
-      return response.data as unknown;
+      return response.data as CacheAlert[];
     } catch (error) {
       console.error('Erro ao buscar alertas do cache:', error);
       // Retorna alertas mockados
@@ -274,7 +274,7 @@ class CacheService {
   async getHealth(): Promise<CacheHealth> {
     try {
       const response = await this.api.get('/v1/cache/health');
-      return response.data as unknown;
+      return response.data as CacheHealth;
     } catch (error) {
       console.error('Erro ao buscar saúde do cache:', error);
       // Retorna dados mockados
@@ -298,7 +298,7 @@ class CacheService {
   async getPatterns(): Promise<CachePattern[]> {
     try {
       const response = await this.api.get('/v1/cache/patterns');
-      return response.data as unknown;
+      return response.data as CachePattern[];
     } catch (error) {
       console.error('Erro ao buscar padrões do cache:', error);
       // Retorna padrões mockados
@@ -341,7 +341,7 @@ class CacheService {
   async searchKeys(options: CacheSearchOptions): Promise<CacheSearchResult> {
     try {
       const response = await this.api.post('/v1/cache/search', options);
-      return response.data as unknown;
+      return response.data as CacheSearchResult;
     } catch (error) {
       console.error('Erro ao buscar chaves:', error);
       throw error;

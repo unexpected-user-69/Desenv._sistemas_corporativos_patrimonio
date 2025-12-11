@@ -1,0 +1,161 @@
+### Arquivo de Testes HTTP para Patrimônio
+### Baseado no padrão Aurora Platform
+###
+### Este arquivo contém exemplos de requisições HTTP para testar os endpoints de patrimônio.
+### Use com REST Client (VSCode) ou similar.
+###
+### Variáveis de ambiente (configure no início do arquivo ou no seu cliente HTTP)
+@host = http://localhost:3101
+@apiBase = {{host}}/v1
+@token = 
+@patrimonioId = 
+
+### ============================================
+### CENÁRIO 1: Listar Patrimônios (Rota Pública)
+### ============================================
+
+### GET /patrimonio - Listar todos os patrimônios (200)
+GET {{apiBase}}/patrimonio
+Accept: application/json
+
+### GET /patrimonio - Listar patrimônios com autenticação (200)
+GET {{apiBase}}/patrimonio
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### ============================================
+### CENÁRIO 2: Buscar Patrimônio por ID (Rota Pública)
+### ============================================
+
+### GET /patrimonio/:id - Buscar patrimônio por ID (200)
+GET {{apiBase}}/patrimonio/{{patrimonioId}}
+Accept: application/json
+
+### GET /patrimonio/:id - Tentar buscar patrimônio inexistente (404)
+GET {{apiBase}}/patrimonio/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+### ============================================
+### CENÁRIO 3: Criar Patrimônio (Rota Protegida - Requer ADMIN ou MANAGER)
+### ============================================
+
+### POST /patrimonio - Criar patrimônio como ADMIN (201)
+POST {{apiBase}}/patrimonio
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "codigo": "PAT-001",
+  "nome": "Computador Desktop",
+  "descricao": "Computador para uso administrativo",
+  "categoriaId": "categoria-uuid",
+  "valor": 2500.00,
+  "dataAquisicao": "2024-01-15",
+  "status": "DISPONIVEL",
+  "localizacao": "Sala 101"
+}
+
+### POST /patrimonio - Tentar criar sem autenticação (401)
+POST {{apiBase}}/patrimonio
+Content-Type: application/json
+Accept: application/json
+
+{
+  "codigo": "PAT-002",
+  "nome": "Notebook",
+  "descricao": "Notebook para uso administrativo",
+  "valor": 3500.00
+}
+
+### POST /patrimonio - Tentar criar como OPERATOR (403 - sem permissão)
+POST {{apiBase}}/patrimonio
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "codigo": "PAT-003",
+  "nome": "Tablet",
+  "descricao": "Tablet para uso administrativo",
+  "valor": 1500.00
+}
+
+### POST /patrimonio - Criar patrimônio com dados inválidos (400)
+POST {{apiBase}}/patrimonio
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "codigo": "",
+  "nome": "",
+  "valor": -100
+}
+
+### ============================================
+### CENÁRIO 4: Atualizar Patrimônio (Rota Protegida - Requer ADMIN ou MANAGER)
+### ============================================
+
+### PATCH /patrimonio/:id - Atualizar patrimônio como ADMIN (200)
+PATCH {{apiBase}}/patrimonio/{{patrimonioId}}
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Computador Desktop Atualizado",
+  "valor": 2700.00
+}
+
+### PATCH /patrimonio/:id - Tentar atualizar sem autenticação (401)
+PATCH {{apiBase}}/patrimonio/{{patrimonioId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "nome": "Nome Atualizado"
+}
+
+### PATCH /patrimonio/:id - Tentar atualizar como OPERATOR (403)
+PATCH {{apiBase}}/patrimonio/{{patrimonioId}}
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Nome Atualizado"
+}
+
+### ============================================
+### CENÁRIO 5: Deletar Patrimônio (Rota Protegida - Requer ADMIN)
+### ============================================
+
+### DELETE /patrimonio/:id - Deletar patrimônio como ADMIN (200)
+DELETE {{apiBase}}/patrimonio/{{patrimonioId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### DELETE /patrimonio/:id - Tentar deletar sem autenticação (401)
+DELETE {{apiBase}}/patrimonio/{{patrimonioId}}
+Accept: application/json
+
+### DELETE /patrimonio/:id - Tentar deletar como MANAGER (403)
+DELETE {{apiBase}}/patrimonio/{{patrimonioId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### ============================================
+### CENÁRIO 6: Buscar por Código (Rota Pública)
+### ============================================
+
+### GET /patrimonio/codigo/:codigo - Buscar patrimônio por código (200)
+GET {{apiBase}}/patrimonio/codigo/PAT-001
+Accept: application/json
+
+### GET /patrimonio/codigo/:codigo - Buscar patrimônio por código inexistente (404)
+GET {{apiBase}}/patrimonio/codigo/PAT-999
+Accept: application/json
+
+
+

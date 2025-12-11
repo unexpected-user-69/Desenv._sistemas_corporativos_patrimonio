@@ -1,35 +1,24 @@
 // Configuração de ambiente
 
-import type { EnvironmentVariables } from '../types/global';
-
 // Helper function to safely get environment variables
-const getEnvVar = (
-  key: keyof EnvironmentVariables,
-  defaultValue: string,
-): string => {
-  const value = (import.meta as any).env[key];
+const getEnvVar = (key: string, defaultValue: string): string => {
+  const value = (import.meta as any).env?.[key];
   return value || defaultValue;
 };
 
-const getEnvBoolean = (
-  key: keyof EnvironmentVariables,
-  defaultValue: boolean,
-): boolean => {
-  const value = (import.meta as any).env[key];
+const getEnvBoolean = (key: string, defaultValue: boolean): boolean => {
+  const value = (import.meta as any).env?.[key];
   return value === 'true' || defaultValue;
 };
 
-const getEnvNumber = (
-  key: keyof EnvironmentVariables,
-  defaultValue: number,
-): number => {
-  const value = (import.meta as any).env[key];
+const getEnvNumber = (key: string, defaultValue: number): number => {
+  const value = (import.meta as any).env?.[key];
   return value ? parseInt(value, 10) : defaultValue;
 };
 
 export const config = {
   api: {
-    baseUrl: getEnvVar('VITE_API_BASE_URL', 'http://localhost:3000'),
+    baseUrl: getEnvVar('VITE_API_BASE_URL', 'http://localhost:3101'),
     timeout: 30000,
   },
   app: {

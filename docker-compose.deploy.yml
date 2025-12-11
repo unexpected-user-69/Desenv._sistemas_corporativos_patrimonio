@@ -1,0 +1,266 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: patrimonio-db-deploy
+    image: postgres:16
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-patrimonio_inventario}
+    volumes:
+      - ./postgres-init:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-patrimonio_inventario}"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - patrimonio_network
+
+  users-service:
+    container_name: patrimonio-users-deploy
+    image: ghcr.io/${REPO_OWNER}/users-service:${USERS_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DB_SCHEMA: users
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: ${POSTGRES_DB:-patrimonio_inventario}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3002:3002"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3002/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  auth-service:
+    container_name: patrimonio-auth-deploy
+    image: ghcr.io/${REPO_OWNER}/auth-service:${AUTH_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_SCHEMA: auth
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: ${POSTGRES_DB:-patrimonio_inventario}
+      USERS_API_URL: "http://users-service:3002"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      HASH_PEPPER: ${HASH_PEPPER}
+      HASH_SALT_ROUNDS: ${HASH_SALT_ROUNDS:-12}
+    depends_on:
+      db:
+        condition: service_healthy
+      users-service:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  patrimonio-service:
+    container_name: patrimonio-service-deploy
+    image: desenv_sistemas_corporativos_patrimonio-patrimonio-service:latest
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      DB_SCHEMA: patrimonio
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-postgres123}
+      DB_NAME: ${POSTGRES_DB:-patrimonio_inventario}
+      AUTH_API_URL: "http://auth-service:3001"
+      USERS_API_URL: "http://users-service:3002"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-testsecret123}
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    ports:
+      - "3003:3003"
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3003/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  categorias-service:
+    container_name: patrimonio-categorias-deploy
+    image: ghcr.io/${REPO_OWNER}/categorias-service:${CATEGORIAS_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      DB_SCHEMA: categorias
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: ${POSTGRES_DB:-patrimonio_inventario}
+      AUTH_API_URL: "http://auth-service:3001"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    ports:
+      - "3004:3004"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3004/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  audit-service:
+    container_name: patrimonio-audit-deploy
+    image: ghcr.io/${REPO_OWNER}/audit-service:${AUDIT_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      DB_SCHEMA: audit
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: ${POSTGRES_DB:-patrimonio_inventario}
+      AUTH_API_URL: "http://auth-service:3001"
+      USERS_API_URL: "http://users-service:3002"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    ports:
+      - "3005:3005"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3005/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  events-service:
+    container_name: patrimonio-events-deploy
+    image: ghcr.io/${REPO_OWNER}/events-service:${EVENTS_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      NODE_ENV: production
+      PORT: 3006
+      DB_SCHEMA: events
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: ${POSTGRES_DB:-patrimonio_inventario}
+      AUTH_API_URL: "http://auth-service:3001"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    ports:
+      - "3006:3006"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3006/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  api-gateway:
+    container_name: patrimonio-gateway-deploy
+    image: ghcr.io/${REPO_OWNER}/api-gateway:${GATEWAY_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      NODE_ENV: production
+      PORT: 3100
+      AUTH_SERVICE_URL: "http://auth-service:3001"
+      USERS_SERVICE_URL: "http://users-service:3002"
+      PATRIMONIO_SERVICE_URL: "http://patrimonio-service:3003"
+      CATEGORIAS_SERVICE_URL: "http://categorias-service:3004"
+      AUDIT_SERVICE_URL: "http://audit-service:3005"
+      EVENTS_SERVICE_URL: "http://events-service:3006"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      users-service:
+        condition: service_healthy
+      patrimonio-service:
+        condition: service_healthy
+      categorias-service:
+        condition: service_healthy
+      audit-service:
+        condition: service_healthy
+      events-service:
+        condition: service_healthy
+    ports:
+      - "3100:3100"
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3100/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  pgdata:
+  uploads:
+
+networks:
+  patrimonio_network:
+    driver: bridge
+

@@ -131,6 +131,7 @@ export const useCacheStore = create<CacheState>()(
           set({ keys, isLoading: false });
         } catch (error) {
           set({
+            keys: [], // Garantir que keys seja sempre um array
             error:
               error instanceof Error ? error.message : 'Erro ao buscar chaves',
             isLoading: false,
@@ -193,6 +194,7 @@ export const useCacheStore = create<CacheState>()(
           set({ alerts, isLoading: false });
         } catch (error) {
           set({
+            alerts: [], // Garantir que alerts seja sempre um array
             error:
               error instanceof Error ? error.message : 'Erro ao buscar alertas',
             isLoading: false,

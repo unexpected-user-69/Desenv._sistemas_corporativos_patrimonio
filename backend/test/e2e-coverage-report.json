@@ -1,0 +1,1174 @@
+{
+  "summary": {
+    "totalEndpoints": 150,
+    "totalMethods": 178,
+    "coveredMethods": 35,
+    "missingMethods": 142,
+    "coverage": "19.66%"
+  },
+  "covered": [
+    {
+      "path": "/",
+      "methods": [
+        "GET"
+      ],
+      "controller": "app",
+      "testFiles": [
+        "test\\app.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/integrations/executions",
+      "methods": [
+        "GET"
+      ],
+      "controller": "integrations-erp",
+      "testFiles": [
+        "test\\integrations-erp\\integrations-erp.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/integrations/executions/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "integrations-erp",
+      "testFiles": [
+        "test\\integrations-erp\\integrations-erp.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/integrations/executions/{id}/reconciliation",
+      "methods": [
+        "GET"
+      ],
+      "controller": "integrations-erp",
+      "testFiles": [
+        "test\\integrations-erp\\integrations-erp.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/integrations/metrics",
+      "methods": [
+        "GET"
+      ],
+      "controller": "integrations-erp",
+      "testFiles": [
+        "test\\integrations-erp\\integrations-erp.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/integrations/health",
+      "methods": [
+        "GET"
+      ],
+      "controller": "integrations-erp",
+      "testFiles": [
+        "test\\integrations-erp\\integrations-erp.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/integrations/run",
+      "methods": [
+        "POST"
+      ],
+      "controller": "integrations-erp",
+      "testFiles": [
+        "test\\integrations-erp\\integrations-erp.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/inventory/campaigns/{id}/assignments",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "inventory-mobile",
+      "testFiles": [
+        "test\\inventory-mobile\\inventory-mobile.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/inventory/campaigns/{id}/report",
+      "methods": [
+        "GET"
+      ],
+      "controller": "inventory-mobile",
+      "testFiles": [
+        "test\\inventory-mobile\\inventory-mobile.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/inventory/campaigns/{id}/export/csv",
+      "methods": [
+        "GET"
+      ],
+      "controller": "inventory-mobile",
+      "testFiles": [
+        "test\\inventory-mobile\\inventory-mobile.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/inventory/campaigns/{id}/export/excel",
+      "methods": [
+        "GET"
+      ],
+      "controller": "inventory-mobile",
+      "testFiles": [
+        "test\\inventory-mobile\\inventory-mobile.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/inventory/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "controller": "inventory-mobile",
+      "testFiles": [
+        "test\\inventory-mobile\\inventory-mobile.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/inventory/campaigns",
+      "methods": [
+        "POST"
+      ],
+      "controller": "inventory-mobile",
+      "testFiles": [
+        "test\\inventory-mobile\\inventory-mobile.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/inventory/sync/pull",
+      "methods": [
+        "POST"
+      ],
+      "controller": "inventory-mobile",
+      "testFiles": [
+        "test\\inventory-mobile\\inventory-mobile.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/inventory/sync/push",
+      "methods": [
+        "POST"
+      ],
+      "controller": "inventory-mobile",
+      "testFiles": [
+        "test\\inventory-mobile\\inventory-mobile.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/inventory/reconcile",
+      "methods": [
+        "POST"
+      ],
+      "controller": "inventory-mobile",
+      "testFiles": [
+        "test\\inventory-mobile\\inventory-mobile.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/maintenance/os",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "maintenance",
+      "testFiles": [
+        "test\\maintenance\\maintenance.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/maintenance/apontamentos",
+      "methods": [
+        "POST"
+      ],
+      "controller": "maintenance",
+      "testFiles": [
+        "test\\maintenance\\maintenance.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/maintenance/os/{id}/status",
+      "methods": [
+        "PATCH"
+      ],
+      "controller": "maintenance",
+      "testFiles": [
+        "test\\maintenance\\maintenance.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/notifications/templates",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "notifications",
+      "testFiles": [
+        "test\\notifications\\notifications.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/notifications/templates/{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "controller": "notifications",
+      "testFiles": [
+        "test\\notifications\\notifications.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/notifications/policies",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "notifications",
+      "testFiles": [
+        "test\\notifications\\notifications.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/notifications/webhooks",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "notifications",
+      "testFiles": [
+        "test\\notifications\\notifications.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/notifications/test",
+      "methods": [
+        "POST"
+      ],
+      "controller": "notifications",
+      "testFiles": [
+        "test\\notifications\\notifications.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/reports/requests",
+      "methods": [
+        "GET"
+      ],
+      "controller": "reports",
+      "testFiles": [
+        "test\\reports\\reports.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/reports/requests/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "reports",
+      "testFiles": [
+        "test\\reports\\reports.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/reports/{id}/download",
+      "methods": [
+        "GET"
+      ],
+      "controller": "reports",
+      "testFiles": [
+        "test\\reports\\reports.e2e-spec.ts"
+      ]
+    },
+    {
+      "path": "/v1/reports/export",
+      "methods": [
+        "POST"
+      ],
+      "controller": "reports",
+      "testFiles": [
+        "test\\reports\\reports.e2e-spec.ts"
+      ]
+    }
+  ],
+  "missing": [
+    {
+      "path": "/health",
+      "methods": [
+        "GET"
+      ],
+      "controller": "app"
+    },
+    {
+      "path": "/audit/logs",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "audit"
+    },
+    {
+      "path": "/audit/logs/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "audit"
+    },
+    {
+      "path": "/audit/logs/entity/{id}/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "audit"
+    },
+    {
+      "path": "/audit/logs/user/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "audit"
+    },
+    {
+      "path": "/audit/stats",
+      "methods": [
+        "GET"
+      ],
+      "controller": "audit"
+    },
+    {
+      "path": "/auth/me",
+      "methods": [
+        "GET"
+      ],
+      "controller": "auth"
+    },
+    {
+      "path": "/auth/login",
+      "methods": [
+        "POST"
+      ],
+      "controller": "auth"
+    },
+    {
+      "path": "/auth/refresh",
+      "methods": [
+        "POST"
+      ],
+      "controller": "auth"
+    },
+    {
+      "path": "/auth/logout",
+      "methods": [
+        "POST"
+      ],
+      "controller": "auth"
+    },
+    {
+      "path": "/categorias",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "categorias"
+    },
+    {
+      "path": "/categorias/{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "controller": "categorias"
+    },
+    {
+      "path": "/categorias/codigo/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "categorias"
+    },
+    {
+      "path": "/categorias/{id}/desativar",
+      "methods": [
+        "PATCH"
+      ],
+      "controller": "categorias"
+    },
+    {
+      "path": "/categorias/{id}/ativar",
+      "methods": [
+        "PATCH"
+      ],
+      "controller": "categorias"
+    },
+    {
+      "path": "/cache/stats",
+      "methods": [
+        "GET"
+      ],
+      "controller": "cache"
+    },
+    {
+      "path": "/cache/health",
+      "methods": [
+        "GET"
+      ],
+      "controller": "cache"
+    },
+    {
+      "path": "/cache/keys",
+      "methods": [
+        "GET"
+      ],
+      "controller": "cache"
+    },
+    {
+      "path": "/cache/operations",
+      "methods": [
+        "GET"
+      ],
+      "controller": "cache"
+    },
+    {
+      "path": "/cache/alerts",
+      "methods": [
+        "GET"
+      ],
+      "controller": "cache"
+    },
+    {
+      "path": "/cache/config",
+      "methods": [
+        "GET"
+      ],
+      "controller": "cache"
+    },
+    {
+      "path": "/cache/key/{id}",
+      "methods": [
+        "GET",
+        "DELETE"
+      ],
+      "controller": "cache"
+    },
+    {
+      "path": "/cache/clear",
+      "methods": [
+        "POST"
+      ],
+      "controller": "cache"
+    },
+    {
+      "path": "/enums/categorias",
+      "methods": [
+        "GET"
+      ],
+      "controller": "enums"
+    },
+    {
+      "path": "/enums/status",
+      "methods": [
+        "GET"
+      ],
+      "controller": "enums"
+    },
+    {
+      "path": "/enums/roles",
+      "methods": [
+        "GET"
+      ],
+      "controller": "enums"
+    },
+    {
+      "path": "/enums/campos-ordenacao",
+      "methods": [
+        "GET"
+      ],
+      "controller": "enums"
+    },
+    {
+      "path": "/enums/direcoes-ordenacao",
+      "methods": [
+        "GET"
+      ],
+      "controller": "enums"
+    },
+    {
+      "path": "/metrics",
+      "methods": [
+        "GET"
+      ],
+      "controller": "metrics"
+    },
+    {
+      "path": "/metrics/health",
+      "methods": [
+        "GET"
+      ],
+      "controller": "metrics"
+    },
+    {
+      "path": "/metrics/logs",
+      "methods": [
+        "GET"
+      ],
+      "controller": "metrics"
+    },
+    {
+      "path": "/events",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "events"
+    },
+    {
+      "path": "/events/{id}",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "controller": "events"
+    },
+    {
+      "path": "/events/{id}/publish",
+      "methods": [
+        "POST"
+      ],
+      "controller": "events"
+    },
+    {
+      "path": "/v1/maintenance/planos",
+      "methods": [
+        "POST"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/maintenance/sla/metrics",
+      "methods": [
+        "GET"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/maintenance/sla/mttr",
+      "methods": [
+        "GET"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/maintenance/sla/mtbf/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/maintenance/os/{id}/parts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/maintenance/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/maintenance/reports",
+      "methods": [
+        "GET"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/maintenance/reports/export/csv",
+      "methods": [
+        "GET"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/maintenance/reports/export/excel",
+      "methods": [
+        "GET"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/maintenance/os/{id}/parts/{id}",
+      "methods": [
+        "DELETE"
+      ],
+      "controller": "maintenance"
+    },
+    {
+      "path": "/v1/notifications/queue/stats",
+      "methods": [
+        "GET"
+      ],
+      "controller": "notifications"
+    },
+    {
+      "path": "/v1/notifications/metrics",
+      "methods": [
+        "GET"
+      ],
+      "controller": "notifications"
+    },
+    {
+      "path": "/v1/notifications/metrics/summary",
+      "methods": [
+        "GET"
+      ],
+      "controller": "notifications"
+    },
+    {
+      "path": "/patrimonio",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/codigo/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/categoria/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/status/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/responsavel/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/stats/categoria",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/stats/status",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/stats/valor-total",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/vencimento-garantia",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/localizacao/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/stats/localizacoes",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/stats/faixa-valor",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/stats/aquisicao",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/stats/evolucao",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/export/csv",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/export/excel",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/relatorio/inventario",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/numero-serie/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/aquisicao-periodo",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/valor-range",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/status-multiplos",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/categorias-multiplas",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/validar-codigo/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/disponibilidade",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/garantia-expirada",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/alertas/garantia",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/manutencao-prolongada",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/sem-responsavel",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/historico",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/historico/responsaveis",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/responsavel/{id}/historico",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/com-foto",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/stats/responsavel/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/stats/marca-modelo",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/top-valiosos",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/novos",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/historico/localizacoes",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/export/pdf",
+      "methods": [
+        "GET"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/transferir-responsavel",
+      "methods": [
+        "POST"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/descarte",
+      "methods": [
+        "POST"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/bulk",
+      "methods": [
+        "POST",
+        "PATCH",
+        "DELETE"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/bulk/transferir-responsavel",
+      "methods": [
+        "POST"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/verificar-duplicidade",
+      "methods": [
+        "POST"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/foto",
+      "methods": [
+        "POST",
+        "DELETE"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/status",
+      "methods": [
+        "PATCH"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/ativar",
+      "methods": [
+        "PATCH"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/desativar",
+      "methods": [
+        "PATCH"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/patrimonio/{id}/localizacao",
+      "methods": [
+        "PATCH"
+      ],
+      "controller": "patrimonio"
+    },
+    {
+      "path": "/v1/reports/catalog",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "report-catalog"
+    },
+    {
+      "path": "/v1/reports/catalog/{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "controller": "report-catalog"
+    },
+    {
+      "path": "/v1/reports/catalog/key/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "report-catalog"
+    },
+    {
+      "path": "/v1/reports/catalog/permissions/catalog/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "report-catalog"
+    },
+    {
+      "path": "/v1/reports/catalog/permissions/user/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "report-catalog"
+    },
+    {
+      "path": "/v1/reports/catalog/{id}/versions",
+      "methods": [
+        "POST"
+      ],
+      "controller": "report-catalog"
+    },
+    {
+      "path": "/v1/reports/catalog/permissions",
+      "methods": [
+        "POST"
+      ],
+      "controller": "report-catalog"
+    },
+    {
+      "path": "/v1/reports/catalog/{id}/versions/{id}/current",
+      "methods": [
+        "PUT"
+      ],
+      "controller": "report-catalog"
+    },
+    {
+      "path": "/v1/reports/catalog/permissions/{id}",
+      "methods": [
+        "DELETE"
+      ],
+      "controller": "report-catalog"
+    },
+    {
+      "path": "/v1/reports/metrics",
+      "methods": [
+        "GET"
+      ],
+      "controller": "reports-metrics"
+    },
+    {
+      "path": "/v1/reports/metrics/summary",
+      "methods": [
+        "GET"
+      ],
+      "controller": "reports-metrics"
+    },
+    {
+      "path": "/v1/reports/metrics/model/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "reports-metrics"
+    },
+    {
+      "path": "/v1/reports/metrics/quota",
+      "methods": [
+        "GET"
+      ],
+      "controller": "reports-metrics"
+    },
+    {
+      "path": "/v1/reports/metrics/quota/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "reports-metrics"
+    },
+    {
+      "path": "/users",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/email/{id}",
+      "methods": [
+        "GET"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/advanced/search",
+      "methods": [
+        "GET"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/cursor/search",
+      "methods": [
+        "GET"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/fuzzy/search",
+      "methods": [
+        "GET"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/date-range",
+      "methods": [
+        "GET"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/stats/roles",
+      "methods": [
+        "GET"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/recent/active",
+      "methods": [
+        "GET"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/validate",
+      "methods": [
+        "POST"
+      ],
+      "controller": "users"
+    },
+    {
+      "path": "/users/bulk",
+      "methods": [
+        "POST"
+      ],
+      "controller": "users"
+    }
+  ]
+}

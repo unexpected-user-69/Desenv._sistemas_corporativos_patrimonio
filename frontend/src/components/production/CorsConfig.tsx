@@ -23,7 +23,7 @@ export const CorsConfig: React.FC<Props> = ({ config, onUpdate }) => {
       setLoading(true);
       setMessage(null);
 
-      await productionService.updateCorsConfig(formData);
+      await productionService.updateCorsConfig();
       setMessage({
         type: 'success',
         text: 'Configuração de CORS salva com sucesso!',
@@ -290,7 +290,7 @@ export const CorsConfig: React.FC<Props> = ({ config, onUpdate }) => {
               <button
                 onClick={() =>
                   setFormData({
-                    origin: ['http://localhost:3000', 'http://localhost:3001'],
+                    origin: ['http://localhost:3101', 'http://localhost:5173'],
                     methods: [
                       'GET',
                       'POST',

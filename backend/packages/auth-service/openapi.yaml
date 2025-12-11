@@ -1,0 +1,382 @@
+openapi: 3.1.0
+info:
+  title: Auth Service API
+  version: 1.0.0
+  description: |
+    Serviço de autenticação e autorização para o sistema de patrimônio.
+    Fornece endpoints para login, refresh de tokens, logout e informações do usuário autenticado.
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:3001
+    description: Servidor de desenvolvimento local
+  - url: http://auth-service:3001
+    description: Servidor Docker interno
+
+paths:
+  /auth/login:
+    post:
+      summary: Autenticar usuário
+      description: |
+        Valida as credenciais do usuário e retorna access token e refresh token.
+        O access token expira em 15 minutos. Use o refresh token para renovar o access token.
+      operationId: login
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Dados de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Muitas requisições (rate limit)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      summary: Renovar access token usando refresh token
+      description: |
+        Valida o refresh token e retorna um novo par de tokens (access + refresh).
+        O refresh token antigo é revogado automaticamente.
+        IMPORTANTE: Use o refreshToken retornado no login (não o accessToken!).
+        O refreshToken é um token aleatório base64url, não um JWT.
+      operationId: refresh
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Tokens renovados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '400':
+          description: Dados de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Refresh token inválido ou expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      summary: Revogar refresh token (logout)
+      description: |
+        Revoga o refresh token, invalidando a sessão do usuário.
+        O access token continuará válido até expirar.
+      operationId: logout
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '200':
+          description: Logout realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+        '400':
+          description: Dados de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      summary: Obter informações do usuário autenticado
+      description: |
+        Retorna as informações do usuário autenticado extraídas do JWT token.
+        Requer autenticação via Bearer token.
+      operationId: me
+      tags:
+        - auth
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Informações do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '401':
+          description: Token inválido ou não fornecido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      summary: Health check do serviço
+      description: |
+        Retorna o status de saúde do serviço, incluindo timestamp e uptime.
+      operationId: health
+      tags:
+        - health
+      responses:
+        '200':
+          description: Serviço está funcionando
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Serviço indisponível
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+          description: Email do usuário
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: SecurePassword123!
+          description: Senha do usuário
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          description: Access token JWT
+        refreshToken:
+          type: string
+          example: PB9P1tnlRUXS32JnNwVcESwamwFnPyN7rSwam6EUn60eDoQoPY7qTxu9qdDHYscM
+          description: Refresh token (base64url, não é JWT)
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: 12345678-90ab-cdef-1234-567890abcdef
+            email:
+              type: string
+              format: email
+              example: user@example.com
+            name:
+              type: string
+              example: User Name
+            role:
+              type: string
+              enum: [OPERATOR, MANAGER, ADMIN]
+              example: ADMIN
+
+    RefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          example: PB9P1tnlRUXS32JnNwVcESwamwFnPyN7rSwam6EUn60eDoQoPY7qTxu9qdDHYscM
+          description: Refresh token obtido no login (não é JWT)
+
+    RefreshResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          description: Novo access token JWT
+        refreshToken:
+          type: string
+          example: PB9P1tnlRUXS32JnNwVcESwamwFnPyN7rSwam6EUn60eDoQoPY7qTxu9qdDHYscM
+          description: Novo refresh token (base64url)
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            email:
+              type: string
+              format: email
+            name:
+              type: string
+            role:
+              type: string
+              enum: [OPERATOR, MANAGER, ADMIN]
+
+    LogoutRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          example: PB9P1tnlRUXS32JnNwVcESwamwFnPyN7rSwam6EUn60eDoQoPY7qTxu9qdDHYscM
+          description: Refresh token a ser revogado
+
+    LogoutResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Logout successful
+        revoked:
+          type: integer
+          example: 1
+          description: Número de tokens revogados (0 ou 1)
+
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 12345678-90ab-cdef-1234-567890abcdef
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        name:
+          type: string
+          example: User Name
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [OPERATOR, MANAGER, ADMIN]
+          example: [ADMIN]
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+          enum: [ok, error]
+        timestamp:
+          type: string
+          format: date-time
+          example: 2025-01-27T12:00:00Z
+        uptime:
+          type: number
+          example: 1234.56
+          description: Tempo de atividade em segundos
+        service:
+          type: string
+          example: auth-service
+        version:
+          type: string
+          example: 1.0.0
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Validation failed
+        error:
+          type: string
+          example: Bad Request
+        code:
+          type: string
+          example: VALIDATION_ERROR
+          nullable: true
+        details:
+          type: array
+          items:
+            type: string
+          nullable: true
+          example:
+            - email must be a valid email
+            - password must be longer than 8 characters
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtido no endpoint /auth/login
+
+
+
+
+

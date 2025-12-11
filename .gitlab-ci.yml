@@ -1,0 +1,78 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  POSTGRES_DB: patrimonio_inventario_test
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  REDIS_DB: 0
+
+services:
+  - postgres:15-alpine
+  - redis:7-alpine
+
+test:
+  stage: test
+  image: node:20-alpine
+  before_script:
+    - cd backend
+    - npm ci
+    - cp .env.example .env || true
+    - echo "NODE_ENV=test" >> .env
+    - echo "DB_HOST=postgres" >> .env
+    - echo "DB_PORT=5432" >> .env
+    - echo "DB_USER=$POSTGRES_USER" >> .env
+    - echo "DB_PASS=$POSTGRES_PASSWORD" >> .env
+    - echo "DB_NAME=$POSTGRES_DB" >> .env
+    - echo "REDIS_HOST=$REDIS_HOST" >> .env
+    - echo "REDIS_PORT=$REDIS_PORT" >> .env
+    - echo "REDIS_DB=$REDIS_DB" >> .env
+    - echo "JWT_ACCESS_SECRET=test_secret" >> .env
+    - echo "JWT_REFRESH_SECRET=test_refresh_secret" >> .env
+  script:
+    - npm run lint
+    - npm run test
+    - npm run migration:run
+    - npm run test:e2e
+  coverage: '/Lines\s*:\s*(\d+\.\d+)%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: backend/coverage/cobertura-coverage.xml
+    paths:
+      - backend/coverage/
+    expire_in: 1 week
+
+build:
+  stage: build
+  image: node:20-alpine
+  script:
+    - cd backend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - backend/dist/
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+
+deploy:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - echo "Deploy to production"
+    # Adicione seus comandos de deploy aqui
+  only:
+    - main
+  when: manual
+
+

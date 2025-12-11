@@ -1,0 +1,287 @@
+services:
+  # Serviço de banco de dados PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: patrimonio_inventario_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
+      POSTGRES_DB: ${DB_NAME:-patrimonio_inventario}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-patrimonio_inventario}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - patrimonio_network
+
+  # Serviço Redis para filas (BullMQ) e cache
+  redis:
+    image: redis:7-alpine
+    container_name: patrimonio_inventario_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - patrimonio_network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./packages/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3100
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USERS_SERVICE_URL: http://users-service:3002
+      PATRIMONIO_SERVICE_URL: http://patrimonio-service:3003
+      CATEGORIAS_SERVICE_URL: http://categorias-service:3004
+      AUDIT_SERVICE_URL: http://audit-service:3005
+      EVENTS_SERVICE_URL: http://events-service:3006
+    depends_on:
+      - auth-service
+      - users-service
+      - patrimonio-service
+      - categorias-service
+      - audit-service
+      - events-service
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3100/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./packages/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASS:-postgres}@db:5432/${DB_NAME:-patrimonio_inventario}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_DAYS: 7
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Users Service
+  users-service:
+    build:
+      context: ./packages/users-service
+      dockerfile: Dockerfile
+    container_name: users-service
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3002
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASS:-postgres}@db:5432/${DB_NAME:-patrimonio_inventario}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Patrimonio Service
+  patrimonio-service:
+    build:
+      context: ./packages/patrimonio-service
+      dockerfile: Dockerfile
+    container_name: patrimonio-service
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3003
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DB_SCHEMA: patrimonio
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASS:-postgres}@db:5432/${DB_NAME:-patrimonio_inventario}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Categorias Service
+  categorias-service:
+    build:
+      context: ./packages/categorias-service
+      dockerfile: Dockerfile
+    container_name: categorias-service
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3004
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASS:-postgres}@db:5432/${DB_NAME:-patrimonio_inventario}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Audit Service
+  audit-service:
+    build:
+      context: ./packages/audit-service
+      dockerfile: Dockerfile
+    container_name: audit-service
+    restart: unless-stopped
+    ports:
+      - "3005:3005"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3005
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASS:-postgres}@db:5432/${DB_NAME:-patrimonio_inventario}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Events Service
+  events-service:
+    build:
+      context: ./packages/events-service
+      dockerfile: Dockerfile
+    container_name: events-service
+    restart: unless-stopped
+    ports:
+      - "3006:3006"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3006
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-postgres}
+      DB_NAME: ${DB_NAME:-patrimonio_inventario}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASS:-postgres}@db:5432/${DB_NAME:-patrimonio_inventario}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret}
+      AUTH_API_URL: http://auth-service:3001
+      USERS_API_URL: http://users-service:3002
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      users-service:
+        condition: service_healthy
+    networks:
+      - patrimonio_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Rede dedicada para comunicação entre serviços
+networks:
+  patrimonio_network:
+    driver: bridge
+
+# Volumes persistentes para dados
+volumes:
+  db_data:
+  redis_data:

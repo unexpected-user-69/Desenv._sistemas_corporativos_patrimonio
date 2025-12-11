@@ -1,0 +1,99 @@
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsString,
+  IsEnum,
+  IsBoolean,
+} from 'class-validator';
+import { Type, Transform } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { UserRole } from '../enums/user-role.enum';
+
+export class PaginationQueryDto {
+  @ApiPropertyOptional({
+    description: 'Número da página (começando em 1)',
+    minimum: 1,
+    default: 1,
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({
+    description: 'Número de itens por página',
+    minimum: 1,
+    maximum: 100,
+    default: 10,
+    example: 10,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number = 10;
+
+  @ApiPropertyOptional({
+    description: 'Busca textual genérica (nome e email)',
+    example: 'joão',
+  })
+  @IsOptional()
+  @IsString()
+  @Transform(
+    ({ value }) => (typeof value === 'string' ? value.trim() : value) as string,
+  )
+  q?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por role do usuário',
+    enum: UserRole,
+    example: UserRole.OPERATOR,
+  })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+
+  @ApiPropertyOptional({
+    description:
+      'Filtrar por status ativo/inativo (aceita: true, false, "true", "false", "1", "0")',
+    example: true,
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+      const normalized = value.toLowerCase().trim();
+      if (normalized === 'true' || normalized === '1') return true;
+      if (normalized === 'false' || normalized === '0') return false;
+    }
+    return value as boolean;
+  })
+  @Type(() => Boolean)
+  @IsBoolean()
+  isActive?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Ordenar por campo',
+    enum: ['name', 'email', 'createdAt', 'updatedAt'],
+    default: 'createdAt',
+    example: 'name',
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: 'name' | 'email' | 'createdAt' | 'updatedAt' = 'createdAt';
+
+  @ApiPropertyOptional({
+    description: 'Direção da ordenação',
+    enum: ['ASC', 'DESC'],
+    default: 'DESC',
+    example: 'ASC',
+  })
+  @IsOptional()
+  @IsString()
+  sortOrder?: 'ASC' | 'DESC' = 'DESC';
+}

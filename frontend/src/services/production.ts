@@ -142,7 +142,7 @@ const mockAlerts: ProductionAlert[] = [
     resolved: false,
     metadata: {
       origin: 'https://malicious-site.com',
-      allowedOrigins: ['http://localhost:3000'],
+      allowedOrigins: ['http://localhost:3101'],
     },
   },
   {
@@ -171,7 +171,7 @@ class ProductionService {
   // private _baseUrl: string;
 
   constructor() {
-    // this._baseUrl = 'http://localhost:3000';
+    // this._baseUrl = 'http://localhost:3101';
   }
 
   async getProductionDashboard(): Promise<ProductionDashboard> {
@@ -184,8 +184,8 @@ class ProductionService {
       const dashboard: ProductionDashboard = {
         environment: {
           name: 'production',
-          apiUrl: 'http://localhost:3000',
-          corsOrigins: ['http://localhost:3000', 'http://localhost:3001'],
+          apiUrl: 'http://localhost:3101',
+          corsOrigins: ['http://localhost:3101', 'http://localhost:5173'],
           rateLimitConfig: {
             ttl: 60000,
             limit: 100,
@@ -232,7 +232,7 @@ class ProductionService {
           skipFailedRequests: false,
         },
         corsConfig: {
-          origin: ['http://localhost:3000', 'http://localhost:3001'],
+          origin: ['http://localhost:3101', 'http://localhost:5173'],
           methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
           allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
           credentials: true,
@@ -444,7 +444,7 @@ class ProductionService {
     }
   }
 
-  async getCompressionStats(): Promise<CompressionStats> {
+  async getCompressionStats(): Promise<any> {
     try {
       // Em produção, fazer requisição real para o backend
       // const response = await fetch(`${this.baseUrl}/v1/production/compression/stats`);

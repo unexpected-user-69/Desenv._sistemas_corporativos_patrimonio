@@ -8,7 +8,8 @@ import {
   SystemHealth,
 } from '../types/monitoring';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL =
+  (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:3101';
 
 export class MonitoringService {
   private baseUrl: string;
@@ -24,6 +25,14 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.warn('Resposta não é JSON válido:', text);
+        throw new Error('Resposta do servidor não é JSON válido');
+      }
+
       return (await response.json()) as MetricsData;
     } catch (error) {
       console.error('Erro ao buscar métricas:', error);
@@ -49,10 +58,20 @@ export class MonitoringService {
       if (params.limit) queryParams.append('limit', params.limit.toString());
       if (params.offset) queryParams.append('offset', params.offset.toString());
 
-      const response = await fetch(`${this.baseUrl}/logs?${queryParams}`);
+      const response = await fetch(
+        `${this.baseUrl}/metrics/logs?${queryParams}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.warn('Resposta não é JSON válido:', text);
+        throw new Error('Resposta do servidor não é JSON válido');
+      }
+
       return (await response.json()) as { logs: LogEntry[]; total: number };
     } catch (error) {
       console.error('Erro ao buscar logs:', error);
@@ -63,7 +82,7 @@ export class MonitoringService {
   // Regras de alerta
   async getAlertRules(): Promise<AlertRule[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/alerts/rules`);
+      const response = await fetch(`${this.baseUrl}/cache/alerts`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -76,7 +95,7 @@ export class MonitoringService {
 
   async createAlertRule(rule: Omit<AlertRule, 'id'>): Promise<AlertRule> {
     try {
-      const response = await fetch(`${this.baseUrl}/alerts/rules`, {
+      const response = await fetch(`${this.baseUrl}/cache/alerts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +117,7 @@ export class MonitoringService {
     rule: Partial<AlertRule>,
   ): Promise<AlertRule> {
     try {
-      const response = await fetch(`${this.baseUrl}/alerts/rules/${id}`, {
+      const response = await fetch(`${this.baseUrl}/cache/alerts/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +136,7 @@ export class MonitoringService {
 
   async deleteAlertRule(id: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/alerts/rules/${id}`, {
+      const response = await fetch(`${this.baseUrl}/cache/alerts/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -132,7 +151,8 @@ export class MonitoringService {
   // Configuração de dashboards
   async getDashboards(): Promise<DashboardConfig[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/dashboards`);
+      // TODO: Implementar endpoint de dashboards no backend
+      const response = await fetch(`${this.baseUrl}/cache/config`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -147,7 +167,8 @@ export class MonitoringService {
     dashboard: Omit<DashboardConfig, 'id'>,
   ): Promise<DashboardConfig> {
     try {
-      const response = await fetch(`${this.baseUrl}/dashboards`, {
+      // TODO: Implementar endpoint de dashboards no backend
+      const response = await fetch(`${this.baseUrl}/cache/config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -171,6 +192,19 @@ export class MonitoringService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.warn('Resposta não é JSON válido:', text);
+        // Retorna um objeto de saúde padrão se a resposta não for JSON
+        return {
+          status: 'unknown' as const,
+          services: [],
+          lastCheck: new Date().toISOString(),
+        };
+      }
+
       return (await response.json()) as SystemHealth;
     } catch (error) {
       console.error('Erro ao buscar saúde do sistema:', error);

@@ -1,0 +1,893 @@
+openapi: 3.1.0
+info:
+  title: Users Service API
+  version: 1.0.0
+  description: |
+    Serviço de gestão de usuários para o sistema de patrimônio.
+    Fornece endpoints para CRUD completo de usuários, busca avançada, validação de credenciais e estatísticas.
+
+servers:
+  - url: http://localhost:3002
+    description: Servidor de desenvolvimento local
+  - url: http://users-service:3002
+    description: Servidor Docker interno
+
+paths:
+  /users:
+    get:
+      summary: Listar usuários com filtros avançados
+      description: |
+        Lista todos os usuários com paginação e filtros avançados.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: listUsers
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Busca textual (nome e email)
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [OPERATOR, MANAGER, ADMIN]
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [name, email, createdAt, updatedAt]
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [ASC, DESC]
+      responses:
+        '200':
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsersResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Criar novo usuário
+      description: |
+        Cria um novo usuário no sistema.
+        Requer autenticação e role ADMIN.
+      operationId: createUser
+      tags: [users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email já existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{id}:
+    get:
+      summary: Buscar usuário por ID
+      description: |
+        Busca um usuário pelo ID.
+        Requer autenticação. O usuário pode buscar apenas seus próprios dados, exceto ADMIN que pode buscar qualquer usuário.
+      operationId: getUserById
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: ID inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Atualizar usuário
+      description: |
+        Atualiza um usuário existente.
+        Requer autenticação. O usuário pode atualizar apenas seus próprios dados, exceto ADMIN que pode atualizar qualquer usuário.
+      operationId: updateUser
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '200':
+          description: Usuário atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Deletar usuário
+      description: |
+        Deleta um usuário (soft delete).
+        Requer autenticação e role ADMIN.
+      operationId: deleteUser
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Usuário deletado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User deleted successfully
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/email/{email}:
+    get:
+      summary: Buscar usuário por email
+      description: |
+        Busca um usuário pelo email.
+        Requer autenticação.
+      operationId: getUserByEmail
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+            format: email
+      responses:
+        '200':
+          description: Usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Email inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/validate:
+    post:
+      summary: Validar credenciais de usuário
+      description: |
+        Valida as credenciais (email e senha) de um usuário.
+        Endpoint público usado pelo Auth Service.
+        Retorna o usuário se as credenciais forem válidas, null caso contrário.
+      operationId: validateCredentials
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateUserRequest'
+      responses:
+        '200':
+          description: Credenciais válidas ou inválidas
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/User'
+                  - type: 'null'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/bulk:
+    post:
+      summary: Criar múltiplos usuários
+      description: |
+        Cria múltiplos usuários de uma vez.
+        Requer autenticação e role ADMIN.
+      operationId: createBulkUsers
+      tags: [users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CreateUser'
+      responses:
+        '201':
+          description: Usuários criados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: integer
+                  failed:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/advanced/search:
+    get:
+      summary: Busca avançada de usuários
+      description: |
+        Realiza busca avançada com múltiplos filtros.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: advancedSearch
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [OPERATOR, MANAGER, ADMIN]
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Resultados da busca
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/cursor/search:
+    get:
+      summary: Busca com cursor (paginação baseada em cursor)
+      description: |
+        Realiza busca com paginação baseada em cursor.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: cursorSearch
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Resultados da busca
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  nextCursor:
+                    type: string
+                    nullable: true
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/fuzzy/search:
+    get:
+      summary: Busca fuzzy (aproximada)
+      description: |
+        Realiza busca fuzzy (aproximada) por nome ou email.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: fuzzySearch
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+      responses:
+        '200':
+          description: Resultados da busca fuzzy
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Parâmetro q obrigatório
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/date-range:
+    get:
+      summary: Buscar usuários por intervalo de datas
+      description: |
+        Busca usuários criados em um intervalo de datas.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: searchByDateRange
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Usuários no intervalo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Datas inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/stats/roles:
+    get:
+      summary: Estatísticas de usuários por role
+      description: |
+        Retorna estatísticas de quantos usuários existem por role.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: getStatsByRoles
+      tags: [users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Estatísticas por role
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  OPERATOR:
+                    type: integer
+                  MANAGER:
+                    type: integer
+                  ADMIN:
+                    type: integer
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/recent/active:
+    get:
+      summary: Usuários ativos recentes
+      description: |
+        Retorna lista de usuários ativos ordenados por data de atualização recente.
+        Requer autenticação e role MANAGER ou ADMIN.
+      operationId: getRecentActiveUsers
+      tags: [users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+      responses:
+        '200':
+          description: Lista de usuários ativos recentes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      summary: Health check do serviço
+      description: |
+        Retorna o status de saúde do serviço, incluindo timestamp e uptime.
+      operationId: health
+      tags: [health]
+      responses:
+        '200':
+          description: Serviço está funcionando
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Serviço indisponível
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateUser:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - role
+      properties:
+        name:
+          type: string
+          example: João Silva
+          minLength: 1
+        email:
+          type: string
+          format: email
+          example: joao.silva@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: Senha123!
+        role:
+          type: string
+          enum: [OPERATOR, MANAGER, ADMIN]
+          example: OPERATOR
+        isActive:
+          type: boolean
+          default: true
+          example: true
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://example.com/avatar.jpg
+
+    UpdateUser:
+      type: object
+      properties:
+        name:
+          type: string
+          example: João Silva
+        email:
+          type: string
+          format: email
+          example: joao.silva@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+        role:
+          type: string
+          enum: [OPERATOR, MANAGER, ADMIN]
+        isActive:
+          type: boolean
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 12345678-90ab-cdef-1234-567890abcdef
+        name:
+          type: string
+          example: João Silva
+        email:
+          type: string
+          format: email
+          example: joao.silva@example.com
+        role:
+          type: string
+          enum: [OPERATOR, MANAGER, ADMIN]
+          example: OPERATOR
+        isActive:
+          type: boolean
+          example: true
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-01-27T12:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-01-27T12:00:00Z
+        version:
+          type: integer
+          example: 1
+
+    PaginatedUsersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 10
+            total:
+              type: integer
+              example: 100
+            totalPages:
+              type: integer
+              example: 10
+
+    ValidateUserRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: joao.silva@example.com
+        password:
+          type: string
+          format: password
+          example: Senha123!
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+          enum: [ok, error]
+        timestamp:
+          type: string
+          format: date-time
+          example: 2025-01-27T12:00:00Z
+        uptime:
+          type: number
+          example: 1234.56
+        service:
+          type: string
+          example: users-service
+        version:
+          type: string
+          example: 1.0.0
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Validation failed
+        error:
+          type: string
+          example: Bad Request
+        code:
+          type: string
+          example: VALIDATION_ERROR
+          nullable: true
+        details:
+          type: array
+          items:
+            type: string
+          nullable: true
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtido no endpoint /auth/login do Auth Service
+
+
+
+
+
+

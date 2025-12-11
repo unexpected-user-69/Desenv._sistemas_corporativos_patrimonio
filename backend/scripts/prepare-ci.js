@@ -87,6 +87,46 @@ async function ensureDatabase(dbName) {
   }
 }
 
+/**
+ * Garante a existência de um usuário padrão usado em vários testes E2E
+ * (evita erros de FK/NOT NULL em owner_id/created_by_id).
+ */
+async function ensureDefaultTestUser(dbName) {
+  const host = process.env.DB_HOST || 'localhost';
+  const port = parseInt(process.env.DB_PORT || '5432', 10);
+  const user = process.env.DB_USER || 'postgres';
+  const password = process.env.DB_PASS || 'postgres';
+
+  const client = new Client({
+    host,
+    port,
+    user,
+    password,
+    database: dbName,
+  });
+
+  const defaultId = '00000000-0000-0000-0000-000000000001';
+  const defaultEmail = 'ci-default@example.com';
+  const defaultPasswordHash = 'hash';
+
+  try {
+    await client.connect();
+    await client.query(
+      `INSERT INTO users (id, name, email, password_hash, role, is_active, created_at, updated_at)
+       VALUES ($1, 'CI Default User', $2, $3, 'ADMIN', true, NOW(), NOW())
+       ON CONFLICT (id) DO NOTHING`,
+      [defaultId, defaultEmail, defaultPasswordHash],
+    );
+    console.log('✅ Usuário padrão para testes garantido:', defaultEmail);
+  } catch (err) {
+    console.warn(`⚠️  Não foi possível criar usuário padrão de teste: ${err.message}`);
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
 (async () => {
-  await ensureDatabase('patrimonio_inventario_test');
+  const dbName = 'patrimonio_inventario_test';
+  await ensureDatabase(dbName);
+  await ensureDefaultTestUser(dbName);
 })();

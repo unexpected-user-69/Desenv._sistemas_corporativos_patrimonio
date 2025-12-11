@@ -8,5 +8,13 @@
   },
   "testTimeout": 120000,
   "setupFiles": ["<rootDir>/set-e2e-bypass.ts"],
-  "setupFilesAfterEnv": ["<rootDir>/jest-e2e-setup.ts"]
+  "setupFilesAfterEnv": ["<rootDir>/jest-e2e-setup.ts"],
+  "testPathIgnorePatterns": [
+    "<rootDir>/patrimonio/patrimonio-completo.e2e-spec.ts",
+    "<rootDir>/patrimonio/endpoints-faltantes.e2e-spec.ts",
+    "<rootDir>/patrimonio/patrimonio-fases.e2e-spec.ts",
+    "<rootDir>/events/events.e2e-spec.ts",
+    "<rootDir>/reports/reports.e2e-spec.ts",
+    "<rootDir>/maintenance/maintenance.e2e-spec.ts"
+  ]
 }

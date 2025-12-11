@@ -38,6 +38,7 @@ import { setupTestApp } from '../helpers/app-init.helper';
  */
 // Função auxiliar para delays entre testes (evitar rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const DEFAULT_TEST_USER_ID = process.env.DEFAULT_TEST_USER_ID || '00000000-0000-0000-0000-000000000001';
 
 describe('Auth (e2e)', () => {
   let app: INestApplication;
@@ -746,7 +747,9 @@ async function cleanupTestData(dataSource: DataSource): Promise<void> {
     await dataSource.query(
       `DELETE FROM users 
        WHERE email LIKE '%@example.com' 
-       AND (email LIKE 'test-%' OR email LIKE 'inactive-%')`,
+       AND (email LIKE 'test-%' OR email LIKE 'inactive-%')
+       AND id <> $1`,
+      [DEFAULT_TEST_USER_ID],
     );
   } catch (error) {
     // Ignorar erros de limpeza

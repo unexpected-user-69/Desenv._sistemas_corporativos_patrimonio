@@ -7,6 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { Client } = require('pg');
 
 console.log('🚀 Preparando arquivos de imagem dummy para testes E2E...');
 
@@ -54,3 +55,38 @@ testFiles.forEach(filename => {
 
 console.log('🎉 Preparação de arquivos dummy concluída!');
 console.log('📁 Arquivos criados em:', tempDir);
+
+// Criar banco de teste se não existir (idempotente)
+async function ensureDatabase(dbName) {
+  const host = process.env.DB_HOST || 'localhost';
+  const port = parseInt(process.env.DB_PORT || '5432', 10);
+  const user = process.env.DB_USER || 'postgres';
+  const password = process.env.DB_PASS || 'postgres';
+
+  const client = new Client({
+    host,
+    port,
+    user,
+    password,
+    database: 'postgres',
+  });
+
+  try {
+    await client.connect();
+    const res = await client.query('SELECT 1 FROM pg_database WHERE datname = $1', [dbName]);
+    if (res.rowCount === 0) {
+      await client.query(`CREATE DATABASE ${dbName}`);
+      console.log(`✅ Banco criado: ${dbName}`);
+    } else {
+      console.log(`ℹ️  Banco já existe: ${dbName}`);
+    }
+  } catch (err) {
+    console.warn(`⚠️  Não foi possível garantir banco ${dbName}: ${err.message}`);
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
+(async () => {
+  await ensureDatabase('patrimonio_inventario_test');
+})();

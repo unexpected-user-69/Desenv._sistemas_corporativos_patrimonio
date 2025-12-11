@@ -13,13 +13,21 @@ import { Categoria } from '../../packages/categorias-service/src/categorias/enti
 import { AuditLog } from '../../packages/audit-service/src/audit/entities/audit-log.entity';
 config();
 
+const isTest = process.env.NODE_ENV === 'test';
+
 // Helper para aplicar defaults seguros em ambiente de teste (CI)
 function envOrDefault(key: string, fallback: string) {
   const val = process.env[key];
-  if (val && val.trim().length > 0) return val;
-  // Em CI alguns runners não exportam as envs; garantir defaults para evitar "root"/db inexistente.
-  if (process.env.NODE_ENV === 'test') return fallback;
-  return val ?? fallback;
+  if (isTest) return val && val.trim().length > 0 ? val : fallback;
+  return val && val.trim().length > 0 ? val : fallback;
+}
+
+// Em ambiente de teste, forçar o uso do banco de teste, mesmo que o .env tenha outro valor.
+function getDbName() {
+  if (isTest) {
+    return 'patrimonio_inventario_test';
+  }
+  return envOrDefault('DB_NAME', 'patrimonio_inventario');
 }
 
 const common = {
@@ -68,7 +76,7 @@ const options: PostgresConnectionOptions = process.env.DATABASE_URL
       port: parseInt(envOrDefault('DB_PORT', '5432'), 10),
       username: envOrDefault('DB_USER', 'postgres'),
       password: envOrDefault('DB_PASS', 'postgres'),
-      database: envOrDefault('DB_NAME', 'patrimonio_inventario_test'),
+      database: getDbName(),
       ssl: sslOptions,
     };
 

@@ -1,4 +1,4 @@
-version: '3.8'
+﻿version: '3.8'
 
 services:
   db:
@@ -45,7 +45,7 @@ services:
     networks:
       - patrimonio_network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3002/health || exit 1"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3002/health', res => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));\""]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -80,14 +80,14 @@ services:
     networks:
       - patrimonio_network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3001/health || exit 1"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3001/health', res => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));\""]
       interval: 30s
       timeout: 10s
       retries: 3
 
   patrimonio-service:
     container_name: patrimonio-service-deploy
-    image: desenv_sistemas_corporativos_patrimonio-patrimonio-service:latest
+    image: ghcr.io/${REPO_OWNER}/patrimonio-service:${PATRIMONIO_IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file:
       - .env.prod
@@ -115,7 +115,7 @@ services:
     networks:
       - patrimonio_network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3003/health || exit 1"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3003/health', res => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));\""]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -147,7 +147,7 @@ services:
     networks:
       - patrimonio_network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3004/health || exit 1"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3004/health', res => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));\""]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -180,7 +180,7 @@ services:
     networks:
       - patrimonio_network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3005/health || exit 1"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3005/health', res => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));\""]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -212,7 +212,7 @@ services:
     networks:
       - patrimonio_network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3006/health || exit 1"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3006/health', res => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));\""]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -251,7 +251,7 @@ services:
     networks:
       - patrimonio_network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3100/health || exit 1"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3100/api/health', res => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));\""]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -263,4 +263,3 @@ volumes:
 networks:
   patrimonio_network:
     driver: bridge
-

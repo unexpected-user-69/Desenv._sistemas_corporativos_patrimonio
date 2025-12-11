@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -156,7 +156,7 @@ jobs:
       - name: Check build artifacts
         run: |
           if [ ! -d "backend/dist" ]; then
-            echo "❌ Build failed: dist directory not found"
+            echo "âŒ Build failed: dist directory not found"
             exit 1
           fi
-          echo "✅ Build successful"
+          echo "âœ… Build successful"

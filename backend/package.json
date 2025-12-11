@@ -17,6 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "pretest:e2e": "node scripts/prepare-ci.js",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:unit": "jest --testPathPatterns=spec.ts",
     "test:integration": "jest --testPathPatterns=integration",

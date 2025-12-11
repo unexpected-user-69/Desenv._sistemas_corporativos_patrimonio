@@ -5,11 +5,12 @@ import { EventsController } from './events.controller';
 import { Event } from './entities/event.entity';
 import { EventPatrimonio } from './entities/event-patrimonio.entity';
 import { HttpClientsModule } from '../http-clients/http-clients.module';
+import { User } from '../shared/entities/user.entity';
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Event, EventPatrimonio]),
+    TypeOrmModule.forFeature([Event, EventPatrimonio, User]),
     HttpClientsModule,
   ],
   controllers: [EventsController],

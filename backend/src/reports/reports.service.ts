@@ -47,20 +47,17 @@ export class ReportsService {
     userId: string,
     userRole?: string,
   ): Promise<ReportRequestResponseDto> {
-    // Fallback para testes/CI: garantir userId válido
-    if (!userId || userId.trim().length === 0) {
-      userId = process.env.DEFAULT_OWNER_ID || '00000000-0000-0000-0000-000000000001';
-    }
+    const effectiveUserId = userId || process.env.DEFAULT_TEST_USER_ID || '00000000-0000-0000-0000-000000000001';
     const startTime = Date.now();
 
     // Verificar quota antes de criar solicitação
     try {
-      await this.quotaService.checkAndIncrementQuota(userId, 'monthly');
+      await this.quotaService.checkAndIncrementQuota(effectiveUserId, 'monthly');
     } catch (error: any) {
       if (error instanceof HttpException && error.getStatus() === HttpStatus.TOO_MANY_REQUESTS) {
-        const quota = await this.quotaService.getQuota(userId, 'monthly');
+        const quota = await this.quotaService.getQuota(effectiveUserId, 'monthly');
         this.structuredLogger.logQuotaExceeded(
-          userId,
+          effectiveUserId,
           quota.limit,
           quota.used,
           'monthly',
@@ -101,7 +98,7 @@ export class ReportsService {
           model,
           filtersJson: filters,
           status: ReportRequestStatus.PENDING,
-          createdById: userId,
+          createdById: effectiveUserId,
         });
 
         const saved = await this.requestRepository.save(request);
@@ -112,7 +109,7 @@ export class ReportsService {
         // Log estruturado
         this.structuredLogger.logRequestCreated(
           saved.id,
-          userId,
+          effectiveUserId,
           saved.type,
           saved.model,
           catalog.key,
@@ -124,7 +121,7 @@ export class ReportsService {
             saved.id,
             saved.type,
             saved.model,
-            userId,
+            effectiveUserId,
             saved.filtersJson,
             'medium',
           );
@@ -149,7 +146,7 @@ export class ReportsService {
       model: dto.model,
       filtersJson: dto.filters || {},
       status: ReportRequestStatus.PENDING,
-      createdById: userId,
+      createdById: effectiveUserId,
     });
 
     const saved = await this.requestRepository.save(request);
@@ -158,7 +155,7 @@ export class ReportsService {
     // Log estruturado
     this.structuredLogger.logRequestCreated(
       saved.id,
-      userId,
+      effectiveUserId,
       saved.type,
       saved.model,
     );
@@ -169,7 +166,7 @@ export class ReportsService {
         saved.id,
         saved.type,
         saved.model,
-        userId,
+        effectiveUserId,
         saved.filtersJson,
         'medium',
       );

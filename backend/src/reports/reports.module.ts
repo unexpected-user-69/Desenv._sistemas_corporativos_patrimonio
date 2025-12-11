@@ -23,6 +23,9 @@ import { ReportStructuredLoggerService } from './services/report-structured-logg
 import { ReportProcessor } from './processors/report.processor';
 import { ReportQuota } from './entities/report-quota.entity';
 import { User } from '../shared/entities/user.entity';
+import { Patrimonio } from '../patrimonio/entities/patrimonio.entity';
+import { WorkOrder } from '../maintenance/entities/work-order.entity';
+import { Campaign } from '../inventory-mobile/entities/campaign.entity';
 
 @Module({
   imports: [
@@ -35,6 +38,9 @@ import { User } from '../shared/entities/user.entity';
       ReportPermission,
       ReportQuota,
       User, // Necessário para relações ManyToOne nas entidades de reports
+      Patrimonio, // Usado pelos geradores CSV/PDF de relatórios
+      WorkOrder,
+      Campaign,
     ]),
     BullModule.registerQueue({
       name: 'report-queue',

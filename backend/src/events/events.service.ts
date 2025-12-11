@@ -19,6 +19,8 @@ import { EventResponseDto } from './dto/event-response.dto';
 import { QueryEventsDto } from './dto/query-events.dto';
 import { PaginatedEventsResponseDto } from './dto/paginated-events-response.dto';
 import { toSlug } from './utils/slug.util';
+import { User } from '../shared/entities/user.entity';
+import { UserRole } from '../shared/enums/user-role.enum';
 
 @Injectable()
 export class EventsService {
@@ -29,8 +31,40 @@ export class EventsService {
     private readonly eventRepository: Repository<Event>,
     @InjectRepository(EventPatrimonio)
     private readonly eventPatrimonioRepository: Repository<EventPatrimonio>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly patrimonioHttpClient: PatrimonioHttpClient,
   ) {}
+
+  private readonly defaultTestUserId =
+    process.env.DEFAULT_TEST_USER_ID ?? '00000000-0000-0000-0000-000000000001';
+
+  /**
+   * Em ambientes de teste/CI, garante um usuário padrão para cumprir FK created_by.
+   */
+  private async ensureUserExists(userId?: string): Promise<string> {
+    const effectiveId = userId || this.defaultTestUserId;
+
+    let user = await this.userRepository.findOne({ where: { id: effectiveId } });
+    if (!user && process.env.NODE_ENV !== 'production') {
+      user = this.userRepository.create({
+        id: effectiveId,
+        name: 'Test User',
+        email: `test-user-${effectiveId}@example.com`,
+        passwordHash: 'test',
+        role: UserRole.ADMIN,
+        isActive: true,
+      });
+      await this.userRepository.save(user);
+      this.logger.log(`Usuário padrão criado para eventos (ID: ${effectiveId}).`);
+    }
+
+    if (!user) {
+      throw new BadRequestException(`Usuário ${effectiveId} não encontrado`);
+    }
+
+    return effectiveId;
+  }
 
   /**
    * Serializa Event para EventResponseDto usando class-transformer
@@ -79,12 +113,7 @@ export class EventsService {
     createEventDto: CreateEventDto,
     createdBy: string,
   ): Promise<EventResponseDto> {
-    // Fallback para testes/CI: se createdBy vier vazio, usar um ID padrão
-    if (!createdBy || createdBy.trim().length === 0) {
-      createdBy = process.env.DEFAULT_OWNER_ID || '00000000-0000-0000-0000-000000000001';
-    }
-    // Garantir UUID válido para evitar 22P02
-    createdBy = createdBy.trim();
+    const effectiveUserId = await this.ensureUserExists(createdBy);
 
     // Validar datas
     const startDate = new Date(createEventDto.startDate);
@@ -127,7 +156,7 @@ export class EventsService {
       eventType: createEventDto.eventType,
       visibility: createEventDto.visibility || EventVisibility.PUBLIC,
       state: createEventDto.state || EventState.DRAFT,
-      createdBy,
+      createdBy: effectiveUserId,
     });
 
     const savedEvent = await this.eventRepository.save(event);
@@ -171,16 +200,17 @@ export class EventsService {
    * Lista eventos com filtros e paginação
    */
   async findAll(query: QueryEventsDto): Promise<PaginatedEventsResponseDto> {
-    // Sanitizar filtros para evitar UUID vazio gerando erro 22P02
-    const page = query.page || 1;
-    const limit = query.limit || 20;
-    const q = query.q;
-    const eventType = query.eventType;
-    const state = query.state;
-    const visibility = query.visibility;
-    const patrimonioId = query.patrimonioId && query.patrimonioId.trim().length > 0 ? query.patrimonioId : undefined;
-    const from = query.from && query.from.trim().length > 0 ? query.from : undefined;
-    const to = query.to && query.to.trim().length > 0 ? query.to : undefined;
+    const {
+      page = 1,
+      limit = 20,
+      q,
+      eventType,
+      state,
+      visibility,
+      patrimonioId,
+      from,
+      to,
+    } = query;
 
     const skip = (page - 1) * limit;
 

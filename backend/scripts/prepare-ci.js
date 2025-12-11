@@ -2,13 +2,13 @@
 
 /**
  * Script de preparação para CI
- * Cria arquivos necessários para os testes E2E passarem no ambiente automatizado
+ * Cria arquivos de imagem dummy necessários para os testes E2E
  */
 
 const fs = require('fs');
 const path = require('path');
 
-console.log('🚀 Preparando ambiente para CI...');
+console.log('🚀 Preparando arquivos de imagem dummy para testes E2E...');
 
 // Criar diretório temporário para testes
 const tempDir = path.join(process.cwd(), 'test-temp');
@@ -17,7 +17,7 @@ if (!fs.existsSync(tempDir)) {
   console.log('✅ Diretório temporário criado:', tempDir);
 }
 
-// Criar arquivo PNG dummy para testes de upload
+// Criar arquivo PNG dummy simples (1x1 pixel transparente)
 const dummyPngBuffer = Buffer.from([
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
   0x00, 0x00, 0x00, 0x0D, // IHDR length
@@ -35,7 +35,7 @@ const dummyPngBuffer = Buffer.from([
   0xAE, 0x42, 0x60, 0x82  // CRC
 ]);
 
-// Arquivos de teste necessários
+// Arquivos de teste necessários pelos testes E2E
 const testFiles = [
   'foto_para_teste.jpg',
   'foto_para_teste.png',
@@ -47,37 +47,10 @@ testFiles.forEach(filename => {
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, dummyPngBuffer);
     console.log('✅ Arquivo de teste criado:', filename);
+  } else {
+    console.log('ℹ️  Arquivo já existe:', filename);
   }
 });
 
-// Verificar se há .env para teste
-const envPath = path.join(process.cwd(), '.env');
-const envTestPath = path.join(process.cwd(), '.env.test');
-
-if (!fs.existsSync(envPath) && fs.existsSync(envTestPath)) {
-  fs.copyFileSync(envTestPath, envPath);
-  console.log('✅ Arquivo .env copiado de .env.test');
-} else if (!fs.existsSync(envPath)) {
-  // Criar .env básico para testes
-  const basicEnv = `# Ambiente de teste para CI
-NODE_ENV=test
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASS=postgres
-DB_NAME=patrimonio_inventario_test
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_DB=0
-JWT_ACCESS_SECRET=test_secret
-JWT_REFRESH_SECRET=test_refresh_secret
-USERS_API_URL=http://localhost:3101/v1
-PATRIMONIO_SERVICE_URL=http://localhost:3101/v1
-`;
-  fs.writeFileSync(envPath, basicEnv);
-  console.log('✅ Arquivo .env básico criado para testes');
-}
-
-console.log('🎉 Preparação para CI concluída com sucesso!');
+console.log('🎉 Preparação de arquivos dummy concluída!');
 console.log('📁 Arquivos criados em:', tempDir);
-console.log('🧪 Ambiente pronto para execução dos testes E2E.');
